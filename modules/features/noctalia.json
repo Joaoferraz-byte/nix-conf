@@ -107,7 +107,7 @@
           "fontWeight": "bold",
           "groupedBorderOpacity": 1,
           "hideUnoccupied": false,
-          "iconScale": 0.7,
+          "iconScale": 0.55,
           "id": "Workspace",
           "labelMode": "index",
           "occupiedColor": "secondary",
@@ -128,7 +128,7 @@
           "hidePassive": false,
           "id": "Tray",
           "pinned": [],
-          "iconScale": 0.7
+          "iconScale": 0.55
         },
         {
           "hideWhenZero": false,

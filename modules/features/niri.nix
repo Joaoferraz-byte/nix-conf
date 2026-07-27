@@ -73,6 +73,10 @@
               geometry-corner-radius = 12;
               clip-to-geometry = true;
               opacity = 0.80;
+              # Ativando o blur via background-effect conforme documentação do Niri 26.04
+              background-effect = {
+                blur = true;
+              };
               draw-border-with-background = true;
             }
           ];

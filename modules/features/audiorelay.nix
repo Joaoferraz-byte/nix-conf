@@ -50,11 +50,19 @@
           enable = true;
           pulse.enable = true;
         };
+        
+        # Correção do ícone e compatibilidade Java/Wayland para Flatpak
         services.flatpak.overrides.settings = {
-          "net.audiorelay.AudioRelay".Environment = {
-            "_JAVA_AWT_WM_NONREPARENTING" = "1";
+          "net.audiorelay.AudioRelay" = {
+            Context.sockets = [ "wayland" "fallback-x11" ];
+            Context.filesystems = [ "xdg-config/gtk-3.0:ro" "xdg-run/flatpak-info:ro" ];
+            Environment = {
+              "_JAVA_AWT_WM_NONREPARENTING" = "1";
+              "GDK_BACKEND" = "wayland,x11";
+            };
           };
         };
+
         networking.nftables.enable = lib.mkIf (cfg.lanSubnet != null) true;
         networking.firewall = lib.mkMerge [
           (lib.mkIf (cfg.lanSubnet != null) {
