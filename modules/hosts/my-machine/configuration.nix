@@ -86,6 +86,8 @@
 	     jdk21
 	     jdk25
 	     jdk8
+	     jdt-language-server
+	     spring-boot-cli
 	  ];
 
 		  system.stateVersion = "24.05";
