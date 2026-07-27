@@ -2,9 +2,26 @@
   flake.nixosModules.audiorelay = { config, lib, pkgs, ... }:
     let
       cfg = config.services.audiorelay;
+      audiorelayPort = 59100;
     in {
       options.services.audiorelay = {
-        enable = lib.mkEnableOption "AudioRelay (Pipewire Virtual Sinks)";
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Habilita o AudioRelay.";
+        };
+
+        lanInterface = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = "enp6s0";
+          description = "Interface de rede da LAN/Wi-Fi.";
+        };
+
+        lanSubnet = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = "10.253.8.96/24";
+          description = "CIDR da sub-rede local.";
+        };
       };
 
       config = lib.mkIf cfg.enable {
@@ -42,7 +59,23 @@
             "_JAVA_AWT_WM_NONREPARENTING" = "1";
           };
         };
+
+        networking.nftables.enable = lib.mkIf (cfg.lanSubnet != null) true;
+
+        networking.firewall = lib.mkMerge [
+          (lib.mkIf (cfg.lanSubnet != null) {
+            extraInputRules = ''
+              ip saddr ${cfg.lanSubnet} tcp dport ${toString audiorelayPort} accept comment "AudioRelay (LAN apenas)"
+              ip saddr ${cfg.lanSubnet} udp dport ${toString audiorelayPort} accept comment "AudioRelay (LAN apenas)"
+            '';
+          })
+          (lib.mkIf (cfg.lanSubnet == null && cfg.lanInterface != null) {
+            interfaces.${cfg.lanInterface} = {
+              allowedTCPPorts = [ audiorelayPort ];
+              allowedUDPPorts = [ audiorelayPort ];
+            };
+          })
+        ];
       };
     };
 }
-
