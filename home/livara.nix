@@ -8,6 +8,21 @@
 
   programs.home-manager.enable = true;
 
+  home.packages = with pkgs; [
+    # LSP Servers para Neovim
+    clangd
+    python3Packages.pyright
+    nodePackages.vscode-html-languageserver
+    nodePackages.vscode-css-languageserver
+    nodePackages.typescript-language-server
+    # Ferramentas para Manim (Python)
+    python3Packages.manim
+    python3Packages.manim-voiceover
+    # Outras ferramentas úteis
+    ripgrep # para Telescope live_grep
+    fd # para Telescope find_files
+  ];
+
   # Neovim focado em Java/Spring Boot pesado e tema GitHub Dark
   programs.neovim = {
     enable = true;
@@ -23,6 +38,17 @@
       luasnip
       github-nvim-theme
       nvim-jdtls
+      nvim-java
+      nvim-tree-lua
+      nvim-web-devicons
+      lualine-nvim
+      telescope-nvim
+      plenary-nvim
+      vim-fugitive
+      gitsigns-nvim
+      which-key-nvim
+      bufferline-nvim
+      dashboard-nvim
     ];
 
     extraConfig = ''
@@ -38,41 +64,249 @@
 
       lua << EOF
       -- Configuração do LSP para Java (jdtls)
-      local lspconfig = require('lspconfig')
-      local cmp = require('cmp')
+      local lspconfig = require(\'lspconfig\')
+      local cmp = require(\'cmp\')
 
       cmp.setup({
         snippet = {
           expand = function(args)
-            require('luasnip').lsp_expand(args.body)
+            require(\'luasnip\').lsp_expand(args.body)
           end,
         },
         mapping = cmp.mapping.preset.insert({
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-Space>'] = cmp.mapping.complete(),
-          ['<C-e>'] = cmp.mapping.abort(),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+          [\'<C-b>\'] = cmp.mapping.scroll_docs(-4),
+          [\'<C-f>\'] = cmp.mapping.scroll_docs(4),
+          [\'<C-Space>\'] = cmp.mapping.complete(),
+          [\'<C-e>\'] = cmp.mapping.abort(),
+          [\'<CR>\'] = cmp.mapping.confirm({ select = true }),
         }),
         sources = cmp.config.sources({
-          { name = 'nvim_lsp' },
-          { name = 'luasnip' },
+          { name = \'nvim_lsp\' },
+          { name = \'luasnip\' },
         }, {
-          { name = 'buffer' },
+          { name = \'buffer\' },
         })
       })
 
-      local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      local capabilities = require(\'cmp_nvim_lsp\').default_capabilities()
 
-      -- O nvim-jdtls precisa de uma configuração específica, geralmente via ftplugin/java.lua
-      -- Aqui inicializamos de forma básica para suportar Spring Boot
+      -- Configuração do LSP para Java (jdtls) e nvim-java
+      require(\'java\').setup{} -- Inicializa nvim-java
       lspconfig.jdtls.setup{
         capabilities = capabilities,
-        cmd = { 'jdtls' },
+        cmd = { \'jdtls\' },
         root_dir = function(fname)
-          return require('lspconfig.util').root_pattern('pom.xml', 'gradle.build', '.git')(fname) or vim.fn.getcwd()
+          -- Detecta projetos Java/Spring Boot e também um diretório \'Projects\' no home
+          local root_patterns = {\"pom.xml\", \"gradle.build\", \".git\"}
+          local project_root = require(\'lspconfig.util\').root_pattern(unpack(root_patterns))(fname)
+          if project_root then return project_root end
+
+          local home_projects = vim.fn.expand(\'~/Projects\')
+          if vim.fn.isdirectory(home_projects) and string.find(fname, home_projects, 1, true) then
+            return home_projects
+          end
+          return vim.fn.getcwd()
         end,
       }
+
+      -- Configuração do nvim-tree
+      require(\'nvim-tree\').setup({
+        sort_by = \"case_sensitive\",
+        view = {
+          width = 30,
+        },
+        renderer = {
+          group_empty = true,
+          icons = {
+            git_placement = \"before\",
+            padding = \" \",
+            symlink_arrow = \" ➛ \",
+            show = {
+              file = true,
+              folder = true,
+              folder_arrow = true,
+              git = true,
+            },
+            glyphs = {
+              default = \"\",
+              symlink = \"\",
+              folder = {
+                arrow_open = \"\",
+                arrow_closed = \"\",
+                default = \"\",
+                open = \"\",
+                empty = \"\",
+                empty_open = \"\",
+                symlink = \"\",
+                symlink_open = \"\",
+              },
+              git = {
+                unstaged = \"\",
+                staged = \"✓\",
+                untracked = \"\",
+                renamed = \"➜\",
+                unmerged = \"\",
+                deleted = \"\",
+                ignored = \"◌\",
+              },
+            },
+          },
+        },
+        filters = {
+          dotfiles = true,
+        },
+        git = {
+          enable = true,
+          ignore = false,
+          timeout = 500,
+        },
+        actions = {
+          open_file = {
+            quit_on_open = true,
+            resize_window = true,
+            window_picker = {
+              enable = true,
+              chars = \"abcdefghijklmnopqrstuvwxyz\",
+              exclude = {
+                filetype = { \"NvimTree\", \"packer\", \"qf\", \"help\" },
+                buftype = { \"nofile\", \"terminal\", \"prompt\" },
+              },
+            },
+          },
+        },
+      })
+
+      -- Configuração do lualine
+      require(\'lualine\').setup({
+        options = {
+          icons_enabled = true,
+          theme = \'github-dark\',
+          component_separators = { left = \'\', right = \'\'},
+          section_separators = { left = \'\', right = \'\'},
+          globalstatus = true,
+        },
+        sections = {
+          lualine_a = {\'mode\'},
+          lualine_b = {\'branch\', \'diff\', \'diagnostics\'},
+          lualine_c = {\'filename\'},
+          lualine_x = {\'encoding\', \'fileformat\', \'filetype\'},
+          lualine_y = {\'progress\'},
+          lualine_z = {\'location\'}
+        },
+        inactive_sections = {
+          lualine_a = {},
+          lualine_b = {},
+          lualine_c = {\'filename\'},
+          lualine_x = {\'location\'},
+          lualine_y = {},
+          lualine_z = {}
+        },
+        tabline = {},
+        winbar = {},
+        inactive_winbar = {},
+        extensions = {\'nvim-tree\', \'which-key\'}
+      })
+
+      -- Configuração do which-key
+      require(\'which-key\').setup()
+
+      -- Configuração do gitsigns
+      require(\'gitsigns\').setup()
+
+      -- Configuração do bufferline
+      require(\'bufferline\').setup()
+
+      -- Configuração do dashboard-nvim
+      require(\'dashboard\').setup({
+        theme = \'hyper\',
+        config = {
+          header = {
+            \'                                                               \',
+            \' █████╗ ███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗██╗    ██╗\',
+            \'██╔══██╗████╗  ██║██║   ██║██╔══██╗████╗  ██║██║    ██║\',
+            \'███████║██╔██╗ ██║██║   ██║███████║██╔██╗ ██║██║ █╗ ██║\',
+            \'██╔══██║██║╚██╗██║██║   ██║██╔══██║██║╚██╗██║██║███╗██║\',
+            \'██║  ██║██║ ╚████║╚██████╔╝██║  ██║██║ ╚████║╚███╔███╝\',
+            \'╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══╝╚══╝ \',
+            \'                                                               \',
+            \'  A modern, modular, and declarative Neovim configuration.  \',
+            \'                                                               \',
+          },
+          center = {
+            {
+              icon = \'  \',
+              desc = \'Find File\',
+              action = \'Telescope find_files\',
+              key = \'f\',
+            },
+            {
+              icon = \'  \',
+              desc = \'New File\',
+              action = \'enew\',
+              key = \'n\',
+            },
+            {
+              icon = \'  \',
+              desc = \'Recent Files\',
+              action = \'Telescope oldfiles\',
+              key = \'r\',
+            },
+            {
+              icon = \'  \',
+              desc = \'Explore Files\',
+              action = \'NvimTreeToggle\',
+              key = \'e\',
+            },
+            {
+              icon = \'  \',
+              desc = \'Configuration\',
+              action = \'e ~/.config/nvim/init.lua\',
+              key = \'c\',
+            },
+            {
+              icon = \'  \',
+              desc = \'Quit Neovim\',
+              action = \'qa\',
+              key = \'q\',
+            },
+          },
+          footer = {},
+        },
+      })
+
+      -- Mapeamentos de teclas
+      vim.keymap.set(\'n\', \'<leader>e\', \":NvimTreeToggle<CR>\", { desc = \'Toggle NvimTree\' })
+      vim.keymap.set(\'n\', \'<leader>ff\', \'<cmd>Telescope find_files<CR>\', { desc = \'Find Files\' })
+      vim.keymap.set(\'n\', \'<leader>fg\', \'<cmd>Telescope live_grep<CR>\', { desc = \'Live Grep\' })
+      vim.keymap.set(\'n\', \'<leader>fb\', \'<cmd>Telescope buffers<CR>\', { desc = \'Find Buffers\' })
+      vim.keymap.set(\'n\', \'<leader>fh\', \'<cmd>Telescope help_tags<CR>\', { desc = \'Help Tags\' })
+
+      -- Configuração de LSP para outras linguagens
+      -- C++
+      lspconfig.clangd.setup({
+        capabilities = capabilities,
+      })
+
+      -- Python
+      lspconfig.pyright.setup({
+        capabilities = capabilities,
+      })
+
+      -- HTML
+      lspconfig.html.setup({
+        capabilities = capabilities,
+      })
+
+      -- CSS
+      lspconfig.cssls.setup({
+        capabilities = capabilities,
+      })
+
+      -- JavaScript/TypeScript
+      lspconfig.tsserver.setup({
+        capabilities = capabilities,
+      })
+
       EOF
     '';
   };
