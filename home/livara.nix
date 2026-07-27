@@ -13,7 +13,7 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
-    clangd
+    llvmPackages.clang-unwrapped # clangd está aqui no unstable
     pyright
     vscode-langservers-extracted
     typescript-language-server
@@ -28,6 +28,8 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
+    withRuby = false;
+    withPython3 = false;
 
     plugins = with pkgs.vimPlugins; [
       nvim-lspconfig
@@ -308,6 +310,7 @@
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
+    setSessionVariables = true;
     desktop = "${config.home.homeDirectory}/Desktop";
     documents = "${config.home.homeDirectory}/Documents";
     download = "${config.home.homeDirectory}/Downloads";

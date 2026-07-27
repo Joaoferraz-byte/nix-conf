@@ -17,7 +17,7 @@
 
   perSystem = { pkgs, lib, self', system, ... }: {
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
-      inherit pkgs;
+      pkgs = pkgs // { lndir = pkgs.xorg.lndir; };
       v2-settings = true; # Restaurado para unstable
 
       settings = {
