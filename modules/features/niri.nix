@@ -18,9 +18,7 @@
   perSystem = { pkgs, lib, self', system, ... }: {
     # Removido a re-importação do nixpkgs para manter precisão, estabilidade e usar a mesma versão instanciada globalmente
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
-      inherit pkgs;
-      # Se o erro de lndir persistir, o wrapper precisará ser ajustado no input, 
-      # mas por enquanto vamos tentar a forma padrão.
+      pkgs = pkgs // { lndir = pkgs.xorg.lndir; };
       settings = {
         spawn-at-startup = [
           (lib.getExe self'.packages.myNoctalia)
