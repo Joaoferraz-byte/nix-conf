@@ -16,6 +16,12 @@
 
   perSystem = { pkgs, lib, self', ... }: {
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
+      # Passamos um pacote niri que garantidamente tem o atributo passthru.providedSessions
+      # ou usamos o pkgs.niri se ele já tiver.
+      package = pkgs.niri.overrideAttrs (old: {
+        passthru = (old.passthru or {}) // { providedSessions = [ "niri" ]; };
+      });
+      
       inherit pkgs;
       v2-settings = true;
       settings = {
@@ -56,23 +62,23 @@
           hide-when-typing = _: { };
           hide-after-inactive-ms = 3000;
         };
-        window-rule = {
-          geometry-corner-radius = 12;
-          clip-to-geometry = true;
-          opacity = 0.80;
-          background-effect = {
-            blur = true;
-          };
-        };
+        window-rule = [
+          {
+            geometry-corner-radius = 12;
+            clip-to-geometry = true;
+            opacity = 0.80;
+            draw-border-with-background = true;
+          }
+        ];
         prefer-no-csd = true;
         hotkey-overlay.skip-at-startup = true;
         binds = {
-          "Mod+Return".spawn-sh = lib.getExe pkgs.alacritty;
-          "Mod+S".spawn-sh = "${lib.getExe self'.packages.myNoctalia} ipc call launcher toggle";
-          "Mod+O".spawn-sh = lib.getExe pkgs.obsidian;
-          "Mod+W".spawn-sh = lib.getExe pkgs.brave;
-          "Mod+E".spawn-sh = lib.getExe pkgs.nautilus;
-          "Mod+D".spawn-sh = lib.getExe pkgs.vesktop;
+          "Mod+Return".spawn = [ (lib.getExe pkgs.alacritty) ];
+          "Mod+S".spawn = [ (lib.getExe self'.packages.myNoctalia) "ipc" "call" "launcher" "toggle" ];
+          "Mod+O".spawn = [ (lib.getExe pkgs.obsidian) ];
+          "Mod+W".spawn = [ (lib.getExe pkgs.brave) ];
+          "Mod+E".spawn = [ (lib.getExe pkgs.nautilus) ];
+          "Mod+D".spawn = [ (lib.getExe pkgs.vesktop) ];
           "Mod+Q".close-window = _: { };
           "Mod+F".maximize-column = _: { };
           "Mod+Shift+F".fullscreen-window = _: { };
@@ -102,11 +108,11 @@
           "Mod+Page_Up".focus-workspace-up = _: { };
           "Print".screenshot = _: { };
           "Mod+Print".screenshot-window = _: { };
-          "XF86AudioRaiseVolume".spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
-          "XF86AudioLowerVolume".spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-          "XF86AudioMute".spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-          "XF86MonBrightnessUp".spawn-sh = "brightnessctl set +5%";
-          "XF86MonBrightnessDown".spawn-sh = "brightnessctl set 5%-";
+          "XF86AudioRaiseVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" ];
+          "XF86AudioLowerVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-" ];
+          "XF86AudioMute".spawn = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
+          "XF86MonBrightnessUp".spawn = [ "brightnessctl" "set" "+5%" ];
+          "XF86MonBrightnessDown".spawn = [ "brightnessctl" "set" "5%-" ];
           "Mod+Shift+E".quit = _: { };
         };
       };
