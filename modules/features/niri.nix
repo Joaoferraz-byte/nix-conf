@@ -19,8 +19,13 @@
       package = pkgs.niri.overrideAttrs (old: {
         passthru = (old.passthru or {}) // { providedSessions = [ "niri" ]; };
         
+        # A falha ocorre no build de libdisplay-info-sys (Rust)
+        # Precisamos garantir que o pkg-config consiga encontrar a libdisplay-info durante a compilação
         nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.pkg-config ];
         buildInputs = (old.buildInputs or []) ++ [ pkgs.libdisplay-info ];
+        
+        # Injetar a variável de ambiente para ajudar o pkg-config se necessário
+        PKG_CONFIG_PATH = "${pkgs.libdisplay-info.dev}/lib/pkgconfig";
       });
       
       inherit pkgs;
