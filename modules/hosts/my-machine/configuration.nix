@@ -16,7 +16,7 @@
 	  boot.loader.systemd-boot.enable = true;
 	  boot.loader.efi.canTouchEfiVariables = true;
 
-	  # Use latest kernel.
+	  # Use zen kernel for better desktop performance and responsiveness, avoiding unstable/experimental kernels like cachyos for stability
 	  boot.kernelPackages = pkgs.linuxPackages_zen;
 	  networking.hostName = "limine"; # Define your hostname.
 
