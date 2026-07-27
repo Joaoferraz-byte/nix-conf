@@ -90,6 +90,6 @@
 	     spring-boot-cli
 	  ];
 
-		  system.stateVersion = "24.05";
+		  system.stateVersion = "24.11"; # Atualizando para o estado mais recente do unstable
     };
 }

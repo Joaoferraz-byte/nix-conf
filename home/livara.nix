@@ -14,14 +14,13 @@
 
   home.packages = with pkgs; [
     clangd
-    python3Packages.pyright
-    nodePackages.vscode-html-languageserver-bin
-    nodePackages.vscode-css-languageserver-bin
-    nodePackages.typescript-language-server
+    pyright
+    vscode-langservers-extracted
+    typescript-language-server
     ripgrep
     fd
     python3Packages.manim
-    (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+    nerd-fonts.jetbrains-mono
   ];
 
   programs.neovim = {

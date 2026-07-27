@@ -4,22 +4,18 @@
 
     services.xserver.videoDrivers = [ "nvidia" ];
 
-    hardware.opengl = {
+    # Sintaxe moderna para NixOS Unstable (substitui hardware.opengl)
+    hardware.graphics = {
       enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
+      enable32Bit = true;
     };
 
     hardware.nvidia = {
-      # a partir do driver 590, a Nvidia parou de suportar Maxwell/Pascal/Volta
-      # (inclui a GTX 1050 Ti) — precisa fixar no último branch que ainda suporta: 580 (LTSB)
+      # Mantendo driver legacy_580 para GTX 1050 Ti
       package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
 
       modesetting.enable = true;
-
-      # Pascal nunca teve suporte ao driver kernel open-source (só Turing+),
-      # e o branch legacy nem oferece essa opção de qualquer forma
-      open = false;
+      open = false; # Pascal/Maxwell não suportam driver open
 
       powerManagement.enable = false;
       powerManagement.finegrained = false;
