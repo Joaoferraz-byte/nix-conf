@@ -1,8 +1,7 @@
 { self, inputs, ... }: {
   perSystem = { pkgs, ... }: {
     packages.myNoctalia = inputs.wrapper-modules.wrappers.noctalia-shell.wrap {
-      pkgs = pkgs // { noctalia-shell = inputs.wrapper-modules.legacyPackages.${pkgs.system}.noctalia-shell; };
-
+      inherit pkgs;
       settings = builtins.fromJSON (builtins.readFile ./noctalia.json);
     };
   };
