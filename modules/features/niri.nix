@@ -16,11 +16,7 @@
   };
 
   perSystem = { pkgs, lib, self', system, ... }: {
-    _module.args.pkgs = import inputs.nixpkgs {
-      inherit system;
-      config.allowUnfree = true;
-    };
-
+    # Removido a re-importação do nixpkgs para manter precisão, estabilidade e usar a mesma versão instanciada globalmente
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
       inherit pkgs;
       v2-settings = true;
