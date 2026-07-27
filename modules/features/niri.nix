@@ -21,7 +21,7 @@
       
       settings = {
         spawn-at-startup = [
-          { command = [ (lib.getExe self'.packages.myNoctalia) ]; }
+          (lib.getExe self'.packages.myNoctalia)
         ];
 
         xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite;
@@ -78,12 +78,12 @@
         hotkey-overlay.skip-at-startup = true;
 
         binds = {
-          "Mod+Return".spawn.command = [ (lib.getExe pkgs.alacritty) ];
-          "Mod+S".spawn.command = [ (lib.getExe self'.packages.myNoctalia) "ipc" "call" "launcher" "toggle" ];
-          "Mod+O".spawn.command = [ (lib.getExe pkgs.obsidian) ];
-          "Mod+W".spawn.command = [ (lib.getExe pkgs.brave) ];
-          "Mod+E".spawn.command = [ (lib.getExe pkgs.nautilus) ];
-          "Mod+D".spawn.command = [ (lib.getExe pkgs.vesktop) ];
+          "Mod+Return".spawn = [ (lib.getExe pkgs.alacritty) ];
+          "Mod+S".spawn = [ (lib.getExe self'.packages.myNoctalia) "ipc" "call" "launcher" "toggle" ];
+          "Mod+O".spawn = [ (lib.getExe pkgs.obsidian) ];
+          "Mod+W".spawn = [ (lib.getExe pkgs.brave) ];
+          "Mod+E".spawn = [ (lib.getExe pkgs.nautilus) ];
+          "Mod+D".spawn = [ (lib.getExe pkgs.vesktop) ];
 
           "Mod+Q".close-window = _: { };
           "Mod+F".maximize-column = _: { };
@@ -120,11 +120,11 @@
           "Print".screenshot = _: { };
           "Mod+Print".screenshot-window = _: { };
 
-          "XF86AudioRaiseVolume".spawn.command = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" ];
-          "XF86AudioLowerVolume".spawn.command = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-" ];
-          "XF86AudioMute".spawn.command = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
-          "XF86MonBrightnessUp".spawn.command = [ "brightnessctl" "set" "+5%" ];
-          "XF86MonBrightnessDown".spawn.command = [ "brightnessctl" "set" "5%-" ];
+          "XF86AudioRaiseVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" ];
+          "XF86AudioLowerVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-" ];
+          "XF86AudioMute".spawn = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
+          "XF86MonBrightnessUp".spawn = [ "brightnessctl" "set" "+5%" ];
+          "XF86MonBrightnessDown".spawn = [ "brightnessctl" "set" "5%-" ];
 
           "Mod+Shift+E".quit = _: { };
         };
