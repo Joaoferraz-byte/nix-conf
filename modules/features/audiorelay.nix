@@ -58,6 +58,7 @@
           "net.audiorelay.AudioRelay".Environment = {
             "_JAVA_AWT_WM_NONREPARENTING" = "1";
             "XDG_CURRENT_DESKTOP" = "GNOME"; # Força o uso do StatusNotifierItem (appindicator) que funciona melhor no Noctalia/GNOME
+            "DBUS_SESSION_BUS_ADDRESS" = "unix:path=/run/user/1000/bus"; # Garante comunicação D-Bus correta para o tray
           };
         };
 
