@@ -182,3 +182,38 @@ nix-conf/
 ├── Icons/
 └── Wallpapers/
 ```
+
+186	
+187	## Etapa 6 — Finalização do Neovim, Alacritty e Tray (Jul 2026)
+188	
+189	### Neovim como IDE Completa (Refatorado)
+190	
+191	**Arquivo:** `home/livara.nix`
+192	
+193	- **Limpeza de Plugins:** Removidas duplicatas e pacotes de sistema (LSP servers) que estavam incorretamente na lista de plugins do Neovim.
+194	- **Migração para extraLuaConfig:** Toda a configuração do Neovim agora utiliza `programs.neovim.extraLuaConfig`, eliminando problemas de escape de caracteres e blocos heredoc `lua << EOF`.
+195	- **Suporte Java/Spring Boot:** Configuração completa do `nvim-java` com Lombok, testes, debug e ferramentas de Spring Boot. O `jdtls` agora detecta automaticamente a pasta `~/Projects`.
+196	- **LSP Multi-linguagem:** Configurado suporte para C++ (`clangd`), Python (`pyright`), HTML, CSS e TypeScript/JavaScript.
+197	- **Interface e Navegação:** 
+198	  - `dashboard-nvim` com tema hyper e header ASCII elegante.
+199	  - `nvim-tree` configurado para toggle com `<leader>e`.
+200	  - `lualine` com tema GitHub Dark e status global.
+201	  - Mapeamentos de teclas para navegação entre janelas (`<C-h/j/k/l>`) e atalhos para Telescope e Java.
+202	
+203	### Alacritty com Nerd Font
+204	
+205	**Arquivo:** `home/livara.nix`
+206	
+207	- **Fontes:** Adicionado o pacote `nerdfonts.override { fonts = [ "JetBrainsMono" ]; }` para suporte a ícones no Neovim e barra.
+208	- **Configuração:** O Alacritty agora utiliza explicitamente "JetBrainsMono Nerd Font".
+209	
+210	### Correção Definitiva do Tray e AudioRelay
+211	
+212	**Arquivo:** `modules/features/audiorelay.nix`
+213	
+214	- **D-Bus:** Adicionada a variável `DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/1000/bus"` ao ambiente do Flatpak do AudioRelay. Isso garante que o aplicativo consiga se comunicar corretamente com o barramento de sessão para registrar o ícone no tray do Noctalia.
+215	
+216	### Verificação de Compatibilidade 24.05
+217	
+218	- Verificados todos os pacotes e opções nos arquivos `greeter.nix` e `keyd.nix` para garantir que são compatíveis com o canal `nixos-24.05`.
+219	
