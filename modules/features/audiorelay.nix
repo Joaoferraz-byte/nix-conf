@@ -57,6 +57,7 @@
         services.flatpak.overrides.settings = {
           "net.audiorelay.AudioRelay".Environment = {
             "_JAVA_AWT_WM_NONREPARENTING" = "1";
+            "XDG_CURRENT_DESKTOP" = "GNOME"; # Força o uso do StatusNotifierItem (appindicator) que funciona melhor no Noctalia/GNOME
           };
         };
 
