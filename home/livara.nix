@@ -6,6 +6,27 @@
 
   home.stateVersion = "24.05";
 
+  # Gerenciamento da pasta Projects
+  home.sessionVariables = {
+    PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
+  };
+
+  home.activation.createProjectsDir = {
+    after = [ "writeBoundary" ];
+    before = [ "installPackages" ];
+    # Cria o diretório Projects se não existir
+    # Isso garante que o Neovim possa detectá-lo e que o usuário tenha um local padrão
+    # para seus projetos, gerenciado declarativamente.
+    # Referência: Home Manager Manual, seção "Activation Script"
+    # https://nix-community.github.io/home-manager/options.html#opt-home.activation
+    text = ''
+      if [ ! -d "$HOME/Projects" ]; then
+        mkdir -p "$HOME/Projects"
+        echo "Created ~/Projects directory."
+      fi
+    '';
+  };
+
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
