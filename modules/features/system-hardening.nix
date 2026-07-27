@@ -20,5 +20,11 @@
       enable = true;
       memoryPercent = 50; # zram como swap comprimida na RAM, reduz uso do disco de swap
     };
+
+    # Restringir logs do kernel apenas para root
+    boot.kernel.sysctl = {
+      "kernel.dmesg_restrict" = 1;
+      "kernel.kptr_restrict" = 2;
+    };
   };
 }
