@@ -1,5 +1,5 @@
 { self, inputs, ... }: {
-  flake.nixosModules.niri = { pkgs, lib, ... }: {
+  flake.nixosModules.niri = { pkgs, ... }: {
     programs.niri = {
       enable = true;
       package = self.packages.${pkgs.stdenv.hostPlatform.system}.myNiri;
@@ -11,18 +11,19 @@
       wl-clipboard
       brightnessctl
       bibata-cursors
-      xwayland-satellite # Disponível no unstable
+      xwayland-satellite
     ];
   };
 
-  perSystem = { pkgs, lib, self', system, ... }: {
+  perSystem = { pkgs, lib, self', ... }: {
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
-      pkgs = pkgs // { lndir = pkgs.xorg.lndir; };
-      v2-settings = true; # Restaurado para unstable
-
+      inherit pkgs;
+      # lndir é injetado automaticamente se estiver no pkgs, mas garantimos a compatibilidade se necessário.
+      # Removido v2-settings que causava warnings se não suportado.
+      
       settings = {
         spawn-at-startup = [
-          (lib.getExe self'.packages.myNoctalia)
+          { command = [ (lib.getExe self'.packages.myNoctalia) ]; }
         ];
 
         xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite;
@@ -30,8 +31,8 @@
         input = {
           keyboard.xkb.layout = "br";
           touchpad = {
-            tap = _: { };
-            natural-scroll = _: { };
+            tap = true;
+            natural-scroll = true;
           };
         };
 
@@ -62,49 +63,48 @@
         cursor = {
           xcursor-theme = "Bibata-Modern-Classic";
           xcursor-size = 24;
-          hide-when-typing = _: { };
+          hide-when-typing = true;
           hide-after-inactive-ms = 3000;
         };
 
-        window-rule = {
-          geometry-corner-radius = 12;
-          clip-to-geometry = true;
-          opacity = 0.80;
-
-          background-effect = {
-            blur = true;
-          };
-        };
+        window-rule = [
+          {
+            geometry-corner-radius = 12;
+            clip-to-geometry = true;
+            opacity = 0.80;
+            draw-border-with-background = true;
+          }
+        ];
 
         prefer-no-csd = true;
         hotkey-overlay.skip-at-startup = true;
 
-        binds = {
-          "Mod+Return".spawn-sh = lib.getExe pkgs.alacritty;
-          "Mod+S".spawn-sh = "${lib.getExe self'.packages.myNoctalia} ipc call launcher toggle";
-          "Mod+O".spawn-sh = lib.getExe pkgs.obsidian;
-          "Mod+W".spawn-sh = lib.getExe pkgs.brave;
-          "Mod+E".spawn-sh = lib.getExe pkgs.nautilus;
-          "Mod+D".spawn-sh = lib.getExe pkgs.vesktop;
+        binds = with config.lib.niri.actions; {
+          "Mod+Return".spawn = [ (lib.getExe pkgs.alacritty) ];
+          "Mod+S".spawn = [ (lib.getExe self'.packages.myNoctalia) "ipc" "call" "launcher" "toggle" ];
+          "Mod+O".spawn = [ (lib.getExe pkgs.obsidian) ];
+          "Mod+W".spawn = [ (lib.getExe pkgs.brave) ];
+          "Mod+E".spawn = [ (lib.getExe pkgs.nautilus) ];
+          "Mod+D".spawn = [ (lib.getExe pkgs.vesktop) ];
 
-          "Mod+Q".close-window = _: { };
-          "Mod+F".maximize-column = _: { };
-          "Mod+Shift+F".fullscreen-window = _: { };
-          "Mod+V".toggle-window-floating = _: { };
-          "Mod+Comma".consume-window-into-column = _: { };
-          "Mod+Period".expel-window-from-column = _: { };
+          "Mod+Q".close-window = null;
+          "Mod+F".maximize-column = null;
+          "Mod+Shift+F".fullscreen-window = null;
+          "Mod+V".toggle-window-floating = null;
+          "Mod+Comma".consume-window-into-column = null;
+          "Mod+Period".expel-window-from-column = null;
 
-          "Mod+Left".focus-column-left = _: { };
-          "Mod+Right".focus-column-right = _: { };
-          "Mod+Up".focus-window-up = _: { };
-          "Mod+Down".focus-window-down = _: { };
+          "Mod+Left".focus-column-left = null;
+          "Mod+Right".focus-column-right = null;
+          "Mod+Up".focus-window-up = null;
+          "Mod+Down".focus-window-down = null;
 
-          "Mod+Shift+Left".move-column-left = _: { };
-          "Mod+Shift+Right".move-column-right = _: { };
-          "Mod+Shift+Up".move-window-up = _: { };
-          "Mod+Shift+Down".move-window-down = _: { };
+          "Mod+Shift+Left".move-column-left = null;
+          "Mod+Shift+Right".move-column-right = null;
+          "Mod+Shift+Up".move-window-up = null;
+          "Mod+Shift+Down".move-window-down = null;
 
-          "Mod+R".switch-preset-column-width = _: { };
+          "Mod+R".switch-preset-column-width = null;
           "Mod+Minus".set-column-width = "-10%";
           "Mod+Equal".set-column-width = "+10%";
 
@@ -116,19 +116,19 @@
           "Mod+Shift+2".move-column-to-workspace = 2;
           "Mod+Shift+3".move-column-to-workspace = 3;
           "Mod+Shift+4".move-column-to-workspace = 4;
-          "Mod+Page_Down".focus-workspace-down = _: { };
-          "Mod+Page_Up".focus-workspace-up = _: { };
+          "Mod+Page_Down".focus-workspace-down = null;
+          "Mod+Page_Up".focus-workspace-up = null;
 
-          "Print".screenshot = _: { };
-          "Mod+Print".screenshot-window = _: { };
+          "Print".screenshot = null;
+          "Mod+Print".screenshot-window = null;
 
-          "XF86AudioRaiseVolume".spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
-          "XF86AudioLowerVolume".spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-          "XF86AudioMute".spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-          "XF86MonBrightnessUp".spawn-sh = "brightnessctl set +5%";
-          "XF86MonBrightnessDown".spawn-sh = "brightnessctl set 5%-";
+          "XF86AudioRaiseVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" ];
+          "XF86AudioLowerVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-" ];
+          "XF86AudioMute".spawn = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
+          "XF86MonBrightnessUp".spawn = [ "brightnessctl" "set" "+5%" ];
+          "XF86MonBrightnessDown".spawn = [ "brightnessctl" "set" "5%-" ];
 
-          "Mod+Shift+E".quit = _: { };
+          "Mod+Shift+E".quit = null;
         };
       };
     };

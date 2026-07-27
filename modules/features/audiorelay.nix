@@ -7,20 +7,20 @@
       options.services.audiorelay = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = true;
+          default = false; # Desabilitado por padrão para segurança
           description = "Habilita o AudioRelay.";
         };
 
         lanInterface = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = "enp6s0";
-          description = "Interface de rede da LAN/Wi-Fi.";
+          default = null;
+          description = "Interface de rede da LAN/Wi-Fi (ex: enp6s0).";
         };
 
         lanSubnet = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = "10.253.8.96/24";
-          description = "CIDR da sub-rede local.";
+          default = null;
+          description = "CIDR da sub-rede local (ex: 192.168.1.0/24).";
         };
       };
 
@@ -57,8 +57,8 @@
         services.flatpak.overrides.settings = {
           "net.audiorelay.AudioRelay".Environment = {
             "_JAVA_AWT_WM_NONREPARENTING" = "1";
-            "XDG_CURRENT_DESKTOP" = "GNOME"; # Força o uso do StatusNotifierItem (appindicator) que funciona melhor no Noctalia/GNOME
-            "DBUS_SESSION_BUS_ADDRESS" = "unix:path=/run/user/1000/bus"; # Garante comunicação D-Bus correta para o tray
+            "XDG_CURRENT_DESKTOP" = "GNOME";
+            # DBUS_SESSION_BUS_ADDRESS removido por ser host-specific e perigoso para reprodutibilidade
           };
         };
 

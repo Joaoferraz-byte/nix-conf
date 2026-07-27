@@ -1,19 +1,18 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, ... }:
 
 {
   home.username = "livara";
   home.homeDirectory = "/home/livara";
-  home.stateVersion = "24.05";
+  home.stateVersion = "24.11";
 
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
   };
 
-
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
-    llvmPackages.clang-unwrapped # clangd está aqui no unstable
+    llvmPackages.clang-unwrapped
     pyright
     vscode-langservers-extracted
     typescript-language-server
@@ -52,7 +51,8 @@
       dashboard-nvim
     ];
 
-    extraLuaConfig = ''
+    # Corrigido de extraLuaConfig para initLua para evitar avisos de renomeação
+    initLua = ''
       vim.opt.number = true
       vim.opt.relativenumber = true
       vim.opt.termguicolors = true
