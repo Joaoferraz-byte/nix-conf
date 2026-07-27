@@ -66,12 +66,9 @@
 	  nixpkgs.config.allowUnfree = true;
 
 	  environment.systemPackages = with pkgs; [
-	     
 	     # Essential
-	     neovim
 	     git
 	     gh
-	     alacritty
 	     nautilus
 
 	     # Basic

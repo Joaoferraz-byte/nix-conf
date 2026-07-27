@@ -8,6 +8,11 @@
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
 
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+
+    home-manager = {
+      url = "github:nix-community/home-manager/release-24.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree ./modules);
