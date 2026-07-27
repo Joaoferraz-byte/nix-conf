@@ -131,6 +131,34 @@
     enableCompletion = true;
   };
 
+  # Associações de arquivos (MIME types)
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "application/pdf" = [ "okularApplication_pdf.desktop" ];
+      "application/epub+zip" = [ "com.github.johnfactotum.Foliate.desktop" ];
+      "text/plain" = [ "nvim.desktop" ];
+      "text/x-java" = [ "nvim.desktop" ];
+      "text/x-csrc" = [ "nvim.desktop" ];
+      "text/x-c++src" = [ "nvim.desktop" ];
+      "text/x-python" = [ "nvim.desktop" ];
+      "application/json" = [ "nvim.desktop" ];
+      "text/html" = [ "nvim.desktop" ];
+      "text/css" = [ "nvim.desktop" ];
+      "application/javascript" = [ "nvim.desktop" ];
+    };
+  };
+
+  # Configurar o desktop entry do Neovim para rodar no Alacritty
+  xdg.desktopEntries.nvim = {
+    name = "Neovim";
+    genericName = "Text Editor";
+    exec = "alacritty -e nvim %F";
+    terminal = false;
+    categories = [ "Utility" "TextEditor" ];
+    mimeType = [ "text/plain" "text/x-java" ];
+  };
+
   # XDG User Dirs em inglês
   xdg.userDirs = {
     enable = true;
