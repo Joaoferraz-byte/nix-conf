@@ -3,10 +3,8 @@
 {
   home.username = "livara";
   home.homeDirectory = "/home/livara";
-
   home.stateVersion = "24.05";
 
-  # Gerenciamento da pasta Projects
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
   };
@@ -17,7 +15,6 @@
     text = ''
       if [ ! -d "$HOME/Projects" ]; then
         mkdir -p "$HOME/Projects"
-        echo "Created ~/Projects directory."
       fi
     '';
   };
@@ -25,22 +22,17 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
-    # LSP Servers para Neovim
     clangd
     python3Packages.pyright
     nodePackages.vscode-html-languageserver-bin
     nodePackages.vscode-css-languageserver-bin
     nodePackages.typescript-language-server
-    # Ferramentas gerais
-    ripgrep # para Telescope live_grep
-    fd # para Telescope find_files
-    # Manim (se disponível no 24.05, caso contrário omitir)
+    ripgrep
+    fd
     python3Packages.manim
-    # Nerd Font para Alacritty e Neovim
     (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
   ];
 
-  # Neovim focado em Java/Spring Boot pesado e tema GitHub Dark
   programs.neovim = {
     enable = true;
     defaultEditor = true;
@@ -69,7 +61,6 @@
     ];
 
     extraLuaConfig = ''
-      -- Opções gerais
       vim.opt.number = true
       vim.opt.relativenumber = true
       vim.opt.termguicolors = true
@@ -87,18 +78,15 @@
       vim.g.mapleader = " "
       vim.g.maplocalleader = " "
 
-      -- Tema GitHub Dark com background transparente
       vim.cmd("colorscheme github_dark")
       vim.api.nvim_set_hl(0, "Normal", { bg = "NONE", ctermbg = "NONE" })
       vim.api.nvim_set_hl(0, "NonText", { bg = "NONE", ctermbg = "NONE" })
       vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
       vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
 
-      -- Desabilitar netrw (necessário para nvim-tree)
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
 
-      -- nvim-java (Spring Boot Tools, Debug, Test)
       require('java').setup({
         lombok = { enable = true },
         java_test = { enable = true },
@@ -108,7 +96,6 @@
       })
       vim.lsp.enable('jdtls')
 
-      -- nvim-cmp (autocomplete)
       local cmp = require('cmp')
       local luasnip = require('luasnip')
 
@@ -124,7 +111,7 @@
           ['<C-Space>'] = cmp.mapping.complete(),
           ['<C-e>'] = cmp.mapping.abort(),
           ['<CR>'] = cmp.mapping.confirm({ select = true }),
-          ['<Tab>'] = cmp.mapping(function(fallback) -- Mapeamento para Tab
+          ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
@@ -133,7 +120,7 @@
               fallback()
             end
           end, { 'i', 's' }),
-          ['<S-Tab>'] = cmp.mapping(function(fallback) -- Mapeamento para Shift-Tab
+          ['<S-Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
             elseif luasnip.jumpable(-1) then
@@ -151,11 +138,9 @@
         })
       })
 
-      -- nvim-lspconfig para outras linguagens
       local lspconfig = require('lspconfig')
       local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-      -- Detecção automática de projetos na pasta ~/Projects para jdtls
       local jdtls_root_dir = function(fname)
         local root_patterns = {"pom.xml", "build.gradle", ".git"}
         local project_root = require('lspconfig.util').root_pattern(unpack(root_patterns))(fname)
@@ -173,41 +158,18 @@
         root_dir = jdtls_root_dir,
       })
 
-      lspconfig.clangd.setup({
-        capabilities = capabilities,
-      })
+      lspconfig.clangd.setup({ capabilities = capabilities })
+      lspconfig.pyright.setup({ capabilities = capabilities })
+      lspconfig.html.setup({ capabilities = capabilities })
+      lspconfig.cssls.setup({ capabilities = capabilities })
+      lspconfig.tsserver.setup({ capabilities = capabilities })
 
-      lspconfig.pyright.setup({
-        capabilities = capabilities,
-      })
-
-      lspconfig.html.setup({
-        capabilities = capabilities,
-      })
-
-      lspconfig.cssls.setup({
-        capabilities = capabilities,
-      })
-
-      lspconfig.tsserver.setup({
-        capabilities = capabilities,
-      })
-
-      -- nvim-tree
       require('nvim-tree').setup({
-        view = {
-          width = 30,
-        },
-        git = {
-          enable = true,
-        },
+        view = { width = 30 },
+        git = { enable = true },
         renderer = {
           icons = {
-            show = {
-              git = true,
-              folder = true,
-              file = true,
-            },
+            show = { git = true, folder = true, file = true },
             glyphs = {
               default = "",
               symlink = "",
@@ -235,7 +197,6 @@
         },
       })
 
-      -- lualine
       require('lualine').setup({
         options = {
           theme = 'github-dark',
@@ -251,12 +212,10 @@
         },
       })
 
-      -- which-key, gitsigns, bufferline
       require('which-key').setup()
       require('gitsigns').setup()
       require('bufferline').setup()
 
-      -- dashboard-nvim
       require('dashboard').setup({
         theme = 'hyper',
         config = {
@@ -273,119 +232,63 @@
             "                                                               ",
           },
           center = {
-            {
-              icon = "  ",
-              desc = "Find File",
-              action = "Telescope find_files",
-              key = "f",
-            },
-            {
-              icon = "  ",
-              desc = "New File",
-              action = "enew",
-              key = "n",
-            },
-            {
-              icon = "  ",
-              desc = "Recent Files",
-              action = "Telescope oldfiles",
-              key = "r",
-            },
-            {
-              icon = "  ",
-              desc = "Explore Files",
-              action = "NvimTreeToggle",
-              key = "e",
-            },
-            {
-              icon = "  ",
-              desc = "Configuration",
-              action = "e ~/.config/nvim/init.lua",
-              key = "c",
-            },
-            {
-              icon = "  ",
-              desc = "Quit Neovim",
-              action = "qa",
-              key = "q",
-            },
+            { icon = "  ", desc = "Find File", action = "Telescope find_files", key = "f" },
+            { icon = "  ", desc = "New File", action = "enew", key = "n" },
+            { icon = "  ", desc = "Recent Files", action = "Telescope oldfiles", key = "r" },
+            { icon = "  ", desc = "Explore Files", action = "NvimTreeToggle", key = "e" },
+            { icon = "  ", desc = "Configuration", action = "e ~/.config/nvim/init.lua", key = "c" },
+            { icon = "  ", desc = "Quit Neovim", action = "qa", key = "q" },
           },
-          footer = {},
         },
       })
 
-      -- Mapeamentos de teclas importantes
       vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle NvimTree' })
       vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<CR>', { desc = 'Find Files' })
       vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', { desc = 'Live Grep' })
       vim.keymap.set('n', '<leader>fb', '<cmd>Telescope buffers<CR>', { desc = 'Find Buffers' })
       vim.keymap.set('n', '<leader>fh', '<cmd>Telescope help_tags<CR>', { desc = 'Help Tags' })
-      vim.keymap.set('n', '<leader>jb', ':JavaBuildBuildWorkspace<CR>', { desc = 'Java Build Workspace' })
-      vim.keymap.set('n', '<leader>jr', ':JavaRunnerRunMain<CR>', { desc = 'Java Run Main' })
-      vim.keymap.set('n', '<leader>jt', ':JavaTestRunCurrentClass<CR>', { desc = 'Java Test Current Class' })
-      vim.keymap.set('n', '<leader>jd', ':JavaDapConfig<CR>', { desc = 'Java DAP Config' })
-      vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Move to left window' })
-      vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Move to down window' })
-      vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move to up window' })
-      vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move to right window' })
+      vim.keymap.set('n', '<leader>jb', ':JavaBuildBuildWorkspace<CR>', { desc = 'Java Build' })
+      vim.keymap.set('n', '<leader>jr', ':JavaRunnerRunMain<CR>', { desc = 'Java Run' })
+      vim.keymap.set('n', '<leader>jt', ':JavaTestRunCurrentClass<CR>', { desc = 'Java Test' })
+      vim.keymap.set('n', '<leader>jd', ':JavaDapConfig<CR>', { desc = 'Java DAP' })
+      vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Move left' })
+      vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Move down' })
+      vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move up' })
+      vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move right' })
     '';
   };
 
-  # Alacritty com GitHub Dark, padding e otimizações
   programs.alacritty = {
     enable = true;
     settings = {
       window = {
-        padding = {
-          x = 10;
-          y = 10;
-        };
+        padding = { x = 10; y = 10; };
         dynamic_padding = true;
         decorations = "none";
       };
       font = {
-        normal = {
-          family = "JetBrainsMono Nerd Font"; # Usar a Nerd Font instalada
-          style = "Regular";
-        };
+        normal = { family = "JetBrainsMono Nerd Font"; style = "Regular"; };
         size = 12.0;
       };
       colors = {
-        primary = {
-          background = "#0d1117";
-          foreground = "#b3b1ad";
-        };
+        primary = { background = "#0d1117"; foreground = "#b3b1ad"; };
         normal = {
-          black   = "#484f58";
-          red     = "#ff7b72";
-          green   = "#3fb950";
-          yellow  = "#d29922";
-          blue    = "#58a6ff";
-          magenta = "#bc8cff";
-          cyan    = "#39c5cf";
-          white   = "#b1bac4";
+          black = "#484f58"; red = "#ff7b72"; green = "#3fb950"; yellow = "#d29922";
+          blue = "#58a6ff"; magenta = "#bc8cff"; cyan = "#39c5cf"; white = "#b1bac4";
         };
         bright = {
-          black   = "#6e7681";
-          red     = "#ffa198";
-          green   = "#56d364";
-          yellow  = "#e3b341";
-          blue    = "#79c0ff";
-          magenta = "#d2a8ff";
-          cyan    = "#56d4dd";
-          white   = "#f0f6fc";
+          black = "#6e7681"; red = "#ffa198"; green = "#56d364"; yellow = "#e3b341";
+          blue = "#79c0ff"; magenta = "#d2a8ff"; cyan = "#56d4dd"; white = "#f0f6fc";
         };
       };
     };
   };
 
-  # Bash para produtividade (autocomplete)
   programs.bash = {
     enable = true;
     enableCompletion = true;
   };
 
-  # Associações de arquivos (MIME types)
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
@@ -403,7 +306,6 @@
     };
   };
 
-  # Configurar o desktop entry do Neovim para rodar no Alacritty
   xdg.desktopEntries.nvim = {
     name = "Neovim";
     genericName = "Text Editor";
@@ -413,7 +315,6 @@
     mimeType = [ "text/plain" "text/x-java" ];
   };
 
-  # XDG User Dirs em inglês
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
