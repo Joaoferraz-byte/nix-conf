@@ -16,14 +16,9 @@
 
   perSystem = { pkgs, lib, self', ... }: {
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
-      package = (pkgs.niri.override {
-        # Garantir que libdisplay-info_0_3 seja usado, ou tentar injetar se estiver faltando no nixpkgs instável atual
-        libdisplay-info_0_3 = pkgs.libdisplay-info; 
-      }).overrideAttrs (old: {
-        # Forçar a presença de providedSessions para evitar erro de atributo
+      package = pkgs.niri.overrideAttrs (old: {
         passthru = (old.passthru or {}) // { providedSessions = [ "niri" ]; };
         
-        # Se o build falha por falta de pkg-config para libdisplay-info, garantimos que esteja nos inputs
         nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.pkg-config ];
         buildInputs = (old.buildInputs or []) ++ [ pkgs.libdisplay-info ];
       });
