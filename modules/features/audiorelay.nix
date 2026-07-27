@@ -7,23 +7,20 @@
       options.services.audiorelay = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = false;
+          default = true;
           description = "Habilita o AudioRelay.";
         };
-
         lanInterface = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = null;
+          default = "enp6s0";
           description = "Interface de rede da LAN/Wi-Fi.";
         };
-
         lanSubnet = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = null;
+          default = "10.253.8.96/24";
           description = "CIDR da sub-rede local.";
         };
       };
-
       config = lib.mkIf cfg.enable {
         services.pipewire.extraConfig.pipewire."99-audiorelay" = {
           "context.objects" = [
@@ -53,16 +50,12 @@
           enable = true;
           pulse.enable = true;
         };
-
-        services.flatpak.overrides.settings = lib.mkIf config.services.flatpak.enable {
+        services.flatpak.overrides.settings = {
           "net.audiorelay.AudioRelay".Environment = {
             "_JAVA_AWT_WM_NONREPARENTING" = "1";
-            "XDG_CURRENT_DESKTOP" = "GNOME";
           };
         };
-
         networking.nftables.enable = lib.mkIf (cfg.lanSubnet != null) true;
-
         networking.firewall = lib.mkMerge [
           (lib.mkIf (cfg.lanSubnet != null) {
             extraInputRules = ''
