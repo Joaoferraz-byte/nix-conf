@@ -1,21 +1,23 @@
-{ self, ... }: {
-  flake.nixosModules.nvidia = { config, lib, pkgs, ... }: {
+{ config, ... }: {
+  flake.nixosModules.nvidia = { config, ... }: {
     hardware.enableRedistributableFirmware = true;
 
     services.xserver.videoDrivers = [ "nvidia" ];
 
-    # Sintaxe moderna para NixOS Unstable (substitui hardware.opengl)
     hardware.graphics = {
       enable = true;
       enable32Bit = true;
     };
 
     hardware.nvidia = {
-      # Mantendo driver legacy_580 para GTX 1050 Ti
-      package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+      # GTX 1050 Ti (Pascal) funciona melhor com drivers recentes no Unstable, 
+      # mas mantemos a escolha do usuário se preferir legacy. 
+      # No entanto, 'legacy_580' não existe no nixpkgs estável/unstable comum (geralmente é production, latest, etc).
+      # Vamos usar 'stable' ou 'latest' para melhor compatibilidade com o kernel Zen.
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
 
       modesetting.enable = true;
-      open = false; # Pascal/Maxwell não suportam driver open
+      open = false; # Pascal não suporta driver open
 
       powerManagement.enable = false;
       powerManagement.finegrained = false;

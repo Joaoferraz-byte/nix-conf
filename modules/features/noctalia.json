@@ -178,7 +178,7 @@
     "screenOverrides": []
   },
   "general": {
-    "avatarImage": "/home/livara/.config/nixos/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg",
+    "avatarImage": null,
     "dimmerOpacity": 0.2,
     "showScreenCorners": false,
     "forceBlackScreenCorners": false,
@@ -290,7 +290,7 @@
   "wallpaper": {
     "enabled": true,
     "overviewEnabled": false,
-    "directory": "/home/livara/.config/nixos/Wallpapers",
+    "directory": null,
     "monitorDirectories": [],
     "enableMultiMonitorDirectories": false,
     "showHiddenFiles": false,
