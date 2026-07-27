@@ -18,8 +18,6 @@
   perSystem = { pkgs, lib, self', ... }: {
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
       inherit pkgs;
-      # lndir é injetado automaticamente se estiver no pkgs, mas garantimos a compatibilidade se necessário.
-      # Removido v2-settings que causava warnings se não suportado.
       
       settings = {
         spawn-at-startup = [
@@ -67,7 +65,7 @@
           hide-after-inactive-ms = 3000;
         };
 
-        window-rule = [
+        window-rules = [
           {
             geometry-corner-radius = 12;
             clip-to-geometry = true;
@@ -79,32 +77,32 @@
         prefer-no-csd = true;
         hotkey-overlay.skip-at-startup = true;
 
-        binds = with config.lib.niri.actions; {
-          "Mod+Return".spawn = [ (lib.getExe pkgs.alacritty) ];
-          "Mod+S".spawn = [ (lib.getExe self'.packages.myNoctalia) "ipc" "call" "launcher" "toggle" ];
-          "Mod+O".spawn = [ (lib.getExe pkgs.obsidian) ];
-          "Mod+W".spawn = [ (lib.getExe pkgs.brave) ];
-          "Mod+E".spawn = [ (lib.getExe pkgs.nautilus) ];
-          "Mod+D".spawn = [ (lib.getExe pkgs.vesktop) ];
+        binds = {
+          "Mod+Return".spawn.command = [ (lib.getExe pkgs.alacritty) ];
+          "Mod+S".spawn.command = [ (lib.getExe self'.packages.myNoctalia) "ipc" "call" "launcher" "toggle" ];
+          "Mod+O".spawn.command = [ (lib.getExe pkgs.obsidian) ];
+          "Mod+W".spawn.command = [ (lib.getExe pkgs.brave) ];
+          "Mod+E".spawn.command = [ (lib.getExe pkgs.nautilus) ];
+          "Mod+D".spawn.command = [ (lib.getExe pkgs.vesktop) ];
 
-          "Mod+Q".close-window = null;
-          "Mod+F".maximize-column = null;
-          "Mod+Shift+F".fullscreen-window = null;
-          "Mod+V".toggle-window-floating = null;
-          "Mod+Comma".consume-window-into-column = null;
-          "Mod+Period".expel-window-from-column = null;
+          "Mod+Q".close-window = _: { };
+          "Mod+F".maximize-column = _: { };
+          "Mod+Shift+F".fullscreen-window = _: { };
+          "Mod+V".toggle-window-floating = _: { };
+          "Mod+Comma".consume-window-into-column = _: { };
+          "Mod+Period".expel-window-from-column = _: { };
 
-          "Mod+Left".focus-column-left = null;
-          "Mod+Right".focus-column-right = null;
-          "Mod+Up".focus-window-up = null;
-          "Mod+Down".focus-window-down = null;
+          "Mod+Left".focus-column-left = _: { };
+          "Mod+Right".focus-column-right = _: { };
+          "Mod+Up".focus-window-up = _: { };
+          "Mod+Down".focus-window-down = _: { };
 
-          "Mod+Shift+Left".move-column-left = null;
-          "Mod+Shift+Right".move-column-right = null;
-          "Mod+Shift+Up".move-window-up = null;
-          "Mod+Shift+Down".move-window-down = null;
+          "Mod+Shift+Left".move-column-left = _: { };
+          "Mod+Shift+Right".move-column-right = _: { };
+          "Mod+Shift+Up".move-window-up = _: { };
+          "Mod+Shift+Down".move-window-down = _: { };
 
-          "Mod+R".switch-preset-column-width = null;
+          "Mod+R".switch-preset-column-width = _: { };
           "Mod+Minus".set-column-width = "-10%";
           "Mod+Equal".set-column-width = "+10%";
 
@@ -116,19 +114,19 @@
           "Mod+Shift+2".move-column-to-workspace = 2;
           "Mod+Shift+3".move-column-to-workspace = 3;
           "Mod+Shift+4".move-column-to-workspace = 4;
-          "Mod+Page_Down".focus-workspace-down = null;
-          "Mod+Page_Up".focus-workspace-up = null;
+          "Mod+Page_Down".focus-workspace-down = _: { };
+          "Mod+Page_Up".focus-workspace-up = _: { };
 
-          "Print".screenshot = null;
-          "Mod+Print".screenshot-window = null;
+          "Print".screenshot = _: { };
+          "Mod+Print".screenshot-window = _: { };
 
-          "XF86AudioRaiseVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" ];
-          "XF86AudioLowerVolume".spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-" ];
-          "XF86AudioMute".spawn = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
-          "XF86MonBrightnessUp".spawn = [ "brightnessctl" "set" "+5%" ];
-          "XF86MonBrightnessDown".spawn = [ "brightnessctl" "set" "5%-" ];
+          "XF86AudioRaiseVolume".spawn.command = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" ];
+          "XF86AudioLowerVolume".spawn.command = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-" ];
+          "XF86AudioMute".spawn.command = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
+          "XF86MonBrightnessUp".spawn.command = [ "brightnessctl" "set" "+5%" ];
+          "XF86MonBrightnessDown".spawn.command = [ "brightnessctl" "set" "5%-" ];
 
-          "Mod+Shift+E".quit = null;
+          "Mod+Shift+E".quit = _: { };
         };
       };
     };

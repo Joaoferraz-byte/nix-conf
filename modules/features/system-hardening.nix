@@ -35,6 +35,7 @@
     };
     
     # Habilitar microcode update
-    hardware.cpu.amd.updateMicrocode = true; # Assume AMD baseado no Zen kernel e hardware.nix anterior
+    # Removido hardware.cpu.amd.updateMicrocode daqui para evitar conflito com hardware.nix e manter modularidade.
+    # O hardware.nix já lida com isso usando lib.mkDefault.
   };
 }
