@@ -18,7 +18,7 @@
   perSystem = { pkgs, lib, self', system, ... }: {
     # Removido a re-importação do nixpkgs para manter precisão, estabilidade e usar a mesma versão instanciada globalmente
     packages.myNiri = inputs.wrapper-modules.wrappers.niri.wrap {
-      inherit pkgs;
+      pkgs = pkgs // { lndir = pkgs.xorg.lndir; };
       v2-settings = true;
 
       settings = {
