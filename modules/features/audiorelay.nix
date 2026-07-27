@@ -54,11 +54,11 @@
           pulse.enable = true;
         };
 
-        services.flatpak.overrides.settings = {
+        # Flatpak overrides só devem ser aplicados se flatpak estiver habilitado
+        services.flatpak.overrides.settings = lib.mkIf config.services.flatpak.enable {
           "net.audiorelay.AudioRelay".Environment = {
             "_JAVA_AWT_WM_NONREPARENTING" = "1";
             "XDG_CURRENT_DESKTOP" = "GNOME";
-            # DBUS_SESSION_BUS_ADDRESS removido por ser host-specific e perigoso para reprodutibilidade
           };
         };
 
