@@ -9,15 +9,6 @@
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
   };
 
-  home.activation.createProjectsDir = {
-    after = [ "writeBoundary" ];
-    before = [ "installPackages" ];
-    text = ''
-      if [ ! -d "$HOME/Projects" ]; then
-        mkdir -p "$HOME/Projects"
-      fi
-    '';
-  };
 
   programs.home-manager.enable = true;
 

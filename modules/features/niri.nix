@@ -26,7 +26,7 @@
           (lib.getExe self'.packages.myNoctalia)
         ];
 
-        xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite;
+        # xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite; # não existe no 24.05
 
         input = {
           keyboard.xkb.layout = "br";
