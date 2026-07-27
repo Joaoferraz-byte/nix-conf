@@ -14,11 +14,6 @@
   home.activation.createProjectsDir = {
     after = [ "writeBoundary" ];
     before = [ "installPackages" ];
-    # Cria o diretório Projects se não existir
-    # Isso garante que o Neovim possa detectá-lo e que o usuário tenha um local padrão
-    # para seus projetos, gerenciado declarativamente.
-    # Referência: Home Manager Manual, seção "Activation Script"
-    # https://nix-community.github.io/home-manager/options.html#opt-home.activation
     text = ''
       if [ ! -d "$HOME/Projects" ]; then
         mkdir -p "$HOME/Projects"
@@ -33,15 +28,16 @@
     # LSP Servers para Neovim
     clangd
     python3Packages.pyright
-    nodePackages.vscode-html-languageserver
-    nodePackages.vscode-css-languageserver
+    nodePackages.vscode-html-languageserver-bin
+    nodePackages.vscode-css-languageserver-bin
     nodePackages.typescript-language-server
-    # Ferramentas para Manim (Python)
-    python3Packages.manim
-    python3Packages.manim-voiceover
-    # Outras ferramentas úteis
+    # Ferramentas gerais
     ripgrep # para Telescope live_grep
     fd # para Telescope find_files
+    # Manim (se disponível no 24.05, caso contrário omitir)
+    python3Packages.manim
+    # Nerd Font para Alacritty e Neovim
+    (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
   ];
 
   # Neovim focado em Java/Spring Boot pesado e tema GitHub Dark
@@ -50,7 +46,7 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
-    
+
     plugins = with pkgs.vimPlugins; [
       nvim-lspconfig
       nvim-treesitter.withAllGrammars
@@ -72,263 +68,266 @@
       dashboard-nvim
     ];
 
-    extraConfig = ''
-      set number
-      set relativenumber
-      set termguicolors
-      set background=dark
-      
-      " Tema GitHub Dark adaptando o background ao terminal
-      colorscheme github_dark
-      highlight Normal guibg=NONE ctermbg=NONE
-      highlight NonText guibg=NONE ctermbg=NONE
+    extraLuaConfig = ''
+      -- Opções gerais
+      vim.opt.number = true
+      vim.opt.relativenumber = true
+      vim.opt.termguicolors = true
+      vim.opt.background = "dark"
+      vim.opt.expandtab = true
+      vim.opt.shiftwidth = 4
+      vim.opt.tabstop = 4
+      vim.opt.smartindent = true
+      vim.opt.wrap = false
+      vim.opt.cursorline = true
+      vim.opt.signcolumn = "yes"
+      vim.opt.updatetime = 250
+      vim.opt.splitright = true
+      vim.opt.splitbelow = true
+      vim.g.mapleader = " "
+      vim.g.maplocalleader = " "
 
-      lua << EOF
-      -- Configuração do LSP para Java (jdtls)
-      local lspconfig = require(\'lspconfig\')
-      local cmp = require(\'cmp\')
+      -- Tema GitHub Dark com background transparente
+      vim.cmd("colorscheme github_dark")
+      vim.api.nvim_set_hl(0, "Normal", { bg = "NONE", ctermbg = "NONE" })
+      vim.api.nvim_set_hl(0, "NonText", { bg = "NONE", ctermbg = "NONE" })
+      vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+      vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+
+      -- Desabilitar netrw (necessário para nvim-tree)
+      vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+
+      -- nvim-java (Spring Boot Tools, Debug, Test)
+      require('java').setup({
+        lombok = { enable = true },
+        java_test = { enable = true },
+        java_debug_adapter = { enable = true },
+        spring_boot_tools = { enable = true },
+        jdk = { auto_install = false },
+      })
+      vim.lsp.enable('jdtls')
+
+      -- nvim-cmp (autocomplete)
+      local cmp = require('cmp')
+      local luasnip = require('luasnip')
 
       cmp.setup({
         snippet = {
           expand = function(args)
-            require(\'luasnip\').lsp_expand(args.body)
+            luasnip.lsp_expand(args.body)
           end,
         },
         mapping = cmp.mapping.preset.insert({
-          [\'<C-b>\'] = cmp.mapping.scroll_docs(-4),
-          [\'<C-f>\'] = cmp.mapping.scroll_docs(4),
-          [\'<C-Space>\'] = cmp.mapping.complete(),
-          [\'<C-e>\'] = cmp.mapping.abort(),
-          [\'<CR>\'] = cmp.mapping.confirm({ select = true }),
+          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<C-e>'] = cmp.mapping.abort(),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+          ['<Tab>'] = cmp.mapping(function(fallback) -- Mapeamento para Tab
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
+          ['<S-Tab>'] = cmp.mapping(function(fallback) -- Mapeamento para Shift-Tab
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              luasnip.jump(-1)
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
         }),
         sources = cmp.config.sources({
-          { name = \'nvim_lsp\' },
-          { name = \'luasnip\' },
-        }, {
-          { name = \'buffer\' },
+          { name = 'nvim_lsp' },
+          { name = 'luasnip' },
+          { name = 'buffer' },
+          { name = 'path' },
         })
       })
 
-      local capabilities = require(\'cmp_nvim_lsp\').default_capabilities()
+      -- nvim-lspconfig para outras linguagens
+      local lspconfig = require('lspconfig')
+      local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-      -- Configuração do LSP para Java (jdtls) e nvim-java
-      require(\'java\').setup{} -- Inicializa nvim-java
-      lspconfig.jdtls.setup{
+      -- Detecção automática de projetos na pasta ~/Projects para jdtls
+      local jdtls_root_dir = function(fname)
+        local root_patterns = {"pom.xml", "build.gradle", ".git"}
+        local project_root = require('lspconfig.util').root_pattern(unpack(root_patterns))(fname)
+        if project_root then return project_root end
+
+        local home_projects = vim.fn.expand('~/Projects')
+        if vim.fn.isdirectory(home_projects) and string.find(fname, home_projects, 1, true) then
+          return home_projects
+        end
+        return vim.fn.getcwd()
+      end
+
+      lspconfig.jdtls.setup({
         capabilities = capabilities,
-        cmd = { \'jdtls\' },
-        root_dir = function(fname)
-          -- Detecta projetos Java/Spring Boot e também um diretório \'Projects\' no home
-          local root_patterns = {\"pom.xml\", \"gradle.build\", \".git\"}
-          local project_root = require(\'lspconfig.util\').root_pattern(unpack(root_patterns))(fname)
-          if project_root then return project_root end
+        root_dir = jdtls_root_dir,
+      })
 
-          local home_projects = vim.fn.expand(\'~/Projects\')
-          if vim.fn.isdirectory(home_projects) and string.find(fname, home_projects, 1, true) then
-            return home_projects
-          end
-          return vim.fn.getcwd()
-        end,
-      }
+      lspconfig.clangd.setup({
+        capabilities = capabilities,
+      })
 
-      -- Configuração do nvim-tree
-      require(\'nvim-tree\').setup({
-        sort_by = \"case_sensitive\",
+      lspconfig.pyright.setup({
+        capabilities = capabilities,
+      })
+
+      lspconfig.html.setup({
+        capabilities = capabilities,
+      })
+
+      lspconfig.cssls.setup({
+        capabilities = capabilities,
+      })
+
+      lspconfig.tsserver.setup({
+        capabilities = capabilities,
+      })
+
+      -- nvim-tree
+      require('nvim-tree').setup({
         view = {
           width = 30,
         },
-        renderer = {
-          group_empty = true,
-          icons = {
-            git_placement = \"before\",
-            padding = \" \",
-            symlink_arrow = \" ➛ \",
-            show = {
-              file = true,
-              folder = true,
-              folder_arrow = true,
-              git = true,
-            },
-            glyphs = {
-              default = \"\",
-              symlink = \"\",
-              folder = {
-                arrow_open = \"\",
-                arrow_closed = \"\",
-                default = \"\",
-                open = \"\",
-                empty = \"\",
-                empty_open = \"\",
-                symlink = \"\",
-                symlink_open = \"\",
-              },
-              git = {
-                unstaged = \"\",
-                staged = \"✓\",
-                untracked = \"\",
-                renamed = \"➜\",
-                unmerged = \"\",
-                deleted = \"\",
-                ignored = \"◌\",
-              },
-            },
-          },
-        },
-        filters = {
-          dotfiles = true,
-        },
         git = {
           enable = true,
-          ignore = false,
-          timeout = 500,
         },
-        actions = {
-          open_file = {
-            quit_on_open = true,
-            resize_window = true,
-            window_picker = {
-              enable = true,
-              chars = \"abcdefghijklmnopqrstuvwxyz\",
-              exclude = {
-                filetype = { \"NvimTree\", \"packer\", \"qf\", \"help\" },
-                buftype = { \"nofile\", \"terminal\", \"prompt\" },
+        renderer = {
+          icons = {
+            show = {
+              git = true,
+              folder = true,
+              file = true,
+            },
+            glyphs = {
+              default = "",
+              symlink = "",
+              folder = {
+                arrow_open = "",
+                arrow_closed = "",
+                default = "",
+                open = "",
+                empty = "",
+                empty_open = "",
+                symlink = "",
+                symlink_open = "",
+              },
+              git = {
+                unstaged = "",
+                staged = "✓",
+                untracked = "",
+                renamed = "➜",
+                unmerged = "",
+                deleted = "",
+                ignored = "◌",
               },
             },
           },
         },
       })
 
-      -- Configuração do lualine
-      require(\'lualine\').setup({
+      -- lualine
+      require('lualine').setup({
         options = {
-          icons_enabled = true,
-          theme = \'github-dark\',
-          component_separators = { left = \'\', right = \'\'},
-          section_separators = { left = \'\', right = \'\'},
+          theme = 'github-dark',
           globalstatus = true,
         },
         sections = {
-          lualine_a = {\'mode\'},
-          lualine_b = {\'branch\', \'diff\', \'diagnostics\'},
-          lualine_c = {\'filename\'},
-          lualine_x = {\'encoding\', \'fileformat\', \'filetype\'},
-          lualine_y = {\'progress\'},
-          lualine_z = {\'location\'}
+          lualine_a = {'mode'},
+          lualine_b = {'branch', 'diff', 'diagnostics'},
+          lualine_c = {'filename'},
+          lualine_x = {'encoding', 'filetype'},
+          lualine_y = {'progress'},
+          lualine_z = {'location'}
         },
-        inactive_sections = {
-          lualine_a = {},
-          lualine_b = {},
-          lualine_c = {\'filename\'},
-          lualine_x = {\'location\'},
-          lualine_y = {},
-          lualine_z = {}
-        },
-        tabline = {},
-        winbar = {},
-        inactive_winbar = {},
-        extensions = {\'nvim-tree\', \'which-key\'}
       })
 
-      -- Configuração do which-key
-      require(\'which-key\').setup()
+      -- which-key, gitsigns, bufferline
+      require('which-key').setup()
+      require('gitsigns').setup()
+      require('bufferline').setup()
 
-      -- Configuração do gitsigns
-      require(\'gitsigns\').setup()
-
-      -- Configuração do bufferline
-      require(\'bufferline\').setup()
-
-      -- Configuração do dashboard-nvim
-      require(\'dashboard\').setup({
-        theme = \'hyper\',
+      -- dashboard-nvim
+      require('dashboard').setup({
+        theme = 'hyper',
         config = {
           header = {
-            \'                                                               \',
-            \' █████╗ ███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗██╗    ██╗\',
-            \'██╔══██╗████╗  ██║██║   ██║██╔══██╗████╗  ██║██║    ██║\',
-            \'███████║██╔██╗ ██║██║   ██║███████║██╔██╗ ██║██║ █╗ ██║\',
-            \'██╔══██║██║╚██╗██║██║   ██║██╔══██║██║╚██╗██║██║███╗██║\',
-            \'██║  ██║██║ ╚████║╚██████╔╝██║  ██║██║ ╚████║╚███╔███╝\',
-            \'╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══╝╚══╝ \',
-            \'                                                               \',
-            \'  A modern, modular, and declarative Neovim configuration.  \',
-            \'                                                               \',
+            "                                                               ",
+            " █████╗ ███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗██╗    ██╗",
+            "██╔══██╗████╗  ██║██║   ██║██╔══██╗████╗  ██║██║    ██║",
+            "███████║██╔██╗ ██║██║   ██║███████║██╔██╗ ██║██║ █╗ ██║",
+            "██╔══██║██║╚██╗██║██║   ██║██╔══██║██║╚██╗██║██║███╗██║",
+            "██║  ██║██║ ╚████║╚██████╔╝██║  ██║██║ ╚████║╚███╔███╝",
+            "╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══╝╚══╝ ",
+            "                                                               ",
+            "  A modern, modular, and declarative Neovim configuration.  ",
+            "                                                               ",
           },
           center = {
             {
-              icon = \'  \',
-              desc = \'Find File\',
-              action = \'Telescope find_files\',
-              key = \'f\',
+              icon = "  ",
+              desc = "Find File",
+              action = "Telescope find_files",
+              key = "f",
             },
             {
-              icon = \'  \',
-              desc = \'New File\',
-              action = \'enew\',
-              key = \'n\',
+              icon = "  ",
+              desc = "New File",
+              action = "enew",
+              key = "n",
             },
             {
-              icon = \'  \',
-              desc = \'Recent Files\',
-              action = \'Telescope oldfiles\',
-              key = \'r\',
+              icon = "  ",
+              desc = "Recent Files",
+              action = "Telescope oldfiles",
+              key = "r",
             },
             {
-              icon = \'  \',
-              desc = \'Explore Files\',
-              action = \'NvimTreeToggle\',
-              key = \'e\',
+              icon = "  ",
+              desc = "Explore Files",
+              action = "NvimTreeToggle",
+              key = "e",
             },
             {
-              icon = \'  \',
-              desc = \'Configuration\',
-              action = \'e ~/.config/nvim/init.lua\',
-              key = \'c\',
+              icon = "  ",
+              desc = "Configuration",
+              action = "e ~/.config/nvim/init.lua",
+              key = "c",
             },
             {
-              icon = \'  \',
-              desc = \'Quit Neovim\',
-              action = \'qa\',
-              key = \'q\',
+              icon = "  ",
+              desc = "Quit Neovim",
+              action = "qa",
+              key = "q",
             },
           },
           footer = {},
         },
       })
 
-      -- Mapeamentos de teclas
-      vim.keymap.set(\'n\', \'<leader>e\', \":NvimTreeToggle<CR>\", { desc = \'Toggle NvimTree\' })
-      vim.keymap.set(\'n\', \'<leader>ff\', \'<cmd>Telescope find_files<CR>\', { desc = \'Find Files\' })
-      vim.keymap.set(\'n\', \'<leader>fg\', \'<cmd>Telescope live_grep<CR>\', { desc = \'Live Grep\' })
-      vim.keymap.set(\'n\', \'<leader>fb\', \'<cmd>Telescope buffers<CR>\', { desc = \'Find Buffers\' })
-      vim.keymap.set(\'n\', \'<leader>fh\', \'<cmd>Telescope help_tags<CR>\', { desc = \'Help Tags\' })
-
-      -- Configuração de LSP para outras linguagens
-      -- C++
-      lspconfig.clangd.setup({
-        capabilities = capabilities,
-      })
-
-      -- Python
-      lspconfig.pyright.setup({
-        capabilities = capabilities,
-      })
-
-      -- HTML
-      lspconfig.html.setup({
-        capabilities = capabilities,
-      })
-
-      -- CSS
-      lspconfig.cssls.setup({
-        capabilities = capabilities,
-      })
-
-      -- JavaScript/TypeScript
-      lspconfig.tsserver.setup({
-        capabilities = capabilities,
-      })
-
-      EOF
+      -- Mapeamentos de teclas importantes
+      vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle NvimTree' })
+      vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<CR>', { desc = 'Find Files' })
+      vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', { desc = 'Live Grep' })
+      vim.keymap.set('n', '<leader>fb', '<cmd>Telescope buffers<CR>', { desc = 'Find Buffers' })
+      vim.keymap.set('n', '<leader>fh', '<cmd>Telescope help_tags<CR>', { desc = 'Help Tags' })
+      vim.keymap.set('n', '<leader>jb', ':JavaBuildBuildWorkspace<CR>', { desc = 'Java Build Workspace' })
+      vim.keymap.set('n', '<leader>jr', ':JavaRunnerRunMain<CR>', { desc = 'Java Run Main' })
+      vim.keymap.set('n', '<leader>jt', ':JavaTestRunCurrentClass<CR>', { desc = 'Java Test Current Class' })
+      vim.keymap.set('n', '<leader>jd', ':JavaDapConfig<CR>', { desc = 'Java DAP Config' })
+      vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Move to left window' })
+      vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Move to down window' })
+      vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move to up window' })
+      vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move to right window' })
     '';
   };
 
@@ -346,7 +345,7 @@
       };
       font = {
         normal = {
-          family = "monospace";
+          family = "JetBrainsMono Nerd Font"; # Usar a Nerd Font instalada
           style = "Regular";
         };
         size = 12.0;
