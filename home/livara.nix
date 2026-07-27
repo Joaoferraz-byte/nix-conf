@@ -51,7 +51,6 @@
       dashboard-nvim
     ];
 
-    # Corrigido de extraLuaConfig para initLua para evitar avisos de renomeação
     initLua = ''
       vim.opt.number = true
       vim.opt.relativenumber = true

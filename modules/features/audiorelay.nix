@@ -7,20 +7,20 @@
       options.services.audiorelay = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = false; # Desabilitado por padrão para segurança
+          default = false;
           description = "Habilita o AudioRelay.";
         };
 
         lanInterface = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
-          description = "Interface de rede da LAN/Wi-Fi (ex: enp6s0).";
+          description = "Interface de rede da LAN/Wi-Fi.";
         };
 
         lanSubnet = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
-          description = "CIDR da sub-rede local (ex: 192.168.1.0/24).";
+          description = "CIDR da sub-rede local.";
         };
       };
 
@@ -54,7 +54,6 @@
           pulse.enable = true;
         };
 
-        # Flatpak overrides só devem ser aplicados se flatpak estiver habilitado
         services.flatpak.overrides.settings = lib.mkIf config.services.flatpak.enable {
           "net.audiorelay.AudioRelay".Environment = {
             "_JAVA_AWT_WM_NONREPARENTING" = "1";
