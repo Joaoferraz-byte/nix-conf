@@ -46,7 +46,10 @@
       isNormalUser = true;
       description = "Livara";
       extraGroups = [ "networkmanager" "wheel" ];
+      shell = pkgs.zsh;
     };
+
+    programs.zsh.enable = true;
 
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
