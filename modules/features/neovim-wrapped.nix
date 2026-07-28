@@ -2,8 +2,14 @@
   self, inputs, ...
 }:
 {
+  flake.nixosModules.neovimWrapped = { pkgs, ... }: {
+    environment.systemPackages = [
+      self.packages.${pkgs.stdenv.hostPlatform.system}.myNeovim
+    ];
+  };
+
   perSystem = {
-    pkgs, lib, system, ...
+    pkgs, system, ...
   }:
   {
     packages.myNeovim = inputs.wrapper-modules.wrappers.neovim.wrap {
@@ -14,6 +20,8 @@
         nvim-treesitter.withAllGrammars
         nvim-cmp
         cmp-nvim-lsp
+        cmp-buffer
+        cmp-path
         luasnip
         github-nvim-theme
         nvim-jdtls
@@ -70,7 +78,12 @@
       ];
 
       # O initLua será o seu arquivo de configuração principal do Neovim
-      initLua = builtins.readFile ./nvim-config/init.lua;
+      # Agora usando o repositório lua-conf externo
+      initLua = ''
+        -- Adiciona o lua-conf ao runtime path do Neovim
+        vim.opt.rtp:prepend("${inputs.lua-conf}")
+        require("init")
+      '';
     };
   };
 }
