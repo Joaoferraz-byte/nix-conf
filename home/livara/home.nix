@@ -29,7 +29,8 @@
         size = 12.0;
       };
       colors = {
-        primary = { background = "#0d1117"; foreground = "#b3b1ad"; };
+        primary = { background = "#0d1117"; foreground = "#c9d1d9"; };
+        cursor = { text = "#0d1117"; cursor = "#58a6ff"; };
         normal = {
           black = "#484f58"; red = "#ff7b72"; green = "#3fb950"; yellow = "#d29922";
           blue = "#58a6ff"; magenta = "#bc8cff"; cyan = "#39c5cf"; white = "#b1bac4";
