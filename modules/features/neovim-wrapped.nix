@@ -74,9 +74,11 @@
         tailwindcss-language-server # Para Tailwind CSS
         prettier # Para formatação de código web
 
-        # --- Dependências do Telescope ---
+        # --- Dependências do Telescope e Extratores ---
         ripgrep
         fd
+        unzip
+        tar
 
         # --- Manim ---
         python3 # Para Manim
