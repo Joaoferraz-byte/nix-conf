@@ -95,7 +95,7 @@
       #
       # Como `inputs.lua-conf` é um input com `flake = false`, ele é um path puro
       # (uma store path), então é seguro usá-lo aqui.
-      settings.config_directory = inputs.lua-conf;
+      settings.config_directory = "${inputs.lua-conf}";
     };
   };
 }
