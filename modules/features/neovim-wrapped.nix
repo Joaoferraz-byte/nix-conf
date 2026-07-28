@@ -73,7 +73,7 @@
         typescript-language-server
         angular-language-server # Para Angular
         tailwindcss-language-server # Para Tailwind CSS
-        nodePackages.prettier # Para formatação de código web
+        prettier # Para formatação de código web
 
         # --- Dependências do Telescope ---
         ripgrep
@@ -81,7 +81,7 @@
 
         # --- Manim ---
         python3 # Para Manim
-        python3Packages.manim # Para Manim
+        manim # Para Manim
       ];
 
       # ---- Diretório de configuração (substitui o `initLua`) ----
