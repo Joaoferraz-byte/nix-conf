@@ -54,6 +54,22 @@
         "type": "github"
       }
     },
+    "lua-conf": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785246445,
+        "narHash": "sha256-LnzmPq3c1Zxl01z36ja3ByEYn64TVvKVhqsUMfXx+Yo=",
+        "owner": "Joaoferraz-byte",
+        "repo": "lua-conf",
+        "rev": "f26554b8c022b32b12d5a658fb7e543a09de93cb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Joaoferraz-byte",
+        "repo": "lua-conf",
+        "type": "github"
+      }
+    },
     "nix-flatpak": {
       "locked": {
         "lastModified": 1783368811,
@@ -137,6 +153,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
+        "lua-conf": "lua-conf",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable",

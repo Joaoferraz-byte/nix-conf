@@ -54,21 +54,6 @@
         # Permite escalonamento em tempo real para o PipeWire
         security.rtkit.enable = true;
 
-        # Compatibilidade com ícone de bandeja e Java/Wayland para Flatpak
-        services.flatpak.overrides.settings = {
-          "net.audiorelay.AudioRelay" = {
-            Context.sockets = [ "wayland" "fallback-x11" ];
-            Context.filesystems = [ "xdg-config/gtk-3.0:ro" "xdg-run/flatpak-info:ro" ];
-            Environment = {
-              "_JAVA_AWT_WM_NONREPARENTING" = "1";
-              "GDK_BACKEND" = "wayland,x11";
-              # Protocolo StatusNotifierItem para a bandeja Noctalia
-              "XDG_CURRENT_DESKTOP" = "GNOME";
-              "DBUS_SESSION_BUS_ADDRESS" = "unix:path=\$XDG_RUNTIME_DIR/bus";
-            };
-          };
-        };
-
         networking.nftables.enable = lib.mkIf (cfg.lanSubnet != null) true;
         networking.firewall = lib.mkMerge [
           (lib.mkIf (cfg.lanSubnet != null) {
