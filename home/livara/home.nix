@@ -1,13 +1,10 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./neovim.nix
-  ];
 
   home.username = "livara";
   home.homeDirectory = "/home/livara";
-  home.stateVersion = "24.11";
+  home.stateVersion = "26.11";
 
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
@@ -15,10 +12,10 @@
 
   programs.home-manager.enable = true;
 
-  home.packages = with pkgs; [
-    python3Packages.manim
-    nerd-fonts.jetbrains-mono
-  ];
+  home.packages = with pkgs;
+    [ python3Packages.manim nerd-fonts.jetbrains-mono
+      self.packages.${pkgs.stdenv.hostPlatform.system}.myNeovim
+    ];
 
   programs.alacritty = {
     enable = true;
@@ -68,14 +65,15 @@
     };
   };
 
-  xdg.desktopEntries.nvim = {
-    name = "Neovim";
-    genericName = "Text Editor";
-    exec = "alacritty -e nvim %F";
-    terminal = false;
-    categories = [ "Utility" "TextEditor" ];
-    mimeType = [ "text/plain" "text/x-java" ];
-  };
+  # A entrada de desktop para Neovim agora é gerenciada pelo wrapper
+  # xdg.desktopEntries.nvim = {
+  #   name = "Neovim";
+  #   genericName = "Editor de Texto";
+  #   exec = "alacritty -e nvim %F";
+  #   terminal = false;
+  #   categories = [ "Utility" "TextEditor" ];
+  #   mimeType = [ "text/plain" "text/x-java" ];
+  # };
 
   xdg.userDirs = {
     enable = true;

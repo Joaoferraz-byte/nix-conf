@@ -2,7 +2,7 @@
   flake.nixosModules.desktop-portals = { pkgs, ... }: {
     security.polkit.enable = true;
 
-    # agente gráfico de autenticação (senha de root/sudo em GUI, ex: montar disco, instalar pacote)
+    # Agente de autenticação Polkit (prompt GUI para ações root/sudo)
     systemd.user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";
       wantedBy = [ "graphical-session.target" ];
@@ -28,7 +28,5 @@
       ];
       config.common.default = "gnome";
     };
-
-    security.rtkit.enable = true;
   };
 }

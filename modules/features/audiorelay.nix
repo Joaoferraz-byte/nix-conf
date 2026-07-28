@@ -8,12 +8,12 @@
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;
-          description = "Habilita o AudioRelay.";
+          description = "Ativar AudioRelay.";
         };
         lanInterface = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = "enp6s0";
-          description = "Interface de rede da LAN/Wi-Fi.";
+          description = "Interface de rede LAN/Wi-Fi.";
         };
         lanSubnet = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
@@ -29,7 +29,7 @@
               args = {
                 "factory.name" = "support.null-audio-sink";
                 "node.name" = "audiorelay_sink";
-                "node.description" = "AudioRelay (Saída para Celular)";
+                "node.description" = "AudioRelay (phone output)";
                 "media.class" = "Audio/Sink";
                 "audio.position" = "FL,FR";
               };
@@ -39,7 +39,7 @@
               args = {
                 "factory.name" = "support.null-audio-sink";
                 "node.name" = "audiorelay_source";
-                "node.description" = "AudioRelay (Microfone do Celular)";
+                "node.description" = "AudioRelay (phone microphone)";
                 "media.class" = "Audio/Source/Virtual";
                 "audio.position" = "FL,FR";
               };
@@ -50,8 +50,11 @@
           enable = true;
           pulse.enable = true;
         };
-        
-        # Correção do ícone e compatibilidade Java/Wayland para Flatpak
+
+        # Permite escalonamento em tempo real para o PipeWire
+        security.rtkit.enable = true;
+
+        # Compatibilidade com ícone de bandeja e Java/Wayland para Flatpak
         services.flatpak.overrides.settings = {
           "net.audiorelay.AudioRelay" = {
             Context.sockets = [ "wayland" "fallback-x11" ];
@@ -59,6 +62,9 @@
             Environment = {
               "_JAVA_AWT_WM_NONREPARENTING" = "1";
               "GDK_BACKEND" = "wayland,x11";
+              # Protocolo StatusNotifierItem para a bandeja Noctalia
+              "XDG_CURRENT_DESKTOP" = "GNOME";
+              "DBUS_SESSION_BUS_ADDRESS" = "unix:path=\$XDG_RUNTIME_DIR/bus";
             };
           };
         };
