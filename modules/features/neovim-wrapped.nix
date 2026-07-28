@@ -9,7 +9,7 @@
   };
 
   perSystem = {
-    pkgs, system, ...
+    pkgs, ...
   }:
   {
     packages.myNeovim = inputs.wrapper-modules.wrappers.neovim.wrap {
