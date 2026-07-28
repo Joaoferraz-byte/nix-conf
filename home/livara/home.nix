@@ -1,7 +1,6 @@
 { config, pkgs, self, ... }:
 
 {
-
   home.username = "livara";
   home.homeDirectory = "/home/livara";
   home.stateVersion = "26.11";
@@ -12,9 +11,10 @@
 
   programs.home-manager.enable = true;
 
-  home.packages = with pkgs;
-    [ manim nerd-fonts.jetbrains-mono
-    ];
+  home.packages = with pkgs; [
+    manim
+    nerd-fonts.jetbrains-mono
+  ];
 
   programs.alacritty = {
     enable = true;
@@ -52,7 +52,7 @@
     
     shellAliases = {
       ll = "ls -l";
-      update = "sudo nixos-rebuild switch";
+      update = "sudo nixos-rebuild switch --flake .#myMachine";
     };
 
     history = {
@@ -89,16 +89,6 @@
     };
   };
 
-  # A entrada de desktop para Neovim agora é gerenciada pelo wrapper
-  # xdg.desktopEntries.nvim = {
-  #   name = "Neovim";
-  #   genericName = "Editor de Texto";
-  #   exec = "alacritty -e nvim %F";
-  #   terminal = false;
-  #   categories = [ "Utility" "TextEditor" ];
-  #   mimeType = [ "text/plain" "text/x-java" ];
-  # };
-
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
@@ -113,4 +103,3 @@
     videos = "${config.home.homeDirectory}/Videos";
   };
 }
-
