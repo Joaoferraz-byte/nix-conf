@@ -1,4 +1,4 @@
-{ self, inputs, ... }: {
+{ self, ... }: {
   flake.nixosModules.myMachineConfiguration = { pkgs, ... }: {
     imports = [ 
       self.nixosModules.myMachineHardware
@@ -9,10 +9,9 @@
       self.nixosModules.system-hardening
       self.nixosModules.flatpak
       self.nixosModules.audiorelay
-      inputs.home-manager.nixosModules.home-manager
+      self.nixosModules.keyd
+      self.nixosModules.neovimWrapped
     ];
-
-    nixpkgs.config.allowUnfree = true;
 
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
@@ -68,6 +67,6 @@
        spring-boot-cli
     ];
 
-    system.stateVersion = "24.11";
+    system.stateVersion = "26.11";
   };
 }

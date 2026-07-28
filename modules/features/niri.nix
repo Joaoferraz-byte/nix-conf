@@ -15,21 +15,17 @@
   };
 
   perSystem = { pkgs, lib, self', system, ... }: {
-    packages.myNiri = 
+    packages.myNiri =
       let
+        # Correção nixpkgs-stable (libdisplay-info)
         stablePkgs = import inputs.nixpkgs-stable {
           inherit system;
           config.allowUnfree = true;
         };
-        
-        niriPkg = stablePkgs.niri.overrideAttrs (old: {
-          passthru = (old.passthru or {}) // { providedSessions = [ "niri" ]; };
-        });
       in
       inputs.wrapper-modules.wrappers.niri.wrap {
-        package = niriPkg;
+        package = stablePkgs.niri;
         inherit pkgs;
-        v2-settings = true;
         settings = {
           spawn-at-startup = [
             (lib.getExe self'.packages.myNoctalia)
@@ -73,7 +69,7 @@
               geometry-corner-radius = 12;
               clip-to-geometry = true;
               opacity = 0.80;
-              # Ativando o blur via background-effect conforme documentação do Niri 26.04
+              # Blur de fundo
               background-effect = {
                 blur = true;
               };

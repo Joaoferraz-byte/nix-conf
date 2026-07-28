@@ -21,13 +21,13 @@
     vscode-langservers-extracted
     typescript-language-server
 
-    # --- dependências reais do Telescope ---
+    # --- Dependências do Telescope ---
     ripgrep
     fd
   ];
 
   home.sessionVariables = {
-    JAVA_HOME = "${pkgs.jdk21}";
+    JAVA_HOME = "${pkgs.jdk21}/lib/openjdk";
   };
 
   programs.neovim = {
@@ -229,12 +229,12 @@
       dap.listeners.before.event_terminated['dapui_config'] = function() dapui.close() end
       dap.listeners.before.event_exited['dapui_config'] = function() dapui.close() end
 
-      vim.keymap.set('n', '<F5>', function() dap.continue() end, { desc = 'Debug: Continue' })
-      vim.keymap.set('n', '<F10>', function() dap.step_over() end, { desc = 'Debug: Step Over' })
-      vim.keymap.set('n', '<F11>', function() dap.step_into() end, { desc = 'Debug: Step Into' })
-      vim.keymap.set('n', '<F12>', function() dap.step_out() end, { desc = 'Debug: Step Out' })
-      vim.keymap.set('n', '<leader>db', function() dap.toggle_breakpoint() end, { desc = 'Debug: Toggle Breakpoint' })
-      vim.keymap.set('n', '<leader>du', function() dapui.toggle() end, { desc = 'Debug: Toggle UI' })
+      vim.keymap.set('n', '<F5>', function() dap.continue() end, { desc = 'Debug: Continuar' })
+      vim.keymap.set('n', '<F10>', function() dap.step_over() end, { desc = 'Debug: Pular (Step Over)' })
+      vim.keymap.set('n', '<F11>', function() dap.step_into() end, { desc = 'Debug: Entrar (Step Into)' })
+      vim.keymap.set('n', '<F12>', function() dap.step_out() end, { desc = 'Debug: Sair (Step Out)' })
+      vim.keymap.set('n', '<leader>db', function() dap.toggle_breakpoint() end, { desc = 'Debug: Alternar Breakpoint' })
+      vim.keymap.set('n', '<leader>du', function() dapui.toggle() end, { desc = 'Debug: Alternar Interface' })
 
       require('dashboard').setup({
         theme = 'hyper',
@@ -248,29 +248,29 @@
             "",
           },
           center = {
-            { icon = "  ", desc = "Find File", action = "Telescope find_files", key = "f" },
-            { icon = "  ", desc = "New File", action = "enew", key = "n" },
-            { icon = "  ", desc = "Recent Files", action = "Telescope oldfiles", key = "r" },
-            { icon = "  ", desc = "Explore Files", action = "NvimTreeToggle", key = "e" },
-            { icon = "  ", desc = "Configuration", action = "e ~/.config/nvim/init.lua", key = "c" },
-            { icon = "  ", desc = "Quit Neovim", action = "qa", key = "q" },
+            { icon = "  ", desc = "Procurar Arquivo", action = "Telescope find_files", key = "f" },
+            { icon = "  ", desc = "Novo Arquivo", action = "enew", key = "n" },
+            { icon = "  ", desc = "Arquivos Recentes", action = "Telescope oldfiles", key = "r" },
+            { icon = "  ", desc = "Explorar Arquivos", action = "NvimTreeToggle", key = "e" },
+            { icon = "  ", desc = "Configuração", action = "e ~/.config/nvim/init.lua", key = "c" },
+            { icon = "  ", desc = "Sair do Neovim", action = "qa", key = "q" },
           },
         },
       })
 
-      vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle NvimTree' })
-      vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<CR>', { desc = 'Find Files' })
-      vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', { desc = 'Live Grep' })
-      vim.keymap.set('n', '<leader>fb', '<cmd>Telescope buffers<CR>', { desc = 'Find Buffers' })
-      vim.keymap.set('n', '<leader>fh', '<cmd>Telescope help_tags<CR>', { desc = 'Help Tags' })
+      vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Alternar NvimTree' })
+      vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<CR>', { desc = 'Procurar Arquivos' })
+      vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', { desc = 'Busca Global (Live Grep)' })
+      vim.keymap.set('n', '<leader>fb', '<cmd>Telescope buffers<CR>', { desc = 'Procurar Buffers' })
+      vim.keymap.set('n', '<leader>fh', '<cmd>Telescope help_tags<CR>', { desc = 'Tags de Ajuda' })
       vim.keymap.set('n', '<leader>jb', ':JavaBuildBuildWorkspace<CR>', { desc = 'Java Build' })
       vim.keymap.set('n', '<leader>jr', ':JavaRunnerRunMain<CR>', { desc = 'Java Run' })
       vim.keymap.set('n', '<leader>jt', ':JavaTestRunCurrentClass<CR>', { desc = 'Java Test' })
       vim.keymap.set('n', '<leader>jd', ':JavaDapConfig<CR>', { desc = 'Java DAP' })
-      vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Move left' })
-      vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Move down' })
-      vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move up' })
-      vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move right' })
+      vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Mover para esquerda' })
+      vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Mover para baixo' })
+      vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Mover para cima' })
+      vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Mover para direita' })
     '';
   };
 }

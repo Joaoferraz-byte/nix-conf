@@ -5,8 +5,6 @@
       keyboards.default = {
         ids = [ "*" ];
         settings = {
-          "meta:M" = { };
-
           main = {
             leftmeta = "overload(meta, menu)";
           };
