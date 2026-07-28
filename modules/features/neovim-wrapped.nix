@@ -29,7 +29,6 @@
         cmp-path
         luasnip
         github-nvim-theme
-        nvim-jdtls
         nvim-java
         nvim-tree-lua
         nvim-web-devicons
