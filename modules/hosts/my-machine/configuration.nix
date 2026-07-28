@@ -1,4 +1,4 @@
-{ self, ... }: {
+{ self, inputs, ... }: {
   flake.nixosModules.myMachineConfiguration = { pkgs, ... }: {
     imports = [ 
       self.nixosModules.myMachineHardware
@@ -9,6 +9,7 @@
       self.nixosModules.system-hardening
       self.nixosModules.flatpak
       self.nixosModules.audiorelay
+      inputs.home-manager.nixosModules.home-manager
     ];
 
     nixpkgs.config.allowUnfree = true;
