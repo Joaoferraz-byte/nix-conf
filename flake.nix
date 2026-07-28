@@ -7,7 +7,6 @@
     import-tree.url = "github:vic/import-tree";
 
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
-    neovim-wrapper = inputs.wrapper-modules.wrappers.neovim;
 
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
