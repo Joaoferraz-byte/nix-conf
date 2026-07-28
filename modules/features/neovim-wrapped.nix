@@ -14,8 +14,13 @@
   {
     packages.myNeovim = inputs.wrapper-modules.wrappers.neovim.wrap {
       inherit pkgs;
-      # Adicione aqui os plugins que você quer que o wrapper gerencie
-      plugins = with pkgs.vimPlugins; [
+
+      # ---- Plugins (antes chamado de `plugins`) ----
+      # No BirdeeHub/nix-wrapper-modules a opção correta é `specs`.
+      # Cada atributo em `specs` vira um "spec" no DAG de inicialização do Neovim.
+      # Aqui agrupamos os plugins de startup em um único spec chamado `general`.
+      # Veja: https://birdeehub.github.io/nix-wrapper-modules/wrapperModules/neovim.html
+      specs.general = with pkgs.vimPlugins; [
         nvim-lspconfig
         nvim-treesitter.withAllGrammars
         nvim-cmp
@@ -41,9 +46,10 @@
         nvim-nio
       ];
 
-      # Adicione aqui os LSPs e outras ferramentas que o Neovim precisa
-      # A opção correta no nix-wrapper-modules é extraPackages
-      extraPackages = with pkgs; [
+      # ---- Ferramentas/LSPs no PATH (antes chamado de `extraPackages`) ----
+      # `extraPackages` está DEPRECADO no wrapper e será removido em 31/08/2026.
+      # A opção correta (e não-deprecada) é `runtimePkgs`, que coloca os binários no PATH do Neovim.
+      runtimePkgs = with pkgs; [
         # --- C / C++ ---
         gcc
         clang-tools
@@ -78,13 +84,18 @@
         python3Packages.manim # Para Manim
       ];
 
-      # O initLua será o seu arquivo de configuração principal do Neovim
-      # Agora usando o repositório lua-conf externo
-      initLua = ''
-        -- Adiciona o lua-conf ao runtime path do Neovim
-        vim.opt.rtp:prepend("${inputs.lua-conf}")
-        require("init")
-      '';
+      # ---- Diretório de configuração (substitui o `initLua`) ----
+      # O neovim wrapper NÃO tem uma opção `initLua`.
+      # O jeito oficial de injetar sua configuração (init.lua + lua/) é apontar
+      # `settings.config_directory` para um diretório que contenha um `init.lua`.
+      #
+      # O wrapper cria um spec chamado `INIT_MAIN` que faz `dofile(cfgdir .. "/init.lua")`,
+      # então o `init.lua` do lua-conf será carregado automaticamente, junto com todo
+      # o conteúdo de `lua/` (que entra no runtimepath como uma config dir normal).
+      #
+      # Como `inputs.lua-conf` é um input com `flake = false`, ele é um path puro
+      # (uma store path), então é seguro usá-lo aqui.
+      settings.config_directory = inputs.lua-conf;
     };
   };
 }
