@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, self, ... }:
 
 {
 
@@ -14,7 +14,6 @@
 
   home.packages = with pkgs;
     [ python3Packages.manim nerd-fonts.jetbrains-mono
-      self.packages.${pkgs.stdenv.hostPlatform.system}.myNeovim
     ];
 
   programs.alacritty = {

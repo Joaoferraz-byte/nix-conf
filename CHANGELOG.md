@@ -26,7 +26,9 @@
 
 ### Home Manager
 
-- Corrigido `JAVA_HOME` de `${pkgs.jdk21}` para `${pkgs.jdk21}/lib/openjdk` — corresponde à convenção setup-hook do nixpkgs.
+- Migração do Neovim para um módulo NixOS via `nix-wrapper-modules`.
+- Separação da configuração Lua para o repositório externo `lua-conf`.
+- Removida a instalação manual do Neovim e `JAVA_HOME` do `home.nix`, agora gerenciados pelo wrapper.
 - Adicionado `home-manager.backupFileExtension = "backup"` para resolver conflitos de arquivos existentes (ex: `mimeapps.list`) durante a ativação.
 - `stateVersion` atualizado para `26.11` em todo o sistema.
 
@@ -61,5 +63,5 @@
 ## Modularização inicial
 
 - Home Manager integrado ao flake via `home-manager.nixosModules.home-manager` com `useGlobalPkgs` e `useUserPackages`.
-- Configuração do usuário dividida em `home/livara/home.nix` e `home/livara/neovim.nix`.
+- Configuração do usuário centralizada em `home/livara/home.nix` (Neovim agora é um módulo de sistema).
 - Módulos de recursos em `modules/features/`, configuração do host em `modules/hosts/my-machine/`.

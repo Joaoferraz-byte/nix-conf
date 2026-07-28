@@ -26,11 +26,11 @@ As variáveis de ambiente `XDG_CURRENT_DESKTOP = "GNOME"` e `DBUS_SESSION_BUS_AD
 
 `security.rtkit.enable = true` foi movido para `audiorelay.nix`, onde o PipeWire é ativado. O RTKit é funcionalmente acoplado ao PipeWire para permitir escalonamento em tempo real, e sua presença no módulo de portais era uma violação de separação de responsabilidades.
 
-### 4. Correção do caminho JAVA_HOME
+### 4. Modularização do Neovim e Separação de Configuração Lua
 
-**Arquivo:** `home/livara/neovim.nix`
+**Arquivo:** `modules/features/neovim-wrapped.nix`, `flake.nix`
 
-`JAVA_HOME` foi corrigido para `"${pkgs.jdk21}/lib/openjdk"`. O valor anterior apontava para a raiz do pacote, mas o diretório home real do JDK em NixOS fica em `$out/lib/openjdk`. Isso corrige falhas em ferramentas como `jdt-language-server` e `Spring Boot CLI`.
+O Neovim foi migrado de uma configuração Home Manager monolítica para um módulo NixOS utilizando o `nix-wrapper-modules`. A configuração Lua foi movida para um repositório dedicado (`lua-conf`) e é integrada como um input do flake. Isso permite a evolução independente da configuração do editor sem a necessidade de reconstruções frequentes do sistema. O `JAVA_HOME` agora é gerenciado pelo wrapper para ferramentas como `jdt-language-server`.
 
 ### 5. Remoção de configurações duplicadas, correção de licença NVIDIA e ativação do Home Manager
 
@@ -69,4 +69,4 @@ O módulo `keyd.nix`, que estava definido mas inativo, foi finalmente importado 
 
 1. **Pino de nixpkgs-stable para o Niri**: Ainda necessário devido a falhas transientes na `libdisplay-info` no canal unstable. Deve ser removido quando corrigido upstream.
 2. **Ausência de CI/CD**: O repositório ainda não possui automação para validar o flake via GitHub Actions.
-3. **Configuração do Neovim Monolítica**: O arquivo `neovim.nix` é extenso e poderia ser modularizado em arquivos separados para LSP, plugins e keymaps.
+3. **Consistência de Inputs**: Garantir que o `lua-conf` seja sempre atualizado em conjunto com alterações nos plugins declarados no `nix-conf`.

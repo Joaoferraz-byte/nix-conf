@@ -15,12 +15,16 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    lua-conf = {
+      url = "github:Joaoferraz-byte/lua-conf";
+      flake = false;
+    };
   };
 
-  outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs = inputs@{ self, ... }: inputs.flake-parts.lib.mkFlake {inherit inputs;} {
     imports = [
       (inputs.import-tree ./modules)
-      self.nixosModules.neovimWrapped
     ];
     
     perSystem = { system, ... }: {
