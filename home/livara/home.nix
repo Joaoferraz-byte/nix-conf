@@ -13,7 +13,7 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs;
-    [ python3Packages.manim nerd-fonts.jetbrains-mono
+    [ manim nerd-fonts.jetbrains-mono
     ];
 
   programs.alacritty = {
