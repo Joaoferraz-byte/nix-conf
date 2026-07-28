@@ -40,7 +40,7 @@
         gitsigns-nvim
         which-key-nvim
         bufferline-nvim
-        dashboard-nvim
+        snacks-nvim
         nvim-dap
         nvim-dap-ui
         nvim-nio
