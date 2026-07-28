@@ -42,7 +42,8 @@
       ];
 
       # Adicione aqui os LSPs e outras ferramentas que o Neovim precisa
-      extraBinPath = with pkgs; [
+      # A opção correta no nix-wrapper-modules é extraPackages
+      extraPackages = with pkgs; [
         # --- C / C++ ---
         gcc
         clang-tools
