@@ -1,4 +1,4 @@
-{ config, pkgs, self, ... }:
+{ config, pkgs, inputs, self, ... }:
 
 {
   home.username = "livara";
@@ -12,10 +12,11 @@
   programs.home-manager.enable = true;
 
   # ── Neovim (NixVim) ─────────────────────────────────────────────────────
-  # NixVim é configurado como módulo do Home Manager usando o flake separado.
+  # O módulo de configuração vem do flake reutilizável vim-conf; a interface
+  # `programs.nixvim` é fornecida pelo módulo oficial compartilhado no host.
   programs.nixvim = {
     enable = true;
-    imports = [ self.inputs.nixvim-config.nixvimModule ];
+    imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
 
   home.packages = with pkgs; [
