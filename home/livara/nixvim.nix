@@ -217,7 +217,7 @@
   plugins.cmp-nvim-lsp = { enable = true; };
   plugins.cmp-buffer = { enable = true; };
   plugins.cmp-path = { enable = true; };
-  plugins.cmp-luasnip = { enable = true; };
+  plugins.cmp_luasnip = { enable = true; };
   plugins.cmp-treesitter = { enable = true; };
 
   plugins.luasnip = {
@@ -410,10 +410,10 @@
     };
   };
 
-  plugins.telescope-fzf-native = { enable = true; };
+  plugins.telescope_fzf_native = { enable = true; };
 
   # ── Which-key ───────────────────────────────────────────────────────────────
-  plugins.which-key = {
+  plugins.which_key = {
     enable = true;
     settings = {
       preset = "helix";
@@ -429,7 +429,7 @@
   };
 
   # ── Utilities ───────────────────────────────────────────────────────────────
-  plugins.indent-blankline = {
+  plugins.indent_blankline = {
     enable = true;
     settings = {
       scope = { enabled = true; show_start = false; };
@@ -450,7 +450,7 @@
   };
 
   # ── DAP ─────────────────────────────────────────────────────────────────────
-  plugins.nvim-dap = {
+  plugins.dap = {
     enable = true;
     settings = {
       signs = {
@@ -463,7 +463,7 @@
     };
   };
 
-  plugins.nvim-dap-ui = { enable = true; };
+  plugins.dap-ui = { enable = true; };
 
   # ── Extra Plugins ───────────────────────────────────────────────────────────
   extraPlugins = with pkgs.vimPlugins; [
