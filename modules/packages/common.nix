@@ -25,8 +25,8 @@
       heroic          # Launcher GOG/Epic Games
 
       # ── Java / Spring Boot ────────────────────────────────────────────────
-      # Nota: jdk21 e jdt-language-server também estão nos runtimePkgs do
-      # neovim-wrapped.nix para que o LSP funcione dentro do editor.
+      # Nota: jdk21 e jdt-language-server também são gerenciados pelo nvf (nvf.nix)
+      
       # A presença aqui garante disponibilidade global no sistema (ex: terminal,
       # scripts, build tools fora do Neovim).
       jdk21
