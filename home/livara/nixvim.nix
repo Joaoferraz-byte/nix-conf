@@ -415,14 +415,6 @@
       };
     };
 
-    # Keymaps automáticas do LSP (on_attach)
-    onAttach = ''
-      function(client, bufnr)
-        local opts = { buffer = bufnr, noremap = true, silent = true }
-        vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, opts)
-        vim.keymap.set('n', '<leader>cr', vim.lsp.buf.request, opts)
-      end
-    '';
   };
 
   # ── Completion ──────────────────────────────────────────────────────────────
@@ -444,6 +436,7 @@
   plugins.cmp-buffer     = { enable = true; };
   plugins.cmp-path       = { enable = true; };
   plugins.cmp-luasnip    = { enable = true; };
+  plugins.cmp-treesitter = { enable = true; };
 
   plugins.cmp = {
     enable = true;

@@ -10,10 +10,9 @@
     # nixvim: Neovim distribution built around Nix modules.
     # Usado como módulo do Home Manager para configuração de usuário:
     # keymaps, plugins, colorschemes, extraConfigLua, etc.
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # NOTA: não usamos follows para nixpkgs conforme recomendado pela
+    # documentação oficial do nixvim (pode causar incompatibilidades).
+    nixvim.url = "github:nix-community/nixvim";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
