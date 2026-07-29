@@ -7,8 +7,13 @@
     # wrapper-modules: mantido para o wrapper do Noctalia (noctalia.nix)
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-    # nvf: configuração declarativa do Neovim
-    nvf.url = "github:notashelf/nvf";
+    # nixvim: Neovim distribution built around Nix modules.
+    # Usado como módulo do Home Manager para configuração de usuário:
+    # keymaps, plugins, colorschemes, extraConfigLua, etc.
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";

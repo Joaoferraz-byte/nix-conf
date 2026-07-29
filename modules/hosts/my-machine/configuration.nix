@@ -16,7 +16,6 @@
       self.nixosModules.flatpak
       self.nixosModules.audiorelay
       self.nixosModules.keyd
-      self.nixosModules.nvf
     ];
 
     # ── Boot ──────────────────────────────────────────────────────────────────

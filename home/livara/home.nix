@@ -11,6 +11,12 @@
 
   programs.home-manager.enable = true;
 
+  # ── Neovim (NixVim) ─────────────────────────────────────────────────────
+  # NixVim é configurado como módulo do Home Manager. O arquivo nixvim.nix
+  # é importado via programs.nixvim.imports para não precisar prefixar tudo
+  # com programs.nixvim.
+  programs.nixvim.imports = [ ./nixvim.nix ];
+
   home.packages = with pkgs; [
     manim
     nerd-fonts.jetbrains-mono

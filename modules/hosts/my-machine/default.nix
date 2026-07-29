@@ -8,6 +8,7 @@
       }
       self.nixosModules.myMachineConfiguration
       inputs.home-manager.nixosModules.home-manager
+      inputs.nixvim.homeModules.nixvim
       {
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
