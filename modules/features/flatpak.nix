@@ -34,6 +34,20 @@
         enable = true;
         onCalendar = "weekly";
       };
+
+      # Overrides globais para todos os Flatpaks
+      # Garante que ícones e cursores do sistema sejam visíveis dentro do sandbox.
+      overrides.settings.global = {
+        Environment = {
+          # Expõe os diretórios de ícones do host para dentro do sandbox Flatpak.
+          # Necessário para que ícones de tema (ex: Bibata-Modern-Classic) sejam
+          # encontrados por apps Flatpak no Niri/Noctalia.
+          XCURSOR_PATH = "/run/host/user-share/icons:/run/host/share/icons";
+          # Garante que os dados do sistema (incluindo ícones de apps) estejam
+          # disponíveis para o Flatpak. Crítico para descoberta de ícones no Niri.
+          XDG_DATA_DIRS = "/run/host/usr/share:/run/host/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share";
+        };
+      };
     };
   };
 }
