@@ -26,36 +26,20 @@
   };
 
   # ── Theme: GitHub Dark ─────────────────────────────────────────────────────
-  colorschemes.github = {
+  colorschemes.github-theme = {
     enable = true;
     settings = {
-      theme = "dark_default";
-      styles = {
-        comments = { italic = true; };
-        keywords = { italic = true; };
-        functions = { italic = true; };
-      };
-      transparent = true;
-      integrations = {
-        nvimtree   = true;
-        telescope  = true;
-        which_key  = true;
-        gitsigns   = true;
-        lualine    = true;
-        treesitter = true;
-        native_lsp = {
-          enabled = true;
-          underlines = {
-            errors      = [ "undercurl" ];
-            hints       = [ "undercurl" ];
-            warnings    = [ "undercurl" ];
-            information = [ "undercurl" ];
-          };
+      options = {
+        transparent = true;
+        styles = {
+          comments = "italic";
+          keywords = "italic";
+          functions = "italic";
         };
       };
     };
   };
-  colorscheme = "github_dark";
+  colorscheme = "github_dark_default";
 
   # ── Performance ─────────────────────────────────────────────────────────────
   performance = {
@@ -155,15 +139,40 @@
     servers = {
       jdtls = {
         enable  = true;
-        package = null;
+        package = pkgs.jdt-language-server;
+        cmd = [
+          "jdtls"
+          "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
+        ];
         settings = {
           java = {
             configuration = {
               runtimes = [
-                { name = "JavaSE-21"; path = "/run/current-system/sw"; }
+                { name = "JavaSE-21"; path = "${pkgs.jdk21}"; default = true; }
+                { name = "JavaSE-8"; path = "${pkgs.jdk8}"; }
               ];
             };
             codeAction = { sortMembers = { enable = true; }; };
+            signatureHelp = { enabled = true; };
+            contentProvider = { preferred = "fernflower"; };
+            completion = {
+              favoriteStaticMembers = [
+                "org.junit.jupiter.api.Assertions.*"
+                "org.mockito.Mockito.*"
+                "org.assertj.core.api.Assertions.*"
+              ];
+              importOrder = [ "java" "jakarta" "javax" "com" "org" ];
+            };
+            sources = {
+              organizeImports = {
+                starThreshold = 9999;
+                staticThreshold = 9999;
+              };
+            };
+            format = {
+              enable = true;
+              settings = { profile = "GoogleStyle"; };
+            };
           };
         };
       };
