@@ -1,9 +1,3 @@
-# modules/hosts/my-machine/configuration.nix
-#
-# Módulo raiz do host "limine". Define configurações específicas desta máquina:
-# boot, rede, locale, usuários e importa todos os módulos de funcionalidades.
-# Os pacotes de sistema foram extraídos para modules/packages/common.nix para
-# permitir reutilização em futuros hosts sem duplicação.
 { self, ... }: {
   flake.nixosModules.myMachineConfiguration = { pkgs, ... }: {
     imports = [
@@ -18,17 +12,14 @@
       self.nixosModules.keyd
     ];
 
-    # ── Boot ──────────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
     boot.kernelPackages = pkgs.linuxPackages_zen;
 
-    # ── Rede ──────────────────────────────────────────────────────────────────
     networking.hostName = "limine";
     networking.networkmanager.enable = true;
 
-    # ── Localização e fuso horário ─────────────────────────────────────────────
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
     i18n.extraLocaleSettings = {
@@ -48,7 +39,6 @@
     };
     console.keyMap = "br-abnt2";
 
-    # ── Usuários ──────────────────────────────────────────────────────────────
     users.users."livara" = {
       isNormalUser = true;
       description  = "Livara";
@@ -57,7 +47,6 @@
     };
     programs.zsh.enable = true;
 
-    # ── Nix ───────────────────────────────────────────────────────────────────
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
     system.stateVersion = "26.11";

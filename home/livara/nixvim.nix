@@ -1,56 +1,41 @@
-# home/livara/nixvim.nix
-#
-# Configuração completa do Neovim via NixVim (nix-community/nixvim).
-# NixVim é escolhido sobre NVF por:
-#   - Maturidade: 2.900+ stars, 4.700+ commits, 3 mantenedores
-#   - Flexibilidade: settings aceita qualquer attrset → Lua table
-#   - Escape hatch: extraConfigLua para Lua bruto quando Nix não basta
-#   - Completude: keymaps, opts, colorschemes, autocmds, plugins, performance
-#   - Estabilidade: testado contra nixpkgs revision, sem enum types quebrando
-#
-# Linguagens: Java/Spring Boot, C/C++, Nix, Python, TypeScript, HTML, CSS
-# Features: LSP, DAP, treesitter, completion, filetree, statusline,
-#           dashboard, keybinds, automações, git, telescope, which-key.
-#
-# Estrutura: Este arquivo é importado via programs.nixvim.imports em home.nix.
-#            Assim não precisamos prefixar tudo com programs.nixvim.
 { pkgs, ... }: {
-  # ── Core ────────────────────────────────────────────────────────────────────
   enable = true;
 
-  # ── Opções do Vim ───────────────────────────────────────────────────────────
-  # opts traduz para vim.opt.<name> no init.lua gerado.
+  # ── Vim Options ─────────────────────────────────────────────────────────────
   opts = {
-    number            = true;
-    relativenumber    = true;
-    shiftwidth        = 2;
-    tabstop           = 2;
-    expandtab         = true;
-    smartindent       = true;
-    wrap              = false;
-    swapfile          = false;
-    backup            = false;
-    undofile          = true;
-    hlsearch          = false;
-    incsearch         = true;
-    termguicolors     = true;
-    scrolloff         = 8;
-    signcolumn        = "yes";
-    updatetime        = 50;
-    cursorline        = true;
-    # Mouse em todos os modos
-    mouse             = "a";
-    # Dividir janelas abaixo e à direita
-    splitbelow        = true;
-    splitright        = true;
+    number         = true;
+    relativenumber = true;
+    shiftwidth     = 2;
+    tabstop        = 2;
+    expandtab      = true;
+    smartindent    = true;
+    wrap           = false;
+    swapfile       = false;
+    backup         = false;
+    undofile       = true;
+    hlsearch       = false;
+    incsearch      = true;
+    termguicolors  = true;
+    scrolloff      = 8;
+    signcolumn     = "yes";
+    updatetime     = 50;
+    cursorline     = true;
+    mouse          = "a";
+    splitbelow     = true;
+    splitright     = true;
   };
 
-  # ── Tema ────────────────────────────────────────────────────────────────────
-  colorschemes.catppuccin = {
+  # ── Theme: GitHub Dark ─────────────────────────────────────────────────────
+  colorschemes.github = {
     enable = true;
     settings = {
-      flavour = "mocha";    # darkest variante
-      transparent_background = true;
+      theme = "dark_default";
+      styles = {
+        comments = { italic = true; };
+        keywords = { italic = true; };
+        functions = { italic = true; };
+      };
+      transparent = true;
       integrations = {
         nvimtree   = true;
         telescope  = true;
@@ -61,20 +46,16 @@
         native_lsp = {
           enabled = true;
           underlines = {
-            errors       = [ "undercurl" ];
-            hints        = [ "undercurl" ];
-            warnings     = [ "undercurl" ];
-            information  = [ "undercurl" ];
+            errors      = [ "undercurl" ];
+            hints       = [ "undercurl" ];
+            warnings    = [ "undercurl" ];
+            information = [ "undercurl" ];
           };
-        };
-        dap = {
-          enableUI       = true;
-          enableDapVirtualText = true;
         };
       };
     };
   };
-  colorscheme = "catppuccin";
+  colorscheme = "github_dark";
 
   # ── Performance ─────────────────────────────────────────────────────────────
   performance = {
@@ -87,247 +68,75 @@
   };
 
   # ── Keymaps ─────────────────────────────────────────────────────────────────
-  # Mapeamentos principais do editor. Cada item tem:
-  #   key:     atalho
-  #   action:  comando ou remap
-  #   mode:    modo(s) do vim (n=normal, i=insert, v=visual, t=terminal)
-  #   options: { silent = true } por padrão
   keymaps = [
-    # ── Líder ─────────────────────────────────────────────────────────────────
-    # Espaço como líder (padrão NixVim já define, mas explicitamos)
-    {
-      key     = "<space>";
-      action  = "<cmd>noh<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; nowait = true; desc = "Clear search highlight"; };
-    }
+    { key = "<space>"; action = "<cmd>noh<CR>"; mode = [ "n" ]; options = { silent = true; nowait = true; desc = "Clear search highlight"; }; }
 
-    # ── Buffer / Navegação ────────────────────────────────────────────────────
-    {
-      key     = "<leader>bd";
-      action  = "<cmd>bd<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Delete buffer"; };
-    }
-    {
-      key     = "<C-s>";
-      action  = "<cmd>w<CR>";
-      mode    = [ "n" "i" ];
-      options = { silent = true; desc = "Save file"; };
-    }
-    {
-      key     = "<leader>q";
-      action  = "<cmd>qa<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Quit all buffers"; };
-    }
+    # Buffer
+    { key = "<leader>bd"; action = "<cmd>bd<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Delete buffer"; }; }
+    { key = "<leader>x"; action = "<cmd>bd<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Delete buffer alt"; }; }
+    { key = "<C-s>"; action = "<cmd>w<CR>"; mode = [ "n" "i" ]; options = { silent = true; desc = "Save file"; }; }
+    { key = "<leader>q"; action = "<cmd>qa<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Quit all buffers"; }; }
 
-    # ── LSP ───────────────────────────────────────────────────────────────────
-    {
-      key     = "gd";
-      action  = "<cmd>lua vim.lsp.buf.definition()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Go to definition"; };
-    }
-    {
-      key     = "gD";
-      action  = "<cmd>lua vim.lsp.buf.declaration()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Go to declaration"; };
-    }
-    {
-      key     = "gi";
-      action  = "<cmd>lua vim.lsp.buf.implementation()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Go to implementation"; };
-    }
-    {
-      key     = "gr";
-      action  = "<cmd>lua vim.lsp.buf.references()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Go to references"; };
-    }
-    {
-      key     = "K";
-      action  = "<cmd>lua vim.lsp.buf.hover()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Hover documentation"; };
-    }
-    {
-      key     = "<leader>rn";
-      action  = "<cmd>lua vim.lsp.buf.rename()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Rename symbol"; };
-    }
-    {
-      key     = "<leader>ca";
-      action  = "<cmd>lua vim.lsp.buf.code_action()<CR>";
-      mode    = [ "n" "v" ];
-      options = { silent = true; desc = "Code action"; };
-    }
-    {
-      key     = "<leader>ds";
-      action  = "<cmd>lua vim.diagnostic.setloclist()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Diagnostic location list"; };
-    }
+    # LSP
+    { key = "gd"; action = "<cmd>lua vim.lsp.buf.definition()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Go to definition"; }; }
+    { key = "gD"; action = "<cmd>lua vim.lsp.buf.declaration()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Go to declaration"; }; }
+    { key = "gi"; action = "<cmd>lua vim.lsp.buf.implementation()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Go to implementation"; }; }
+    { key = "gr"; action = "<cmd>lua vim.lsp.buf.references()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Go to references"; }; }
+    { key = "K"; action = "<cmd>lua vim.lsp.buf.hover()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Hover documentation"; }; }
+    { key = "<leader>rn"; action = "<cmd>lua vim.lsp.buf.rename()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Rename symbol"; }; }
+    { key = "<leader>ca"; action = "<cmd>lua vim.lsp.buf.code_action()<CR>"; mode = [ "n" "v" ]; options = { silent = true; desc = "Code action"; }; }
+    { key = "<leader>ds"; action = "<cmd>lua vim.diagnostic.setloclist()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Diagnostic location list"; }; }
 
-    # ── Telescope ─────────────────────────────────────────────────────────────
-    {
-      key     = "<leader>ff";
-      action  = "<cmd>Telescope find_files<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Find files"; };
-    }
-    {
-      key     = "<leader>fg";
-      action  = "<cmd>Telescope live_grep<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Live grep"; };
-    }
-    {
-      key     = "<leader>fb";
-      action  = "<cmd>Telescope buffers<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Find buffers"; };
-    }
-    {
-      key     = "<leader>fh";
-      action  = "<cmd>Telescope help_tags<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Help tags"; };
-    }
-    {
-      key     = "<leader>fo";
-      action  = "<cmd>Telescope oldfiles<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Old files"; };
-    }
-    {
-      key     = "<leader>fd";
-      action  = "<cmd>Telescope diagnostics<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Diagnostics"; };
-    }
-    {
-      key     = "<leader>fs";
-      action  = "<cmd>Telescope lsp_document_symbols<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Document symbols"; };
-    }
+    # Telescope
+    { key = "<leader>ff"; action = "<cmd>Telescope find_files<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Find files"; }; }
+    { key = "<leader>fg"; action = "<cmd>Telescope live_grep<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Live grep"; }; }
+    { key = "<leader>fb"; action = "<cmd>Telescope buffers<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Find buffers"; }; }
+    { key = "<leader>fh"; action = "<cmd>Telescope help_tags<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Help tags"; }; }
+    { key = "<leader>fo"; action = "<cmd>Telescope oldfiles<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Old files"; }; }
+    { key = "<leader>fd"; action = "<cmd>Telescope diagnostics<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Diagnostics"; }; }
+    { key = "<leader>fs"; action = "<cmd>Telescope lsp_document_symbols<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Document symbols"; }; }
 
-    # ── Filetree (nvim-tree) ─────────────────────────────────────────────────
-    {
-      key     = "<leader>e";
-      action  = "<cmd>NvimTreeToggle<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Toggle file tree"; };
-    }
+    # Filetree
+    { key = "<leader>e"; action = "<cmd>NvimTreeToggle<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Toggle file tree"; }; }
 
-    # ── Terminal ──────────────────────────────────────────────────────────────
-    {
-      key     = "<C-\\>";
-      action  = "<cmd>ToggleTerm direction=float<CR>";
-      mode    = [ "n" "t" ];
-      options = { silent = true; desc = "Toggle floating terminal"; };
-    }
+    # Terminal
+    { key = "<C-\\>"; action = "<cmd>ToggleTerm direction=float<CR>"; mode = [ "n" "t" ]; options = { silent = true; desc = "Toggle floating terminal"; }; }
 
-    # ── DAP (Debug) ───────────────────────────────────────────────────────────
-    {
-      key     = "<leader>db";
-      action  = "<cmd>lua require('dap').toggle_breakpoint()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Toggle breakpoint"; };
-    }
-    {
-      key     = "<leader>dc";
-      action  = "<cmd>lua require('dap').continue()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Continue debugging"; };
-    }
-    {
-      key     = "<leader>dn";
-      action  = "<cmd>lua require('dap').step_over()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Step over"; };
-    }
-    {
-      key     = "<leader>di";
-      action  = "<cmd>lua require('dap').step_into()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Step into"; };
-    }
-    {
-      key     = "<leader>do";
-      action  = "<cmd>lua require('dap').step_out()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Step out"; };
-    }
-    {
-      key     = "<leader>dr";
-      action  = "<cmd>lua require('dapui').toggle()<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Toggle DAP UI"; };
-    }
+    # DAP
+    { key = "<leader>db"; action = "<cmd>lua require('dap').toggle_breakpoint()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Toggle breakpoint"; }; }
+    { key = "<leader>dc"; action = "<cmd>lua require('dap').continue()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Continue debugging"; }; }
+    { key = "<leader>dn"; action = "<cmd>lua require('dap').step_over()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Step over"; }; }
+    { key = "<leader>di"; action = "<cmd>lua require('dap').step_into()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Step into"; }; }
+    { key = "<leader>do"; action = "<cmd>lua require('dap').step_out()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Step out"; }; }
+    { key = "<leader>dr"; action = "<cmd>lua require('dapui').toggle()<CR>"; mode = [ "n" ]; options = { silent = true; desc = "Toggle DAP UI"; }; }
 
-    # ── Movimentação visual ───────────────────────────────────────────────────
-    # Melhorar navegação com hjkl quando as linhas são longas
-    {
-      key     = "j";
-      action  = "gj";
-      mode    = [ "n" "v" ];
-      options = { silent = true; desc = "Move down visually"; };
-    }
-    {
-      key     = "k";
-      action  = "gk";
-      mode    = [ "n" "v" ];
-      options = { silent = true; desc = "Move up visually"; };
-    }
-
-    # ── Fechar quickfix e outros painéis com q ────────────────────────────────
-    {
-      key     = "q";
-      action  = ":close<CR>";
-      mode    = [ "n" ];
-      options = { silent = true; desc = "Close buffer"; };
-    }
+    # Visual movement
+    { key = "j"; action = "gj"; mode = [ "n" "v" ]; options = { silent = true; desc = "Move down visually"; }; }
+    { key = "k"; action = "gk"; mode = [ "n" "v" ]; options = { silent = true; desc = "Move up visually"; }; }
   ];
 
   # ── Autocmds ────────────────────────────────────────────────────────────────
-  # Automations que rodam em eventos específicos.
   autoGroups = {
-    # Grupo para fechar painéis de ajuda/man com q
-    auto_close_panels = { };
-    # Grupo para highlight quando yanka
     highlight_yank = { };
-    # Grupo para remover espaços em branco no fim de linha ao salvar
     trim_whitespace = { };
   };
 
   autoCmd = [
-    # Fechar quickfix, man, help com q
     {
       event   = "FileType";
       pattern = [ "qf" "help" "man" "lspinfo" ];
       command = "nnoremap <buffer> <silent> q :close<CR>";
     }
-
-    # Highlight ao copiar
     {
       event   = "TextYankPost";
       group   = "highlight_yank";
       command = "lua vim.highlight.on_yank { higroup = 'Visual', timeout = 200 }";
     }
-
-    # Remover espaços em branco ao salvar
     {
       event   = "BufWritePre";
       group   = "trim_whitespace";
       command = "%s/\\s\\+$//e";
     }
-
-    # Desabilitar relativenumber no modo insert e terminal
     {
       event   = [ "InsertEnter" "TermOpen" ];
       pattern = "*";
@@ -344,30 +153,20 @@
   plugins.lsp = {
     enable = true;
     servers = {
-      # Java / Spring Boot
       jdtls = {
         enable  = true;
-        package = null;   # usa jdt-language-server do sistema
+        package = null;
         settings = {
           java = {
             configuration = {
               runtimes = [
-                {
-                  name   = "JavaSE-21";
-                  path   = "/run/current-system/sw";
-                }
+                { name = "JavaSE-21"; path = "/run/current-system/sw"; }
               ];
             };
-            codeAction = {
-              sortMembers = {
-                enable = true;
-              };
-            };
+            codeAction = { sortMembers = { enable = true; }; };
           };
         };
       };
-
-      # C/C++
       clangd = {
         enable = true;
         settings = {
@@ -383,38 +182,13 @@
           };
         };
       };
-
-      # Nix
-      nil_ls = {
-        enable = true;
-      };
-
-      # Python
-      pyright = {
-        enable = true;
-      };
-
-      # TypeScript / JavaScript
-      ts_ls = {
-        enable = true;
-      };
-
-      # HTML
-      html = {
-        enable = true;
-      };
-
-      # CSS
-      cssls = {
-        enable = true;
-      };
-
-      # JSON
-      jsonls = {
-        enable = true;
-      };
+      nil_ls = { enable = true; };
+      pyright = { enable = true; };
+      ts_ls = { enable = true; };
+      html = { enable = true; };
+      cssls = { enable = true; };
+      jsonls = { enable = true; };
     };
-
   };
 
   # ── Completion ──────────────────────────────────────────────────────────────
@@ -423,84 +197,46 @@
     cmp = {
       enable = true;
       menu = {
-        nvim_lsp   = "[LSP]";
-        buffer     = "[BUF]";
-        path       = "[FILE]";
-        luasnip    = "[SNIP]";
+        nvim_lsp = "[LSP]";
+        buffer   = "[BUF]";
+        path     = "[FILE]";
+        luasnip  = "[SNIP]";
       };
     };
   };
 
-  # nvim-cmp com fontes
   plugins.cmp-nvim-lsp = { enable = true; };
-  plugins.cmp-buffer     = { enable = true; };
-  plugins.cmp-path       = { enable = true; };
-  plugins.cmp-luasnip    = { enable = true; };
+  plugins.cmp-buffer = { enable = true; };
+  plugins.cmp-path = { enable = true; };
+  plugins.cmp-luasnip = { enable = true; };
   plugins.cmp-treesitter = { enable = true; };
 
-  plugins.cmp = {
-    enable = true;
-    settings = {
-      snippet = {
-        expand = ''
-          function(args)
-            require('luasnip').lsp_expand(args.body)
-          end
-        '';
-      };
-      sources = [
-        { name = "nvim_lsp"; }
-        { name = "buffer"; }
-        { name = "path"; }
-        { name = "luasnip"; }
-      ];
-      mapping = {
-        "<C-k>"   = "cmp.mapping.select_prev_item()";
-        "<C-j>"   = "cmp.mapping.select_next_item()";
-        "<C-e>"   = "cmp.mapping.abort()";
-        "<CR>"    = "cmp.mapping.confirm({ select = true })";
-        "<C-Space>" = "cmp.mapping.complete()";
-        "<Tab>"   = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
-        "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
-      };
-    };
-  };
-
-  # Snippets via Luasnip
   plugins.luasnip = {
     enable = true;
     settings = {
       enable_autosnippets = true;
     };
+    fromLua = [
+      { paths = "./snippets"; }
+    ];
+    fromVscode = [
+      { lazyLoad = true; }
+    ];
   };
 
   # ── Treesitter ──────────────────────────────────────────────────────────────
   plugins.treesitter = {
-    enable     = true;
+    enable = true;
     settings = {
+      indent = { enable = true; };
+      highlight = { enable = true; };
       ensure_installed = [
-        "java" "kotlin" "groovy"
-        "c" "cpp"
-        "nix"
-        "python"
-        "javascript" "typescript" "tsx"
-        "html" "css"
-        "json" "yaml" "toml"
-        "markdown" "markdown_inline"
-        "bash" "vim" "vimdoc" "lua"
-        "gitignore" "dockerfile"
-        "cmake"
-        "sql"
-        "zig"
+        "java" "kotlin" "groovy" "xml" "html" "css" "scss"
+        "c" "cpp" "cmake" "make" "bash" "zsh" "fish" "sh"
+        "nix" "lua" "python" "javascript" "typescript" "tsx"
+        "json" "yaml" "toml" "vim" "vimdoc" "regex" "markdown"
+        "go" "rust" "ruby" "php"
       ];
-      auto_install = true;
-      highlight = {
-        enable = true;
-        additional_vim_regex_highlighting = true;
-      };
-      indent = {
-        enable = true;
-      };
     };
   };
 
@@ -513,50 +249,36 @@
     };
   };
 
-  # ── UI: Filetree, Statusline, Dashboard ────────────────────────────────────
+  # ── UI ──────────────────────────────────────────────────────────────────────
   plugins.nvim-tree = {
     enable = true;
     settings = {
-      view = {
-        width  = 35;
-        side   = "left";
-      };
+      view = { width = 35; side = "left"; };
       renderer = {
         icons = {
-          show = {
-            file   = true;
-            folder = true;
-            git    = true;
-          };
+          show = { file = true; folder = true; git = true; };
           glyphs = {
             git = {
-              unstaged = "✗";
-              staged   = "✓";
-              unmerged = "";
-              renamed  = "➜";
+              unstaged  = "✗";
+              staged    = "✓";
+              unmerged  = "";
+              renamed   = "➜";
               untracked = "★";
-              deleted  = "⊘";
-              ignored  = "◌";
+              deleted   = "⊘";
+              ignored   = "◌";
             };
           };
         };
       };
       filters = {
-        dotfiles     = false;
-        git_ignored  = false;
-        custom       = [ ".git" "node_modules" ".direnv" ".result" ];
+        dotfiles    = false;
+        git_ignored = false;
+        custom      = [ ".git" "node_modules" ".direnv" ".result" ];
       };
-      git = {
-        enable = true;
-      };
+      git = { enable = true; };
       diagnostics = {
         enable = true;
-        icons = {
-          hint    = "󰠠 ";
-          info    = " ";
-          warning = " ";
-          error   = " ";
-        };
+        icons = { hint = "󰠠 "; info = " "; warning = " "; error = " "; };
       };
     };
   };
@@ -564,52 +286,19 @@
   plugins.lualine = {
     enable = true;
     settings = {
-      theme = "catppuccin";
+      theme = "github_dark";
       sections = {
         lualine_a = [
-          {
-            __raw = ''
-              {
-                'mode',
-                fmt = function(str)
-                  return '▊ ' .. str
-                end
-              }
-            '';
-          }
+          { __raw = ''{ 'mode', fmt = function(str) return '▊ ' .. str end }''; }
         ];
         lualine_b = [ "branch" "diff" ];
         lualine_c = [
-          {
-            __raw = ''
-              {
-                'diagnostics',
-                sources = { 'nvim_lsp', 'nvim_diagnostic', 'nvim_workspace_diagnostic' },
-                symbols = { error = ' ', warn = ' ', info = ' ', hint = '󰠠 ' },
-              }
-            '';
-          }
-          {
-            __raw = ''
-              {
-                'filename',
-                path = 1,
-                symbols = { modified = '  ', readonly = '  ' },
-              }
-            '';
-          }
+          { __raw = ''{ 'diagnostics', sources = { 'nvim_lsp', 'nvim_diagnostic' }, symbols = { error = ' ', warn = ' ', info = ' ', hint = '󰠠 ' } }''; }
+          { __raw = ''{ 'filename', path = 1, symbols = { modified = '  ', readonly = '  ' } }''; }
         ];
         lualine_x = [
-          {
-            __raw = ''
-              { 'encoding', fmt = string.lower }
-            '';
-          }
-          {
-            __raw = ''
-              { 'fileformat', icons_enabled = true }
-            '';
-          }
+          { __raw = ''{ 'encoding', fmt = string.lower }''; }
+          { __raw = ''{ 'fileformat', icons_enabled = true }''; }
         ];
         lualine_y = [ "progress" ];
         lualine_z = [ "location" ];
@@ -633,31 +322,11 @@
           "                                                      "
         ];
         shortcut = [
-          {
-            __raw = ''
-              { icon = '  ', desc = 'Recent files', action = 'Telescope oldfiles', key = 'f' }
-            '';
-          }
-          {
-            __raw = ''
-              { icon = '  ', desc = 'Find files', action = 'Telescope find_files', key = 'o' }
-            '';
-          }
-          {
-            __raw = ''
-              { icon = '  ', desc = 'Config files', action = 'Telescope find_files search_dirs={config.home.homeDirectory..\"/.config/nvim\"}', key = 'c' }
-            '';
-          }
-          {
-            __raw = ''
-              { icon = '  ', desc = 'Session', action = 'SessionRestore', key = 's' }
-            '';
-          }
-          {
-            __raw = ''
-              { icon = '  ', desc = 'Quit', action = 'qa', key = 'q' }
-            '';
-          }
+          { __raw = ''{ icon = '  ', desc = 'Recent files', action = 'Telescope oldfiles', key = 'f' }''; }
+          { __raw = ''{ icon = '  ', desc = 'Find files', action = 'Telescope find_files', key = 'o' }''; }
+          { __raw = ''{ icon = '  ', desc = 'Config files', action = 'Telescope find_files search_dirs={\"~/.config/nvim\"}', key = 'c' }''; }
+          { __raw = ''{ icon = '  ', desc = 'Session', action = 'SessionRestore', key = 's' }''; }
+          { __raw = ''{ icon = '  ', desc = 'Quit', action = 'qa', key = 'q' }''; }
         ];
         footer = [ "Powered by NixVim" ];
       };
@@ -720,9 +389,7 @@
         ];
       };
       pickers = {
-        find_files = {
-          hidden = false;
-        };
+        find_files = { hidden = false; };
         live_grep = {
           additional_args = ''
             function()
@@ -734,161 +401,69 @@
     };
   };
 
-  # Ripgrep como provider do telescope
-  plugins.telescope-fzf-native = {
-    enable = true;
-  };
+  plugins.telescope-fzf-native = { enable = true; };
 
   # ── Which-key ───────────────────────────────────────────────────────────────
   plugins.which-key = {
     enable = true;
     settings = {
       preset = "helix";
-      icons = {
-        rules = true;
-      };
+      icons = { rules = true; };
       spec = [
-        {
-          __raw = ''
-            { '<leader>f', group = 'find' }
-          '';
-        }
-        {
-          __raw = ''
-            { '<leader>g', group = 'git' }
-          '';
-        }
-        {
-          __raw = ''
-            { '<leader>d', group = 'debug' }
-          '';
-        }
-        {
-          __raw = ''
-            { '<leader>c', group = 'code' }
-          '';
-        }
-        {
-          __raw = ''
-            { '<leader>b', group = 'buffer' }
-          '';
-        }
+        { __raw = ''{ '<leader>f', group = 'find' }''; }
+        { __raw = ''{ '<leader>g', group = 'git' }''; }
+        { __raw = ''{ '<leader>d', group = 'debug' }''; }
+        { __raw = ''{ '<leader>c', group = 'code' }''; }
+        { __raw = ''{ '<leader>b', group = 'buffer' }''; }
       ];
     };
   };
 
-  # ── Indent guides ───────────────────────────────────────────────────────────
+  # ── Utilities ───────────────────────────────────────────────────────────────
   plugins.indent-blankline = {
     enable = true;
     settings = {
-      scope = {
-        enabled = true;
-        show_start = false;
-      };
-      indent = {
-        char = "│";
-      };
+      scope = { enabled = true; show_start = false; };
+      indent = { char = "│"; };
     };
   };
 
-  # ── Comment ─────────────────────────────────────────────────────────────────
-  plugins.comment = {
+  plugins.comment = { enable = true; };
+  plugins.nvim-autopairs = { enable = true; };
+  plugins.nvim-surround = { enable = true; };
+  plugins.todo-comments = { enable = true; };
+  plugins.toggleterm = {
     enable = true;
     settings = {
-      toggler = {
-        line = "gcc";
-        block = "gbc";
-      };
-      opleader = {
-        line = "gc";
-        block = "gb";
-      };
+      direction = "float";
+      float_opts = { border = "curved"; };
     };
   };
 
-  # ── Surrounded (vim-surround) ───────────────────────────────────────────────
-  plugins.nvim-surround = {
-    enable = true;
-  };
-
-  # ── Autopairs ───────────────────────────────────────────────────────────────
-  plugins.nvim-autopairs = {
-    enable = true;
-  };
-
-  # ── Todo comments ───────────────────────────────────────────────────────────
-  plugins.todo-comments = {
-    enable = true;
-  };
-
-  # ── DAP (Debug Adapter Protocol) ───────────────────────────────────────────
+  # ── DAP ─────────────────────────────────────────────────────────────────────
   plugins.nvim-dap = {
     enable = true;
     settings = {
-      adapters = {
-        # Java DAP adapter (nvim-jdtls já configura, mas garantimos)
-        java = {
-          type = "server";
-          port = "\${port}";
-          executable = {
-            command = "java";
-            args = [
-              "-cp"
-              "/run/current-system/sw/share/java/jdt-language-server/plugins/*"
-              "com.microsoft.java.debug.plugin.internal.JavaDebugServer"
-              "\${port}"
-            ];
-          };
-        };
-      };
       signs = {
-        dapBreakpoint       = { text = "●"; texthl = "DapBreakpoint"; };
+        dapBreakpoint         = { text = "●"; texthl = "DapBreakpoint"; };
         dapBreakpointCondition = { text = "●"; texthl = "DapBreakpointCondition"; };
-        dapLogPoint         = { text = "◆"; texthl = "DapLogPoint"; };
-        dapStopped          = { text = "▶"; texthl = "DapStopped"; };
+        dapLogPoint           = { text = "◆"; texthl = "DapLogPoint"; };
+        dapStopped            = { text = "▶"; texthl = "DapStopped"; };
         dapBreakpointRejected = { text = "○"; texthl = "DapBreakpointRejected"; };
       };
     };
   };
 
-  # DAP UI
-  plugins.nvim-dap-ui = {
-    enable = true;
-  };
+  plugins.nvim-dap-ui = { enable = true; };
 
-  # DAP virtual text (mostra variáveis inline)
-
-  # CodeLLDB para C/C++ debugging - configurado via extraConfigLua
-
-  # ── Nix: format via extraConfigLua (nixfmt) ────────────────────────────────
-
-  # ── Floating terminal ──────────────────────────────────────────────────────
-  plugins.toggleterm = {
-    enable = true;
-    settings = {
-      direction = "float";
-      float_opts = {
-        border = "curved";
-      };
-    };
-  };
-
-  # ── Extra Plugins não suportados nativamente ────────────────────────────────
+  # ── Extra Plugins ───────────────────────────────────────────────────────────
   extraPlugins = with pkgs.vimPlugins; [
-    # nvim-web-devicons para ícones no nvim-tree e lualine
     nvim-web-devicons
   ];
 
-  # ── Lua Config (automations e setup que não tem opção Nix) ─────────────────
-  # extraConfigLua é injetado no init.lua após os plugins carregarem.
-  # Útil para: configurações complexas de DAP, ftplugin, maven-nvim, etc.
+  # ── Lua Config ──────────────────────────────────────────────────────────────
   extraConfigLua = ''
-    -- ── DAP: Configuração Java ────────────────────────────────────────────────
-    -- nvim-jdtls configura DAP automaticamente, mas precisamos do dap adapter
-    -- quando o jdtls não está usando nvim-jdtls.
-    -- Para uso com nvim-jdtls, o adapter é configurado pelo próprio plugin.
-
-    -- ── DAP: Configuração C/C++ (CodeLLDB) ───────────────────────────────────
+    -- DAP: CodeLLDB (C/C++)
     local dap = require('dap')
     dap.adapters.codelldb = {
       type = 'server',
@@ -920,7 +495,6 @@
     }
     dap.configurations.c = dap.configurations.cpp
 
-    -- ── DAP: Configuração Python ──────────────────────────────────────────────
     dap.configurations.python = {
       {
         name = "Launch file",
@@ -933,7 +507,7 @@
       },
     }
 
-    -- ── DAP UI: Posição padrão ───────────────────────────────────────────────
+    -- DAP UI setup
     local dapui = require('dapui')
     dapui.setup({
       layouts = {
@@ -963,35 +537,23 @@
       },
     })
 
-    -- Abrir DAP UI automaticamente ao iniciar debugging
-    dap.listeners.after.event_initialized["dapui_config"] = function()
-      dapui.open()
-    end
-    dap.listeners.before.event_terminated["dapui_config"] = function()
-      dapui.close()
-    end
-    dap.listeners.before.event_exited["dapui_config"] = function()
-      dapui.close()
-    end
+    dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
+    dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
+    dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
 
-    -- ── LSP: Diagnostics virtuais ────────────────────────────────────────────
+    -- LSP diagnostics
     vim.diagnostic.config({
-      virtual_text = {
-        source = "always",
-        spacing = 2,
-      },
+      virtual_text = { source = "always", spacing = 2 },
       signs = true,
       underline = true,
       update_in_insert = false,
       severity_sort = true,
     })
 
-    -- ── Formatação on save ───────────────────────────────────────────────────
-    -- Se format_on_save é suportado pelo servidor LSP
+    -- Format on save
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*",
       callback = function(args)
-        -- Só formata se o buffer tem LSP com formatting capability
         local bufnr = args.buf
         local clients = vim.lsp.get_clients({ bufnr = bufnr })
         for _, client in ipairs(clients) do
@@ -1003,33 +565,25 @@
       end,
     })
 
-    -- ── Highlight on cursor hold ─────────────────────────────────────────────
+    -- Cursor hold highlight
     vim.api.nvim_create_augroup("CursorHoldHighlight", { clear = true })
     vim.api.nvim_create_autocmd("CursorHold", {
       group = "CursorHoldHighlight",
       pattern = "*",
-      callback = function()
-        vim.lsp.buf.document_highlight()
-      end,
+      callback = function() vim.lsp.buf.document_highlight() end,
     })
     vim.api.nvim_create_autocmd("CursorMoved", {
       group = "CursorHoldHighlight",
       pattern = "*",
-      callback = function()
-        vim.lsp.buf.clear_references()
-      end,
+      callback = function() vim.lsp.buf.clear_references() end,
     })
 
-    -- ── Nix: Usar nixfmt para formatar arquivos .nix ────────────────────────
+    -- Nix formatting via nixfmt
     vim.api.nvim_create_autocmd("FileType", {
       pattern = "nix",
       callback = function()
         vim.bo.formatexpr = "v:lua.vim.lsp.formatexpr(#{timeout_ms=500})"
       end,
     })
-
-    -- ── Melhorias gerais ─────────────────────────────────────────────────────
-    -- Fechar buffer com :q
-    vim.keymap.set("n", "<leader>x", "<cmd>bd<CR>", { desc = "Delete buffer" })
   '';
 }
