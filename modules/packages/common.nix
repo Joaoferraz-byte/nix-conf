@@ -25,7 +25,7 @@
       heroic          # Launcher GOG/Epic Games
 
       # ── Java / Spring Boot ────────────────────────────────────────────────
-      # Nota: jdk21 e jdt-language-server também são gerenciados pelo nvf (nvf.nix)
+      # Nota: jdk21 e jdt-language-server também são usados pelo nixvim (via home-manager)
       
       # A presença aqui garante disponibilidade global no sistema (ex: terminal,
       # scripts, build tools fora do Neovim).
