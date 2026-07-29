@@ -191,9 +191,9 @@
           };
         };
       };
-      nil_ls = { enable = true; };
+      nil-ls = { enable = true; };
       pyright = { enable = true; };
-      ts_ls = { enable = true; };
+      ts-ls = { enable = true; };
       html = { enable = true; };
       cssls = { enable = true; };
       jsonls = { enable = true; };
@@ -410,10 +410,10 @@
     };
   };
 
-  plugins.telescope_fzf_native = { enable = true; };
+  plugins.telescope-fzf-native = { enable = true; };
 
   # ── Which-key ───────────────────────────────────────────────────────────────
-  plugins.which_key = {
+  plugins.which-key = {
     enable = true;
     settings = {
       preset = "helix";
@@ -429,7 +429,7 @@
   };
 
   # ── Utilities ───────────────────────────────────────────────────────────────
-  plugins.indent_blankline = {
+  plugins.indent-blankline = {
     enable = true;
     settings = {
       scope = { enabled = true; show_start = false; };
@@ -478,11 +478,10 @@
       type = 'server',
       port = "${"$"}{port}",
       executable = {
-        command = "codelldb",
-        args = { "--port", "${"$"}{port}" },
+        command = '${pkgs.vscode-extensions.vadimcn.vscode-codelldb}/share/vscode/extensions/vadimcn.vscode-codelldb/adapter/codelldb',
+        args = {"--port", "${"$"}{port}"},
       }
     }
-
     dap.configurations.cpp = {
       {
         name = "Launch file",
@@ -491,14 +490,6 @@
         program = function()
           return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
         end,
-        cwd = "${"$"}{workspaceFolder}",
-        stopOnEntry = false,
-      },
-      {
-        name = "Attach to process",
-        type = "codelldb",
-        request = "attach",
-        pid = require('dap.utils').pick_process,
         cwd = "${"$"}{workspaceFolder}",
       },
     }
