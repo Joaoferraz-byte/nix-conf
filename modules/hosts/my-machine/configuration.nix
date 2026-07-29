@@ -1,74 +1,65 @@
+# modules/hosts/my-machine/configuration.nix
+#
+# Módulo raiz do host "limine". Define configurações específicas desta máquina:
+# boot, rede, locale, usuários e importa todos os módulos de funcionalidades.
+# Os pacotes de sistema foram extraídos para modules/packages/common.nix para
+# permitir reutilização em futuros hosts sem duplicação.
 { self, ... }: {
   flake.nixosModules.myMachineConfiguration = { pkgs, ... }: {
-    imports = [ 
+    imports = [
       self.nixosModules.myMachineHardware
+      self.nixosModules.commonPackages
       self.nixosModules.niri
       self.nixosModules.nvidia
       self.nixosModules.greeter
       self.nixosModules.desktop-portals
-      self.nixosModules.system-hardening
       self.nixosModules.flatpak
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.neovimWrapped
     ];
 
+    # ── Boot ──────────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
-
     boot.kernelPackages = pkgs.linuxPackages_zen;
-    networking.hostName = "limine";
 
+    # ── Rede ──────────────────────────────────────────────────────────────────
+    networking.hostName = "limine";
     networking.networkmanager.enable = true;
 
+    # ── Localização e fuso horário ─────────────────────────────────────────────
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
     i18n.extraLocaleSettings = {
-      LC_ADDRESS = "pt_BR.UTF-8";
+      LC_ADDRESS        = "pt_BR.UTF-8";
       LC_IDENTIFICATION = "pt_BR.UTF-8";
-      LC_MEASUREMENT = "pt_BR.UTF-8";
-      LC_MONETARY = "pt_BR.UTF-8";
-      LC_NAME = "pt_BR.UTF-8";
-      LC_NUMERIC = "pt_BR.UTF-8";
-      LC_PAPER = "pt_BR.UTF-8";
-      LC_TELEPHONE = "pt_BR.UTF-8";
-      LC_TIME = "pt_BR.UTF-8";
+      LC_MEASUREMENT    = "pt_BR.UTF-8";
+      LC_MONETARY       = "pt_BR.UTF-8";
+      LC_NAME           = "pt_BR.UTF-8";
+      LC_NUMERIC        = "pt_BR.UTF-8";
+      LC_PAPER          = "pt_BR.UTF-8";
+      LC_TELEPHONE      = "pt_BR.UTF-8";
+      LC_TIME           = "pt_BR.UTF-8";
     };
-
     services.xserver.xkb = {
-      layout = "br";
+      layout  = "br";
       variant = "";
     };
     console.keyMap = "br-abnt2";
 
+    # ── Usuários ──────────────────────────────────────────────────────────────
     users.users."livara" = {
       isNormalUser = true;
-      description = "Livara";
-      extraGroups = [ "networkmanager" "wheel" ];
-      shell = pkgs.zsh;
+      description  = "Livara";
+      extraGroups  = [ "networkmanager" "wheel" ];
+      shell        = pkgs.zsh;
     };
-
     programs.zsh.enable = true;
 
+    # ── Nix ───────────────────────────────────────────────────────────────────
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-    environment.systemPackages = with pkgs; [
-       git
-       gh
-       nautilus
-       brave
-       vesktop
-       kdePackages.okular
-       foliate
-       obsidian
-       hydralauncher
-       heroic
-       jdk21
-       jdk8
-       jdt-language-server
-       spring-boot-cli
-    ];
 
     system.stateVersion = "26.11";
   };
