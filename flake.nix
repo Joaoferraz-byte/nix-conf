@@ -12,6 +12,7 @@
     # keymaps, plugins, colorschemes, extraConfigLua, etc.
     # NOTA: não usamos follows para nixpkgs conforme recomendado pela
     # documentação oficial do nixvim (pode causar incompatibilidades).
+    nixvim-config.url = "path:./nixvim-config";
     nixvim.url = "github:nix-community/nixvim";
     home-manager = {
       url = "github:nix-community/home-manager/master";

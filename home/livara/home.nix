@@ -12,10 +12,11 @@
   programs.home-manager.enable = true;
 
   # ── Neovim (NixVim) ─────────────────────────────────────────────────────
-  # NixVim é configurado como módulo do Home Manager. O arquivo nixvim.nix
-  # é importado via programs.nixvim.imports para não precisar prefixar tudo
-  # com programs.nixvim.
-  programs.nixvim.imports = [ ./nixvim.nix ];
+  # NixVim é configurado como módulo do Home Manager usando o flake separado.
+  programs.nixvim = {
+    enable = true;
+    imports = [ self.inputs.nixvim-config.nixvimModule ];
+  };
 
   home.packages = with pkgs; [
     manim
