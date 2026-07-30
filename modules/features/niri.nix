@@ -88,9 +88,10 @@
               hide-after-inactive-ms = 3000;
             };
 
-            window-rule = [
+            window-rules = [
               # ── Regra geral para todas as janelas ──────────────────────
               {
+                matches = [ { app-id = ".*"; } ];
                 geometry-corner-radius = 12;
                 clip-to-geometry = true;
                 opacity = 0.80;
