@@ -9,8 +9,8 @@
     # O NixVim vive em um flake separado e reutilizável.
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
     # NixVim permanece uma entrada independente, sem forçar `follows`.
-    # SDDM com tema Noctalia para o login manager
-    sddm-noctalia.url = "github:ClementFombonne/sddm-noctalia-theme";
+    # SDDM com tema Astronaut para o login manager
+    sddm-astronaut.url = "github:Keyitdev/sddm-astronaut-theme";
     nixvim.url = "github:nix-community/nixvim";
     # NOTA: nixvim aparece como input direto E dentro do vim-conf.
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
