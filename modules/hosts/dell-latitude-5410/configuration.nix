@@ -10,7 +10,7 @@
     imports = [
       self.nixosModules.dellLatitude5410Hardware
       self.nixosModules.commonPackages
-      self.nixosModules.niri
+      self.nixosModules.hyprland
       self.nixosModules.greeter
       self.nixosModules.desktop-portals
       self.nixosModules.flatpak

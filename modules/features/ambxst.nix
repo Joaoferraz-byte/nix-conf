@@ -3,7 +3,7 @@
 #
 # O Ambxst é um ecossistema completo de shell para Wayland que usa:
 # - Quickshell (QML) para a interface
-# - axctl para abstração de compositor (suporta Niri nativamente)
+# - axctl para abstração de compositor (suporta Hyprland nativamente)
 # - JSON para configuração declarativa
 #
 # Esta integração segue o mesmo padrão do noctalia.nix:
@@ -16,7 +16,7 @@
   flake.nixosModules.ambxst = { pkgs, lib, config, ... }: {
 
     # ── Pacote principal ───────────────────────────────────────────────────
-    # O wrapper "ambxst" é instalado no sistema e chamado pelo Niri no
+    # O wrapper "ambxst" é instalado no sistema e chamado pelo Hyprland no
     # spawn-at-startup. Ele inicializa o axctl e o Quickshell.
     environment.systemPackages = [
       inputs.shell-conf.packages.${pkgs.stdenv.hostPlatform.system}.default
