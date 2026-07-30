@@ -128,6 +128,14 @@
               # as ações correspondentes na UI do shell.
               #
               # Referência: Ambxst/modules/services/GlobalShortcuts.qml
+              # ── FIFO IPC para Ambxst ────────────────────────────────────
+              # Cada comando envia uma string via pipe para o GlobalShortcuts.qml
+              # do Ambxst. O Ambxst escuta /tmp/ambxst_ipc.pipe e executa
+              # a ação correspondente na UI.
+              #
+              # NOTE: Estes keybinds cobrem TODOS os atalhos do Ambxst.
+              # O binds.json do Ambxst (gerado pelo shell-conf) deve ficar vazio
+              # (exceto para SUPER+T que não tem FIFO equivalente).
               "Mod+S".spawn-sh = "echo launcher > /tmp/ambxst_ipc.pipe";
               "Mod+D".spawn-sh = "echo dashboard > /tmp/ambxst_ipc.pipe";
               "Mod+A".spawn-sh = "echo assistant > /tmp/ambxst_ipc.pipe";
@@ -139,6 +147,7 @@
               "Mod+Escape".spawn-sh = "echo powermenu > /tmp/ambxst_ipc.pipe";
               "Mod+L".spawn-sh = "echo lockscreen > /tmp/ambxst_ipc.pipe";
               "Mod+Shift+S".spawn-sh = "echo screenshot > /tmp/ambxst_ipc.pipe";
+              "Mod+T".spawn-sh = "echo tools > /tmp/ambxst_ipc.pipe";
 
               # ── Gerenciamento de janelas (Niri nativo) ───────────────────
               "Mod+Q".close-window = _: { };
