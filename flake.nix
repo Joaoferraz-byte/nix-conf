@@ -41,3 +41,4 @@
     };
   };
 }
+    shell-conf.url = "github:Joaoferraz-byte/shell-conf";
