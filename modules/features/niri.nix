@@ -120,6 +120,8 @@
             "XF86MonBrightnessUp".spawn-sh = "brightnessctl set +5%";
             "XF86MonBrightnessDown".spawn-sh = "brightnessctl set 5%-";
             "Mod+Shift+E".quit = _: { };
+            "Mod+WheelScrollUp".previous-window = { cooldown-ms = 150; };
+            "Mod+WheelScrollDown".next-window = { cooldown-ms = 150; };
           };
         };
       };
