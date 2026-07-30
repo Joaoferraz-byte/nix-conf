@@ -16,6 +16,8 @@
     # NOTA: nixvim aparece como input direto E dentro do vim-conf.
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
     # O vim-conf usa o nixvim internamente para construir o pacote.
+    # Quickshell integration
+    shell-conf.url = "github:Joaoferraz-byte/shell-conf";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -41,4 +43,3 @@
     };
   };
 }
-    shell-conf.url = "github:Joaoferraz-byte/shell-conf";
