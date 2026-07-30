@@ -1,3 +1,13 @@
+# ─── Quickshell Integration [DEPRECATED] ────────────────────────────────
+# DEPRECATED: Este módulo foi substituído por ambxst.nix (BUG-002).
+# O módulo ambxst.nix fornece integração completa com o Ambxst shell,
+# incluindo fontes, serviços (upower, power-profiles-daemon) e o módulo HM.
+#
+# Este arquivo é mantido apenas para referência histórica.
+# Todos os hosts devem usar self.nixosModules.ambxst em vez de
+# self.nixosModules.quickshell.
+#
+# TODO: Remover este arquivo após confirmar que nenhum host usa quickshell.
 # ─── Quickshell Integration ────────────────────────────────────────────
 # Integra a nova barra Quickshell (shell-conf) ao sistema Home Manager.
 # Esta configuração é injetada como sharedModule do home-manager via
