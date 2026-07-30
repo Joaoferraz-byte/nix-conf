@@ -123,11 +123,6 @@
     # that is unnecessary for most desktop use cases.
     services.geoclue2.enable = false;
 
-    # Disable Geoclue app-level access (redundant but explicit)
-    services.geoclue2 = {
-      enable = false;
-    };
-
     # ── Auditd with Smart Filtering ───────────────────────────────────────
     # Source: Reddit r/NixOS "kernel hardening + auditd" post (xmrah, 2025).
     # Uses "lock" mode to prevent root from wiping audit rules.
