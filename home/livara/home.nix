@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, self, ... }:
+{ config, pkgs, lib, inputs, self, ... }:
 
 {
   home.username = "livara";
@@ -62,7 +62,7 @@
     name = "Neovim (NixVim)";
     genericName = "Editor";
     comment = "Edit text files";
-    exec = "${pkgs.nixvim}/bin/nvim %F";
+    exec = "${inputs.vim-conf.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/nvim %F";
     terminal = true;
     type = "Application";
     mimeType = [
