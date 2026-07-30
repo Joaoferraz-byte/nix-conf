@@ -9,9 +9,6 @@
     networking.firewall = {
       enable = true;
 
-      # Block all incoming by default
-      defaultPolicy = "drop";
-
       # AudioRelay requires TCP port 1239 open for audio streaming
       allowedTCPPorts = [ 1239 ];
 
