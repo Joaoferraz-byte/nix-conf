@@ -25,6 +25,11 @@
     {
       packages.myNiri =
         let
+          # ── PREDICTIVE-001: nixpkgs-stable pin para o Niri ──────────────────
+          # TODO: Remover este pin quando o problema de libdisplay-info for
+          # resolvido no nixos-unstable. Verificar periodicamente se:
+          #   nix build nixpkgs#niri  (sem o pin) funciona sem erros de libdisplay-info.
+          # O pin atual é nixos-25.05 (rev 77981d0d8e43).
           # Correção nixpkgs-stable (libdisplay-info)
           stablePkgs = import inputs.nixpkgs-stable {
             inherit system;

@@ -4,7 +4,7 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/77981d0d8e43ee2c652eaf835259665eb88a674d";
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
-    # wrapper-modules: mantido para o wrapper do Noctalia (noctalia.nix)
+    # wrapper-modules: mantido para o wrapper do Niri (niri.nix)
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     # O NixVim vive em um flake separado e reutilizável.
@@ -31,7 +31,7 @@
     # ── Input Consistency Policy ────────────────────────────────────────
     # Inputs do flake são usados para:
     #   - nixpkgs-stable: pino de segurança para o niri (libdisplay-info)
-    #   - wrapper-modules: wrapper do Noctalia (nix-wrapper-modules)
+    #   - wrapper-modules: wrapper do Niri (nix-wrapper-modules)
     #   - nix-flatpak: gerência declarativa de Flatpaks
     #   - vim-conf: configuração NixVim declarativa (plugins, languages, keymaps)
     #   - nixvim: módulo HM compartilhado para programas.nixvim.*
