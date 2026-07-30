@@ -16,8 +16,12 @@
     # NOTA: nixvim aparece como input direto E dentro do vim-conf.
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
     # O vim-conf usa o nixvim internamente para construir o pacote.
-    # Quickshell integration
-    shell-conf.url = "github:Joaoferraz-byte/shell-conf";
+    # Ambxst shell (substitui o shell-conf anterior)
+    # O shell-conf agora empacota o Ambxst com suporte nativo ao Niri.
+    shell-conf = {
+      url = "github:Joaoferraz-byte/shell-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -32,6 +36,7 @@
     #   - vim-conf: configuração NixVim declarativa (plugins, languages, keymaps)
     #   - nixvim: módulo HM compartilhado para programas.nixvim.*
     #   - home-manager: configuração do usuário livara
+    #   - shell-conf: Ambxst shell (Quickshell + axctl + Niri)
     imports = [
       (inputs.import-tree ./modules)
     ];

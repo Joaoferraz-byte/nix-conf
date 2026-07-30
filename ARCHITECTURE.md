@@ -1,7 +1,7 @@
 # Arquitetura do Sistema — nix-conf
 
 > Documento de mapeamento vivo da configuração NixOS declarativa para o host `limine`.
-> Última atualização: 2026-07-29
+> Última atualização: 2026-07-30
 
 ---
 
@@ -39,9 +39,11 @@ nix-conf/
     │   ├── greeter.nix                # Greeter de login (greetd + regreet)
     │   ├── keyd.nix                   # Remapeamento de teclado (leftmeta → overload)
     │   ├── niri.nix                   # Compositor Wayland Niri (configuração completa)
-    │   ├── noctalia.json              # Configuração da barra Noctalia (JSON)
-    │   ├── noctalia.nix               # Wrapper Noctalia via nix-wrapper-modules
+    │   ├── ambxst.nix               # Shell Ambxst (Quickshell + axctl + Niri)
+    │   ├── noctalia.json              # Configuração da barra Noctalia (JSON) [legado]
+    │   ├── noctalia.nix               # Wrapper Noctalia via nix-wrapper-modules [legado]
     │   ├── nvidia.nix                 # Driver NVIDIA legacy_580 + hardware.graphics
+    │   ├── shell.nix                  # Módulo quickshell anterior [substituído por ambxst.nix]
     │   └── system-hardening.nix      # Firewall, sudo, GC automático, zram
     └── hosts/
         └── my-machine/
@@ -64,7 +66,9 @@ flake.nix
 ├── nix-flatpak                        → gerenciamento declarativo de Flatpaks
 ├── home-manager (master)              → configuração do usuário livara
 │   └── follows nixpkgs
-└── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
+├── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
+└── shell-conf (flake)                 → Ambxst shell (Quickshell + axctl + Niri)
+    └── follows nixpkgs
 ```
 
 ---
@@ -84,7 +88,9 @@ Todos os módulos são exportados como `flake.nixosModules.<nome>` e importados 
 | `flatpak` | Flatpaks declarativos via nix-flatpak |
 | `audiorelay` | AudioRelay Flatpak + nós virtuais PipeWire + firewall |
 | `keyd` | Remapeamento `leftmeta` → `overload(meta, menu)` |
+| `ambxst` | Shell Quickshell (Ambxst) com axctl para Niri, fontes e JSONs de config |
 | `nixvim` (via Home Manager) | Neovim declarativo via vim-conf flake + NixVim module |
+| `ambxst` (via Home Manager) | Configurações JSON do Ambxst + keybinds declarativos |
 
 ---
 
@@ -109,6 +115,7 @@ modules/hosts/my-machine/default.nix
         │     ├── nixosModules.flatpak
         │     ├── nixosModules.audiorelay
         │     ├── nixosModules.keyd
+        │     ├── nixosModules.ambxst
         │     └── home-manager.users.livara → home/livara/home.nix
         │
         └── home-manager.users.livara → home/livara/home.nix
@@ -124,6 +131,8 @@ O arquivo `home/livara/home.nix` gerencia:
 - **MIME types**: Associações de arquivos (PDF → Okular, código → Neovim)
 - **XDG User Dirs**: Diretórios padrão criados declarativamente
 - **Variáveis de sessão**: `PROJECTS_DIR`
+- **Tema de ícones**: Papirus-Dark (GTK + dconf, lido pelo wrapper do Ambxst)
+- **Tema GTK**: adw-gtk3-dark
 
 ---
 
@@ -171,3 +180,4 @@ Pacotes instalados globalmente em `environment.systemPackages`:
 2. **Pacotes duplicados no sistema**: `jdk21` e `jdt-language-server` aparecem tanto em `configuration.nix` quanto em `vim-conf/config/plugins/core.nix`. Devem ser consolidados em um módulo de pacotes dedicado.
 3. **Ausência de CI/CD**: Sem automação para validar o flake via GitHub Actions.
 4. **Pino de `nixpkgs-stable`**: Ainda necessário para o Niri; deve ser removido quando o upstream estabilizar.
+5. **Módulos legados**: `shell.nix` e `noctalia.nix` podem ser removidos após confirmação de que o Ambxst está funcionando corretamente.
