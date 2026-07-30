@@ -17,25 +17,20 @@
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
-      self.nixosModules.quickshell
+      # Migrado de quickshell para ambxst (BUG-002).
+      # O módulo ambxst.nix gerencia o Ambxst shell com suporte completo
+      # a fontes, upower, power-profiles-daemon e módulo HM.
+      self.nixosModules.ambxst
     ];
-
-    # ── Desktop Widgets (host-specific Noctalia layout) ─────────────────
-    environment.etc."noctalia/desktop-widgets.json".text =
-      builtins.toJSON (builtins.fromJSON (builtins.readFile ./desktop-widgets.json));
-
     # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
-
     # Kernel padrão (sem Zen, mais estável para laptop corporativo)
     boot.kernelPackages = pkgs.linuxPackages;
-
     # ── Rede ──────────────────────────────────────────────────────────────
     networking.hostName = "limine-laptop";
     networking.networkmanager.enable = true;
-
     # ── Local ─────────────────────────────────────────────────────────────
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
@@ -55,7 +50,6 @@
       variant = "";
     };
     console.keyMap = "br-abnt2";
-
     # ── Usuário ───────────────────────────────────────────────────────────
     users.users."livara" = {
       isNormalUser = true;
@@ -64,10 +58,8 @@
       shell        = pkgs.zsh;
     };
     programs.zsh.enable = true;
-
     # ── Nix ───────────────────────────────────────────────────────────────
-    nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
+    # experimental-features movido para system-hardening.nix (DRY)
     system.stateVersion = "26.11";
   };
 }
