@@ -1,7 +1,7 @@
 # ─── System Hardening & Security Module ────────────────────────────────────
-# Based on: NixOS Wiki Security, Discourse discussions, and best practices.
-# Designed for a desktop/workstation use case (not server), balancing
-# security with usability. Port 1239 for AudioRelay is allowed explicitly.
+# Based on: NixOS Wiki Security, Discourse discussions, Reddit best practices,
+# and kernel hardening guides (madaidan's Insecurities, Solene's Harden NixOS).
+# Designed for a desktop/workstation use case, balancing security with usability.
 { ... }: {
   flake.nixosModules.system-hardening = { pkgs, lib, ... }: {
 
@@ -28,16 +28,24 @@
     };
 
     # ── Kernel Hardening ──────────────────────────────────────────────────
-    # Restrict kernel access to sensitive info
     security.protectKernelImage = true;
 
-    # Disable ptrace for non-related processes (hardens against debugging attacks)
     boot.kernel.sysctl = {
-      # Prevent non-privileged ptrace access to other processes
+      # Restrict ptrace: level 2 for desktop (blocks non-child debugging)
+      # Source: Reddit r/NixOS kernel hardening thread — level 2 recommended
+      # for desktops that still need dmesg access (unlike servers that use 3).
       "kernel.yama.ptrace_scope" = 2;
+
+      # Block unprivileged BPF (attack vector via JIT spray)
+      # Source: Reddit r/NixOS "kernel hardening + auditd" post (xmrah, 2025)
+      "kernel.unprivileged_bpf_disabled" = 1;
 
       # Restrict access to /proc/sysrq-trigger
       "kernel.sysrq" = 0;
+
+      # Hide kernel pointers (hardens against kernel exploits)
+      # Source: Reddit r/NixOS kernel hardening thread
+      "kernel.kptr_restrict" = 1;
 
       # Protect against SYN floods
       "net.ipv4.tcp_syncookies" = 1;
@@ -72,18 +80,13 @@
 
       # Restrict BPF JIT (reduce attack surface)
       "net.core.bpf_jit_harden" = 2;
-
-      # Hide kernel pointers (hardens against kernel exploits)
-      "kernel.kptr_restrict" = 1;
     };
 
     # ── Boot Security ─────────────────────────────────────────────────────
     boot = {
-      # Enable secure boot if supported
       loader.systemd-boot.enable = true;
-      loader.systemd-boot.editor = false; # Prevent editing boot entries at boot time
+      loader.systemd-boot.editor = false; # Prevent editing boot entries
 
-      # Kernel module loading restrictions
       kernelModules = [
         "nvidia"
         "nvidia_modeset"
@@ -99,9 +102,14 @@
 
     # ── Sudo Hardening ────────────────────────────────────────────────────
     security.sudo = {
-      # Only wheel group can use sudo
       execWheelOnly = true;
-      # Add timestamp_timeout for convenience but with security
+
+      # pwfeedback: show asterisks when typing password
+      # Source: Reddit r/NixOS "nice snippets" thread (Maskdask)
+      extraConfig = ''
+        Defaults pwfeedback
+      '';
+
       extraRules = [{
         users = [ "livara" ];
         commands = [
@@ -110,28 +118,41 @@
       }];
     };
 
-    # ── Privacy & Telemetry ───────────────────────────────────────────────
-    # Disable hardware tracking
-    services.udev.extraRules = ''
-      # Disable webcam indicator control
-      ACTION=="add", SUBSYSTEM=="video4linux", ATTR{device/power/control}="auto"
-    '';
+    # ── Privacy: Disable unnecessary tracking/services ────────────────────
+    # Source: Reddit r/NixOS hardening thread — geoclue2 is a location tracker
+    # that is unnecessary for most desktop use cases.
+    services.geoclue2.enable = false;
 
-    # Disable automatic firmware updates to prevent unexpected changes
-    services.fwupd.enable = false;
+    # Disable Geoclue app-level access (redundant but explicit)
+    services.geoclue2 = {
+      enable = false;
+    };
 
-    # Enable audit logging for security-relevant events
-    auditd.enable = true;
+    # ── Auditd with Smart Filtering ───────────────────────────────────────
+    # Source: Reddit r/NixOS "kernel hardening + auditd" post (xmrah, 2025).
+    # Uses "lock" mode to prevent root from wiping audit rules.
+    # Filters by auid>=1000 to ignore systemd/dbus noise.
+    security.audit = {
+      enable = "lock";
+      rules = [
+        # Only log access denied events from real users (uid >= 1000)
+        "-a always,exit -F arch=b64 -S open,openat -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access_denied"
+        "-a always,exit -F arch=b64 -S open,openat -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access_denied"
+        # Watch critical system config files
+        "-w /etc/sudoers -p wa -k sudoers_changes"
+        "-w /etc/ssh/sshd_config -p wa -k sshd_config"
+        "-w /etc/passwd -p wa -k identity"
+        "-w /etc/shadow -p wa -k identity"
+      ];
+      backlogLimit = 8192; # Prevent log drops under heavy syscall bursts
+    };
 
     # ── Nix Store Security ────────────────────────────────────────────────
     nix = {
       settings = {
         auto-optimise-store = true;
-        # Restrict who can install packages
         trusted-users = [ "root" "livara" ];
-        # Disable import-from-derivation (security risk)
         allow-import-from-derivation = false;
-        # Use binary cache from trusted sources only
         extra-trusted-public-keys = [
           "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
         ];
@@ -152,7 +173,6 @@
     };
 
     # ── Systemd Service Hardening ─────────────────────────────────────────
-    # Apply common hardening defaults to services
     systemd.services.systemd-resolved.serviceConfig = {
       PrivateDevices = "yes";
       ProtectHome = "yes";
@@ -161,6 +181,8 @@
     };
 
     # ── Log Retention ─────────────────────────────────────────────────────
+    # Source: Reddit r/NixOS kernel hardening thread — Seal=yes enables
+    # systemd's Forward Secure Sealing (FSS) for tamper-proof journal logs.
     services.journald.extraConfig = ''
       SystemMaxUse=200M
       MaxRetentionSec=30day
