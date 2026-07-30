@@ -28,7 +28,7 @@
         inherit pkgs;
         settings = {
           spawn-at-startup = [
-            (lib.getExe self'.packages.myNoctalia)
+            (lib.getExe self'.packages.myNoctaliaWithFlatpakIcons)
           ];
           xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite;
           input = {
