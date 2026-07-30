@@ -11,6 +11,7 @@
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
+      self.nixosModules.quickshell
     ];
 
     # ── Desktop Widgets (host-specific Noctalia layout) ─────────────────
