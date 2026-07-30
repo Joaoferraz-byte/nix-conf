@@ -41,7 +41,7 @@
           "clockColor": "none",
           "customFont": "",
           "formatHorizontal": "HH:mm ddd, MMM dd",
-          "formatVertical": "dd \u2015 MM",
+          "formatVertical": "dd ― MM",
           "id": "Clock",
           "tooltipFormat": "HH:mm ddd, MMM dd",
           "useCustomFont": false
@@ -126,9 +126,9 @@
           "colorizeIcons": false,
           "drawerEnabled": true,
           "hidePassive": false,
+          "iconScale": 0.55,
           "id": "Tray",
-          "pinned": [],
-          "iconScale": 0.55
+          "pinned": []
         },
         {
           "hideWhenZero": false,
@@ -151,9 +151,7 @@
             "detectedRecorder": "",
             "filenameFormat": "",
             "gifMaxSeconds": 30,
-            "installedLangs": [
-              "eng"
-            ],
+            "installedLangs": ["eng"],
             "paletteColors": [],
             "recordCopyToClipboard": false,
             "recordSkipConfirmation": false,
@@ -178,7 +176,7 @@
     "screenOverrides": []
   },
   "general": {
-    "avatarImage": null,
+    "avatarImage": "/home/livara/.config/nixos/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg",
     "dimmerOpacity": 0.2,
     "showScreenCorners": false,
     "forceBlackScreenCorners": false,
@@ -215,28 +213,13 @@
     "lockScreenBlur": 0,
     "lockScreenTint": 0,
     "keybinds": {
-      "keyUp": [
-        "Up"
-      ],
-      "keyDown": [
-        "Down"
-      ],
-      "keyLeft": [
-        "Left"
-      ],
-      "keyRight": [
-        "Right"
-      ],
-      "keyEnter": [
-        "Return",
-        "Enter"
-      ],
-      "keyEscape": [
-        "Esc"
-      ],
-      "keyRemove": [
-        "Del"
-      ]
+      "keyUp": ["Up"],
+      "keyDown": ["Down"],
+      "keyLeft": ["Left"],
+      "keyRight": ["Right"],
+      "keyEnter": ["Return", "Enter"],
+      "keyEscape": ["Esc"],
+      "keyRemove": ["Del"]
     },
     "reverseScroll": false,
     "smoothScrollEnabled": true
@@ -256,7 +239,7 @@
     "settingsPanelSideBarCardStyle": false
   },
   "location": {
-    "name": "S\u00e3o Paulo",
+    "name": "São Paulo",
     "weatherEnabled": true,
     "weatherShowEffects": true,
     "weatherTaliaMascotAlways": false,
@@ -290,7 +273,7 @@
   "wallpaper": {
     "enabled": true,
     "overviewEnabled": false,
-    "directory": null,
+    "directory": "/home/livara/.config/nixos/Wallpapers",
     "monitorDirectories": [],
     "enableMultiMonitorDirectories": false,
     "showHiddenFiles": false,
@@ -599,11 +582,7 @@
     "autoHideMs": 2000,
     "overlayLayer": true,
     "backgroundOpacity": 1,
-    "enabledTypes": [
-      0,
-      1,
-      2
-    ],
+    "enabledTypes": [0, 1, 2],
     "monitors": []
   },
   "audio": {
@@ -676,5 +655,12 @@
     "resumeLockCommand": "",
     "resumeSuspendCommand": "",
     "customCommands": "[]"
+  },
+  "desktopWidgets": {
+    "enabled": false,
+    "overviewEnabled": true,
+    "gridSnap": false,
+    "gridSnapScale": false,
+    "monitorWidgets": []
   }
 }
