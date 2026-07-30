@@ -17,15 +17,12 @@
 
       packages.myNoctaliaWithFlatpakIcons = pkgs.writeShellScriptBin "noctalia-wrapper" ''
         export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share:$XDG_DATA_DIRS"
-        exec ${self.packages.${pkgs.stdenv.hostPlatform.system}.myNoctalia}/bin/noctalia "$@"
+        exec ${self.packages.${pkgs.stdenv.hostPlatform.system}.myNoctalia}/bin/noctalia-shell "$@"
       '';
 
       packages.myNoctaliaDynamicMonitor = pkgs.writeShellApplication {
         name = "noctalia-dynamic-monitor";
-        runtimeInputs = [
-          pkgs.jq
-          pkgs.niri
-        ];
+        runtimeInputs = [ pkgs.jq ];
         text = ''
           set -euo pipefail
 
@@ -57,7 +54,7 @@
 
           export NOCTALIA_SETTINGS_FILE="$out_settings"
           export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share:''${XDG_DATA_DIRS:-}"
-          exec ${self.packages.${pkgs.stdenv.hostPlatform.system}.myNoctalia}/bin/noctalia "$@"
+          exec ${self.packages.${pkgs.stdenv.hostPlatform.system}.myNoctalia}/bin/noctalia-shell "$@"
         '';
       };
     };
