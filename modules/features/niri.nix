@@ -40,7 +40,7 @@
             # O wrapper "ambxst" inicializa o axctl (daemon IPC para Niri)
             # e o Quickshell com o shell.qml do Ambxst.
             spawn-at-startup = [
-              { command = [ "ambxst" ]; }
+              [ "ambxst" ]
             ];
 
             xwayland-satellite.path = lib.getExe pkgs.xwayland-satellite;
