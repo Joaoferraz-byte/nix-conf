@@ -13,7 +13,7 @@ A arquitetura segue os princípios de:
 - **Declaratividade total**: todo o estado do sistema é descrito em código Nix.
 - **Modularidade**: cada funcionalidade é isolada em seu próprio módulo `.nix`.
 - **Reprodutibilidade**: o `flake.lock` garante builds determinísticos.
-- **Separação de responsabilidades**: configuração de sistema (NixOS) vs. configuração de usuário (Home Manager) vs. configuração do editor (vim-conf).
+- **Separação de responsabilidades**: configuração de sistema (NixOS) vs. configuração de usuário (Home Manager) vs. configuração do editor (lua-conf).
 
 ---
 
@@ -35,21 +35,21 @@ nix-conf/
     ├── features/                      # Módulos de funcionalidades isoladas
     │   ├── audiorelay.nix             # AudioRelay (Flatpak) + PipeWire virtual nodes
     │   ├── desktop-portals.nix        # XDG portals, Polkit, GNOME Keyring
-    │   ├── greeter.nix                # Greeter de login (SDDM + Astronaut Theme)
+    │   ├── flatpak.nix                # Gerenciamento declarativo de Flatpaks via nix-flatpak
+    │   ├── greeter.nix                # Greeter de login (SDDM + Noctalia theme)
     │   ├── keyd.nix                   # Remapeamento de teclado (leftmeta → overload)
-    │   ├── hyprland.nix               # Compositor Wayland Hyprland (configuração completa via UWSM)
-    │   ├── ambxst.nix                 # Shell Ambxst-X (Quickshell + axctl + Hyprland)
+    │   ├── hyprland.nix               # Compositor Wayland Hyprland (configuração completa)
+    │   ├── ambxst.nix               # Shell Ambxst-X (Quickshell + axctl + Hyprland)
+    │   ├── noctalia.json              # Configuração Noctalia antiga (JSON) [legado/arquivado]
+    │   ├── noctalia.nix               # Wrapper Noctalia antigo [legado/arquivado]
     │   ├── nvidia.nix                 # Driver NVIDIA legacy_580 + hardware.graphics
-    │   └── system-hardening.nix       # Firewall, sudo, GC automático, zram
+    │   ├── shell.nix                  # Módulo quickshell anterior [substituído por ambxst.nix]
+    │   └── system-hardening.nix      # Firewall, sudo, GC automático, zram
     └── hosts/
-        ├── my-machine/
-        │   ├── default.nix            # Define nixosConfigurations.myMachine + Home Manager
-        │   ├── configuration.nix      # Importa todos os módulos; pacotes de sistema; locale
-        │   └── hardware.nix           # UUIDs de disco, módulos de kernel, microcode AMD
-        └── dell-latitude-5410/
-            ├── default.nix            # Define nixosConfigurations.dell-latitude-5410
-            ├── configuration.nix      # Configuração específica do laptop Dell
-            └── hardware.nix           # Hardware específico do laptop Dell
+        └── my-machine/
+            ├── default.nix            # Define nixosConfigurations.myMachine + Home Manager
+            ├── configuration.nix      # Importa todos os módulos; pacotes de sistema; locale
+            └── hardware.nix           # UUIDs de disco, módulos de kernel, microcode AMD
 ```
 
 ---
@@ -65,9 +65,8 @@ flake.nix
 ├── home-manager (master)              → configuração do usuário livara
 │   └── follows nixpkgs
 ├── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
-├── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
-│   └── follows nixpkgs
-└── sddm-astronaut (flake)             → Tema Astronaut para o SDDM
+└── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
+    └── follows nixpkgs
 ```
 
 ---
@@ -79,16 +78,18 @@ Todos os módulos são exportados como `flake.nixosModules.<nome>` e importados 
 | Módulo | Responsabilidade |
 | :--- | :--- |
 | `myMachineHardware` | Hardware, filesystems btrfs, microcode AMD |
-| `hyprland` | Compositor Wayland Hyprland, UWSM, keybindings, regras de janela |
+| `myMachineConfiguration` | Módulo raiz do host; importa todos os outros |
+| `hyprland` | Compositor Wayland Hyprland, keybindings, regras de janela |
 | `nvidia` | Driver proprietário NVIDIA legacy_580 |
-| `greeter` | Login com SDDM + Astronaut Theme (Wayland) |
+| `greeter` | Login com SDDM + Noctalia theme |
 | `desktop-portals` | XDG portals (gnome+gtk), Polkit, GNOME Keyring |
 | `flatpak` | Flatpaks declarativos via nix-flatpak |
 | `audiorelay` | AudioRelay Flatpak + nós virtuais PipeWire + firewall |
 | `keyd` | Remapeamento `leftmeta` → `overload(meta, menu)` |
-| `ambxst` | Shell Quickshell (Ambxst-X) integrado ao Hyprland via axctl |
+| `ambxst` | Shell Quickshell (Ambxst-X) com axctl para Hyprland, fontes e JSONs de config |
 | `nixvim` (via Home Manager) | Neovim declarativo via vim-conf flake + NixVim module |
-| `ambxst` (via Home Manager) | Configurações JSON do Ambxst-X + settings customizados |
+| `ambxst` (via Home Manager) | Configurações JSON do Ambxst + keybinds declarativos |
+| `hyprland` (via Home Manager) | Configuração do usuário do Hyprland (keybinds, monitor, window rules) |
 
 ---
 
@@ -129,7 +130,7 @@ O arquivo `home/livara/home.nix` gerencia:
 - **MIME types**: Associações de arquivos (PDF → Okular, código → Neovim)
 - **XDG User Dirs**: Diretórios padrão criados declarativamente
 - **Variáveis de sessão**: `PROJECTS_DIR`
-- **Tema de ícones**: Papirus-Dark (GTK + dconf, lido pelo wrapper do Ambxst-X)
+- **Tema de ícones**: Papirus-Dark (GTK + dconf, lido pelo wrapper do Ambxst)
 - **Tema GTK**: adw-gtk3-dark
 
 ---
@@ -144,11 +145,38 @@ O Neovim é gerenciado via **NixVim** como módulo do Home Manager, com a config
 - O módulo oficial do NixVim (`inputs.nixvim.homeModules.nixvim`) é registrado em `home-manager.sharedModules`
 - O binário executável é exposto via `inputs.vim-conf.packages.<system>.default`
 
+### Plugins declarados (vim-conf)
+Consulte `vim-conf/config/plugins/` para a lista completa de plugins configurados declarativamente.
+
+### Linguagens suportadas
+Consulte `vim-conf/config/languages/` para as configurações de Java, Web, C/C++, embarcados e programação competitiva.
+
+---
+
+## Pacotes de Sistema (configuration.nix)
+
+Pacotes instalados globalmente em `environment.systemPackages`:
+
+| Pacote | Categoria |
+| :--- | :--- |
+| `git`, `gh` | Controle de versão |
+| `nautilus` | Gerenciador de arquivos |
+| `brave` | Navegador web |
+| `vesktop` | Cliente Discord |
+| `kdePackages.okular` | Leitor de PDF |
+| `foliate` | Leitor de e-books |
+| `obsidian` | Notas |
+| `hydralauncher`, `heroic` | Launchers de jogos |
+| `jdk21`, `jdk8` | Java Development Kit |
+| `jdt-language-server` | LSP para Java |
+| `spring-boot-cli` | CLI Spring Boot |
+
 ---
 
 ## Dívidas Técnicas Identificadas
 
-1. **Sincronização de Wallpapers**: A pasta `Wallpapers/` deve ser sincronizada com o gerenciador de wallpapers do Ambxst-X.
-2. **Pacotes duplicados no sistema**: `jdk21` e `jdt-language-server` devem ser consolidados em um módulo de pacotes dedicado.
+1. **Desktop entry do NixVim**: O desktop entry agora referencia o pacote do flake vim-conf diretamente, garantindo consistência com o módulo HM.
+2. **Pacotes duplicados no sistema**: `jdk21` e `jdt-language-server` aparecem tanto em `configuration.nix` quanto em `vim-conf/config/plugins/core.nix`. Devem ser consolidados em um módulo de pacotes dedicado.
 3. **Ausência de CI/CD**: Sem automação para validar o flake via GitHub Actions.
-4. **Widgets de Desktop**: Migrar os widgets legados do Noctalia para o sistema nativo do Ambxst-X.
+4. ~~**Pino de `nixpkgs-stable`**~~: REMOVIDO junto com a migração para Hyprland (antigo pino para Niri).
+5. **Módulos legados**: `shell.nix`, `noctalia.nix` e `noctalia.json` podem ser removidos após confirmação de que o Ambxst está funcionando corretamente.

@@ -12,7 +12,7 @@
       # AudioRelay requires TCP port 1239 open for audio streaming
       allowedTCPPorts = [ 1239 ];
 
-      # Allow mDNS (used by Avahi, local discovery)
+      # Allow mDNS (used by Noctalia, Avahi, local discovery)
       allowedUDPPorts = [ 5353 ];
 
       # Allow ICMP ping (useful for debugging, not a security risk)

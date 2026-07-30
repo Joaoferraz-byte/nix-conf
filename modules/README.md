@@ -21,7 +21,7 @@ Este diretório contém todos os módulos NixOS do repositório, organizados em 
 1. Crie `modules/hosts/<host>/configuration.nix` copiando o `my-machine/configuration.nix` como base.
 2. Crie `modules/hosts/<host>/default.nix` copiando o `my-machine/default.nix` e ajustando o nome.
 3. Crie `modules/hosts/<host>/hardware.nix` com os UUIDs e módulos específicos da máquina.
-4. Crie `modules/hosts/<host>/desktop-widgets.json` com o layout de widgets para o monitor dessa máquina.
+4. Crie `modules/hosts/<host>/desktop-widgets.json` com o layout de widgets do Noctalia para o monitor dessa máquina.
 5. Adicione o novo host ao `flake.nix` sob `nixosConfigurations`.
 
 ## Adicionando um Novo Módulo de Feature

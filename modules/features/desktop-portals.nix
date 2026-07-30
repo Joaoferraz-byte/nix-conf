@@ -26,7 +26,7 @@
       # ── Roteamento por interface (BUG-007) ─────────────────────────────
       # Usar config.common.default = "gnome" roteava TODAS as requisições
       # para o portal GNOME, causando falhas de inicialização em sessões
-      # não-GNOME (Niri). O roteamento por interface é mais robusto:
+      # não-GNOME (Hyprland). O roteamento por interface é mais robusto:
       # - ScreenCast/Screenshot → gnome (suporte nativo a Wayland PipeWire)
       # - Tudo mais → gtk (fallback universal, funciona sem GNOME)
       # Referência: nixpkgs#391489, portals.conf(5)
