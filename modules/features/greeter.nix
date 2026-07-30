@@ -1,8 +1,11 @@
 # ─── SDDM Display Manager + Noctalia Theme ────────────────────────────────
-# SDDM is the recommended display manager for Noctalia (used by KDE/Qt-based
-# shells). The sddm-noctalia-theme (github:ClementFombonne/sddm-noctalia-theme)
+# SDDM is the display manager with the Noctalia theme for the login screen.
+# The sddm-noctalia-theme (github:ClementFombonne/sddm-noctalia-theme)
 # provides an official NixOS module that handles packaging, dependencies, and
 # theme configuration declaratively.
+#
+# NOTE: This module uses SDDM + Noctalia theme. The greeter service was
+# previously greetd+regreet (older setup). Now migrated to SDDM.
 { self, inputs, ... }: {
   flake.nixosModules.greeter = { pkgs, lib, config, ... }: {
 
@@ -37,7 +40,7 @@
     };
 
     # ── Wayland support for SDDM (required by assertion) ──────────────────
-    # Niri is a Wayland-only compositor; SDDM must run in Wayland mode.
+    # Hyprland is a Wayland-only compositor; SDDM must run in Wayland mode.
     services.displayManager.sddm.wayland.enable = true;
 
     # ── Fonts: provide Cantarell for the greeter ─────────────────────────

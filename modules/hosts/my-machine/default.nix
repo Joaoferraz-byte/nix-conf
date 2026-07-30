@@ -13,12 +13,12 @@
         home-manager.useUserPackages = true;
         home-manager.extraSpecialArgs = { inherit inputs self; };
         home-manager.backupFileExtension = "backup";
-        # nixvim é importado como módulo compartilhado do Home Manager.
-        # Isso faz com que `programs.nixvim.*` esteja disponível para
-        # todos os usuários do home-manager sem precisar importar
-        # separadamente em cada home.nix.
+        # Módulos Home Manager compartilhados entre hosts.
+        # NixVim: configuração declarativa do editor (via vim-conf).
+        # Hyprland: configuração do compositor (keybinds, monitor, etc.).
         home-manager.sharedModules = [
           inputs.nixvim.homeModules.nixvim
+          self.homeManagerModules.hyprland
         ];
         home-manager.users.livara = import ../../../home/livara/home.nix;
       }

@@ -7,7 +7,7 @@
 
 ## Visão Geral
 
-Este repositório contém a configuração completa de um sistema NixOS baseado em **flakes**, para um desktop de alto desempenho com GPU NVIDIA, compositor Wayland **Niri**, e um ambiente de desenvolvimento focado em **Java Spring Boot** e **C/C++**.
+Este repositório contém a configuração completa de um sistema NixOS baseado em **flakes**, para um desktop de alto desempenho com GPU NVIDIA, compositor Wayland **Hyprland**, e um ambiente de desenvolvimento focado em **Java Spring Boot** e **C/C++**.
 
 A arquitetura segue os princípios de:
 - **Declaratividade total**: todo o estado do sistema é descrito em código Nix.
@@ -36,12 +36,12 @@ nix-conf/
     │   ├── audiorelay.nix             # AudioRelay (Flatpak) + PipeWire virtual nodes
     │   ├── desktop-portals.nix        # XDG portals, Polkit, GNOME Keyring
     │   ├── flatpak.nix                # Gerenciamento declarativo de Flatpaks via nix-flatpak
-    │   ├── greeter.nix                # Greeter de login (greetd + regreet)
+    │   ├── greeter.nix                # Greeter de login (SDDM + Noctalia theme)
     │   ├── keyd.nix                   # Remapeamento de teclado (leftmeta → overload)
-    │   ├── niri.nix                   # Compositor Wayland Niri (configuração completa)
-    │   ├── ambxst.nix               # Shell Ambxst (Quickshell + axctl + Niri)
-    │   ├── noctalia.json              # Configuração da barra Noctalia (JSON) [legado]
-    │   ├── noctalia.nix               # Wrapper Noctalia via nix-wrapper-modules [legado]
+    │   ├── hyprland.nix               # Compositor Wayland Hyprland (configuração completa)
+    │   ├── ambxst.nix               # Shell Ambxst-X (Quickshell + axctl + Hyprland)
+    │   ├── noctalia.json              # Configuração Noctalia antiga (JSON) [legado/arquivado]
+    │   ├── noctalia.nix               # Wrapper Noctalia antigo [legado/arquivado]
     │   ├── nvidia.nix                 # Driver NVIDIA legacy_580 + hardware.graphics
     │   ├── shell.nix                  # Módulo quickshell anterior [substituído por ambxst.nix]
     │   └── system-hardening.nix      # Firewall, sudo, GC automático, zram
@@ -59,15 +59,13 @@ nix-conf/
 ```
 flake.nix
 ├── nixpkgs (nixos-unstable)           → fonte principal de pacotes
-├── nixpkgs-stable (pino fixo)         → segurança para builds instáveis do niri
 ├── flake-parts                        → estrutura modular do flake
 ├── import-tree                        → auto-importação recursiva de ./modules
-├── wrapper-modules                    → wrappers para Neovim e Noctalia
 ├── nix-flatpak                        → gerenciamento declarativo de Flatpaks
 ├── home-manager (master)              → configuração do usuário livara
 │   └── follows nixpkgs
 ├── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
-└── shell-conf (flake)                 → Ambxst shell (Quickshell + axctl + Niri)
+└── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
     └── follows nixpkgs
 ```
 
@@ -81,16 +79,17 @@ Todos os módulos são exportados como `flake.nixosModules.<nome>` e importados 
 | :--- | :--- |
 | `myMachineHardware` | Hardware, filesystems btrfs, microcode AMD |
 | `myMachineConfiguration` | Módulo raiz do host; importa todos os outros |
-| `niri` | Compositor Wayland, keybindings, regras de janela |
+| `hyprland` | Compositor Wayland Hyprland, keybindings, regras de janela |
 | `nvidia` | Driver proprietário NVIDIA legacy_580 |
-| `greeter` | Login com greetd + regreet (tema adw-gtk3-dark) |
+| `greeter` | Login com SDDM + Noctalia theme |
 | `desktop-portals` | XDG portals (gnome+gtk), Polkit, GNOME Keyring |
 | `flatpak` | Flatpaks declarativos via nix-flatpak |
 | `audiorelay` | AudioRelay Flatpak + nós virtuais PipeWire + firewall |
 | `keyd` | Remapeamento `leftmeta` → `overload(meta, menu)` |
-| `ambxst` | Shell Quickshell (Ambxst) com axctl para Niri, fontes e JSONs de config |
+| `ambxst` | Shell Quickshell (Ambxst-X) com axctl para Hyprland, fontes e JSONs de config |
 | `nixvim` (via Home Manager) | Neovim declarativo via vim-conf flake + NixVim module |
 | `ambxst` (via Home Manager) | Configurações JSON do Ambxst + keybinds declarativos |
+| `hyprland` (via Home Manager) | Configuração do usuário do Hyprland (keybinds, monitor, window rules) |
 
 ---
 
@@ -108,7 +107,7 @@ modules/hosts/my-machine/default.nix
         │
         ├── nixosModules.myMachineConfiguration (configuration.nix)
         │     ├── nixosModules.myMachineHardware
-        │     ├── nixosModules.niri
+        │     ├── nixosModules.hyprland
         │     ├── nixosModules.nvidia
         │     ├── nixosModules.greeter
         │     ├── nixosModules.desktop-portals
@@ -179,5 +178,5 @@ Pacotes instalados globalmente em `environment.systemPackages`:
 1. **Desktop entry do NixVim**: O desktop entry agora referencia o pacote do flake vim-conf diretamente, garantindo consistência com o módulo HM.
 2. **Pacotes duplicados no sistema**: `jdk21` e `jdt-language-server` aparecem tanto em `configuration.nix` quanto em `vim-conf/config/plugins/core.nix`. Devem ser consolidados em um módulo de pacotes dedicado.
 3. **Ausência de CI/CD**: Sem automação para validar o flake via GitHub Actions.
-4. **Pino de `nixpkgs-stable`**: Ainda necessário para o Niri; deve ser removido quando o upstream estabilizar.
-5. **Módulos legados**: `shell.nix` e `noctalia.nix` podem ser removidos após confirmação de que o Ambxst está funcionando corretamente.
+4. ~~**Pino de `nixpkgs-stable`**~~: REMOVIDO junto com a migração para Hyprland (antigo pino para Niri).
+5. **Módulos legados**: `shell.nix`, `noctalia.nix` e `noctalia.json` podem ser removidos após confirmação de que o Ambxst está funcionando corretamente.

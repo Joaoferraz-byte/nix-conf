@@ -16,9 +16,12 @@
         home-manager.useUserPackages = true;
         home-manager.extraSpecialArgs = { inherit inputs self; };
         home-manager.backupFileExtension = "backup";
-        # NixVim módulo compartilhado (mesmo que my-machine)
+        # Módulos Home Manager compartilhados entre hosts.
+        # NixVim: configuração declarativa do editor (via vim-conf).
+        # Hyprland: configuração do compositor (keybinds, monitor, etc.).
         home-manager.sharedModules = [
           inputs.nixvim.homeModules.nixvim
+          self.homeManagerModules.hyprland
         ];
         home-manager.users.livara = import ../../../home/livara/home.nix;
       }
