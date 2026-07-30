@@ -6,6 +6,10 @@
       enable = true;
       enable32Bit = true;
     };
+    boot.kernelModules = [
+      "nvidia"
+      "nvidia_modeset"
+    ];
     hardware.nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
       modesetting.enable = true;

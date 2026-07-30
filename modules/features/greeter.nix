@@ -36,6 +36,10 @@
       };
     };
 
+    # ── Wayland support for SDDM (required by assertion) ──────────────────
+    # Niri is a Wayland-only compositor; SDDM must run in Wayland mode.
+    services.displayManager.sddm.wayland.enable = true;
+
     # ── Fonts: provide Cantarell for the greeter ─────────────────────────
     # SDDM Noctalia theme needs fonts available in the system package store.
     fonts.packages = with pkgs; [

@@ -80,22 +80,19 @@
     };
 
     # ── Boot Security ─────────────────────────────────────────────────────
-    boot = {
-      loader.systemd-boot.enable = true;
-      loader.systemd-boot.editor = false; # Prevent editing boot entries
+    # NOTE: boot.loader.* and boot.kernelModules are host-specific decisions
+    # (nvidia vs intel, systemd-boot vs grub) and must be set in the host
+    # configuration.nix, not in this shared hardening module.
+    # kernelParams for hardening are kept here as they apply to all systems.
+    boot.loader.systemd-boot.editor = false; # Prevent editing boot entries
 
-      kernelModules = [
-        "nvidia"
-        "nvidia_modeset"
-      ];
-      kernelParams = [
-        "mitigations=auto"
-        "slab_nomerge"
-        "init_on_alloc=1"
-        "init_on_free=1"
-        "page_alloc.shuffle=1"
-      ];
-    };
+    boot.kernelParams = [
+      "mitigations=auto"
+      "slab_nomerge"
+      "init_on_alloc=1"
+      "init_on_free=1"
+      "page_alloc.shuffle=1"
+    ];
 
     # ── Sudo Hardening ────────────────────────────────────────────────────
     security.sudo = {
