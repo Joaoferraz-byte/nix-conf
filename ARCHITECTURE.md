@@ -29,15 +29,7 @@ nix-conf/
 ├── Wallpapers/                        # Papéis de parede (assets estáticos)
 ├── home/
 │   └── livara/
-│       ├── home.nix                   # Configuração Home Manager do usuário livara
-│       └── nvim-config/               # Config Lua legada (substituída pelo lua-conf externo)
-│           ├── init.lua
-│           └── lua/
-│               ├── core/              # Opções e keymaps base
-│               ├── dap/               # Debug Adapter Protocol
-│               ├── lsp/               # Language Server Protocol
-│               ├── plugins/           # Plugins gerais
-│               └── ui/                # Interface (dashboard)
+│       └── home.nix                   # Configuração Home Manager do usuário livara
 └── modules/
     ├── parts.nix                      # Define sistemas suportados (x86_64-linux, aarch64-linux)
     ├── features/                      # Módulos de funcionalidades isoladas
@@ -46,7 +38,6 @@ nix-conf/
     │   ├── flatpak.nix                # Gerenciamento declarativo de Flatpaks via nix-flatpak
     │   ├── greeter.nix                # Greeter de login (greetd + regreet)
     │   ├── keyd.nix                   # Remapeamento de teclado (leftmeta → overload)
-    │   ├── neovim-wrapped.nix         # Neovim via nix-wrapper-modules + lua-conf externo
     │   ├── niri.nix                   # Compositor Wayland Niri (configuração completa)
     │   ├── noctalia.json              # Configuração da barra Noctalia (JSON)
     │   ├── noctalia.nix               # Wrapper Noctalia via nix-wrapper-modules
@@ -73,7 +64,7 @@ flake.nix
 ├── nix-flatpak                        → gerenciamento declarativo de Flatpaks
 ├── home-manager (master)              → configuração do usuário livara
 │   └── follows nixpkgs
-└── lua-conf (flake = false)           → repositório externo de configuração Lua do Neovim
+└── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
 ```
 
 ---
@@ -93,7 +84,7 @@ Todos os módulos são exportados como `flake.nixosModules.<nome>` e importados 
 | `flatpak` | Flatpaks declarativos via nix-flatpak |
 | `audiorelay` | AudioRelay Flatpak + nós virtuais PipeWire + firewall |
 | `keyd` | Remapeamento `leftmeta` → `overload(meta, menu)` |
-| `neovimWrapped` | Neovim com plugins Nix + config Lua do lua-conf |
+| `nixvim` (via Home Manager) | Neovim declarativo via vim-conf flake + NixVim module |
 
 ---
 
@@ -118,7 +109,7 @@ modules/hosts/my-machine/default.nix
         │     ├── nixosModules.flatpak
         │     ├── nixosModules.audiorelay
         │     ├── nixosModules.keyd
-        │     └── nixosModules.neovimWrapped
+        │     └── home-manager.users.livara → home/livara/home.nix
         │
         └── home-manager.users.livara → home/livara/home.nix
 ```
@@ -138,31 +129,19 @@ O arquivo `home/livara/home.nix` gerencia:
 
 ## Configuração do Editor (Neovim)
 
-O Neovim é gerenciado como um **pacote de sistema** via `neovim-wrapped.nix`, usando `nix-wrapper-modules`. A configuração Lua reside no repositório externo `lua-conf` (input do flake).
+O Neovim é gerenciado via **NixVim** como módulo do Home Manager, com a configuração declarativa no repositório externo `vim-conf`.
 
-### Plugins declarados (nix-conf)
-`nvim-lspconfig`, `nvim-treesitter`, `nvim-cmp`, `cmp-nvim-lsp`, `cmp-buffer`, `cmp-path`, `luasnip`, `github-nvim-theme`, `nvim-java`, `nvim-tree-lua`, `nvim-web-devicons`, `lualine-nvim`, `telescope-nvim`, `plenary-nvim`, `vim-fugitive`, `gitsigns-nvim`, `which-key-nvim`, `bufferline-nvim`, `snacks-nvim`, `nvim-dap`, `nvim-dap-ui`, `nvim-nio`
+### Arquitetura NixVim
+- `programs.nixvim.enable = true` no `home.nix` do usuário
+- `programs.nixvim.imports = [ inputs.vim-conf.lib.nixvimModule ]` — carrega a configuração do flake vim-conf
+- O módulo oficial do NixVim (`inputs.nixvim.homeModules.nixvim`) é registrado em `home-manager.sharedModules`
+- O binário executável é exposto via `inputs.vim-conf.packages.<system>.default`
 
-### Runtime packages (nix-conf)
-`gcc`, `clang-tools`, `cmake`, `gnumake`, `maven`, `gradle`, `jdk21`, `jdt-language-server`, `spring-boot-cli`, `kotlin`, `kotlin-language-server`, `pyright`, `vscode-langservers-extracted`, `typescript-language-server`, `angular-language-server`, `tailwindcss-language-server`, `prettier`, `ripgrep`, `fd`, `unzip`, `gnutar`, `python3`, `python3Packages.manim`
+### Plugins declarados (vim-conf)
+Consulte `vim-conf/config/plugins/` para a lista completa de plugins configurados declarativamente.
 
-### Estrutura lua-conf
-```
-lua-conf/
-├── init.lua                    # Ponto de entrada; carrega todos os módulos
-└── lua/
-    ├── custom_core/
-    │   ├── options.lua         # Opções do Neovim (números de linha, tabs, etc.)
-    │   └── keymaps.lua         # Keymaps globais
-    ├── custom_dap/
-    │   └── init.lua            # Configuração do DAP (debug)
-    ├── custom_lsp/
-    │   └── init.lua            # LSP: jdtls, clangd, pyright, angularls, etc.
-    ├── custom_plugins/
-    │   └── init.lua            # Treesitter, nvim-cmp, nvim-tree, lualine, etc.
-    └── custom_ui/
-        └── init.lua            # Dashboard (snacks.nvim)
-```
+### Linguagens suportadas
+Consulte `vim-conf/config/languages/` para as configurações de Java, Web, C/C++, embarcados e programação competitiva.
 
 ---
 
@@ -188,7 +167,7 @@ Pacotes instalados globalmente em `environment.systemPackages`:
 
 ## Dívidas Técnicas Identificadas
 
-1. **`nvim-config/` legado em `home/livara/`**: A pasta `home/livara/nvim-config/` contém uma configuração Lua antiga que não é mais usada pelo sistema (o wrapper aponta para `lua-conf`). Deve ser removida para evitar confusão.
-2. **Pacotes duplicados no sistema**: `jdk21` e `jdt-language-server` aparecem tanto em `configuration.nix` quanto nos `runtimePkgs` do `neovim-wrapped.nix`. Devem ser consolidados em um módulo de pacotes dedicado.
+1. **Desktop entry do NixVim**: O desktop entry agora referencia o pacote do flake vim-conf diretamente, garantindo consistência com o módulo HM.
+2. **Pacotes duplicados no sistema**: `jdk21` e `jdt-language-server` aparecem tanto em `configuration.nix` quanto em `vim-conf/config/plugins/core.nix`. Devem ser consolidados em um módulo de pacotes dedicado.
 3. **Ausência de CI/CD**: Sem automação para validar o flake via GitHub Actions.
 4. **Pino de `nixpkgs-stable`**: Ainda necessário para o Niri; deve ser removido quando o upstream estabilizar.
