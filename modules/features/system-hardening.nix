@@ -140,6 +140,8 @@
     nix = {
       settings = {
         auto-optimise-store = true;
+        # Habilita nix-command e flakes para todos os hosts (DRY — evita duplicação em cada configuration.nix)
+        experimental-features = [ "nix-command" "flakes" ];
         trusted-users = [ "root" "livara" ];
         allow-import-from-derivation = false;
         extra-trusted-public-keys = [
