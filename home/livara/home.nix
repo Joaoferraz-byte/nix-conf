@@ -22,7 +22,26 @@
   home.packages = with pkgs; [
     manim
     nerd-fonts.jetbrains-mono
+    # Tema de ícones para o Ambxst (launcher e barra)
+    # O Ambxst usa QS_ICON_THEME para encontrar ícones de apps.
+    # O Papirus-Dark oferece cobertura ampla e visual consistente.
+    papirus-icon-theme
   ];
+
+  # ── Tema de ícones GTK ───────────────────────────────────────────────────
+  # Define o tema de ícones para o sistema GTK e para o Ambxst.
+  # O wrapper do Ambxst lê o tema via gsettings e exporta QS_ICON_THEME.
+  gtk = {
+    enable = true;
+    iconTheme = {
+      package = pkgs.papirus-icon-theme;
+      name = "Papirus-Dark";
+    };
+    theme = {
+      package = pkgs.adw-gtk3;
+      name = "adw-gtk3-dark";
+    };
+  };
 
   programs.alacritty = {
     enable = true;
@@ -55,6 +74,12 @@
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       xdg-terms = [ "alacritty" ];
+      # Tema de ícones: lido pelo wrapper do Ambxst via gsettings
+      # para definir QS_ICON_THEME corretamente
+      icon-theme = "Papirus-Dark";
+      gtk-theme = "adw-gtk3-dark";
+      cursor-theme = "Bibata-Modern-Classic";
+      cursor-size = 24;
     };
   };
 

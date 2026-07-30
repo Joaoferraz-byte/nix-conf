@@ -11,7 +11,12 @@
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
-      self.nixosModules.quickshell
+      # Ambxst substitui o módulo quickshell anterior.
+      # O módulo ambxst.nix gerencia:
+      #   - O pacote "ambxst" (wrapper Nix com Quickshell + axctl)
+      #   - As fontes necessárias (Phosphor Icons, Roboto, Noto, etc.)
+      #   - O módulo HM que copia os JSONs de configuração
+      self.nixosModules.ambxst
     ];
 
     # ── Desktop Widgets (host-specific Noctalia layout) ─────────────────
