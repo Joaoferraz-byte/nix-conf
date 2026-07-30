@@ -62,7 +62,7 @@
     name = "Neovim (NixVim)";
     genericName = "Editor";
     comment = "Edit text files";
-    exec = "${inputs.vim-conf.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/nvim %F";
+    exec = "alacritty -e nvim %F";
     terminal = true;
     icon = "nvim";
     type = "Application";
