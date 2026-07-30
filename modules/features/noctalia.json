@@ -41,7 +41,7 @@
           "clockColor": "none",
           "customFont": "",
           "formatHorizontal": "HH:mm ddd, MMM dd",
-          "formatVertical": "dd ― MM",
+          "formatVertical": "dd \u2015 MM",
           "id": "Clock",
           "tooltipFormat": "HH:mm ddd, MMM dd",
           "useCustomFont": false
@@ -256,7 +256,7 @@
     "settingsPanelSideBarCardStyle": false
   },
   "location": {
-    "name": "São Paulo",
+    "name": "S\u00e3o Paulo",
     "weatherEnabled": true,
     "weatherShowEffects": true,
     "weatherTaliaMascotAlways": false,
@@ -676,31 +676,5 @@
     "resumeLockCommand": "",
     "resumeSuspendCommand": "",
     "customCommands": "[]"
-  },
-  "desktopWidgets": {
-    "enabled": true,
-    "overviewEnabled": true,
-    "gridSnap": true,
-    "gridSnapScale": true,
-    "monitorWidgets": [
-      {
-        "name": "HDMI-A-1",
-        "widgets": [
-          {
-            "clockColor": "none",
-            "clockStyle": "digital",
-            "customFont": "",
-            "format": "HH:mm\\nd MMMM yyyy",
-            "id": "Clock",
-            "roundedCorners": true,
-            "scale": 1.0666666666666667,
-            "showBackground": true,
-            "useCustomFont": false,
-            "x": 1740,
-            "y": 900
-          }
-        ]
-      }
-    ]
   }
 }
