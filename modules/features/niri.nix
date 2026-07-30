@@ -120,8 +120,12 @@
             "XF86MonBrightnessUp".spawn-sh = "brightnessctl set +5%";
             "XF86MonBrightnessDown".spawn-sh = "brightnessctl set 5%-";
             "Mod+Shift+E".quit = _: { };
-            "Mod+WheelScrollUp".previous-window = { cooldown-ms = 150; };
-            "Mod+WheelScrollDown".next-window = { cooldown-ms = 150; };
+            # NOTE: next-window/previous-window are only valid inside
+            # recent-windows.binds (Alt-Tab switcher), NOT in the main
+            # binds section. For wheel scrolling across columns, use
+            # focus-column-right/left instead.
+            "Mod+WheelScrollUp".focus-column-left = { cooldown-ms = 150; };
+            "Mod+WheelScrollDown".focus-column-right = { cooldown-ms = 150; };
           };
         };
       };
