@@ -6,6 +6,8 @@
       hydralauncher heroic
       jdk21 jdk8 jdt-language-server spring-boot-cli lombok
       file-roller
+      tlp   # Power management (laptop)
+      powertop   # Power consumption analysis
     ];
   };
 }
