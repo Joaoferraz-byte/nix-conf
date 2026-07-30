@@ -1,45 +1,84 @@
 # Changelog
 
-## Revisão de arquitetura e limpeza técnica
-
-### Flake
-
-- `home-manager` fixado na `master` com `inputs.nixpkgs.follows = "nixpkgs"` — corresponde ao canal `nixos-unstable`.
-- Entrada `nixpkgs-stable` mantida como pino de segurança para o `niri` contra falhas transientes de build da `libdisplay-info` no `nixos-unstable`.
-- `perSystem` define `_module.args.pkgs` com `allowUnfree = true` — fonte única para pacotes proprietários.
-- Corrigido erro de licença NVIDIA adicionando `allowUnfree = true` na definição do `nixosSystem` no `default.nix`.
-
-### Niri
-
-- Removido `v2-settings = true` depreciado — o módulo wrapper ativa as configurações v2 por padrão.
-- Removido `overrideAttrs` redundante para `providedSessions` — o wrapper passa `providedSessions` automaticamente.
-- Blur de fundo mantido (`background-effect { blur = true }`, válido desde niri 26.04).
-
-### AudioRelay
-
-- Restaurado `XDG_CURRENT_DESKTOP = "GNOME"` e `DBUS_SESSION_BUS_ADDRESS` — força o protocolo StatusNotifierItem para que o ícone da bandeja renderize no Noctalia.
-- Movido `security.rtkit.enable` de `desktop-portals.nix` para cá — o rtkit pertence ao PipeWire.
-
-### Portais Desktop
-
-- Removido `security.rtkit.enable` (movido para `audiorelay.nix`).
-
-### Home Manager
-
-- Migração do Neovim para um módulo NixOS via `nix-wrapper-modules`.
-- Separação da configuração Lua para o repositório externo `lua-conf`.
-- Removida a instalação manual do Neovim e `JAVA_HOME` do `home.nix`, agora gerenciados pelo wrapper.
-- Adicionado `home-manager.backupFileExtension = "backup"` para resolver conflitos de arquivos existentes (ex: `mimeapps.list`) durante a ativação.
-- `stateVersion` atualizado para `26.11` em todo o sistema.
+## Refatoração de organização e modularidade
 
 ### Estrutura
 
-- Removido sistemas darwin do `parts.nix` — este é um desktop NVIDIA apenas Linux.
-- Indentação normalizada para 2 espaços em `hardware.nix` e `flatpak.nix`.
-- Removido importação duplicada do módulo `home-manager` e `allowUnfree` duplicado do `configuration.nix`.
-- Removido bloco `meta:M` vazio de `keyd.nix`.
-- Ativado módulo `keyd.nix` no `configuration.nix`.
-- Traduzido todos os comentários e descrições de inglês para português.
+- `ARCHITECTURE.md` atualizado para refletir a arquitetura atual (sem referências a `neovim-wrapped` ou `lua-conf`).
+- `ARCHITECTURE_REVIEW_REPORT.md` reescrito com as revisões arquiteturais aplicadas até agora.
+- `CHANGELOG.md` reescrito removendo referências a módulos e inputs que não existem mais.
+- Módulo `system-hardening` agora é importado no `configuration.nix` (estava definido mas inativo).
+
+### Pacotes
+
+- `modules/packages/common.nix` e `modules/packages/flatpak.nix` mantidos sob `packages/` como convenção para gerência de pacotes.
+- `modules/features/` reservado para funcionalidades do sistema (greeter, niri, nvidia, etc.).
+
+---
+
+## Auditoria de segurança e hardening
+
+### Firewall
+
+- Política padrão `DROP` configurada explicitamente.
+- Porta TCP 1239 (AudioRelay) permitida.
+- mDNS (UDP 5353) permitido para Noctalia/Avahi.
+- Stateful connection tracking habilitado.
+
+### Kernel
+
+- `ptrace_scope=2`, SYN cookies, source routing desabilitado.
+- ICMP redirects desabilitados, IP forwarding desabilitado.
+- BPF JIT hardened, kernel pointers ocultos.
+- ASLR forçado (`randomize_va_space=2`).
+
+### Boot
+
+- Editor do systemd-boot desabilitado.
+- Kernel params: `mitigations=auto`, `slab_nomerge`, `init_on_alloc/free`, `page_alloc.shuffle`.
+
+### Privacidade
+
+- `fwupd` desabilitado.
+- `auditd` habilitado.
+- Journald: 200M máximo, retenção de 30 dias, compressão e selo ativados.
+
+### Nix
+
+- `allow-import-from-derivation` desabilitado.
+- `trusted-users` restrito a `root` e `livara`.
+
+---
+
+## Tema do greeter (login manager)
+
+### Greeter (regreet)
+
+- Background: ícone violeta do Noctalia (`6afde16e...jpg`) com fit `Cover`.
+- GTK theme: `adw-gtk3-dark`.
+- Cursor: `Bibata-Modern-Classic`.
+- Font: `Cantarell 14`.
+- Clock: 24h, locale `pt_BR`.
+- CSS completo com tema Noctalia (roxo/violeta):
+  - Efeito de vidro fosco no container principal.
+  - Botões com tint roxo e transições suaves.
+  - Focus rings brilhantes nos campos de entrada.
+  - Bordas arredondadas (10-16px) em todos os elementos.
+- Mensagem de boas-vindas: "Bem-vindo de volta".
+- Pacotes adicionados: `bibata-cursor-theme`, `cantarell-fonts`.
+
+---
+
+## Correção do erro de compilação (attribute 'nixvim' missing)
+
+### Home Manager
+
+- Desktop entry do Neovim corrigido: `${pkgs.nixvim}/bin/nvim` substituído por referência ao pacote do flake `vim-conf`.
+- Parâmetro `lib` adicionado ao escopo de `home.nix`.
+
+### Documentação
+
+- `ARCHITECTURE.md` atualizado para refletir a arquitetura NixVim atual.
 
 ---
 
@@ -63,5 +102,5 @@
 ## Modularização inicial
 
 - Home Manager integrado ao flake via `home-manager.nixosModules.home-manager` com `useGlobalPkgs` e `useUserPackages`.
-- Configuração do usuário centralizada em `home/livara/home.nix` (Neovim agora é um módulo de sistema).
+- Configuração do usuário centralizada em `home/livara/home.nix`.
 - Módulos de recursos em `modules/features/`, configuração do host em `modules/hosts/my-machine/`.

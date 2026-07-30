@@ -11,12 +11,23 @@
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
     # NixVim permanece uma entrada independente, sem forçar `follows`.
     nixvim.url = "github:nix-community/nixvim";
+    # NOTA: nixvim aparece como input direto E dentro do vim-conf.
+    # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
+    # O vim-conf usa o nixvim internamente para construir o pacote.
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
   outputs = inputs@{ self, ... }: inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+    # ── Input Consistency Policy ────────────────────────────────────────
+    # Inputs do flake são usados para:
+    #   - nixpkgs-stable: pino de segurança para o niri (libdisplay-info)
+    #   - wrapper-modules: wrapper do Noctalia (nix-wrapper-modules)
+    #   - nix-flatpak: gerência declarativa de Flatpaks
+    #   - vim-conf: configuração NixVim declarativa (plugins, languages, keymaps)
+    #   - nixvim: módulo HM compartilhado para programas.nixvim.*
+    #   - home-manager: configuração do usuário livara
     imports = [
       (inputs.import-tree ./modules)
     ];

@@ -10,7 +10,14 @@
       self.nixosModules.flatpak
       self.nixosModules.audiorelay
       self.nixosModules.keyd
+      self.nixosModules.system-hardening
     ];
+
+    # ── Desktop Widgets (host-specific Noctalia layout) ─────────────────
+    # Este arquivo contém a configuração de widgets de desktop com
+    # coordenadas e nome de monitor específicos desta máquina.
+    environment.etc."noctalia/desktop-widgets.json".text =
+      builtins.toJSON (builtins.fromJSON (builtins.readFile ./desktop-widgets.json));
 
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
