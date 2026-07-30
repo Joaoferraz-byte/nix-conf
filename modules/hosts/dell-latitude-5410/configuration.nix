@@ -50,6 +50,12 @@
       variant = "";
     };
     console.keyMap = "br-abnt2";
+    # ── Energia ────────────────────────────────────────────────────────────
+    # O Dell Latitude 5410 usa tlp (laptop), que conflita com power-profiles-daemon.
+    # O ambxst.nix define power-profiles-daemon.enable = mkDefault true, então
+    # forçamos false aqui para manter o tlp.
+    services.power-profiles-daemon.enable = lib.mkForce false;
+
     # ── Usuário ───────────────────────────────────────────────────────────
     users.users."livara" = {
       isNormalUser = true;

@@ -40,8 +40,18 @@
     ];
 
     # ── Serviços recomendados pelo Ambxst ──────────────────────────────────
+    # NOTE: power-profiles-daemon conflicts with tlp. The Dell Latitude 5410
+    # host sets services.tlp.enable = true, so we disable power-profiles-daemon
+    # there. For hosts that want power-profiles-daemon, they should NOT enable tlp.
+    # Use `lib.mkForce false` to ensure tlp wins on the Dell host.
     services.upower.enable = lib.mkDefault true;
     services.power-profiles-daemon.enable = lib.mkDefault true;
+
+    # Disable tlp if power-profiles-daemon is enabled to avoid the NixOS assertion.
+    # Hosts that prefer tlp (e.g., Dell Latitude) should override this with
+    # `services.tlp.enable = lib.mkForce true` and
+    # `services.power-profiles-daemon.enable = lib.mkForce false`.
+    services.tlp.enable = lib.mkDefault false;
 
     # ── Módulo Home Manager ────────────────────────────────────────────────
     # Gerencia os arquivos JSON de configuração e os keybinds do Ambxst.
