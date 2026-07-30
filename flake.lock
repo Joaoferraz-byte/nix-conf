@@ -177,6 +177,22 @@
     },
     "nixpkgs_3": {
       "locked": {
+        "lastModified": 1768564909,
+        "narHash": "sha256-Kell/SpJYVkHWMvnhqJz/8DqQg2b6PguxVWOuadbHCc=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "e4bae1bd10c9c57b2cf517953ab70060a828ee6f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
         "lastModified": 1785301185,
         "narHash": "sha256-eoS3KQTO0aPWXZvIaRbRAzSSHW3l5wdMFXtT1ISfoKA=",
         "owner": "NixOS",
@@ -191,7 +207,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
+    "nixpkgs_5": {
       "locked": {
         "lastModified": 1784555310,
         "narHash": "sha256-/FCliTPgiuV1owejZFNx3Ch9irdvkOfOFl+HHZ+DrtM=",
@@ -207,7 +223,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_5": {
+    "nixpkgs_6": {
       "locked": {
         "lastModified": 1780336545,
         "narHash": "sha256-vhVhuXzFrIOfcssC/9hDHx7MHzDKjF3keHuREOQqQiQ=",
@@ -246,7 +262,7 @@
     "nixvim_2": {
       "inputs": {
         "flake-parts": "flake-parts_3",
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_5",
         "systems": "systems_2"
       },
       "locked": {
@@ -272,8 +288,27 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable",
         "nixvim": "nixvim",
+        "sddm-noctalia": "sddm-noctalia",
         "vim-conf": "vim-conf",
         "wrapper-modules": "wrapper-modules"
+      }
+    },
+    "sddm-noctalia": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1769159502,
+        "narHash": "sha256-crN2oqml/QJTjOCa3/i0MQREDvPzg5TYC5BfKnk77fQ=",
+        "owner": "ClementFombonne",
+        "repo": "sddm-noctalia-theme",
+        "rev": "92bf8e6ff35be19b50b60a38e0f3d6e38e1c66e1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ClementFombonne",
+        "repo": "sddm-noctalia-theme",
+        "type": "github"
       }
     },
     "systems": {
@@ -310,15 +345,15 @@
     },
     "vim-conf": {
       "inputs": {
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_4",
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1785342860,
-        "narHash": "sha256-kPGGOVJfOyoLLfd8f+Ta/jD/G/RM6vNZk9KkZbFuxZY=",
+        "lastModified": 1785376865,
+        "narHash": "sha256-xCZJPSWWEaYBEr1cDKZ1vbFWkgGbYV2fxxAyGrUHg8g=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "5fef181079d04eb70b9aeb23e7d5ab9d68923fdd",
+        "rev": "c222b92540e1538e2a5c115a467eed16fc8f34c4",
         "type": "github"
       },
       "original": {
@@ -329,7 +364,7 @@
     },
     "wrapper-modules": {
       "inputs": {
-        "nixpkgs": "nixpkgs_5"
+        "nixpkgs": "nixpkgs_6"
       },
       "locked": {
         "lastModified": 1782135443,
