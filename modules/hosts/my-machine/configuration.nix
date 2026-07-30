@@ -18,21 +18,15 @@
       #   - O módulo HM que copia os JSONs de configuração
       self.nixosModules.ambxst
     ];
-
-    # ── Desktop Widgets (host-specific Noctalia layout) ─────────────────
-    # Este arquivo contém a configuração de widgets de desktop com
-    # coordenadas e nome de monitor específicos desta máquina.
-    environment.etc."noctalia/desktop-widgets.json".text =
-      builtins.toJSON (builtins.fromJSON (builtins.readFile ./desktop-widgets.json));
-
+    # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
     boot.kernelPackages = pkgs.linuxPackages_zen;
-
+    # ── Rede ──────────────────────────────────────────────────────────────
     networking.hostName = "limine";
     networking.networkmanager.enable = true;
-
+    # ── Local ─────────────────────────────────────────────────────────────
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
     i18n.extraLocaleSettings = {
@@ -51,7 +45,7 @@
       variant = "";
     };
     console.keyMap = "br-abnt2";
-
+    # ── Usuário ───────────────────────────────────────────────────────────
     users.users."livara" = {
       isNormalUser = true;
       description  = "Livara";
@@ -59,9 +53,8 @@
       shell        = pkgs.zsh;
     };
     programs.zsh.enable = true;
-
-    nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
+    # ── Nix ───────────────────────────────────────────────────────────────
+    # experimental-features movido para system-hardening.nix (DRY)
     system.stateVersion = "26.11";
   };
 }
