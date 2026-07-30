@@ -36,7 +36,7 @@
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif
       # Phosphor Icons (embutido no pacote do shell-conf)
-      inputs.shell-conf.packages.${pkgs.stdenv.hostPlatform.system}.phosphor-icons
+      inputs.shell-conf.packages.${pkgs.stdenv.hostPlatform.system}.ttf-phosphor-icons
     ];
 
     # ── Serviços recomendados pelo Ambxst ──────────────────────────────────
