@@ -52,6 +52,33 @@
     };
   };
 
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      xdg-terms = [ "alacritty" ];
+    };
+  };
+
+  xdg.desktopEntries.nvim = {
+    name = "Neovim (NixVim)";
+    genericName = "Editor";
+    comment = "Edit text files";
+    exec = "${pkgs.nixvim}/bin/nvim %F";
+    terminal = true;
+    type = "Application";
+    mimeType = [
+      "text/plain"
+      "text/x-java"
+      "text/x-csrc"
+      "text/x-c++src"
+      "text/x-python"
+      "application/json"
+      "text/html"
+      "text/css"
+      "application/javascript"
+    ];
+    categories = [ "Development" "Utility" "TextEditor" ];
+  };
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
