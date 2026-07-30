@@ -1,11 +1,10 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/77981d0d8e43ee2c652eaf835259665eb88a674d";
+
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
-    # wrapper-modules: mantido para o wrapper do Niri (niri.nix)
-    wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
+
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     # O NixVim vive em um flake separado e reutilizável.
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
@@ -17,7 +16,7 @@
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
     # O vim-conf usa o nixvim internamente para construir o pacote.
     # Ambxst shell (substitui o shell-conf anterior)
-    # O shell-conf agora empacota o Ambxst com suporte nativo ao Niri.
+    # O shell-conf agora consome o Ambxst-X e integra com o Hyprland.
     shell-conf = {
       url = "github:Joaoferraz-byte/shell-conf";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -30,13 +29,12 @@
   outputs = inputs@{ self, ... }: inputs.flake-parts.lib.mkFlake {inherit inputs;} {
     # ── Input Consistency Policy ────────────────────────────────────────
     # Inputs do flake são usados para:
-    #   - nixpkgs-stable: pino de segurança para o niri (libdisplay-info)
-    #   - wrapper-modules: wrapper do Niri (nix-wrapper-modules)
+
     #   - nix-flatpak: gerência declarativa de Flatpaks
     #   - vim-conf: configuração NixVim declarativa (plugins, languages, keymaps)
     #   - nixvim: módulo HM compartilhado para programas.nixvim.*
     #   - home-manager: configuração do usuário livara
-    #   - shell-conf: Ambxst shell (Quickshell + axctl + Niri)
+    #   - shell-conf: Ambxst-X shell (Quickshell + axctl + Hyprland)
     imports = [
       (inputs.import-tree ./modules)
     ];
