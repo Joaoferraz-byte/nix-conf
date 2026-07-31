@@ -48,7 +48,7 @@
     fonts.packages = with pkgs; [
       cantarell-fonts
       noto-fonts
-      noto-fonts-emoji
+      noto-fonts-color-emoji
     ];
   };
 }
