@@ -39,7 +39,8 @@
   # ── Home Manager Module ─────────────────────────────────────────────────
   flake.homeManagerModules.hyprland = { pkgs, ... }: {
     # Configuração do cursor (Bibata)
-    home.pointerCursor = {\n    enable = true;
+    home.pointerCursor = {
+      enable = true;
       name = "Bibata-Modern-Classic";
       package = pkgs.bibata-cursors;
       size = 24;
