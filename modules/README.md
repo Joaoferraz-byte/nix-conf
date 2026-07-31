@@ -1,37 +1,26 @@
-# Módulos do Sistema
+# Módulos do sistema
 
-Este diretório contém todos os módulos NixOS do repositório, organizados em três camadas:
-
-## Estrutura
+Este diretório concentra os módulos que compõem as configurações NixOS do repositório. A documentação de arquitetura, aplicação e validação está disponível no [README da raiz](../README.md).
 
 | Diretório | Responsabilidade |
-| :--- | :--- |
-| `features/` | Funcionalidades do sistema (greeter, compositor, drivers, firewall, etc.) |
-| `packages/` | Gerência declarativa de pacotes (Nix e Flatpak) |
-| `hosts/` | Configuração específica de cada máquina (hardware, locale, usuário) |
+|---|---|
+| `features/` | Funcionalidades reutilizáveis de sistema, como greeter, compositor, drivers, firewall, Ambxst, Hyprland e portais. |
+| `packages/` | Declaração de pacotes Nix e Flatpak. |
+| `hosts/` | Configurações específicas de máquina, incluindo hardware, locale e preferências locais. |
+| `parts.nix` | Definição dos sistemas suportados e composição dos módulos de flake. |
 
-## Convenções
+Cada feature expõe um módulo em `flake.nixosModules.<nome>` ou `flake.homeManagerModules.<nome>`, conforme o nível em que suas opções devem ser avaliadas. Os hosts importam apenas os módulos necessários e preservam os detalhes de hardware em seus próprios diretórios.
 
-- Cada módulo em `features/` exporta `flake.nixosModules.<nome>` para ser importado pela configuração do host.
-- Cada host em `hosts/<nome>/` contém: `configuration.nix` (importa módulos), `default.nix` (define `nixosConfiguration`), `hardware.nix` (gerado pelo `nixos-generate-config`), e arquivos host-specific como `desktop-widgets.json`.
-- O `parts.nix` na raiz de `modules/` define os sistemas suportados (`x86_64-linux`, `aarch64-linux`).
+## Novo host
 
-## Adicionando um Novo Host
+Para adicionar um host, crie `modules/hosts/<host>/configuration.nix`, `default.nix` e `hardware.nix`. O `configuration.nix` deve importar as features desejadas; o `default.nix` deve declarar a configuração NixOS com o nome do novo host; e o `hardware.nix` deve conter os módulos e UUIDs específicos da máquina. Quando o desktop usar widgets por monitor, inclua também `desktop-widgets.json` no diretório do host.
 
-1. Crie `modules/hosts/<host>/configuration.nix` copiando o `my-machine/configuration.nix` como base.
-2. Crie `modules/hosts/<host>/default.nix` copiando o `my-machine/default.nix` e ajustando o nome.
-3. Crie `modules/hosts/<host>/hardware.nix` com os UUIDs e módulos específicos da máquina.
-4. Crie `modules/hosts/<host>/desktop-widgets.json` com o layout de widgets para o monitor dessa máquina.
-5. Adicione o novo host ao `flake.nix` sob `nixosConfigurations`.
+Depois, registre o host em `flake.nix` sob `nixosConfigurations` e valide a derivação correspondente antes de aplicar a configuração:
 
-## Adicionando um Novo Módulo de Feature
+```bash
+nix build .#nixosConfigurations.<host>.config.system.build.toplevel
+```
 
-1. Crie `modules/features/<nome>.nix` com a estrutura padrão:
-   ```nix
-   { ... }: {
-     flake.nixosModules.<nome> = { pkgs, lib, ... }: {
-       # configuração
-     };
-   }
-   ```
-2. Importe-o no `configuration.nix` do host que precisa dessa feature.
+## Nova feature
+
+Uma feature deve ter uma única responsabilidade e expor um módulo NixOS ou Home Manager com nome estável. Mantenha opções de hardware e identidade de host fora de `features/`; mantenha pacotes específicos em `packages/`; e documente qualquer dependência entre módulos no cabeçalho do arquivo ou no README da raiz.
