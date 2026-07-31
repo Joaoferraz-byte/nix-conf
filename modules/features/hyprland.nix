@@ -103,54 +103,40 @@
             rounding  = 0;
           }
         ];
+
+        # Autostart do Ambxst via exec-once padrão do Hyprland.
+        # Isso garante que o shell suba após o ambiente estar pronto.
+        exec_once = [ "ambxst" ];
       };
 
       extraConfig = ''
-        -- ── Inicialização do Ambxst-X (Lua Native) ─────────────────────────
-        -- O Ambxst-X usa axctl para gerar hyprland.lua com binds e regras.
-        -- Para Hyprland 0.55+, a sintaxe Lua exige concatenar com " + ".
+        -- ── Integração Nativa do Ambxst-X ─────────────────────────────────
+        -- O Ambxst-X gera hyprland.lua dinamicamente. Esta linha carrega
+        -- os binds e regras gerados sem a necessidade de bootstrap complexo.
+        -- O pcall garante que erros no arquivo gerado não causem crash.
 
         local ambxst_state_home = os.getenv("XDG_STATE_HOME")
           or (os.getenv("HOME") .. "/.local/state")
         local ambxst_hyprland = ambxst_state_home .. "/ambxst/hyprland.lua"
 
-        -- Função para disparar o Ambxst shell
-        local function run_ambxst()
-          print("Ambxst-X: triggering shell execution")
-          hl.exec_cmd("ambxst")
-        end
-
-        -- Tenta carregar a config gerada pelo axctl de forma segura.
-        -- pcall garante que erros no hyprland.lua não causem Emergency Mode.
         local function load_ambxst_lua()
           local f = io.open(ambxst_hyprland, "r")
           if f then
             f:close()
             local config, err = loadfile(ambxst_hyprland)
             if config then
-              local ok, run_err = pcall(config)
-              if not ok then
-                print("Ambxst-X: error running hyprland.lua: " .. tostring(run_err))
-              end
-            else
-              print("Ambxst-X: syntax error in hyprland.lua: " .. tostring(err))
+              pcall(config)
             end
           end
         end
 
-        -- Binds nativos para garantir acesso básico caso o Ambxst falhe.
-        -- Sintaxe Lua: MOD + KEY (com espaços e +).
+        -- Binds de recuperação nativos (Sintaxe Lua MOD + KEY)
         hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"))
         hl.bind("SUPER + R", hl.dsp.exec_cmd("ambxst --restart"))
         hl.bind("SUPER + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
 
-        -- Carrega os binds dinâmicos gerados pelo axctl
+        -- Carrega a configuração dinâmica do Ambxst
         load_ambxst_lua()
-
-        -- Garante que o shell inicie após a sessão estar pronta
-        hl.on("hyprland.start", function()
-          run_ambxst()
-        end)
       '';
     };
   };
