@@ -9,8 +9,11 @@
     # O NixVim vive em um flake separado e reutilizável.
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
     # NixVim permanece uma entrada independente, sem forçar `follows`.
-    # NOTA: sddm-astronaut está disponível diretamente em nixpkgs.
-    # Não precisa de input flake — see modules/features/greeter.nix.
+    # SDDM com tema Pixie (inspirado em Google Pixel UI / Material Design 3)
+    pixie-sddm = {
+      url = "github:xCaptaiN09/pixie-sddm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixvim.url = "github:nix-community/nixvim";
     # NOTA: nixvim aparece como input direto E dentro do vim-conf.
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).

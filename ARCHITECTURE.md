@@ -40,7 +40,7 @@ nix-conf/
     │   ├── audiorelay.nix         # AudioRelay (Flatpak) + PipeWire virtual nodes
     │   ├── desktop-portals.nix    # XDG portals, Polkit, GNOME Keyring
     │   ├── flatpak.nix            # Gerenciamento declarativo de Flatpaks via nix-flatpak
-    │   ├── greeter.nix            # Greeter de login (SDDM + Astronaut Theme)
+    │   ├── greeter.nix            # Greeter de login (SDDM + Pixie Theme)
     │   ├── keyd.nix               # Remapeamento de teclado (leftmeta → overload)
     │   ├── hyprland.nix           # Compositor Wayland Hyprland (configuração completa via UWSM)
     │   ├── ambxst.nix             # Shell Ambxst-X (Quickshell + axctl + Hyprland)
@@ -71,7 +71,9 @@ flake.nix
 ├── home-manager (master)              → configuração do usuário livara
 │   └── follows nixpkgs
 ├── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
-└── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
+├── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
+│   └── follows nixpkgs
+└── pixie-sddm (flake)                 → Tema Pixie para o SDDM (Google Pixel UI / Material Design 3)
     └── follows nixpkgs
 ```
 
@@ -87,7 +89,7 @@ Todos os módulos são exportados como `flake.nixosModules.<nome>` e importados 
 | `myMachineConfiguration` | Módulo raiz do host; importa todos os outros |
 | `hyprland` | Compositor Wayland Hyprland, UWSM, keybindings, regras de janela |
 | `nvidia` | Driver proprietário NVIDIA legacy_580 |
-| `greeter` | Login com SDDM + Astronaut Theme (Wayland) |
+| `greeter` | Login com SDDM + Pixie Theme (Wayland) |
 | `desktop-portals` | XDG portals (gnome+gtk), Polkit, GNOME Keyring |
 | `flatpak` | Flatpaks declarativos via nix-flatpak |
 | `audiorelay` | AudioRelay Flatpak + nós virtuais PipeWire + firewall |
