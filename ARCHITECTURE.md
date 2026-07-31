@@ -71,9 +71,8 @@ flake.nix
 ├── home-manager (master)              → configuração do usuário livara
 │   └── follows nixpkgs
 ├── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
-├── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
-│   └── follows nixpkgs
-└── sddm-astronaut (flake)             → Tema Astronaut para o SDDM
+└── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
+    └── follows nixpkgs
 ```
 
 ---
