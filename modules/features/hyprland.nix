@@ -112,45 +112,44 @@
       };
 
       extraConfig = ''
-        -- ── Inicialização Resiliente do Ambxst-X ──────────────────────────
+        -- ── Inicialização do Ambxst-X ─────────────────────────────────────
         -- O Ambxst-X usa axctl para gerar hyprland.lua com binds e regras.
-        -- Na primeira sessão esse arquivo ainda não existe; nas seguintes ele
-        -- já foi gerado pelo axctl na sessão anterior.
         --
-        -- Estratégia:
-        --   1. Tenta carregar o hyprland.lua gerado pelo axctl (sessões normais).
-        --   2. Se não existir ou falhar, inicia o Ambxst diretamente para que
-        --      ele gere o arquivo (primeiro boot ou após reset).
-        --   3. O evento "hyprland.start" garante que o Ambxst suba em toda
-        --      nova sessão, independentemente do caminho acima.
-        --
-        -- NOTA: exec-once não é usado aqui porque o Ambxst precisa de um
-        -- ambiente de sessão completo (D-Bus, pipewire, portals) que o UWSM
-        -- garante antes de disparar "hyprland.start".
+        -- A estratégia de carregar o hyprland.lua gerado via pcall/loadfile
+        -- pode causar falhas se o arquivo estiver corrompido ou incompleto.
+        -- Para garantir estabilidade, o Ambxst é iniciado via evento
+        -- "hyprland.start" garantido pelo UWSM.
 
         local ambxst_state_home = os.getenv("XDG_STATE_HOME")
           or (os.getenv("HOME") .. "/.local/state")
         local ambxst_hyprland = ambxst_state_home .. "/ambxst/hyprland.lua"
 
+        -- Função para disparar o Ambxst
         local function run_ambxst()
           print("Ambxst-X: triggering shell execution")
           hl.exec_cmd("ambxst")
         end
 
-        -- Tenta carregar a config gerada pelo axctl
-        local ambxst_config, ambxst_error = loadfile(ambxst_hyprland)
-
-        if ambxst_config then
-          local loaded, load_error = pcall(ambxst_config)
-          if not loaded then
-            print("Ambxst-X: failed to load generated Lua: " .. tostring(load_error))
-            run_ambxst()
+        -- Tenta carregar a config gerada pelo axctl de forma segura.
+        -- Se falhar, o Hyprland continuará com a config base (binds de emergência).
+        local function load_ambxst_lua()
+          local f = io.open(ambxst_hyprland, "r")
+          if f then
+            f:close()
+            local config, err = loadfile(ambxst_hyprland)
+            if config then
+              local ok, run_err = pcall(config)
+              if not ok then
+                print("Ambxst-X: error running hyprland.lua: " .. tostring(run_err))
+              end
+            else
+              print("Ambxst-X: error loading hyprland.lua: " .. tostring(err))
+            end
           end
-        else
-          print("Ambxst-X: generated Lua not found: " .. tostring(ambxst_error))
-          -- Se não houver config, inicia o shell imediatamente para que ele a gere
-          run_ambxst()
         end
+
+        -- Carrega os binds/regras do Ambxst
+        load_ambxst_lua()
 
         -- Garante que o shell inicie em novos logins/eventos de sessão
         hl.on("hyprland.start", function()
