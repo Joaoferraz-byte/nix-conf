@@ -37,86 +37,82 @@
   };
 
   # ── Home Manager Module ─────────────────────────────────────────────────
-  flake.homeManagerModules.hyprland = { ... }: {
-      wayland.windowManager.hyprland = {
-        enable = true;
-        configType = "lua";
-        systemd.enable = false;
+  flake.homeManagerModules.hyprland = { pkgs, ... }: {
+    # Configuração do cursor (Bibata)
+    home.pointerCursor = {
+      name = "Bibata-Modern-Classic";
+      package = pkgs.bibata-cursors;
+      size = 24;
+      gtk.enable = true;
+      x11.enable = true;
+    };
 
-  home.pointerCursor = {
-    name = "Bibata-Modern-Classic";
-    package = pkgs.bibata-cursors;
-    size = 24;
-    gtk.enable = true;
-    x11.enable = true;
-  };
-        settings = {
-          # Variável Lua local: local mod = "SUPER"
-          mod._var = "SUPER";
+    wayland.windowManager.hyprland = {
+      enable = true;
+      configType = "lua";
+      systemd.enable = false;
 
-          monitor = {
-            output = "";
-            mode = "preferred";
-            position = "auto";
-            scale = 1;
-          };
+      settings = {
+        # Variável Lua local: local mod = "SUPER"
+        mod._var = "SUPER";
 
-          config = {
-            input = {
-              kb_layout = "br";
-              touchpad = {
-                natural_scroll = true;
-                tap_to_click = true;
-              };
-            };
-
-            # Gaps, blur, bordas e animações são aplicados pelo Ambxst-X/axctl.
-            general.layout = "dwindle";
-          };
-
-          # Regras permanentes para superfícies do Quickshell. As regras de
-          # camada e aparência dinâmicas continuam sob responsabilidade do
-          # arquivo Lua gerado pelo axctl.
-          window_rule = [
-            {
-              match.class = "^(quickshell)$";
-              no_blur = true;
-              no_shadow = true;
-              decorate = false;
-              rounding = 0;
-            }
-          ];
-
-          # AMBXST/axctl é a fonte única de atalhos interativos. Isso evita
-          # duplicar binds em Lua e deixa launcher, ferramentas, workspaces e
-          # ações personalizadas sob a interface de configuração do shell.
-          bind = [ ];
+        monitor = {
+          output = "";
+          mode = "preferred";
+          position = "auto";
+          scale = 1;
         };
 
-        extraConfig = ''
-          -- Ambxst-X/axctl gera este arquivo dinamicamente a partir dos JSONs.
-          -- A configuração principal permanece inicializável mesmo no primeiro
-          -- login, antes de o arquivo existir, e nunca executa `loadfile(nil)`.
-          local ambxst_data_home = os.getenv("XDG_DATA_HOME") or (os.getenv("HOME") .. "/.local/share")
-          local ambxst_hyprland = ambxst_data_home .. "/ambxst/hyprland.lua"
-          local ambxst_config, ambxst_error = loadfile(ambxst_hyprland)
+        config = {
+          input = {
+            kb_layout = "br";
+            touchpad = {
+              natural_scroll = true;
+              tap_to_click = true;
+            };
+          };
 
-          local function start_ambxst_fallback(reason)
-            print("Ambxst-X: " .. reason .. "; starting the shell fallback")
-            hl.on("hyprland.start", function()
-              hl.exec_cmd("ambxst")
-            end)
-          end
+          # Gaps, blur, bordas e animações são aplicados pelo Ambxst-X/axctl.
+          general.layout = "dwindle";
+        };
 
-          if ambxst_config then
-            local loaded, load_error = pcall(ambxst_config)
-            if not loaded then
-              start_ambxst_fallback("failed to load generated Hyprland Lua: " .. tostring(load_error))
-            end
-          else
-            start_ambxst_fallback("generated Hyprland Lua not present yet: " .. tostring(ambxst_error))
-          end
-        '';
+        # Regras permanentes para superfícies do Quickshell.
+        window_rule = [
+          {
+            match.class = "^(quickshell)$";
+            no_blur = true;
+            no_shadow = true;
+            decorate = false;
+            rounding = 0;
+          }
+        ];
+
+        # AMBXST/axctl é a fonte única de atalhos interativos.
+        bind = [ ];
       };
+
+      extraConfig = ''
+        -- Ambxst-X/axctl gera este arquivo dinamicamente a partir dos JSONs.
+        local ambxst_data_home = os.getenv("XDG_DATA_HOME") or (os.getenv("HOME") .. "/.local/share")
+        local ambxst_hyprland = ambxst_data_home .. "/ambxst/hyprland.lua"
+        local ambxst_config, ambxst_error = loadfile(ambxst_hyprland)
+
+        local function start_ambxst_fallback(reason)
+          print("Ambxst-X: " .. reason .. "; starting the shell fallback")
+          hl.on("hyprland.start", function()
+            hl.exec_cmd("ambxst")
+          end)
+        end
+
+        if ambxst_config then
+          local loaded, load_error = pcall(ambxst_config)
+          if not loaded then
+            start_ambxst_fallback("failed to load generated Hyprland Lua: " .. tostring(load_error))
+          end
+        else
+          start_ambxst_fallback("generated Hyprland Lua not present yet: " .. tostring(ambxst_error))
+        end
+      '';
     };
+  };
 }

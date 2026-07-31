@@ -27,8 +27,8 @@ in
     nerd-fonts.jetbrains-mono
     # Tema de ícones para o Ambxst (launcher e barra)
     # O Ambxst usa QS_ICON_THEME para encontrar ícones de apps.
-    # O Papirus-Dark oferece cobertura ampla e visual consistente.
-    papirus-icon-theme
+    # O Kora oferece cobertura ampla e visual consistente.
+    kora-icon-theme
   ];
 
   # O Ambxst-X lê ~/.face.icon. O greeter declara o mesmo ativo em
@@ -41,8 +41,8 @@ in
   gtk = {
     enable = true;
     iconTheme = {
-      package = pkgs.papirus-icon-theme;
-      name = "Papirus-Dark";
+      package = pkgs.kora-icon-theme;
+      name = "kora";
     };
     theme = {
       package = pkgs.adw-gtk3;
@@ -83,7 +83,7 @@ in
       xdg-terms = [ "alacritty" ];
       # Tema de ícones: lido pelo wrapper do Ambxst via gsettings
       # para definir QS_ICON_THEME corretamente
-      icon-theme = "Papirus-Dark";
+      icon-theme = "kora";
       gtk-theme = "adw-gtk3-dark";
       cursor-theme = "Bibata-Modern-Classic";
       cursor-size = 24;
