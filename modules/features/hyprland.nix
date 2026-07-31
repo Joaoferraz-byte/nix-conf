@@ -19,13 +19,16 @@
     };
 
     # ── UWSM Session Entry ───────────────────────────────────────────────
-    # Override the default "Hyprland (Managed via UWSM)" name which overflows
-    # the SDDM session selector and can cause the UWSM emergency lock.
-    # A short name prevents UI breakage and ensures only one entry is shown.
+    # Apenas redefine o nome exibido no SDDM (curto, para evitar overflow).
+    # NAO definimos binPath aqui: desde nixpkgs#471800 (merged 2026-07-10),
+    # o módulo do nixpkgs já usa start-hyprland automaticamente quando
+    # programs.hyprland.withUWSM = true. Definir binPath manualmente para
+    # "/run/current-system/sw/bin/Hyprland" quebra essa correção e causa:
+    #   - Warning: "Hyprland was started without start-hyprland..."
+    #   - Emergency lock do UWSM (sessão não inicializa corretamente)
     programs.uwsm.waylandCompositors.hyprland = {
       prettyName = "Hyprland";
       comment = "Hyprland compositor";
-      binPath = "/run/current-system/sw/bin/Hyprland";
     };
 
     environment.systemPackages = with pkgs; [
