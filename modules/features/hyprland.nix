@@ -90,15 +90,9 @@
           general.layout = "dwindle";
         };
 
-        # Binds de Emergência (Nível Nix)
-        # Estes binds garantem que o sistema seja utilizável mesmo se o Ambxst
-        # falhar. O Ambxst pode adicionar outros binds via axctl, mas estes
-        # permanecem como fallback de recuperação.
-        bind = [
-          "SUPER_SHIFT, Q, exec, uwsm stop"    # Sair da sessão UWSM
-          "SUPER, Return, exec, kitty"          # Terminal de emergência
-          "SUPER, R, exec, ambxst --restart"    # Reiniciar o shell manualmente
-        ];
+        # Binds de Emergência (Removidos para evitar conflitos com o Ambxst-X)
+        # O Ambxst-X é a fonte primária de configuração.
+        bind = [ ];
 
         window_rule = [
           {
@@ -112,26 +106,22 @@
       };
 
       extraConfig = ''
-        -- ── Inicialização do Ambxst-X ─────────────────────────────────────
+        -- ── Inicialização do Ambxst-X (Lua Native) ─────────────────────────
         -- O Ambxst-X usa axctl para gerar hyprland.lua com binds e regras.
-        --
-        -- A estratégia de carregar o hyprland.lua gerado via pcall/loadfile
-        -- pode causar falhas se o arquivo estiver corrompido ou incompleto.
-        -- Para garantir estabilidade, o Ambxst é iniciado via evento
-        -- "hyprland.start" garantido pelo UWSM.
+        -- Para Hyprland 0.55+, a sintaxe Lua exige concatenar com " + ".
 
         local ambxst_state_home = os.getenv("XDG_STATE_HOME")
           or (os.getenv("HOME") .. "/.local/state")
         local ambxst_hyprland = ambxst_state_home .. "/ambxst/hyprland.lua"
 
-        -- Função para disparar o Ambxst
+        -- Função para disparar o Ambxst shell
         local function run_ambxst()
           print("Ambxst-X: triggering shell execution")
           hl.exec_cmd("ambxst")
         end
 
         -- Tenta carregar a config gerada pelo axctl de forma segura.
-        -- Se falhar, o Hyprland continuará com a config base (binds de emergência).
+        -- pcall garante que erros no hyprland.lua não causem Emergency Mode.
         local function load_ambxst_lua()
           local f = io.open(ambxst_hyprland, "r")
           if f then
@@ -143,15 +133,21 @@
                 print("Ambxst-X: error running hyprland.lua: " .. tostring(run_err))
               end
             else
-              print("Ambxst-X: error loading hyprland.lua: " .. tostring(err))
+              print("Ambxst-X: syntax error in hyprland.lua: " .. tostring(err))
             end
           end
         end
 
-        -- Carrega os binds/regras do Ambxst
+        -- Binds nativos para garantir acesso básico caso o Ambxst falhe.
+        -- Sintaxe Lua: MOD + KEY (com espaços e +).
+        hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"))
+        hl.bind("SUPER + R", hl.dsp.exec_cmd("ambxst --restart"))
+        hl.bind("SUPER + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
+
+        -- Carrega os binds dinâmicos gerados pelo axctl
         load_ambxst_lua()
 
-        -- Garante que o shell inicie em novos logins/eventos de sessão
+        -- Garante que o shell inicie após a sessão estar pronta
         hl.on("hyprland.start", function()
           run_ambxst()
         end)
