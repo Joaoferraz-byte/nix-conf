@@ -5,7 +5,7 @@
 
     programs.ambxst = {
       enable = true;
-      package = inputs.shell-conf.packages.${pkgs.system}.default;
+      package = inputs.shell-conf.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
     # Aplicações e dependências do AMBXST
