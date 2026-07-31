@@ -1,22 +1,20 @@
-# ─── SDDM Display Manager + Astronaut Theme ────────────────────────────────
+# ─── SDDM Display Manager + Pixie Theme ───────────────────────────────────
 # SDDM is the recommended display manager for Hyprland/Wayland.
-# We use the community-maintained sddm-astronaut package for a modern look
-# that matches the Ambxst-X aesthetic.
+# We use the pixie-sddm theme (inspired by Google Pixel UI / Material Design 3)
+# from the flake input github:xCaptaiN09/pixie-sddm.
 { self, inputs, ... }: {
   flake.nixosModules.greeter = { pkgs, lib, config, ... }: {
-    # ── Enable SDDM with Astronaut Theme ───────────────────────────────────
-    # We use the package from nixpkgs (sddm-astronaut) and configure it
-    # as per the NixOS wiki.
-    environment.systemPackages = with pkgs; [
-      sddm-astronaut
+    # ── Enable SDDM with Pixie Theme ───────────────────────────────────────
+    environment.systemPackages = [
+      inputs.pixie-sddm.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true; # Required for Hyprland
-      theme = "sddm-astronaut-theme";
+      theme = "pixie";
       extraPackages = with pkgs; [
-        sddm-astronaut
+        inputs.pixie-sddm.packages.${pkgs.stdenv.hostPlatform.system}.default
         kdePackages.qtmultimedia # Required for video backgrounds/audio
         kdePackages.qtsvg
         kdePackages.qtdeclarative
