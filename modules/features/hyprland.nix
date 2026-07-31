@@ -18,6 +18,16 @@
       xwayland.enable = true;
     };
 
+    # ── UWSM Session Entry ───────────────────────────────────────────────
+    # Override the default "Hyprland (Managed via UWSM)" name which overflows
+    # the SDDM session selector and can cause the UWSM emergency lock.
+    # A short name prevents UI breakage and ensures only one entry is shown.
+    programs.uwsm.waylandCompositors.hyprland = {
+      prettyName = "Hyprland";
+      comment = "Hyprland compositor";
+      binPath = "/run/current-system/sw/bin/Hyprland";
+    };
+
     environment.systemPackages = with pkgs; [
       grim
       slurp
