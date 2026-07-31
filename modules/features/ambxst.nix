@@ -1,14 +1,18 @@
 { self, inputs, ... }: {
   flake.nixosModules.ambxst = { pkgs, config, lib, ... }: {
+    # 1. Injeta o módulo NixOS do shell-conf no sistema
     imports = [ inputs.shell-conf.nixosModules.default ];
 
+    # 2. Ativa o programa ambxst no nível do sistema
     programs.ambxst = {
       enable = true;
       package = inputs.shell-conf.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
-    # O shell-conf fornece um módulo de Home Manager que gerencia o estado.
-    # Injetamos ele aqui para garantir que o usuário receba a configuração.
+    # 3. Garante que o módulo de Home Manager do shell-conf seja injetado 
+    # em todos os usuários que usam home-manager.
+    # Isso resolve o problema de o estado mutável (~/.local/state/ambxst)
+    # não ser inicializado, o que impedia o AMBXST de subir.
     home-manager.sharedModules = [
       inputs.shell-conf.homeManagerModules.default
     ];
