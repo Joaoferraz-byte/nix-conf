@@ -40,7 +40,7 @@ nix-conf/
     │   ├── audiorelay.nix         # AudioRelay (Flatpak) + PipeWire virtual nodes
     │   ├── desktop-portals.nix    # XDG portals, Polkit, GNOME Keyring
     │   ├── flatpak.nix            # Gerenciamento declarativo de Flatpaks via nix-flatpak
-    │   ├── greeter.nix            # Greeter de login (SDDM + Pixie Theme)
+    │   ├── greeter.nix            # Greeter de login (SDDM + SilentSDDM)
     │   ├── keyd.nix               # Remapeamento de teclado (leftmeta → overload)
     │   ├── hyprland.nix           # Compositor Wayland Hyprland (configuração completa via UWSM)
     │   ├── ambxst.nix             # Shell Ambxst-X (Quickshell + axctl + Hyprland)
@@ -73,7 +73,7 @@ flake.nix
 ├── vim-conf (flake)                   → repositório externo de configuração NixVim declarativa
 ├── shell-conf (flake)                 → Ambxst-X shell (Quickshell + axctl + Hyprland)
 │   └── follows nixpkgs
-└── pixie-sddm (flake)                 → Tema Pixie para o SDDM (Google Pixel UI / Material Design 3)
+└── silentSDDM (flake)                 → Tema SilentSDDM e perfil via AccountsService
     └── follows nixpkgs
 ```
 
@@ -89,8 +89,8 @@ Todos os módulos são exportados como `flake.nixosModules.<nome>` e importados 
 | `myMachineConfiguration` | Módulo raiz do host; importa todos os outros |
 | `hyprland` | Compositor Wayland Hyprland, UWSM, keybindings, regras de janela |
 | `nvidia` | Driver proprietário NVIDIA legacy_580 |
-| `greeter` | Login com SDDM + Pixie Theme (Wayland) |
-| `desktop-portals` | XDG portals (gnome+gtk), Polkit, GNOME Keyring |
+| `greeter` | Login com SDDM + SilentSDDM (Wayland) e avatar por AccountsService |
+| `desktop-portals` | XDG portals (Hyprland + GTK), Polkit, GNOME Keyring |
 | `flatpak` | Flatpaks declarativos via nix-flatpak |
 | `audiorelay` | AudioRelay Flatpak + nós virtuais PipeWire + firewall |
 | `keyd` | Remapeamento `leftmeta` → `overload(meta, menu)` |
@@ -140,6 +140,7 @@ O arquivo `home/livara/home.nix` gerencia:
 - **Variáveis de sessão**: `PROJECTS_DIR`
 - **Tema de ícones**: Papirus-Dark (GTK + dconf, lido pelo wrapper do Ambxst-X)
 - **Tema GTK**: adw-gtk3-dark
+- **Avatar**: `~/.face.icon` proveniente do mesmo ativo versionado em `Icons/` usado pelo SilentSDDM antes do login.
 
 ---
 

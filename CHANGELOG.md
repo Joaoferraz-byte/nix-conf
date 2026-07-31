@@ -1,5 +1,21 @@
 # Changelog
 
+## [Não publicado] Correção integrada Hyprland Lua, Ambxst-X e SilentSDDM
+
+### Correções de inicialização e integração
+- **Hyprland**: Migração da configuração Home Manager de Hyprlang para a API Lua do Hyprland 0.55+, eliminando `$mod`, `windowrulev2`, `bindl` e `bindel` de um arquivo `hyprland.lua`.
+- **Ambxst-X**: Troca da linha legada `source = .../hyprland.conf` por carregamento Lua protegido de `~/.local/share/ambxst/hyprland.lua`, com bootstrap idempotente para o primeiro login.
+- **Dependências**: O módulo NixOS oficial do Ambxst-X passou a ser reexportado pelo `shell-conf`, evitando aliases de pacote incorretos e dependências runtime omitidas. O WirePlumber foi habilitado explicitamente, fornecendo o `wpctl` usado pelos binds de áudio.
+- **Configuração do shell**: Adicionados `weather.json` e `prefix.json`; removido o `info.json` sem consumidor; `binds.json` deixou de ser um link imutável para que o Ambxst-X possa mantê-lo e migrá-lo.
+
+### Login, avatar e portais
+- **SDDM**: Tema Pixie substituído pelo módulo oficial do SilentSDDM, mantendo o wallpaper anterior.
+- **Avatar**: `programs.silentSDDM.profileIcons.livara` e `~/.face.icon` agora usam o mesmo ativo versionado, sincronizando greeter e shell por uma única fonte de verdade.
+- **Portais**: XDPH passou a ser o backend prioritário para a sessão Hyprland; GTK permanece apenas como fallback de file chooser.
+- **Artefatos**: Removido o link `result` quebrado, que apontava para uma derivação Noctalia obsoleta, e adicionadas regras de ignorados para resultados locais do Nix.
+
+---
+
 ## [2026-07-30] Migração para Hyprland + Ambxst-X
 
 ### Alterações Principais

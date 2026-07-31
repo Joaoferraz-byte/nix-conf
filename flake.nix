@@ -9,9 +9,9 @@
     # O NixVim vive em um flake separado e reutilizável.
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
     # NixVim permanece uma entrada independente, sem forçar `follows`.
-    # SDDM com tema Pixie (inspirado em Google Pixel UI / Material Design 3)
-    pixie-sddm = {
-      url = "github:xCaptaiN09/pixie-sddm";
+    # Tema SDDM declarativo com suporte nativo a ícones por usuário.
+    silentSDDM = {
+      url = "github:uiriansan/SilentSDDM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixvim.url = "github:nix-community/nixvim";

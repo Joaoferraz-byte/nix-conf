@@ -53,6 +53,9 @@
         services.pipewire = {
           enable = true;
           pulse.enable = true;
+          # Fornece o session manager e `wpctl`, usado pelos binds multimídia
+          # do Hyprland para volume e mute.
+          wireplumber.enable = true;
         };
 
         # RTKit: permite escalonamento em tempo real para o PipeWire
