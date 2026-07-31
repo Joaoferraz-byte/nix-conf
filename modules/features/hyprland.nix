@@ -19,16 +19,15 @@
     };
 
     # ── UWSM Session Entry ───────────────────────────────────────────────
-    # Apenas redefine o nome exibido no SDDM (curto, para evitar overflow).
-    # NAO definimos binPath aqui: desde nixpkgs#471800 (merged 2026-07-10),
-    # o módulo do nixpkgs já usa start-hyprland automaticamente quando
-    # programs.hyprland.withUWSM = true. Definir binPath manualmente para
-    # "/run/current-system/sw/bin/Hyprland" quebra essa correção e causa:
-    #   - Warning: "Hyprland was started without start-hyprland..."
-    #   - Emergency lock do UWSM (sessão não inicializa corretamente)
+    # binPath DEVE apontar para start-hyprland (não Hyprland direto).
+    # start-hyprland é o wrapper oficial que seta XDG vars, portals,
+    # suporte a Electron e screen sharing. Lançar Hyprland direto causa
+    # warning + emergency lock do UWSM.
+    # prettyName curto evita overflow no SDDM session selector.
     programs.uwsm.waylandCompositors.hyprland = {
       prettyName = "Hyprland";
-      comment = "Hyprland compositor";
+      comment = "Hyprland compositor managed by UWSM";
+      binPath = "/run/current-system/sw/bin/start-hyprland";
     };
 
     environment.systemPackages = with pkgs; [

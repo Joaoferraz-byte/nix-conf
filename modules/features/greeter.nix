@@ -12,6 +12,12 @@
 # NOTA: Usamos self.outPath + "/Icons/" porque o greeter.nix vive em
 # modules/features/ e paths relativos (./Icons/) resolveriam para
 # modules/features/Icons/ que não existe.
+#
+# PADDING: O theme.conf do pixie-sddm NÃO expõe padding como opção.
+# Para aumentar o espaçamento do input de senha, sobrescrevemos a deri-
+# vação upstream e aplicamos sed em Main.qml no postPatch.
+#   - ColumnLayout anchors.margins: 40 → 55
+#   - passwordField Layout.topMargin: 30 → 45
 { self, inputs, ... }: {
   flake.nixosModules.greeter = { pkgs, lib, config, ... }: let
     # Derivação que copia wallpapers e ícones para o Nix store.
@@ -21,12 +27,57 @@
       cp ${self.outPath + "/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg"} $out/avatar/avatar.jpg
       cp ${self.outPath + "/Wallpapers/wallhaven-9or3zx.jpg"} $out/background/background.jpg
     '';
-    pixieTheme = inputs.pixie-sddm.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-      background = assets + "/background/background.jpg";
-      avatar = assets + "/avatar/avatar.jpg";
-      autoColor = true;   # Extrai paleta Material You do wallpaper → sincroniza com Ambxst
-      accentColor = "#ffb3ae"; # Fallback warm-pink (cor primária default do Ambxst)
-      backgroundColor = "#1a1111"; # Fundo escuro quente, compatível com Ambxst default
+
+    # Upstream pixie-sddm theme (build from flake input)
+    upstreamTheme = inputs.pixie-sddm.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
+    # Wrapper que herda do upstream e patcheia Main.qml para aumentar padding
+    pixieTheme = pkgs.stdenvNoCC.mkDerivation {
+      pname = "pixie-sddm-custom";
+      version = "3.0-patched";
+
+      # Usa o upstream como source — copia o conteúdo instalado
+      src = pkgs.runCommand "pixie-source" {} ''
+        mkdir -p $out
+        # Copia o tema upstream instalado
+        cp -r ${upstreamTheme}/share/sddm/themes/pixie/* $out/
+      '';
+
+      # Aplica customizações após copiar o source
+      postPatch = ''
+        # ── Configurações de cores (theme.conf) ────────────────────────
+        update_ini() {
+          local key="$1"
+          local value="$2"
+          [ -z "$value" ] && return
+          if grep -q "^$key=" theme.conf; then
+            sed -i "s|^$key=.*|$key=$value|" theme.conf
+          else
+            echo "$key=$value" >> theme.conf
+          fi
+        }
+
+        update_ini "accentColor" "#ffb3ae"
+        update_ini "autoColor" "true"
+        update_ini "backgroundColor" "#1a1111"
+        update_ini "textColor" "#E3E3DC"
+
+        # ── Padding do login: aumenta espaçamento interno ──────────────
+        # ColumnLayout anchors.margins: 40 → 55 (mais respiro interno)
+        # passwordField Layout.topMargin: 30 → 45 (mais espaço acima)
+        sed -i 's/anchors\.margins: 40/anchors.margins: 55/' Main.qml
+        sed -i 's/Layout\.topMargin: 30 \/\//Layout.topMargin: 45 \/\//' Main.qml
+
+        # ── Assets personalizados ───────────────────────────────────────
+        mkdir -p assets
+        cp ${assets + "/background/background.jpg"} assets/background.jpg
+        cp ${assets + "/avatar/avatar.jpg"} assets/avatar.jpg
+      '';
+
+      installPhase = ''
+        mkdir -p $out/share/sddm/themes/pixie
+        cp -r * $out/share/sddm/themes/pixie/
+      '';
     };
   in {
     environment.systemPackages = [ pixieTheme ];
