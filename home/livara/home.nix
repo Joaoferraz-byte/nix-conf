@@ -1,5 +1,8 @@
 { config, pkgs, lib, inputs, self, ... }:
 
+let
+  profileIcon = self.outPath + "/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg";
+in
 {
   home.username = "livara";
   home.homeDirectory = "/home/livara";
@@ -27,6 +30,10 @@
     # O Papirus-Dark oferece cobertura ampla e visual consistente.
     papirus-icon-theme
   ];
+
+  # O Ambxst-X lê ~/.face.icon. O greeter declara o mesmo ativo em
+  # programs.silentSDDM.profileIcons.livara, evitando cópias divergentes.
+  home.file.".face.icon".source = profileIcon;
 
   # ── Tema de ícones GTK ───────────────────────────────────────────────────
   # Define o tema de ícones para o sistema GTK e para o Ambxst.

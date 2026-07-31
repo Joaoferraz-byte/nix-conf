@@ -19,24 +19,17 @@
     security.pam.services.sddm.enableGnomeKeyring = true;
     xdg.portal = {
       enable = true;
+      # O módulo programs.hyprland já adiciona xdg-desktop-portal-hyprland.
+      # GTK complementa apenas o file chooser, não implementado pelo XDPH.
       extraPortals = with pkgs; [
-        xdg-desktop-portal-gnome
         xdg-desktop-portal-gtk
       ];
-      # ── Roteamento por interface (BUG-007) ─────────────────────────────
-      # Usar config.common.default = "gnome" roteava TODAS as requisições
-      # para o portal GNOME, causando falhas de inicialização em sessões
-      # não-GNOME (Hyprland). O roteamento por interface é mais robusto:
-      # - ScreenCast/Screenshot → gnome (suporte nativo a Wayland PipeWire)
-      # - Tudo mais → gtk (fallback universal, funciona sem GNOME)
-      # Referência: nixpkgs#391489, portals.conf(5)
+      # O backend Hyprland deve tratar ScreenCast, Screenshot, RemoteDesktop e
+      # atalhos globais. GTK permanece como fallback para capacidades que ele
+      # não fornece, especialmente FileChooser.
       config = {
-        common = {
-          default = [ "gtk" ];
-          "org.freedesktop.portal.ScreenCast" = [ "gnome" ];
-          "org.freedesktop.portal.Screenshot" = [ "gnome" ];
-          "org.freedesktop.portal.RemoteDesktop" = [ "gnome" ];
-        };
+        common.default = [ "hyprland" "gtk" ];
+        hyprland.default = [ "hyprland" "gtk" ];
       };
     };
   };
