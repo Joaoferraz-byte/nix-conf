@@ -104,39 +104,26 @@
           }
         ];
 
-        # Autostart do Ambxst via exec-once padrão do Hyprland.
-        # Isso garante que o shell suba após o ambiente estar pronto.
-        exec_once = [ "ambxst" ];
       };
 
       extraConfig = ''
-        -- ── Integração Nativa do Ambxst-X ─────────────────────────────────
-        -- O Ambxst-X gera hyprland.lua dinamicamente. Esta linha carrega
-        -- os binds e regras gerados sem a necessidade de bootstrap complexo.
-        -- O pcall garante que erros no arquivo gerado não causem crash.
+        -- axctl aplica regras e atalhos dinâmicos diretamente por IPC e
+        -- recarrega o Hyprland quando o TOML do Ambxst muda. Não carregue a
+        -- cópia Lua gerada pelo axctl aqui: ela pode representar o estado de
+        -- uma sessão anterior e reaplicar binds ou autostarts obsoletos.
 
-        local ambxst_state_home = os.getenv("XDG_STATE_HOME")
-          or (os.getenv("HOME") .. "/.local/state")
-        local ambxst_hyprland = ambxst_state_home .. "/ambxst/hyprland.lua"
-
-        local function load_ambxst_lua()
-          local f = io.open(ambxst_hyprland, "r")
-          if f then
-            f:close()
-            local config, err = loadfile(ambxst_hyprland)
-            if config then
-              pcall(config)
-            end
-          end
-        end
-
-        -- Binds de recuperação nativos (Sintaxe Lua MOD + KEY)
+        -- Não use teclas reservadas pelos defaults do Ambxst, principalmente
+        -- SUPER+T, que abre o gerenciador de terminais do shell.
+        -- Estes três binds são apenas caminhos explícitos de recuperação.
         hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"))
-        hl.bind("SUPER + R", hl.dsp.exec_cmd("ambxst --restart"))
+        hl.bind("SUPER + R", hl.dsp.exec_cmd("ambxst reload"))
         hl.bind("SUPER + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
 
-        -- Carrega a configuração dinâmica do Ambxst
-        load_ambxst_lua()
+        -- `settings.exec_once` não tem equivalente na API Lua. O evento é
+        -- registrado uma única vez por sessão e evita autostart duplicado.
+        hl.on("hyprland.start", function()
+          hl.exec_cmd("ambxst")
+        end)
       '';
     };
   };
