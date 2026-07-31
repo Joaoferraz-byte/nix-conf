@@ -1,32 +1,9 @@
 {
   "nodes": {
-    "ambxst-x": {
-      "inputs": {
-        "axctl": "axctl",
-        "nixpkgs": [
-          "shell-conf",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1784989985,
-        "narHash": "sha256-8u0haeiZ3hCDoTiahNEnt+GVwi3+pinEvIBtRJecBMg=",
-        "owner": "OrynVail",
-        "repo": "Ambxst-X",
-        "rev": "ee9fcbd4f8d602bad3bc9ede0f32f20b09989ba3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "OrynVail",
-        "repo": "Ambxst-X",
-        "type": "github"
-      }
-    },
     "axctl": {
       "inputs": {
         "nixpkgs": [
           "shell-conf",
-          "ambxst-x",
           "nixpkgs"
         ]
       },
@@ -290,17 +267,17 @@
     },
     "shell-conf": {
       "inputs": {
-        "ambxst-x": "ambxst-x",
+        "axctl": "axctl",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1785464132,
-        "narHash": "sha256-Llkr6EB7ao2MkdNjC63X69Mgu466nMxoTtF/NHBHaGk=",
+        "lastModified": 1785515196,
+        "narHash": "sha256-AmJyDCJXTTTmoegAPGRLdKl9zyFuBt7UO6w11DZioP8=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "676e69c477804ec191583fd31f8dc55c9202bb0e",
+        "rev": "44c7da19aee04248f207b47249c4cb6956c8b7f7",
         "type": "github"
       },
       "original": {
