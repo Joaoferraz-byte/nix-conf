@@ -10,8 +10,6 @@
       xwayland.enable = true;
     };
 
-    # UWSM deve iniciar o wrapper oficial, não o binário Hyprland diretamente.
-    # Isso mantém as variáveis XDG e os targets de sessão consistentes.
     programs.uwsm.waylandCompositors.hyprland = {
       prettyName = "Hyprland";
       comment = "Hyprland compositor managed by UWSM";
@@ -27,8 +25,6 @@
       wev
     ];
 
-    # A sessão é gerenciada por UWSM; o Home Manager continua responsável
-    # somente por escrever hyprland.lua.
     home-manager.sharedModules = [
       {
         wayland.windowManager.hyprland.systemd.enable = false;
@@ -38,7 +34,6 @@
 
   # ── Home Manager Module ─────────────────────────────────────────────────
   flake.homeManagerModules.hyprland = { pkgs, ... }: {
-    # Configuração do cursor (Bibata)
     home.pointerCursor = {
       enable = true;
       name = "Bibata-Modern-Classic";
@@ -54,7 +49,6 @@
       systemd.enable = false;
 
       settings = {
-        # Variável Lua local: local mod = "SUPER"
         mod._var = "SUPER";
 
         monitor = {
@@ -72,12 +66,18 @@
               tap_to_click = true;
             };
           };
-
-          # Gaps, blur, bordas e animações são aplicados pelo Ambxst-X/axctl.
           general.layout = "dwindle";
         };
 
-        # Regras permanentes para superfícies do Quickshell.
+        # Binds de Emergência (Nível Nix)
+        # Estes binds garantem que o sistema seja utilizável mesmo se o AMBXST falhar.
+        # O AMBXST pode adicionar outros binds, mas estes permanecem como fallback.
+        bind = [
+          "SUPER_SHIFT, Q, exec, uwsm stop"        # Sair da sessão
+          "SUPER, Return, exec, kitty"             # Abrir terminal de emergência
+          "SUPER, R, exec, ambxst --restart"       # Reiniciar o shell manualmente
+        ];
+
         window_rule = [
           {
             match.class = "^(quickshell)$";
@@ -87,32 +87,37 @@
             rounding = 0;
           }
         ];
-
-        # AMBXST/axctl é a fonte única de atalhos interativos.
-        bind = [ ];
       };
 
       extraConfig = ''
-        -- Ambxst-X/axctl gera este arquivo dinamicamente a partir dos JSONs.
+        -- Lógica de Inicialização Resiliente do Ambxst-X
         local ambxst_data_home = os.getenv("XDG_DATA_HOME") or (os.getenv("HOME") .. "/.local/share")
         local ambxst_hyprland = ambxst_data_home .. "/ambxst/hyprland.lua"
-        local ambxst_config, ambxst_error = loadfile(ambxst_hyprland)
-
-        local function start_ambxst_fallback(reason)
-          print("Ambxst-X: " .. reason .. "; starting the shell fallback")
-          hl.on("hyprland.start", function()
-            hl.exec_cmd("ambxst")
-          end)
+        
+        local function run_ambxst()
+          print("Ambxst-X: triggering shell execution")
+          hl.exec_cmd("ambxst")
         end
+
+        -- Tenta carregar a config gerada pelo axctl
+        local ambxst_config, ambxst_error = loadfile(ambxst_hyprland)
 
         if ambxst_config then
           local loaded, load_error = pcall(ambxst_config)
           if not loaded then
-            start_ambxst_fallback("failed to load generated Hyprland Lua: " .. tostring(load_error))
+            print("Ambxst-X: failed to load generated Lua: " .. tostring(load_error))
+            run_ambxst()
           end
         else
-          start_ambxst_fallback("generated Hyprland Lua not present yet: " .. tostring(ambxst_error))
+          print("Ambxst-X: generated Lua not found: " .. tostring(ambxst_error))
+          -- Se não houver config, inicia o shell imediatamente para que ele a gere
+          run_ambxst()
         end
+
+        -- Garante que o shell inicie em novos logins/eventos
+        hl.on("hyprland.start", function()
+          run_ambxst()
+        end)
       '';
     };
   };
