@@ -23,9 +23,8 @@
     ];
 
     # ── Fontes necessárias para o Ambxst ───────────────────────────────────
-    # Phosphor Icons: fonte de ícones da interface do shell (barra, botões)
-    # As demais fontes são bundled no pacote, mas registrar no sistema
-    # garante que outros apps também as encontrem.
+    # Ambxst-X requer: Roboto, Roboto Mono, League Gothic, Nerd Fonts Symbols.
+    # As demais fontes são bundled no pacote upstream.
     fonts.packages = with pkgs; [
       roboto
       roboto-mono
@@ -35,8 +34,6 @@
       noto-fonts-color-emoji
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif
-      # Phosphor Icons (embutido no pacote do shell-conf)
-      inputs.shell-conf.packages.${pkgs.stdenv.hostPlatform.system}.ttf-phosphor-icons
     ];
 
     # ── Serviços recomendados pelo Ambxst ──────────────────────────────────
