@@ -8,15 +8,18 @@
 #   - background       →  wallpaper do Ambxst (Wallpapers/ dir)
 #   - avatar           →  ícone do Ambxst (Icons/ dir)
 #   - accentColor      →  fallback caso autoColor não consiga extrair
+#
+# NOTA: Usamos self.outPath + "/Icons/" porque o greeter.nix vive em
+# modules/features/ e paths relativos (./Icons/) resolveriam para
+# modules/features/Icons/ que não existe.
 { self, inputs, ... }: {
   flake.nixosModules.greeter = { pkgs, lib, config, ... }: let
     # Derivação que copia wallpapers e ícones para o Nix store.
-    # Usamos um único asset-derivation para manter os caminhos consistentes
-    # entre o SDDM e o Ambxst-X.
+    # self.outPath aponta para a raiz do repositório nix-conf.
     assets = pkgs.runCommand "ambxst-sddm-assets" {} ''
       mkdir -p $out/background $out/avatar
-      cp ${./Icons/6afde16e1ef1cb3257b30e01890787dd.jpg} $out/avatar/avatar.jpg
-      cp ${./Wallpapers/wallhaven-9or3zx.jpg} $out/background/background.jpg
+      cp ${self.outPath + "/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg"} $out/avatar/avatar.jpg
+      cp ${self.outPath + "/Wallpapers/wallhaven-9or3zx.jpg"} $out/background/background.jpg
     '';
     pixieTheme = inputs.pixie-sddm.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
       background = assets + "/background/background.jpg";
