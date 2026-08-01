@@ -25,10 +25,6 @@ in
   home.packages = with pkgs; [
     manim
     nerd-fonts.jetbrains-mono
-    # Tema de ícones para o Ambxst (launcher e barra)
-    # O Ambxst usa QS_ICON_THEME para encontrar ícones de apps.
-    # O Kora oferece cobertura ampla e visual consistente.
-    kora-icon-theme
   ];
 
   # O Ambxst-X lê ~/.face.icon. O greeter declara o mesmo ativo em

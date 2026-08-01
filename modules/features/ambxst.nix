@@ -25,7 +25,6 @@
       blueman
       pavucontrol
       easyeffects
-      kora-icon-theme
       hicolor-icon-theme
     ];
 
