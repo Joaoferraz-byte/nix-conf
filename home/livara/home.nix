@@ -31,6 +31,14 @@ in
   # programs.silentSDDM.profileIcons.livara, evitando cópias divergentes.
   home.file.".face.icon".source = profileIcon;
 
+  # ── Wallpapers: symlink para o diretório gerenciado pelo flake ───────
+  # O seletor de wallpapers do Ambxst usa `wallpaperConfig.adapter.wallPath`
+  # (persistido em ~/.cache/ambxst/wallpapers.json) para encontrar imagens.
+  # Se o usuário configurar o path como ~/.config/nixos/Wallpapers, este
+  # symlink garante que o diretório exista e aponte para as wallpapers
+  # versionadas no flake nix-conf.
+  home.file.".config/nixos/Wallpapers".source = self.outPath + "/Wallpapers";
+
   # ── Tema de ícones GTK ───────────────────────────────────────────────────
   # Define o tema de ícones para o sistema GTK e para o Ambxst.
   # O wrapper do Ambxst lê o tema via gsettings e exporta QS_ICON_THEME.

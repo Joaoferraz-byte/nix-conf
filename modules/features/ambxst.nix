@@ -20,10 +20,17 @@
       partOf = [ "graphical-session.target" ];
       serviceConfig = {
         Type = "simple";
+        ExecStartPre = [ "-${pkgs.coreutils}/bin/mkdir -p %h/.local/state/ambxst/config" ];
         ExecStart = "${config.programs.ambxst.package}/bin/ambxst";
         Restart = "on-failure";
         RestartSec = 2;
         Slice = "session.slice";
+      };
+      # Ensure XDG_STATE_HOME is consistent regardless of session inheritance.
+      # Ambxst resolves its config root from AMBXST_CONFIG_ROOT (set by the
+      # launcher wrapper) which falls back to XDG_STATE_HOME/ambxst.
+      environment = {
+        XDG_STATE_HOME = "/home/${config.users.users.livara.name}/.local/state";
       };
       # Explicitly add system PATH so the shell can find system-level tools
       # like nmcli, bluetoothctl, hyprctl, systemctl, and loginctl that are
