@@ -1,7 +1,22 @@
 { config, pkgs, lib, inputs, self, ... }:
 
 let
-  profileIcon = self.outPath + "/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg";
+  # ── Assets: usar builtins.path para forçar cópia ao Nix store ───────────
+  # Quando o flake é avaliado a partir de um tree sujo, self.outPath aponta
+  # para o diretório local. builtins.path copia o diretório/arquivo para o
+  # store durante a avaliação, garantindo que o path resultante sempre
+  # aponte para um arquivo no store (e não para um path de filesystem que
+  # pode não existir). Isso evita o erro "cannot stat ... No such file or
+  # directory" durante o build do SDDM e home-manager.
+  iconsPath = builtins.path {
+    path = self.outPath + "/Icons";
+    name = "nix-conf-icons";
+  };
+  wallpapersPath = builtins.path {
+    path = self.outPath + "/Wallpapers";
+    name = "nix-conf-wallpapers";
+  };
+  profileIcon = iconsPath + "/6afde16e1ef1cb3257b30e01890787dd.jpg";
 in
 {
   home.username = "livara";
@@ -37,7 +52,7 @@ in
   # Se o usuário configurar o path como ~/.config/nixos/Wallpapers, este
   # symlink garante que o diretório exista e aponte para as wallpapers
   # versionadas no flake nix-conf.
-  home.file.".config/nixos/Wallpapers".source = self.outPath + "/Wallpapers";
+  home.file.".config/nixos/Wallpapers".source = wallpapersPath;
 
   # ── Tema de ícones GTK ───────────────────────────────────────────────────
   # Define o tema de ícones para o sistema GTK e para o Ambxst.
