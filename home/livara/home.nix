@@ -54,7 +54,7 @@ in
     };
   };
 
-  programs.alacritty = {
+  # programs.alacritty = {
     enable = true;
     settings = {
       window = {
@@ -80,11 +80,47 @@ in
         };
       };
     };
+  # };
+
+  programs.kitty = {
+    enable = true;
+    font = {
+      name = "JetBrainsMono Nerd Font";
+      size = 12;
+    };
+    settings = {
+      background_opacity = "0.9";
+      confirm_os_window_close = 0;
+      enable_audio_bell = "no";
+      hide_window_decorations = "titlebar-only";
+      macos_option_as_alt = "yes";
+      update_check_interval = 0;
+      url_style = "hand";
+      wayland_titlebar_color = "#010409";
+    };
+    extraConfig = ''
+      # BEGIN_KITTY_THEME
+      # GitHub Dark
+      include current-theme.conf
+      # END_KITTY_THEME
+
+      # Clipboard integration
+      map ctrl+c copy_to_clipboard
+      map ctrl+v paste_from_clipboard
+
+      # Open URLs with default browser
+      map ctrl+shift+e open_url_with_default_browser
+
+      # Font size
+      map ctrl+plus change_font_size all +2.0
+      map ctrl+minus change_font_size all -2.0
+      map ctrl+backspace change_font_size all 0
+    '';
   };
 
   dconf.settings = {
     "org/gnome/desktop/interface" = {
-      xdg-terms = [ "alacritty" ];
+      xdg-terms = [ "kitty" ];
       # Tema de ícones: lido pelo wrapper do Ambxst via gsettings
       # para definir QS_ICON_THEME corretamente
       icon-theme = "kora";
@@ -98,7 +134,7 @@ in
     name = "Neovim (NixVim)";
     genericName = "Editor";
     comment = "Edit text files";
-    exec = "alacritty -e nvim %F";
+    exec = "kitty -e nvim %F";
     terminal = true;
     icon = "nvim";
     type = "Application";
