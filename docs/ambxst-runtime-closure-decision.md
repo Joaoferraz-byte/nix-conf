@@ -28,3 +28,16 @@ A combinação destas duas abordagens restaura a paridade funcional do shell sob
 
 [1]: https://github.com/Joaoferraz-byte/nix-conf "Repositório nix-conf"
 [2]: https://github.com/Joaoferraz-byte/shell-conf "Repositório shell-conf"
+
+## Verified (Pending Runtime Confirmation)
+
+The following fixes have been implemented and committed to the repositories:
+
+1. **Closure Fix**: Missing CLI dependencies (bash, coreutils, etc.) added to `shell-conf` and system PATH injected into `ambxst.service`.
+2. **Permission Fix**: `ExecStartPre` added to `ambxst.service` to ensure `~/.local/state/ambxst/config` exists with correct ownership.
+3. **Wallpapers Fix**: Symlink from `~/.config/nixos/Wallpapers` to the flake-tracked directory created via Home Manager.
+4. **Rounding Fix**: `CompositorConfig.qml` updated to execute `hyprctl batch` for live decoration updates.
+5. **Icon Theme Fix**: Launcher updated to include user profile in `XDG_DATA_DIRS` and detect GTK theme via `gsettings`.
+6. **Brightness Fix**: Backend improved with machine-readable `brightnessctl` output and robust monitor detection.
+
+**Note to User**: Since this environment cannot run NixOS, please follow the [Verification Runbook](./verification-runbook.md) to apply these changes and record the results here.
