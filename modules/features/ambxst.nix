@@ -25,6 +25,10 @@
         RestartSec = 2;
         Slice = "session.slice";
       };
+      # Explicitly add system PATH so the shell can find system-level tools
+      # like nmcli, bluetoothctl, hyprctl, systemctl, and loginctl that are
+      # not part of the shell's own Nix closure.
+      path = [ "/run/current-system/sw" ];
     };
 
     # 3. Garante que o módulo de Home Manager do shell-conf seja injetado 
