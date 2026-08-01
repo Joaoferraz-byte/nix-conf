@@ -27,7 +27,7 @@ in
     nerd-fonts.jetbrains-mono
   ];
 
-  # O Ambxst-X lê ~/.face.icon. O greeter declara o mesmo ativo em
+  # O Ambxst lê ~/.face.icon. O greeter declara o mesmo ativo em
   # programs.silentSDDM.profileIcons.livara, evitando cópias divergentes.
   home.file.".face.icon".source = profileIcon;
 
