@@ -48,11 +48,12 @@ Essa abordagem passa um **path de filesystem diretamente** para a opção `backg
 
 ### Por que o arquivo "some" localmente:
 
-O arquivo `Wallpapers/wallhaven-9or3zx.jpg` está rastreado no git desde o commit raiz (`544dab0`, 2026-07-26) e está presente em todos os commits do branch `main`. No entanto, o usuário pode não ter o arquivo no working tree local por:
+O arquivo `Wallpapers/wallhaven-9or3zx.jpg` está rastreado no git desde o commit raiz (`544dab0`, 2026-07-26) e está presente em todos os commits do branch `main`. No entanto, o build pode falhar se o arquivo não estiver **rastreado (tracked)** no Git local da máquina de build:
 
-1. **Clone não atualizado**: O repositório local pode não ter recebido o `git pull` mais recente.
-2. **Arquivo removido localmente**: O arquivo pode ter sido deletado acidentalmente do working tree sem commit.
-3. **Tree sujo com arquivo ausente**: O warning "Git tree is dirty" indica que o working tree não está limpo; se o arquivo foi removido localmente mas o commit no git o inclui, o Nix ainda tenta acessar o path local.
+1. **Arquivo não indexado (Untracked)**: O Nix Flakes, ao avaliar um repositório Git, ignora arquivos que não foram adicionados ao índice (`git add`). Isso gera o erro:
+   `error: Path 'Wallpapers' in the repository "..." is not tracked by Git.`
+2. **Clone não atualizado**: O repositório local pode não ter recebido o `git pull` mais recente, contendo as referências corretas.
+3. **Arquivo removido localmente**: O arquivo pode ter sido deletado do working tree. Mesmo que esteja no Git, se o Nix estiver avaliando o "dirty tree", ele tentará ler o arquivo do disco local e falhará se ele não estiver lá.
 
 ### Por que a derivação anterior funcionava:
 
@@ -104,23 +105,30 @@ in {
 
 A escolha entre `runCommandNoCC` (no greeter) e `builtins.path` (no home.nix) reflete as diferenças de contexto: no `greeter.nix`, o `pkgs.runCommandNoCC` é mais apropriado porque precisa copiar arquivos específicos para subdiretórios (`backgrounds/`, `icons/`) que o SilentSDDM espera. No `home.nix`, o `builtins.path` é mais simples porque o Home Manager aceita um diretório inteiro como source do symlink.
 
-## Verificação
+## Verificação e Solução
 
-O usuário deve:
+O usuário deve seguir estes passos para garantir que o ambiente local esteja pronto para o build:
 
-1. **Garantir que o working tree local está limpo**:
+1. **Sincronizar e Indexar os arquivos**:
+   Certifique-se de que todos os assets (Wallpapers e Icons) estão rastreados pelo Git:
    ```bash
    cd ~/.config/nixos
    git pull origin main
-   git status   # deve mostrar "nothing to commit, working tree clean"
+   git add Wallpapers Icons
    ```
 
-2. **Reconstruir o sistema**:
+2. **Limpar o estado do tree (Opcional, mas recomendado)**:
+   O build funciona com o tree sujo, mas é mais seguro garantir que não há arquivos deletados:
+   ```bash
+   git status   # deve mostrar que os arquivos estão "tracked"
+   ```
+
+3. **Reconstruir o sistema**:
    ```bash
    sudo nixos-rebuild switch --flake .#myMachine
    ```
 
-3. **Confirmar ausência de erros**:
+4. **Confirmar ausência de erros**:
    - O warning "Git tree is dirty" não deve aparecer (se o tree está limpo).
    - A derivação `silent-*` deve construir com sucesso.
    - O wallpaper deve aparecer na tela de login do SDDM.
