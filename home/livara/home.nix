@@ -54,34 +54,6 @@ in
     };
   };
 
-  # programs.alacritty = {
-    enable = true;
-    settings = {
-      window = {
-        padding = { x = 10; y = 10; };
-        dynamic_padding = true;
-        decorations = "none";
-        opacity = 1.0;
-      };
-      font = {
-        normal = { family = "JetBrainsMono Nerd Font"; style = "Regular"; };
-        size = 12.0;
-      };
-      colors = {
-        primary = { background = "#010409"; foreground = "#c9d1d9"; };
-        cursor = { text = "#0d1117"; cursor = "#58a6ff"; };
-        normal = {
-          black = "#484f58"; red = "#ff7b72"; green = "#3fb950"; yellow = "#d29922";
-          blue = "#58a6ff"; magenta = "#bc8cff"; cyan = "#39c5cf"; white = "#b1bac4";
-        };
-        bright = {
-          black = "#6e7681"; red = "#ffa198"; green = "#56d364"; yellow = "#e3b341";
-          blue = "#79c0ff"; magenta = "#d2a8ff"; cyan = "#56d4dd"; white = "#f0f6fc";
-        };
-      };
-    };
-  # };
-
   programs.kitty = {
     enable = true;
     font = {
