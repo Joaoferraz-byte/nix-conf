@@ -11,20 +11,16 @@
 # no caminho de filesystem local. A derivação garante que o arquivo esteja
 # sempre no store, independente do estado do tree local.
 # Ver: docs/wallpaper-build-fix.md
-{ self, inputs, pkgs, ... }: let
-  # Derivação que copia wallpapers e ícones para o Nix store.
-  # self.outPath aponta para a raiz do repositório nix-conf; quando o
-  # flake é avaliado a partir de um tree sujo, self.outPath é o diretório
-  # local (ex: /home/livara/.config/nixos). O build sandbox permite acesso
-  # a esse path, e a derivação copia os arquivos para o store de forma
-  # reprodutível.
-  assets = pkgs.runCommandNoCC "nix-conf-sddm-assets" {} ''
-    mkdir -p $out/backgrounds $out/icons
-    cp ${self.outPath + "/Wallpapers/wallhaven-9or3zx.jpg"} $out/backgrounds/wallhaven-9or3zx.jpg
-    cp ${self.outPath + "/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg"} $out/icons/avatar.jpg
-  '';
-in {
-  flake.nixosModules.greeter = { config, ... }: {
+{ self, inputs, ... }: {
+  flake.nixosModules.greeter = { pkgs, config, ... }: let
+    # Derivação que copia wallpapers e ícones para o Nix store.
+    # Definida dentro do módulo para ter acesso ao `pkgs` do sistema.
+    assets = pkgs.runCommandNoCC "nix-conf-sddm-assets" {} ''
+      mkdir -p $out/backgrounds $out/icons
+      cp ${self.outPath + "/Wallpapers/wallhaven-9or3zx.jpg"} $out/backgrounds/wallhaven-9or3zx.jpg
+      cp ${self.outPath + "/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg"} $out/icons/avatar.jpg
+    '';
+  in {
     imports = [
       inputs.silentSDDM.nixosModules.default
     ];
