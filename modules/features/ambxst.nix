@@ -9,6 +9,24 @@
       package = inputs.shell-conf.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
+    # UWSM alcança graphical-session.target somente depois de importar o
+    # ambiente Wayland/DBus. Associar o shell a esse alvo evita que o Lua do
+    # Hyprland e um serviço systemd concorram para iniciar Quickshell.
+    systemd.user.services.ambxst = {
+      description = "Ambxst Quickshell session";
+      wantedBy = [ "graphical-session.target" ];
+      wants = [ "graphical-session.target" ];
+      after = [ "graphical-session.target" ];
+      partOf = [ "graphical-session.target" ];
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${config.programs.ambxst.package}/bin/ambxst";
+        Restart = "on-failure";
+        RestartSec = 2;
+        Slice = "session.slice";
+      };
+    };
+
     # 3. Garante que o módulo de Home Manager do shell-conf seja injetado 
     # em todos os usuários que usam home-manager.
     # Isso resolve o problema de o estado mutável (~/.local/state/ambxst)

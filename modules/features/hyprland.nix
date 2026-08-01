@@ -1,28 +1,58 @@
 { self, inputs, ... }: {
   # ── NixOS Module ────────────────────────────────────────────────────────
-  flake.nixosModules.hyprland = { pkgs, lib, ... }: {
-    programs.hyprland = {
-      enable = true;
-      withUWSM = true;
-      xwayland.enable = true;
+  flake.nixosModules.hyprland = { pkgs, lib, config, ... }:
+    let
+      # A entrada automática de `withUWSM` inicia o wrapper sem declarar
+      # explicitamente o DesktopNames. Em versões afetadas de UWSM/Hyprland
+      # isso resulta em XDG_CURRENT_DESKTOP=start-hyprland. Esta entrada é a
+      # única sessão UWSM local e preserva `Hyprland` em toda a sessão.
+      hyprlandUwsmSession = pkgs.writeTextFile {
+        name = "hyprland-uwsm";
+        text = ''
+          [Desktop Entry]
+          Name=Hyprland (UWSM)
+          Comment=Hyprland compositor managed by UWSM
+          Exec=${lib.getExe config.programs.uwsm.package} start -F -e -D Hyprland -- /run/current-system/sw/bin/start-hyprland
+          Type=Application
+          DesktopNames=Hyprland
+          Keywords=hyprland;wayland;compositor;
+        '';
+        destination = "/share/wayland-sessions/hyprland-uwsm.desktop";
+        derivationArgs.passthru.providedSessions = [ "hyprland-uwsm" ];
+      };
+    in {
+      programs.hyprland = {
+        enable = true;
+        # A entrada automática gerada por esta opção não permite passar
+        # `-e -D Hyprland` ao UWSM. A sessão declarada acima a substitui.
+        withUWSM = false;
+        xwayland.enable = true;
+      };
+
+      # Mantém as unidades UWSM, a importação de ambiente e a integração
+      # systemd da sessão, sem criar uma segunda entrada hyprland-uwsm.
+      programs.uwsm.enable = true;
+
+      environment.systemPackages = with pkgs; [
+        hyprlandUwsmSession
+        grim
+        slurp
+        wl-clipboard
+        brightnessctl
+        bibata-cursors
+        wev
+      ];
+
+      # A entrada aparece no display manager como "Hyprland (UWSM)". Ela usa
+      # start-hyprland e força XDG_CURRENT_DESKTOP=Hyprland antes do compositor.
+      services.displayManager.sessionPackages = [ hyprlandUwsmSession ];
+
+      home-manager.sharedModules = [
+        # UWSM é a única autoridade da sessão systemd; o módulo Home Manager
+        # não pode criar uma sessão Hyprland concorrente.
+        { wayland.windowManager.hyprland.systemd.enable = false; }
+      ];
     };
-
-    # pkgs.hyprland já inclui hyprland-uwsm.desktop via passthru.providedSessions.
-    # Declarar waylandCompositors.hyprland aqui criaria um segundo entry conflitante.
-
-    environment.systemPackages = with pkgs; [
-      grim
-      slurp
-      wl-clipboard
-      brightnessctl
-      bibata-cursors
-      wev
-    ];
-
-    home-manager.sharedModules = [
-      { wayland.windowManager.hyprland.systemd.enable = false; }
-    ];
-  };
 
   # ── Home Manager Module ─────────────────────────────────────────────────
   flake.homeManagerModules.hyprland = { pkgs, lib, ... }: {
@@ -72,13 +102,12 @@
         -- Binds de recuperação (não conflitam com os defaults do Ambxst).
         local mainMod = "SUPER"
         hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
-        hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd("ambxst reload"))
+        hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd("systemctl --user restart ambxst.service"))
         hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
 
-        -- Inicia o Ambxst uma única vez por sessão.
-        hl.on("hyprland.start", function()
-          hl.exec_cmd("ambxst")
-        end)
+        -- Ambxst é iniciado pela unidade systemd `ambxst.service`, associada
+        -- a graphical-session.target. Não iniciar pelo Lua evita duplicidade
+        -- e garante que o ambiente UWSM já tenha sido importado.
       '';
     };
   };
