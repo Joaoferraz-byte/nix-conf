@@ -28,11 +28,9 @@
         withUWSM = false;
         xwayland.enable = true;
       };
-
       # Mantém as unidades UWSM, a importação de ambiente e a integração
       # systemd da sessão, sem criar uma segunda entrada hyprland-uwsm.
       programs.uwsm.enable = true;
-
       environment.systemPackages = with pkgs; [
         hyprlandUwsmSession
         grim
@@ -42,18 +40,15 @@
         bibata-cursors
         wev
       ];
-
       # A entrada aparece no display manager como "Hyprland (UWSM)". Ela usa
       # start-hyprland e força XDG_CURRENT_DESKTOP=Hyprland antes do compositor.
       services.displayManager.sessionPackages = [ hyprlandUwsmSession ];
-
       home-manager.sharedModules = [
         # UWSM é a única autoridade da sessão systemd; o módulo Home Manager
         # não pode criar uma sessão Hyprland concorrente.
         { wayland.windowManager.hyprland.systemd.enable = false; }
       ];
     };
-
   # ── Home Manager Module ─────────────────────────────────────────────────
   flake.homeManagerModules.hyprland = { pkgs, lib, ... }: {
     home.pointerCursor = {
@@ -64,15 +59,12 @@
       gtk.enable = true;
       x11.enable = true;
     };
-
     wayland.windowManager.hyprland = {
       enable     = true;
       configType = "lua";
       systemd.enable = false;
-
       # settings vazio: toda a config vai em extraConfig via Lua puro.
       settings = {};
-
       extraConfig = ''
         -- Monitor padrão
         hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
@@ -90,6 +82,15 @@
           },
           general = {
             layout = "dwindle",
+            gaps_in = 5,
+            gaps_out = 10,
+            border_size = 2,
+          },
+          decoration = {
+            rounding = 16,
+            drop_shadow = true,
+            shadow_range = 4,
+            shadow_render_power = 3,
           },
           misc = {
             force_default_wallpaper = 0,
@@ -99,11 +100,22 @@
 
         hl.config({ dwindle = { preserve_split = true } })
 
-        -- Binds de recuperação (não conflitam com os defaults do Ambxst).
+        -- Binds de recuperação e nativos (garantem funcionalidade básica se o shell falhar).
         local mainMod = "SUPER"
+        
+        -- Terminal e Shell
         hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
+        hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("ambxst run tmux"))
         hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd("systemctl --user restart ambxst.service"))
         hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
+
+        -- Workspaces (1-10)
+        for i = 1, 9 do
+          hl.bind(mainMod .. " + " .. i, hl.dsp.workspace(tostring(i)))
+          hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.movetoworkspace(tostring(i)))
+        end
+        hl.bind(mainMod .. " + 0", hl.dsp.workspace("10"))
+        hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.movetoworkspace("10"))
 
         -- Ambxst é iniciado pela unidade systemd `ambxst.service`, associada
         -- a graphical-session.target. Não iniciar pelo Lua evita duplicidade
