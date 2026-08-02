@@ -1,23 +1,57 @@
 {
   "nodes": {
-    "axctl": {
+    "dank-qml-common": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785445867,
+        "narHash": "sha256-l9IRsLIVZ7bV+KMuTdCga89tGt4lpdMXhQR7f/2qoe4=",
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "rev": "3b06bd9372e18bc8086cc3958d4f677d57fbfdd8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "type": "github"
+      }
+    },
+    "dms": {
       "inputs": {
+        "dank-qml-common": "dank-qml-common",
+        "flake-compat": "flake-compat",
         "nixpkgs": [
           "shell-conf",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1779850544,
-        "narHash": "sha256-RSnr/BVWGw7+OXrRQ+PBrZZ/3gxlwmFlKW4zjlIRoDg=",
-        "owner": "Axenide",
-        "repo": "axctl",
-        "rev": "1e163c0193cf3b407b5d9bf65fbdb3ef8c8c1710",
+        "lastModified": 1785648621,
+        "narHash": "sha256-rjY9hNqLsMqMQZWJkPgyAlL9GEdhcgpnaf0ErwS+iFk=",
+        "owner": "AvengeMedia",
+        "repo": "DankMaterialShell",
+        "rev": "11287459c3abc23c74de86adccb2ab0bc536e464",
         "type": "github"
       },
       "original": {
-        "owner": "Axenide",
-        "repo": "axctl",
+        "owner": "AvengeMedia",
+        "repo": "DankMaterialShell",
+        "type": "github"
+      }
+    },
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "NixOS",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "flake-compat",
         "type": "github"
       }
     },
@@ -267,17 +301,17 @@
     },
     "shell-conf": {
       "inputs": {
-        "axctl": "axctl",
+        "dms": "dms",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1785636207,
-        "narHash": "sha256-7uJvbh914JA5qcPF5eNOM+CQdpGXIPzgZrNZJoPgv7I=",
+        "lastModified": 1785700766,
+        "narHash": "sha256-UQ7nxsCFWqsBjQQk5kz89d3O2yg/0G+Y8f8Gn2Qv2UQ=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "01af79ed110979b523236b46ec315d8922112195",
+        "rev": "9da71ba870afd427c9e6db2a88c0dd727dafaabf",
         "type": "github"
       },
       "original": {
