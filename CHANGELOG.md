@@ -1,5 +1,35 @@
 # Changelog
 
+## [Não publicado] Shell migration: Ambxst → DankMaterialShell
+
+O shell **Ambxst-X** foi substituído pelo **DankMaterialShell** (DMS). A integração
+anterior (axctl, settings/*.json, systemd unit customizado) foi removida; o DMS é
+consumido via o flake `shell-conf` reescrito, que re-exporta os módulos HM e NixOS
+oficiais do upstream (`github:AvengeMedia/DankMaterialShell`).
+
+**Removido:**
+- `modules/features/ambxst.nix`
+- `scripts/sync-ambxst-presets.sh`, `scripts/sync-shell-conf-assets.sh`
+- Todas as referências a `ambxst`, `axctl`, `Ambxst-X` em `*.nix` e docs
+
+**Adicionado:**
+- `modules/features/dank-material-shell.nix` — importa shell-conf DMS modules,
+  preserva pipewire/bluetooth/keyring/system packages do antigo ambxst module
+- Todas as keybinds em `hyprland.nix` agora usam `dms ipc call ...`
+
+**Alterado:**
+- `modules/hosts/*/configuration.nix`: `self.nixosModules.ambxst` → `self.nixosModules.dankMaterialShell`
+- `home/livara/home.nix`: comentários Ambxst removidos
+- `flake.nix`: input comment atualizado para DMS
+- `modules/README.md`: Ambxst → DankMaterialShell na tabela de features
+
+**Nota:** A sessão Hyprland (UWSM) permanece inalterada. O DMS é iniciado pelo
+systemd user service `dms.service` vinculado a `graphical-session.target`.
+
+**Para ativar:** `sudo nixos-rebuild switch --flake .#myMachine`
+
+---
+
 ## [Não publicado] Correção integrada Hyprland Lua, Ambxst-X e SilentSDDM
 
 ### Correções de inicialização e integração
