@@ -110,7 +110,7 @@
         local mainMod = "SUPER"
 
         -- Terminal e Shell
-        hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
+        hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
         hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("ambxst run tmux"))
         hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd("systemctl --user restart ambxst.service"))
         hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
