@@ -3,7 +3,7 @@
     imports = [
       self.nixosModules.myMachineHardware
       self.nixosModules.commonPackages
-      self.nixosModules.hyprland
+      self.nixosModules.niri
       self.nixosModules.nvidia
       self.nixosModules.greeter
       self.nixosModules.desktop-portals

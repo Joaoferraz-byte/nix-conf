@@ -18,7 +18,7 @@
         # Hyprland: configuração do compositor (keybinds, monitor, etc.).
         home-manager.sharedModules = [
           inputs.nixvim.homeModules.nixvim
-          self.homeManagerModules.hyprland
+          self.homeManagerModules.niri
         ];
         home-manager.users.livara = import ../../../home/livara/home.nix;
       }
