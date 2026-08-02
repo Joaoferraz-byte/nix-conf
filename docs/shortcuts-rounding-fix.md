@@ -1,27 +1,52 @@
-# Correção de Atalhos e Arredondamento (Rounding)
+# Restauração de Atalhos e Arredondamento Ambxst
 
-Este documento detalha as correções aplicadas para restaurar a funcionalidade dos atalhos de workspace, o atalho `Super+T` e o arredondamento das janelas.
+Este documento detalha as correções aplicadas para restaurar a funcionalidade completa dos atalhos e o arredondamento das janelas, garantindo 100% de paridade com o Ambxst original.
 
 ## Problema Identificado
 
-Os atalhos de workspace (Super+1-0) e o arredondamento das janelas não estavam funcionando porque dependiam inteiramente do daemon `axctl` do Ambxst-X. Se o daemon falhasse ao iniciar ou o socket IPC não estivesse pronto, o Hyprland ficava sem essas configurações essenciais. Além disso, o atalho `Super+T` (Tmux) não estava definido nativamente.
-
-## Causa Raiz
-
-1. **Ausência de Binds Nativos**: O arquivo `hyprland.nix` definia apenas atalhos de recuperação (`Super+Return`, `Super+R`, `Super+Shift+Q`).
-2. **Dependência Dinâmica**: O arredondamento (rounding) era aplicado dinamicamente pelo shell via `hyprctl`, sem um valor padrão definido na configuração principal do compositor.
-3. **Paridade com Ambxst**: O Ambxst original utiliza `Super+T` para abrir o gerenciador de tmux, enquanto o usuário estava usando atalhos de terminal puro.
+Os atalhos (workspaces, launcher, dashboard, etc.) e o arredondamento das janelas dependiam inteiramente do daemon `axctl` do Ambxst-X. Se o daemon falhasse ao iniciar ou o socket IPC não estivesse pronto, o ambiente perdia funcionalidade essencial. Além disso, muitos atalhos do Ambxst original não estavam presentes no fork atual.
 
 ## Soluções Implementadas
 
 ### 1. Binds Nativos no Hyprland (Lua)
-Adicionamos atalhos nativos diretamente no `modules/features/hyprland.nix` usando a sintaxe Lua do compositor. Isso garante que a navegação básica funcione mesmo que o shell falhe.
-- **Workspaces**: Adicionados binds para `Super + [1-9, 0]` e `Super + Shift + [1-9, 0]`.
-- **Terminal Tmux**: Adicionado bind para `Super + T` executando `ambxst run tmux`.
+Todos os atalhos foram movidos para a configuração nativa do Hyprland (`modules/features/hyprland.nix`) usando chamadas `hl.bind`. Isso garante que os atalhos funcionem mesmo que o shell falhe.
+
+#### Atalhos Core (Ambxst IPC)
+| Tecla | Ação | Comando |
+| :--- | :--- | :--- |
+| `SUPER` | Launcher | `ambxst run launcher` |
+| `SUPER + D` | Dashboard | `ambxst run dashboard` |
+| `SUPER + A` | Assistant | `ambxst run assistant` |
+| `SUPER + V` | Clipboard | `ambxst run clipboard` |
+| `SUPER + .` | Emoji | `ambxst run emoji` |
+| `SUPER + N` | Notes | `ambxst run notes` |
+| `SUPER + T` | Tmux | `ambxst run tmux` |
+| `SUPER + ,` | Wallpapers | `ambxst run wallpapers` |
+| `SUPER + SHIFT + C` | Settings | `ambxst run config` |
+| `SUPER + TAB` | Overview | `ambxst run overview` |
+| `SUPER + ESC` | Power Menu | `ambxst run powermenu` |
+| `SUPER + S` | Tools | `ambxst run tools` |
+| `SUPER + SHIFT + S` | Screenshot | `ambxst run screenshot` |
+| `SUPER + SHIFT + R` | Screen Record | `ambxst run screenrecord` |
+| `SUPER + SHIFT + A` | Lens | `ambxst run lens` |
+| `SUPER + ALT + B` | Reload Shell | `ambxst reload` |
+
+#### Atalhos de Sistema e Navegação
+- `SUPER + C`: Fechar janela ativa.
+- `SUPER + F`: Alternar modo flutuante.
+- `SUPER + M`: Tela cheia.
+- `SUPER + [Setas]`: Mover foco entre janelas.
+- `SUPER + SHIFT + [Setas]`: Mover janelas.
+- `SUPER + [1-0]`: Mudar de workspace (1-10).
+- `SUPER + SHIFT + [1-0]`: Mover janela para workspace.
+
+#### Atalhos de Hardware (Media/Volume/Brightness)
+- Mapeamento completo de teclas `XF86` para controle de volume (`wpctl`), brilho (`ambxst brightness`) e mídia (`playerctl`).
 
 ### 2. Decoração Padrão (Rounding)
 Definimos valores padrão de decoração no bloco `hl.config` do `hyprland.nix`:
 - `rounding = 16` (valor padrão do Ambxst).
+- `blur = { enabled = true, size = 8, passes = 2 }`.
 - `gaps_in = 5` e `gaps_out = 10`.
 - Ativação de sombras (`drop_shadow = true`).
 
@@ -37,4 +62,4 @@ Definimos valores padrão de decoração no bloco `hl.config` do `hyprland.nix`:
    sudo nixos-rebuild switch --flake .#myMachine
    ```
 
-Com essas mudanças, o arredondamento será aplicado imediatamente ao iniciar o Hyprland, e os atalhos de workspace estarão sempre disponíveis.
+Com essas mudanças, o arredondamento será aplicado imediatamente ao iniciar o Hyprland, e a suite completa de atalhos Ambxst estará sempre disponível.
