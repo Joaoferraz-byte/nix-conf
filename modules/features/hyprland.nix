@@ -1,4 +1,4 @@
-{ self, inputs, ... }: {
+{ self, ... }: {
   # ── NixOS Module ────────────────────────────────────────────────────────
   flake.nixosModules.hyprland = { pkgs, lib, config, ... }:
     let
@@ -17,7 +17,6 @@
           DesktopNames=Hyprland
           Keywords=hyprland;wayland;compositor;
         '';
-        destination = "/share/wayland-sessions/hyprland-uwsm.desktop";
         derivationArgs.passthru.providedSessions = [ "hyprland-uwsm" ];
       };
     in {
@@ -104,37 +103,32 @@
         })
         hl.config({ dwindle = { preserve_split = true } })
         -- Binds de recuperação e nativos (garantem funcionalidade básica se o shell falhar).
-        -- Estes atalhos são idênticos aos definidos no adapter default do shell-conf
-        -- e são a única fonte de binds Hyprland — o CompositorKeybinds foi removido
-        -- do shell.qml para evitar conflitos com esta camada declarativa.
         local mainMod = "SUPER"
 
         -- Terminal e Shell
         hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
-        hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("ambxst run tmux"))
-        hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd("systemctl --user restart ambxst.service"))
+        hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("kitty -e tmux"))
+        hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd("systemctl --user restart dms.service"))
         hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
 
-        -- Atalhos Core Ambxst (IPC)
-        -- Launcher: apenas Super (sem modificador adicional).
-        hl.bind(mainMod,                hl.dsp.exec_cmd("ambxst run launcher"))
-        -- Dashboard, Assistant, Clipboard, Emoji, Notes, Wallpapers
-        hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("ambxst run dashboard"))
-        hl.bind(mainMod .. " + A",      hl.dsp.exec_cmd("ambxst run assistant"))
-        hl.bind(mainMod .. " + V",      hl.dsp.exec_cmd("ambxst run clipboard"))
-        hl.bind(mainMod .. " + PERIOD", hl.dsp.exec_cmd("ambxst run emoji"))
-        hl.bind(mainMod .. " + N",      hl.dsp.exec_cmd("ambxst run notes"))
-        hl.bind(mainMod .. " + COMMA",  hl.dsp.exec_cmd("ambxst run wallpapers"))
+        -- Atalhos Core DankMaterialShell (via dms IPC)
+        hl.bind(mainMod,                hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
+        hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("dms ipc call dashboard toggle"))
+        hl.bind(mainMod .. " + A",      hl.dsp.exec_cmd("dms ipc call assistant toggle"))
+        hl.bind(mainMod .. " + V",      hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
+        hl.bind(mainMod .. " + PERIOD", hl.dsp.exec_cmd("dms ipc call emoji toggle"))
+        hl.bind(mainMod .. " + N",      hl.dsp.exec_cmd("dms ipc call notes toggle"))
+        hl.bind(mainMod .. " + COMMA",  hl.dsp.exec_cmd("dms ipc call wallpapers toggle"))
         -- System utilities
-        hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("ambxst run config"))
-        hl.bind(mainMod .. " + TAB",    hl.dsp.exec_cmd("ambxst run overview"))
-        hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("ambxst run powermenu"))
-        hl.bind(mainMod .. " + S",      hl.dsp.exec_cmd("ambxst run tools"))
-        hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("ambxst run screenshot"))
-        hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("ambxst run screenrecord"))
-        hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("ambxst run lens"))
-        hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd("ambxst reload"))
-        hl.bind(mainMod .. " + CTRL + ALT + B", hl.dsp.exec_cmd("ambxst quit"))
+        hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("dms ipc call settings toggle"))
+        hl.bind(mainMod .. " + TAB",    hl.dsp.exec_cmd("dms ipc call overview toggle"))
+        hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
+        hl.bind(mainMod .. " + S",      hl.dsp.exec_cmd("dms ipc call tools toggle"))
+        hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("dms ipc call screenshot"))
+        hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("dms ipc call screenrecord"))
+        hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("dms ipc call google_lens"))
+        hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd("dms run"))
+        hl.bind(mainMod .. " + CTRL + ALT + B", hl.dsp.exec_cmd("dms quit"))
         hl.bind(mainMod .. " + L",      hl.dsp.exec_cmd("loginctl lock-session"))
 
         -- Atalhos de Sistema Hyprland
@@ -207,7 +201,7 @@
         hl.bind(mainMod .. " + ALT + J",     hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 50"))
         hl.bind(mainMod .. " + ALT + K",     hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 -50"))
 
-        -- Scrolling Layout (column operations — nativo Ambxst-X)
+        -- Scrolling Layout (column operations)
         hl.bind(mainMod .. " + ALT + SPACE", hl.dsp.exec_cmd("hyprctl dispatch layoutmsg promote"))
         hl.bind(mainMod .. " + CTRL + SPACE", hl.dsp.exec_cmd("hyprctl dispatch layoutmsg togglefit"))
         hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("hyprctl dispatch layoutmsg colresize +conf"))
@@ -233,13 +227,9 @@
         hl.bind("le", "XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
         hl.bind("le", "XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%-"))
         hl.bind("le", "XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-        hl.bind("le", "XF86MonBrightnessUp",   hl.dsp.exec_cmd("ambxst brightness +5"))
-        hl.bind("le", "XF86MonBrightnessDown", hl.dsp.exec_cmd("ambxst brightness -5"))
+        hl.bind("le", "XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set +5%"))
+        hl.bind("le", "XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"))
         hl.bind("l",  "XF86Calculator",        hl.dsp.exec_cmd("notify-send \"Soon\""))
-
-        -- Ambxst é iniciado pela unidade systemd `ambxst.service`, associada
-        -- a graphical-session.target. Não iniciar pelo Lua evita duplicidade
-        -- e garante que o ambiente UWSM já tenha sido importado.
       '';
     };
   };

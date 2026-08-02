@@ -18,8 +18,8 @@
     # NOTA: nixvim aparece como input direto E dentro do vim-conf.
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
     # O vim-conf usa o nixvim internamente para construir o pacote.
-    # Ambxst shell (substitui o shell-conf anterior)
-    # O shell-conf agora consome o Ambxst-X e integra com o Hyprland.
+    # DankMaterialShell shell (substitui o Ambxst)
+    # O shell-conf agora consome o DMS upstream.
     shell-conf = {
       url = "github:Joaoferraz-byte/shell-conf";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -37,7 +37,7 @@
     #   - vim-conf: configuração NixVim declarativa (plugins, languages, keymaps)
     #   - nixvim: módulo HM compartilhado para programas.nixvim.*
     #   - home-manager: configuração do usuário livara
-    #   - shell-conf: Ambxst-X shell (Quickshell + axctl + Hyprland)
+    #   - shell-conf: DankMaterialShell shell (Quickshell + Go + matugen)
     imports = [
       (inputs.import-tree ./modules)
     ];

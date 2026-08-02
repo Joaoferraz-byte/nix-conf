@@ -42,21 +42,17 @@ in
     nerd-fonts.jetbrains-mono
   ];
 
-  # O Ambxst lê ~/.face.icon. O greeter declara o mesmo ativo em
-  # programs.silentSDDM.profileIcons.livara, evitando cópias divergentes.
+  # O greeter declara o mesmo ativo em programs.silentSDDM.profileIcons.livara,
+  # evitando cópias divergentes.
   home.file.".face.icon".source = profileIcon;
 
   # ── Wallpapers: symlink para o diretório gerenciado pelo flake ───────
-  # O seletor de wallpapers do Ambxst usa `wallpaperConfig.adapter.wallPath`
-  # (persistido em ~/.cache/ambxst/wallpapers.json) para encontrar imagens.
-  # Se o usuário configurar o path como ~/.config/nixos/Wallpapers, este
-  # symlink garante que o diretório exista e aponte para as wallpapers
+  # Este symlink garante que o diretório exista e aponte para as wallpapers
   # versionadas no flake nix-conf.
   home.file.".config/nixos/Wallpapers".source = wallpapersPath;
 
   # ── Tema de ícones GTK ───────────────────────────────────────────────────
-  # Define o tema de ícones para o sistema GTK e para o Ambxst.
-  # O wrapper do Ambxst lê o tema via gsettings e exporta QS_ICON_THEME.
+  # Define o tema de ícones para o sistema GTK.
   gtk = {
     enable = true;
     iconTheme = {
@@ -108,8 +104,6 @@ in
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       xdg-terms = [ "kitty" ];
-      # Tema de ícones: lido pelo wrapper do Ambxst via gsettings
-      # para definir QS_ICON_THEME corretamente
       icon-theme = "kora";
       gtk-theme = "adw-gtk3-dark";
       cursor-theme = "Bibata-Modern-Classic";

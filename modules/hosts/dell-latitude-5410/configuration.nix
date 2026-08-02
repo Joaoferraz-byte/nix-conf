@@ -17,10 +17,11 @@
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
-      # Migrado de quickshell para ambxst (BUG-002).
-      # O módulo ambxst.nix gerencia o Ambxst shell com suporte completo
-      # a fontes, upower, power-profiles-daemon e módulo HM.
-      self.nixosModules.ambxst
+      # DankMaterialShell substitui o Ambxst.
+      # O módulo dank-material-shell.nix gerencia:
+      #   - O shell DMS (systemd service, settings, plugins)
+      #   - Audio, bluetooth, keyring (pipewire, blueman, gnome-keyring)
+      self.nixosModules.dankMaterialShell
     ];
     # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
@@ -52,7 +53,7 @@
     console.keyMap = "br-abnt2";
     # ── Energia ────────────────────────────────────────────────────────────
     # O Dell Latitude 5410 usa tlp (laptop), que conflita com power-profiles-daemon.
-    # O ambxst.nix define power-profiles-daemon.enable = mkDefault true, então
+    # O DMS nixosModule define power-profiles-daemon.enable = mkDefault true, então
     # forçamos false aqui para manter o tlp.
     services.power-profiles-daemon.enable = lib.mkForce false;
 

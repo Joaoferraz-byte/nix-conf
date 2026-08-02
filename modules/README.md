@@ -4,7 +4,7 @@ Este diretório concentra os módulos que compõem as configurações NixOS do r
 
 | Diretório | Responsabilidade |
 |---|---|
-| `features/` | Funcionalidades reutilizáveis de sistema, como greeter, compositor, drivers, firewall, Ambxst, Hyprland e portais. |
+| `features/` | Funcionalidades reutilizáveis de sistema, como greeter, compositor, drivers, firewall, DankMaterialShell, Hyprland e portais. |
 | `packages/` | Declaração de pacotes Nix e Flatpak. |
 | `hosts/` | Configurações específicas de máquina, incluindo hardware, locale e preferências locais. |
 | `parts.nix` | Definição dos sistemas suportados e composição dos módulos de flake. |

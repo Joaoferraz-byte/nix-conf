@@ -36,7 +36,7 @@
       };
 
       # Fonte única para o ícone do SDDM. O mesmo ativo é declarado em home.nix
-      # como ~/.face.icon, que é o caminho lido pelo Ambxst-X na sessão gráfica.
+      # como ~/.face.icon.
       profileIcons.livara = assets + "/icons/avatar.jpg";
 
       settings = {

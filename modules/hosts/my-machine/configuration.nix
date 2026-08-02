@@ -11,12 +11,11 @@
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
-      # Ambxst substitui o módulo quickshell anterior.
-      # O módulo ambxst.nix gerencia:
-      #   - O pacote "ambxst" (wrapper Nix com Quickshell + axctl)
-      #   - As fontes necessárias (Phosphor Icons, Roboto, Noto, etc.)
-      #   - O módulo HM que copia os JSONs de configuração
-      self.nixosModules.ambxst
+      # DankMaterialShell substitui o Ambxst.
+      # O módulo dank-material-shell.nix gerencia:
+      #   - O shell DMS (systemd service, settings, plugins)
+      #   - Audio, bluetooth, keyring (pipewire, blueman, gnome-keyring)
+      self.nixosModules.dankMaterialShell
     ];
     # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
