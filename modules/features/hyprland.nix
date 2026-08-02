@@ -132,6 +132,7 @@
         hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("ambxst run lens"))
         hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd("ambxst reload"))
         hl.bind(mainMod .. " + CTRL + ALT + B", hl.dsp.exec_cmd("ambxst quit"))
+        hl.bind(mainMod .. " + L",      hl.dsp.exec_cmd("loginctl lock-session"))
 
         -- Atalhos de Sistema Hyprland
         hl.bind(mainMod .. " + C",      hl.dsp.killactive())
