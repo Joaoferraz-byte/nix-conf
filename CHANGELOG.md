@@ -16,6 +16,7 @@ oficiais do upstream (`github:AvengeMedia/DankMaterialShell`).
 - `modules/features/dank-material-shell.nix` — importa shell-conf DMS modules,
   preserva pipewire/bluetooth/keyring/system packages do antigo ambxst module
 - Todas as keybinds em `hyprland.nix` agora usam `dms ipc call ...`
+- Corrigido caminho da sessão Hyprland (UWSM) para `share/wayland-sessions/` para compatibilidade com SDDM.
 
 **Alterado:**
 - `modules/hosts/*/configuration.nix`: `self.nixosModules.ambxst` → `self.nixosModules.dankMaterialShell`

@@ -8,6 +8,7 @@
       # única sessão UWSM local e preserva `Hyprland` em toda a sessão.
       hyprlandUwsmSession = pkgs.writeTextFile {
         name = "hyprland-uwsm";
+        destination = "/share/wayland-sessions/hyprland-uwsm.desktop";
         text = ''
           [Desktop Entry]
           Name=Hyprland (UWSM)
