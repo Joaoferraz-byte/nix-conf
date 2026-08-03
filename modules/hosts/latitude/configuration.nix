@@ -27,7 +27,7 @@
     # Kernel padrão (sem Zen, mais estável para laptop corporativo)
     boot.kernelPackages = pkgs.linuxPackages;
     # ── Rede ──────────────────────────────────────────────────────────────
-    networking.hostName = "limine-laptop";
+    networking.hostName = "latitude";
     networking.networkmanager.enable = true;
     # ── Local ─────────────────────────────────────────────────────────────
     time.timeZone = "America/Sao_Paulo";

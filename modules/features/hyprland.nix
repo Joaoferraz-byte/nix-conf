@@ -66,6 +66,10 @@
     
     programs.caelestia.hyprland = {
       enable = true;
+      # The userConfig is written to ~/.config/caelestia/hypr-user.lua
+      # which is sourced at the end of hyprland.lua by the Caelestia config.
+      # This is where user-specific overrides go — window rules, custom
+      # keybinds, workspace assignments, etc.
       userConfig = ''
         -- ── Custom User Configuration (hypr-user.lua) ──────────────────
         local vars = require("variables")
@@ -77,49 +81,35 @@
         -- ZenNotes → special:todo   (toggle via Super+I)
         hl.window_rule({ match = { class = "org.zennotes.ZenNotes" }, workspace = "special:todo silent" })
 
-        -- ── Custom Binds ───────────────────────────────────────────────
+        -- ── Custom Binds (User Additions) ──────────────────────────────
+        -- These complement the upstream keybinds from hyprland/keybinds.lua
         local mainMod = "SUPER"
 
         -- Terminal e Shell
         hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
         hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("kitty -e tmux"))
         hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
-
-        -- ── Full Shortcut Coverage (Merged from Upstream) ──────────────
-        -- Many of these are already in the main hyprland.lua, 
-        -- but we ensure coverage here if needed.
-
-        -- System
-        hl.bind(mainMod .. " + C",      hl.dsp.window.close())
-        hl.bind(mainMod .. " + F",      hl.dsp.window.float())
-        hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())
-        hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))
-        hl.bind(mainMod .. " + M",      hl.dsp.window.fullscreen())
         hl.bind(mainMod .. " + Delete", hl.dsp.exec_cmd("uwsm stop"))
 
-        -- Navigation
-        for _, dir in ipairs({ "left", "right", "up", "down" }) do
-          hl.bind(mainMod .. " + " .. dir:sub(1,1):upper() .. dir:sub(2), hl.dsp.focus({ direction = dir }))
-          hl.bind(mainMod .. " + SHIFT + " .. dir:sub(1,1):upper() .. dir:sub(2), hl.dsp.window.move({ direction = dir }))
-        end
-
-        -- Workspaces (1-10)
-        for i = 1, 9 do
-          hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }))
-          hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
-        end
-        hl.bind(mainMod .. " + 0", hl.dsp.focus({ workspace = 10 }))
-        hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
-
-        -- Special Workspace Toggles
-        hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("caelestia toggle social"))
-        hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("caelestia toggle todo"))
-        hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("pkill fuzzel || caelestia clipboard"))
-        
-        -- Media/Volume (handled by upstream hyprland.lua, but kept for clarity)
+        -- Note: Most keybinds are defined in the upstream
+        -- hypr_upstream/hyprland/keybinds.lua which uses variables.lua
+        -- for keybind definitions. The upstream covers:
+        --   - Window management (close, float, pseudo, fullscreen, etc.)
+        --   - Navigation (focus/move windows, workspaces 1-10, groups)
+        --   - Media (play/pause/next/prev, volume, brightness)
+        --   - Utilities (screenshot, record, color picker)
+        --   - Clipboard and emoji picker
+        --   - Special workspaces (social, sysmon, music, communication, todo)
+        --   - Apps (terminal, browser, editor, file explorer, audio)
+        --   - Session (lock, sleep, launcher, sidebar)
+        --
+        -- Keybind variable overrides can be done by creating:
+        --   ~/.config/caelestia/hypr-vars.lua
+        -- which is sourced by hyprland.lua before keybinds are loaded.
       '';
     };
 
+    wayland.systemd.target = "hyprland-session.target";
     wayland.windowManager.hyprland = {
       enable     = true;
       configType = "lua";

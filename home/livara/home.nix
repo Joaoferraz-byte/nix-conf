@@ -129,7 +129,7 @@ in
     
     shellAliases = {
       ll = "ls -l";
-      update = "sudo nixos-rebuild switch --flake .#myMachine";
+      update = "sudo nixos-rebuild switch --flake .#latitude";
     };
 
     history = {

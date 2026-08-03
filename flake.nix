@@ -9,12 +9,9 @@
     # O NixVim vive em um flake separado e reutilizável.
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
     
-    # QyLock: Coleção de temas SDDM (inclui o tema Clockwork)
-    # Usamos a URL do tarball diretamente para tentar evitar o limite de taxa da API do GitHub.
-    qylock = {
-      url = "github:Darkkal44/qylock";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # NOTE: The Clockwork SDDM theme is now vendored locally in ./themes/clockwork/
+    # and built as a Nix derivation in modules/features/greeter.nix.
+    # No external qylock flake input is needed.
     
     nixvim.url = "github:nix-community/nixvim";
     
