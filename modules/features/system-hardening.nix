@@ -112,10 +112,9 @@
       }];
     };
 
-    # ── Privacy: Disable unnecessary tracking/services ────────────────────
-    # Source: Reddit r/NixOS hardening thread — geoclue2 is a location tracker
-    # that is unnecessary for most desktop use cases.
-    services.geoclue2.enable = false;
+    # ── Privacy & Location Services ───────────────────────────────────────
+    # geoclue2 is required for Caelestia Shell's night light (gammastep) functionality.
+    services.geoclue2.enable = true;
 
     # ── Auditd with Smart Filtering ───────────────────────────────────────
     # Source: Reddit r/NixOS "kernel hardening + auditd" post (xmrah, 2025).
