@@ -2,6 +2,8 @@
 
 let
   # ── Assets: usar caminhos relativos para o store ──
+  # From home/livara/home.nix, ../../Icons = home/Icons (doesn't exist).
+  # The actual icons are at nix-conf/Icons/ (one level above home/).
   iconsPath = builtins.path {
     path = ../../Icons;
     name = "nix-conf-icons";

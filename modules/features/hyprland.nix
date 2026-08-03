@@ -1,5 +1,7 @@
 { self, ... }: {
-  # ── NixOS Module ────────────────────────────────────────────────────────
+  # ═══════════════════════════════════════════════════════════════════════════
+  #  NixOS Module  —  Hyprland compositor + UWSM session management
+  # ═══════════════════════════════════════════════════════════════════════════
   flake.nixosModules.hyprland = { pkgs, lib, config, ... }:
     let
       # A entrada automática de `withUWSM` inicia o wrapper sem declarar
@@ -21,6 +23,7 @@
         derivationArgs.passthru.providedSessions = [ "hyprland-uwsm" ];
       };
     in {
+      # ── Hyprland compositor (system-wide) ───────────────────────────────
       programs.hyprland = {
         enable = true;
         # A entrada automática gerada por esta opção não permite passar
@@ -28,9 +31,8 @@
         withUWSM = false;
         xwayland.enable = true;
       };
-      # Mantém as unidades UWSM, a importação de ambiente e a integração
-      # systemd da sessão, sem criar uma segunda entrada hyprland-uwsm.
       programs.uwsm.enable = true;
+
       environment.systemPackages = with pkgs; [
         hyprlandUwsmSession
         grim
@@ -44,17 +46,21 @@
         hyprpicker
         ydotool
       ];
-      # A entrada aparece no display manager como "Hyprland (UWSM)". Ela usa
-      # start-hyprland e força XDG_CURRENT_DESKTOP=Hyprland antes do compositor.
+
       services.displayManager.sessionPackages = [ hyprlandUwsmSession ];
+
+      # UWSM é a única autoridade da sessão systemd; o módulo Home Manager
+      # não pode criar uma sessão Hyprland concorrente.
       home-manager.sharedModules = [
-        # UWSM é a única autoridade da sessão systemd; o módulo Home Manager
-        # não pode criar uma sessão Hyprland concorrente.
         { wayland.windowManager.hyprland.systemd.enable = false; }
       ];
     };
-  # ── Home Manager Module ─────────────────────────────────────────────────
-  flake.homeManagerModules.hyprland = { pkgs, lib, ... }: {
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  #  Home Manager Module  —  Caelestia Lua config + Hyprland client config
+  # ═══════════════════════════════════════════════════════════════════════════
+  flake.homeManagerModules.hyprland = { pkgs, lib, config, ... }: {
+    # ── Cursor ───────────────────────────────────────────────────────────────
     home.pointerCursor = {
       enable  = true;
       name    = "Bibata-Modern-Classic";
@@ -63,22 +69,23 @@
       gtk.enable = true;
       x11.enable = true;
     };
-    
+
+    # ── Caelestia Hyprland Integration ───────────────────────────────────────
+    # programs.caelestia.hyprland.enable places the Caelestia Lua files under
+    # ~/.config/hypr/ (hyprland.lua, variables.lua, hyprland/*.lua, etc.)
+    # and the userConfig into ~/.config/caelestia/hypr-user.lua.
+    #
+    # This is wrapped in programs.caelestia.enable (from caelestia-shell.nix),
+    # so it only activates when the Caelestia shell is enabled.
     programs.caelestia.hyprland = {
       enable = true;
-      # The userConfig is written to ~/.config/caelestia/hypr-user.lua
-      # which is sourced at the end of hyprland.lua by the Caelestia config.
-      # This is where user-specific overrides go — window rules, custom
-      # keybinds, workspace assignments, etc.
       userConfig = ''
         -- ── Custom User Configuration (hypr-user.lua) ──────────────────
         local vars = require("variables")
         local fn = require("utils.functions")
 
         -- ── Window Rules ───────────────────────────────────────────────
-        -- Vesktop → special:social  (toggle via Super+D)
         hl.window_rule({ match = { class = "vesktop" }, workspace = "special:social silent" })
-        -- ZenNotes → special:todo   (toggle via Super+I)
         hl.window_rule({ match = { class = "org.zennotes.ZenNotes" }, workspace = "special:todo silent" })
 
         -- ── Custom Binds (User Additions) ──────────────────────────────
@@ -109,13 +116,20 @@
       '';
     };
 
+    # ── Wayland session target ───────────────────────────────────────────────
     wayland.systemd.target = "hyprland-session.target";
+
+    # ── Home Manager Hyprland client module ──────────────────────────────────
+    # configType = "lua" tells HM to use Lua mode.
+    # With empty settings, extraConfig, extraLuaFiles, and systemd.enable=false,
+    # HM's luaConfig shouldGenerate returns false → no conflicting hyprland.lua
+    # is generated. The Caelestia hyprland.lua (placed by programs.caelestia.hyprland)
+    # is the only hyprland.lua.
     wayland.windowManager.hyprland = {
-      enable     = true;
-      configType = "lua";
+      enable         = true;
+      configType     = "lua";
       systemd.enable = false;
-      settings = {};
-      # extraConfig is intentionally empty as we use programs.caelestia.hyprland
+      settings       = {};
     };
   };
 }

@@ -2,18 +2,26 @@
 # Integrates the Caelestia Shell desktop shell via the shell-conf flake.
 #
 # This module:
-#   1. Imports shell-conf's NixOS module (enables system level fallback)
-#   2. Imports shell-conf's HM module (enables caelestia at user level, settings)
-#   3. Keeps pipewire/bluetooth/keyring/audiorelay packages intact
+#   1. Imports shell-conf's Home Manager module (provides programs.caelestia options)
+#   2. Enables the shell (programs.caelestia.enable = true) — WITHOUT this,
+#      the entire programs.caelestia module is a no-op.
+#   3. Enables the CLI (programs.caelestia.cli.enable = true)
+#   4. Provides mutable settings so the UI can save changes
+#   5. Keeps pipewire/bluetooth/keyring packages intact
 { self, inputs, ... }: {
   flake.nixosModules.caelestiaShell = { pkgs, lib, config, ... }: {
-    # 1. System-level module (if provided by upstream in the future)
-    imports = [ inputs.shell-conf.nixosModules.default ];
-
-    # 2. Home Manager module (settings JSON, shell, cli)
+    # 1. Home Manager module (settings JSON, shell, cli, hyprland integration)
     home-manager.sharedModules = [
       inputs.shell-conf.homeManagerModules.default
     ];
+    # 2. Enable Caelestia shell — THIS IS THE KEY OPTION
+    #    Without this, the entire programs.caelestia module is a no-op
+    #    (everything is wrapped in lib.mkIf cfg.enable).
+    home-manager.users.livara.programs.caelestia = {
+      enable = true;
+      mutableSettings = true;  # Allow the GUI to persist settings changes
+      cli.enable = true;       # Install caelestia-cli alongside the shell
+    };
 
     # 3. System packages that were previously in ambxst/dms and are still
     #    needed for the desktop experience (independent of the shell).
