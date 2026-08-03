@@ -1,7 +1,6 @@
 { self, inputs, ... }: {
   flake.nixosModules.niri = { pkgs, lib, config, ... }: {
     programs.niri.enable = true;
-
     environment.systemPackages = with pkgs; [
       xwayland-satellite
       swaybg
@@ -12,7 +11,6 @@
       libnotify
     ];
   };
-
   flake.homeManagerModules.niri = { pkgs, lib, config, ... }: {
     programs.niri = {
       enable = true;
@@ -25,7 +23,6 @@
             natural-scroll = true;
           };
         };
-
         layout = {
           gaps = 8;
           focus-ring = {
@@ -35,17 +32,17 @@
             inactive.color = "#414868";
           };
         };
-
-        # Window management
+        # Binds de window management (DMS-specific binds removidos — migração para Caelestia Shell)
+        binds = with config.lib.niri.actions; {
+          "Mod+Return" = { spawn = [ "kitty" ]; };
+          # Window management
           "Mod+Q" = close-window;
           "Mod+Left" = focus-column-left;
           "Mod+Right" = focus-column-right;
           "Mod+Up" = focus-window-up;
           "Mod+Down" = focus-window-down;
-          
           "Mod+Shift+Left" = move-column-left;
           "Mod+Shift+Right" = move-column-right;
-          
           "Mod+1" = focus-workspace 1;
           "Mod+2" = focus-workspace 2;
           "Mod+3" = focus-workspace 3;
@@ -55,7 +52,6 @@
           "Mod+7" = focus-workspace 7;
           "Mod+8" = focus-workspace 8;
           "Mod+9" = focus-workspace 9;
-          
           "Mod+Shift+1" = move-column-to-workspace 1;
           "Mod+Shift+2" = move-column-to-workspace 2;
           "Mod+Shift+3" = move-column-to-workspace 3;
@@ -66,7 +62,6 @@
           "Mod+Shift+8" = move-column-to-workspace 8;
           "Mod+Shift+9" = move-column-to-workspace 9;
         };
-        
         spawn-at-startup = [
           { command = [ "xwayland-satellite" ":0" ]; }
           { command = [ "swaybg" "-i" "${config.home.homeDirectory}/.config/nixos/Wallpapers/wallhaven-83qwky.png" "-m" "fill" ]; }
