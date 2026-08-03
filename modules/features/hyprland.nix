@@ -49,15 +49,32 @@
 
       services.displayManager.sessionPackages = [ hyprlandUwsmSession ];
 
-      # UWSM é a única autoridade da sessão systemd; o módulo Home Manager
-      # não pode criar uma sessão Hyprland concorrente.
-      home-manager.sharedModules = [
-        { wayland.windowManager.hyprland.systemd.enable = false; }
-      ];
+      # ═══════════════════════════════════════════════════════════════════════
+      # IMPORTANT: The HM hyprland module is NOT used.
+      # Caelestia Shell manages the Hyprland Lua config entirely on its own.
+      # Enabling wayland.windowManager.hyprland in HM would cause it to:
+      #   - Generate hypr/hyprland.lua (overriding Caelestia's config)
+      #   - Generate hypr/.luarc.json
+      #   - Add hyprland to home.packages (redundant, already in systemPackages)
+      #   - Create systemd targets that conflict with UWSM
+      #
+      # The NixOS module (programs.hyprland.enable = true) handles:
+      #   - Installing hyprland system-wide
+      #   - SUID wrapper for hyprland
+      #   - xdg-desktop-portal-hyprland
+      #
+      # Caelestia's programs.caelestia.hyprland.enable places:
+      #   - hypr/hyprland.lua (entry point)
+      #   - hypr/variables.lua
+      #   - hypr/hyprland/*.lua (env, general, input, keybinds, etc.)
+      #   - hypr/utils/*.lua
+      #   - hypr/scheme/*.lua
+      #   - caelestia/hypr-user.lua (user overrides)
+      # ═══════════════════════════════════════════════════════════════════════
     };
 
   # ═══════════════════════════════════════════════════════════════════════════
-  #  Home Manager Module  —  Caelestia Lua config + Hyprland client config
+  #  Home Manager Module  —  Cursor + Caelestia Hyprland integration only
   # ═══════════════════════════════════════════════════════════════════════════
   flake.homeManagerModules.hyprland = { pkgs, lib, config, ... }: {
     # ── Cursor ───────────────────────────────────────────────────────────────
@@ -117,19 +134,8 @@
     };
 
     # ── Wayland session target ───────────────────────────────────────────────
+    # This tells the Caelestia systemd service when to start.
+    # It does NOT activate the HM hyprland module.
     wayland.systemd.target = "hyprland-session.target";
-
-    # ── Home Manager Hyprland client module ──────────────────────────────────
-    # configType = "lua" tells HM to use Lua mode.
-    # With empty settings, extraConfig, extraLuaFiles, and systemd.enable=false,
-    # HM's luaConfig shouldGenerate returns false → no conflicting hyprland.lua
-    # is generated. The Caelestia hyprland.lua (placed by programs.caelestia.hyprland)
-    # is the only hyprland.lua.
-    wayland.windowManager.hyprland = {
-      enable         = true;
-      configType     = "lua";
-      systemd.enable = false;
-      settings       = {};
-    };
   };
 }
