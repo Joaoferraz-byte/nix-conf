@@ -69,6 +69,7 @@
       extraConfig = ''
         -- Monitor padrão
         hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+
         -- Input
         hl.config({
           input = {
@@ -80,12 +81,20 @@
               tap_to_click   = true,
             },
           },
+        })
+
+        -- General
+        hl.config({
           general = {
             layout = "dwindle",
             gaps_in = 5,
             gaps_out = 10,
             border_size = 2,
           },
+        })
+
+        -- Decoration
+        hl.config({
           decoration = {
             rounding = 15,
             shadow = {
@@ -100,12 +109,19 @@
               xray = false,
             },
           },
+        })
+
+        -- Misc
+        hl.config({
           misc = {
             force_default_wallpaper = 0,
             disable_hyprland_logo   = true,
           },
         })
+
+        -- Dwindle layout
         hl.config({ dwindle = { preserve_split = true } })
+
         -- Binds de recuperação e nativos (garantem funcionalidade básica se o shell falhar).
         local mainMod = "SUPER"
 
@@ -227,7 +243,7 @@
         end
 
         -- Lid Switch
-        hl.bind("", "switch:Lid Switch", hl.dsp.exec_cmd("loginctl lock-session"), { lock = true })
+        hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("loginctl lock-session"), { locked = true })
 
         -- Mouse Binds
         hl.bind(mainMod .. " + mouse:272", hl.dsp.movewindow(), { mouse = true })

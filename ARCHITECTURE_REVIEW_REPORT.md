@@ -17,7 +17,7 @@ O shell Ambxst-X agora é consumido diretamente como um **flake input** no repos
 Todos os módulos legados (`niri.nix`, `shell.nix`, `noctalia.nix`, `noctalia.json`) foram removidos. O pino de `nixpkgs-stable` que era necessário para o Niri também foi eliminado, simplificando o `flake.nix` principal.
 
 ### 5. Padronização de Hosts
-As configurações dos hosts (`my-machine` e `dell-latitude-5410`) foram atualizadas para importar o novo módulo `hyprland` e remover referências ao Niri.
+As configurações dos hosts (`my-machine` e `latitude`) foram atualizadas para importar o novo módulo `hyprland` e remover referências ao Niri.
 
 ## Próximos Passos Recomendados
 

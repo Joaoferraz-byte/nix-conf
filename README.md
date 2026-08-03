@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-Este repositório contém a configuração NixOS modular dos hosts `myMachine` e `dellLatitude5410`. Ele organiza opções de sistema, hardware, desktop, pacotes e Home Manager em módulos independentes, com uma integração declarativa do Ambxst para Hyprland.
+Este repositório contém a configuração NixOS modular dos hosts `myMachine` e `latitude`. Ele organiza opções de sistema, hardware, desktop, pacotes e Home Manager em módulos independentes, com uma integração declarativa do Ambxst para Hyprland.
 
 | Área | Localização | Responsabilidade |
 |---|---|---|
@@ -48,14 +48,14 @@ Execute os comandos a partir da raiz deste repositório. Escolha o host que corr
 ```bash
 sudo nixos-rebuild switch --flake .#myMachine
 # ou
-sudo nixos-rebuild switch --flake .#dellLatitude5410
+sudo nixos-rebuild switch --flake .#latitude
 ```
 
 Para apenas construir a configuração antes de aplicar mudanças:
 
 ```bash
 nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
-nix build .#nixosConfigurations.dellLatitude5410.config.system.build.toplevel
+nix build .#nixosConfigurations.latitude.config.system.build.toplevel
 ```
 
 Os comandos abaixo verificam a estrutura da flake e a resolução das dependências sem executar uma troca de geração:
@@ -63,7 +63,7 @@ Os comandos abaixo verificam a estrutura da flake e a resolução das dependênc
 ```bash
 nix flake check --no-build
 nix build --dry-run --no-link .#nixosConfigurations.myMachine.config.system.build.toplevel
-nix build --dry-run --no-link .#nixosConfigurations.dellLatitude5410.config.system.build.toplevel
+nix build --dry-run --no-link .#nixosConfigurations.latitude.config.system.build.toplevel
 ```
 
 > O aviso `unknown flake output 'homeManagerModules'` produzido por algumas versões de `nix flake check` é informativo. `homeManagerModules` é uma extensão de convenção para módulos Home Manager e o verificador de flakes não valida extensões de terceiros por nome. [3] [4]

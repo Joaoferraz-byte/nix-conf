@@ -52,8 +52,8 @@ nix-conf/
         │   ├── default.nix        # Define nixosConfigurations.myMachine + Home Manager
         │   ├── configuration.nix  # Importa todos os módulos; pacotes de sistema; locale
         │   └── hardware.nix       # UUIDs de disco, módulos de kernel, microcode AMD
-        └── dell-latitude-5410/
-            ├── default.nix        # Define nixosConfigurations.dell-latitude-5410
+        └── latitude/
+            ├── default.nix        # Define nixosConfigurations.latitude
             ├── configuration.nix  # Configuração específica do laptop Dell
             └── hardware.nix       # Hardware específico do laptop Dell
 ```
