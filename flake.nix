@@ -12,7 +12,7 @@
     # QyLock: Coleção de temas SDDM (inclui o tema Clockwork)
     # Usamos a URL do tarball diretamente para tentar evitar o limite de taxa da API do GitHub.
     qylock = {
-      url = "https://github.com/Darkkal44/qylock/archive/refs/heads/main.tar.gz";
+      url = "github:Darkkal44/qylock";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
