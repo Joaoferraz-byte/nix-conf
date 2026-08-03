@@ -3,22 +3,17 @@
 # necessárias. O avatar é publicado pelo AccountsService, portanto é acessível
 # ao greeter antes do login e não precisa ser copiado para dentro do tema.
 #
-# WALLPAPERS: Usamos uma derivação (pkgs.runCommandNoCC) para copiar os
-# wallpapers do repositório para o Nix store. Isso é necessário porque
-# self.outPath pode apontar para o working tree local quando o flake é
-# avaliado com "Git tree is dirty"; o installPhase do SilentSDDM executa
-# `cp ${bg}` dentro do sandbox do build e falha se o arquivo não existir
-# no caminho de filesystem local. A derivação garante que o arquivo esteja
-# sempre no store, independente do estado do tree local.
-# Ver: docs/wallpaper-build-fix.md
+# ASSETS: Usamos caminhos relativos em vez de self.outPath para evitar erros
+# de "pure evaluation" no Nix Flakes. O Nix copia automaticamente os arquivos
+# referenciados por caminhos relativos para o store durante a avaliação.
 { self, inputs, ... }: {
   flake.nixosModules.greeter = { pkgs, config, ... }: let
-    # Derivação que copia wallpapers e ícones para o Nix store.
-    # Definida dentro do módulo para ter acesso ao `pkgs` do sistema.
+    # Derivação que copia apenas o ícone de perfil para o Nix store.
+    # O wallpaper foi removido conforme solicitação do usuário (o tema não
+    # foi feito para isso).
     assets = pkgs.runCommandNoCC "nix-conf-sddm-assets" {} ''
-      mkdir -p $out/backgrounds $out/icons
-      cp ${self.outPath + "/Wallpapers/wallhaven-9or3zx.jpg"} $out/backgrounds/wallhaven-9or3zx.jpg
-      cp ${self.outPath + "/Icons/6afde16e1ef1cb3257b30e01890787dd.jpg"} $out/icons/avatar.jpg
+      mkdir -p $out/icons
+      cp ${../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg} $out/icons/avatar.jpg
     '';
   in {
     imports = [
@@ -29,19 +24,17 @@
       enable = true;
       theme = "default";
 
-      # Preserva o wallpaper que já era usado pelo greeter anterior; a migração
-      # altera apenas o tema e o mecanismo de ícone de perfil.
-      backgrounds = {
-        "wallhaven-9or3zx.jpg" = assets + "/backgrounds/wallhaven-9or3zx.jpg";
-      };
+      # O wallpaper foi removido deste bloco pois o tema SilentSDDM não deve
+      # ser forçado a usar um background customizado via Nix se não for
+      # suportado nativamente ou se causar problemas de layout.
+      backgrounds = {};
 
       # Fonte única para o ícone do SDDM. O mesmo ativo é declarado em home.nix
       # como ~/.face.icon.
       profileIcons.livara = assets + "/icons/avatar.jpg";
 
       settings = {
-        LoginScreen.background = "wallhaven-9or3zx.jpg";
-        LockScreen.background = "wallhaven-9or3zx.jpg";
+        # Configurações de background removidas para evitar erros no tema.
       };
     };
   };

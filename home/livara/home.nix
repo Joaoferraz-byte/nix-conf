@@ -1,19 +1,16 @@
 { config, pkgs, lib, inputs, self, ... }:
 
 let
-  # ── Assets: usar builtins.path para forçar cópia ao Nix store ───────────
-  # Quando o flake é avaliado a partir de um tree sujo, self.outPath aponta
-  # para o diretório local. builtins.path copia o diretório/arquivo para o
-  # store durante a avaliação, garantindo que o path resultante sempre
-  # aponte para um arquivo no store (e não para um path de filesystem que
-  # pode não existir). Isso evita o erro "cannot stat ... No such file or
-  # directory" durante o build do SDDM e home-manager.
+  # ── Assets: usar caminhos relativos para compatibilidade com modo pure ──
+  # No Nix Flakes, referenciar caminhos absolutos (como self.outPath) dentro
+  # de builtins.path causa erro em modo pure. Usar caminhos relativos (./..)
+  # faz com que o Nix copie o diretório para o store de forma segura.
   iconsPath = builtins.path {
-    path = self.outPath + "/Icons";
+    path = ../../Icons;
     name = "nix-conf-icons";
   };
   wallpapersPath = builtins.path {
-    path = self.outPath + "/Wallpapers";
+    path = ../../Wallpapers;
     name = "nix-conf-wallpapers";
   };
   profileIcon = iconsPath + "/6afde16e1ef1cb3257b30e01890787dd.jpg";
