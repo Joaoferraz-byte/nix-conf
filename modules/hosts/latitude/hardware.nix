@@ -2,7 +2,7 @@
 # Hardware gerado pelo nixos-generate-config.
 #
 # ══════════════════════════════════════════════════════════════════
-# ATENÇÃO: ESTE HOST AINDA NÃO ESTÁ FUNCIONAL
+# ATENÇÃO: ESTE HOST REQUER UUIDS REAIS PARA BOOT
 # ══════════════════════════════════════════════════════════════════
 # Os UUIDs de disco abaixo são PLACEHOLDERS e devem ser substituídos
 # pelos valores reais da máquina após rodar `nixos-generate-config`.
