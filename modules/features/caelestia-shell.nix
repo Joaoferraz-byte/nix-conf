@@ -33,6 +33,10 @@
       # networkmanagerapplet, blueman, pavucontrol removed as redundant.
       easyeffects
       hicolor-icon-theme
+      # Dependencies for Caelestia Shell and Hyprland integration
+      polkit_gnome
+      geoclue2
+      gammastep
     ];
 
     # Audio (preserved from old modules)

@@ -136,6 +136,7 @@
     # ── Wayland session target ───────────────────────────────────────────────
     # This tells the Caelestia systemd service when to start.
     # It does NOT activate the HM hyprland module.
-    wayland.systemd.target = "hyprland-session.target";
+    # Under UWSM, the standard target is graphical-session.target.
+    wayland.systemd.target = "graphical-session.target";
   };
 }
