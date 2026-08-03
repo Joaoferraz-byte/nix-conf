@@ -3,12 +3,10 @@
     "caelestia-cli": {
       "inputs": {
         "caelestia-shell": [
-          "shell-conf",
-          "caelestia-shell"
+          "shell-conf"
         ],
         "nixpkgs": [
           "shell-conf",
-          "caelestia-shell",
           "nixpkgs"
         ]
       },
@@ -23,30 +21,6 @@
       "original": {
         "owner": "caelestia-dots",
         "repo": "cli",
-        "type": "github"
-      }
-    },
-    "caelestia-shell": {
-      "inputs": {
-        "caelestia-cli": "caelestia-cli",
-        "m3shapes": "m3shapes",
-        "nixpkgs": [
-          "shell-conf",
-          "nixpkgs"
-        ],
-        "quickshell": "quickshell"
-      },
-      "locked": {
-        "lastModified": 1785666574,
-        "narHash": "sha256-a+CHe+Le203wP7SwfCOL6Al91iHKLpjcuFRW2+b9S14=",
-        "owner": "caelestia-dots",
-        "repo": "shell",
-        "rev": "7fc6f153f1862e37a3fb48f585f934d1a90e1078",
-        "type": "github"
-      },
-      "original": {
-        "owner": "caelestia-dots",
-        "repo": "shell",
         "type": "github"
       }
     },
@@ -302,7 +276,6 @@
       "inputs": {
         "nixpkgs": [
           "shell-conf",
-          "caelestia-shell",
           "nixpkgs"
         ]
       },
@@ -334,17 +307,19 @@
     },
     "shell-conf": {
       "inputs": {
-        "caelestia-shell": "caelestia-shell",
+        "caelestia-cli": "caelestia-cli",
+        "m3shapes": "m3shapes",
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "quickshell": "quickshell"
       },
       "locked": {
-        "lastModified": 1785718440,
-        "narHash": "sha256-keILYrfdtGkCmTu6sSjoLicrKDVqAdZRrlrIoHNBfog=",
+        "lastModified": 1785762855,
+        "narHash": "sha256-JHohpS2F0vNtRp2JwaYS9IAi3V+lI25Sn97by40ci14=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "8454991fa6146d1108e2b237ca10e772f825c287",
+        "rev": "932e92ce0751e9825bd7549da12bff54446b36d5",
         "type": "github"
       },
       "original": {
