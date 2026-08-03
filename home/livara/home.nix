@@ -65,6 +65,19 @@ in
     };
   };
 
+  # ── Kitty: terminal com tema dinâmico do Caelestia ───────────────────────
+  # O Caelestia CLI gera ~/.local/state/caelestia/theme/kitty.conf a partir
+  # do template em ~/.config/caelestia/templates/kitty.conf (gerenciado pelo
+  # shell-conf).  O `include` abaixo faz o Kitty carregar esse arquivo gerado
+  # automaticamente, aplicando as cores extraídas do wallpaper atual.
+  #
+  # Configurações essenciais para integração com o Caelestia Shell:
+  #   - allow_remote_control yes + listen_on: permite que o postHook do
+  #     Caelestia recarregue as cores em janelas já abertas via
+  #     `kitty @ set-colors --all`.
+  #   - dynamic_background_opacity yes: permite ao Caelestia ajustar a
+  #     opacidade via IPC se necessário.
+  #   - background_opacity: valor padrão; pode ser sobrescrito pelo tema.
   programs.kitty = {
     enable = true;
     font = {
@@ -72,20 +85,29 @@ in
       size = 12;
     };
     settings = {
+      # Opacidade padrão; o tema dinâmico pode definir background com alpha
       background_opacity = "0.9";
+      dynamic_background_opacity = "yes";
+
+      # Permite recarregar cores via `kitty @ set-colors` (usado pelo postHook)
+      allow_remote_control = "yes";
+      listen_on = "unix:/tmp/kitty-livara";
+
       confirm_os_window_close = 0;
       enable_audio_bell = "no";
       hide_window_decorations = "titlebar-only";
       macos_option_as_alt = "yes";
       update_check_interval = 0;
       url_style = "hand";
-      wayland_titlebar_color = "#010409";
+      wayland_titlebar_color = "background";
     };
     extraConfig = ''
-      # BEGIN_KITTY_THEME
-      # GitHub Dark
-      include current-theme.conf
-      # END_KITTY_THEME
+      # ── Tema dinâmico do Caelestia ────────────────────────────────────
+      # O arquivo abaixo é gerado pelo caelestia-cli a partir do template
+      # em ~/.config/caelestia/templates/kitty.conf sempre que o wallpaper
+      # ou o scheme mudam.  Se ainda não existir (primeira inicialização),
+      # o Kitty ignora silenciosamente o include.
+      include ${config.home.homeDirectory}/.local/state/caelestia/theme/kitty.conf
 
       # Clipboard integration
       map ctrl+c copy_to_clipboard

@@ -122,6 +122,13 @@
         -- Dwindle layout
         hl.config({ dwindle = { preserve_split = true } })
 
+        -- ── Window Rules: Special Workspaces ────────────────────────────
+        -- Vesktop → special:social  (toggle via Super+D)
+        hl.windowrule("workspace special:social silent", { class = "vesktop" })
+        -- ZenNotes → special:todo   (toggle via Super+I)
+        -- O Flatpak expõe a classe como "org.zennotes.ZenNotes"
+        hl.windowrule("workspace special:todo silent", { class = "org.zennotes.ZenNotes" })
+
         -- Binds de recuperação e nativos (garantem funcionalidade básica se o shell falhar).
         local mainMod = "SUPER"
 
@@ -160,6 +167,18 @@
         hl.bind(mainMod .. " + ALT + V", hl.dsp.exec_cmd("pkill fuzzel || caelestia clipboard -d"))
         hl.bind(mainMod .. " + PERIOD", hl.dsp.exec_cmd("pkill fuzzel || caelestia emoji -p"))
         hl.bind("CTRL + SHIFT + ALT + V", hl.dsp.exec_cmd('sleep 0.5s && ydotool type -d 1 "$(cliphist list | head -1 | cliphist decode)"'), { locked = true })
+
+        -- ── Special Workspaces (Caelestia toggles) ──────────────────────
+        -- Super+D → toggle special:social  (Vesktop)
+        -- Super+I → toggle special:todo    (ZenNotes)
+        -- O comando `caelestia toggle <name>` lança o app se não estiver
+        -- aberto, move-o para o special workspace e alterna visibilidade.
+        hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("caelestia toggle social"))
+        hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("caelestia toggle todo"))
+
+        -- ── Special Workspace legado (Scratchpad genérico) ───────────────
+        hl.bind(mainMod .. " + SHIFT + V", hl.dsp.workspace.toggle_special("magic"))
+        hl.bind(mainMod .. " + ALT + V",  hl.dsp.window.move({ workspace = "special:magic" }))
 
         -- Atalhos de Sistema Hyprland
         -- Close, Float, Pseudo, Split, Fullscreen
@@ -209,11 +228,6 @@
         hl.bind(mainMod .. " + SHIFT + X",  hl.dsp.focus({ workspace = 1 }))
         hl.bind(mainMod .. " + mouse_up",    hl.dsp.focus({ workspace = -1 }))
         hl.bind(mainMod .. " + mouse_down",  hl.dsp.focus({ workspace = 1 }))
-
-        -- Special Workspace (Scratchpad)
-        hl.bind(mainMod .. " + SHIFT + V", hl.dsp.workspace.toggle_special("magic"))
-        hl.bind(mainMod .. " + ALT + V",  hl.dsp.window.move({ workspace = "special:magic" }))
-
 
         -- Resize Window (repetição contínua)
         -- Usa Super+Alt+Shift+arrows para evitar conflito com movewindow
