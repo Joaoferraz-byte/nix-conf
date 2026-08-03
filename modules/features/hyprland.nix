@@ -87,14 +87,17 @@
             border_size = 2,
           },
           decoration = {
-            rounding = 16,
-            drop_shadow = true,
-            shadow_range = 4,
-            shadow_render_power = 3,
+            rounding = 15,
+            shadow = {
+              enabled = true,
+              range = 15,
+              render_power = 4,
+            },
             blur = {
               enabled = true,
               size = 8,
               passes = 2,
+              xray = false,
             },
           },
           misc = {
@@ -109,28 +112,38 @@
         -- Terminal e Shell
         hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty"))
         hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("kitty -e tmux"))
-        hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd("systemctl --user restart dms.service"))
         hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("uwsm stop"))
 
-        -- Atalhos Core DankMaterialShell (via dms IPC)
-        hl.bind(mainMod,                hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
-        hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("dms ipc call dashboard toggle"))
-        hl.bind(mainMod .. " + A",      hl.dsp.exec_cmd("dms ipc call assistant toggle"))
-        hl.bind(mainMod .. " + V",      hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
-        hl.bind(mainMod .. " + PERIOD", hl.dsp.exec_cmd("dms ipc call emoji toggle"))
-        hl.bind(mainMod .. " + N",      hl.dsp.exec_cmd("dms ipc call notes toggle"))
-        hl.bind(mainMod .. " + COMMA",  hl.dsp.exec_cmd("dms ipc call wallpapers toggle"))
-        -- System utilities
-        hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("dms ipc call settings toggle"))
-        hl.bind(mainMod .. " + TAB",    hl.dsp.exec_cmd("dms ipc call overview toggle"))
-        hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
-        hl.bind(mainMod .. " + S",      hl.dsp.exec_cmd("dms ipc call tools toggle"))
-        hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("dms ipc call screenshot"))
-        hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("dms ipc call screenrecord"))
-        hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("dms ipc call google_lens"))
-        hl.bind(mainMod .. " + ALT + B",   hl.dsp.exec_cmd("dms run"))
-        hl.bind(mainMod .. " + CTRL + ALT + B", hl.dsp.exec_cmd("dms quit"))
-        hl.bind(mainMod .. " + L",      hl.dsp.exec_cmd("loginctl lock-session"))
+        -- Caelestia: launcher e UI
+        hl.bind(mainMod, "SUPER_L", hl.dsp.global("caelestia:launcher"), { release = true })
+        hl.bind("CTRL + ALT", "Delete", hl.dsp.global("caelestia:session"))
+        hl.bind(mainMod .. " + N", hl.dsp.global("caelestia:sidebar"))
+        hl.bind("CTRL + ALT + C", hl.dsp.global("caelestia:clearNotifs"), { locked = true })
+        hl.bind(mainMod .. " + K", hl.dsp.global("caelestia:showall"))
+        hl.bind(mainMod .. " + L", hl.dsp.global("caelestia:lock"))
+        hl.bind(mainMod .. " + ALT + L", function()
+          hl.dispatch(hl.dsp.exec_cmd("caelestia shell -d"))
+          hl.dispatch(hl.dsp.global("caelestia:lock"))
+        end)
+
+        -- Caelestia: kill/restart do shell (debug)
+        hl.bind("CTRL + SUPER + SHIFT", "R", hl.dsp.exec_cmd("qs -c caelestia kill"), { release = true })
+        hl.bind("CTRL + SUPER + ALT", "R", hl.dsp.exec_cmd("qs -c caelestia kill; sleep .1; caelestia shell -d"), { release = true })
+
+        -- Caelestia: screenshot/gravação
+        hl.bind("", "Print", hl.dsp.exec_cmd("caelestia screenshot"), { locked = true })
+        hl.bind(mainMod .. " + SHIFT + S", hl.dsp.global("caelestia:screenshotFreeze"))
+        hl.bind(mainMod .. " + SHIFT + ALT + S", hl.dsp.global("caelestia:screenshot"))
+        hl.bind("CTRL + ALT + R", hl.dsp.exec_cmd("caelestia record"))
+        hl.bind(mainMod .. " + ALT + R", hl.dsp.exec_cmd("caelestia record -s"))
+        hl.bind(mainMod .. " + SHIFT + ALT + R", hl.dsp.exec_cmd("caelestia record -r"))
+        hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"))
+
+        -- Caelestia: clipboard/emoji
+        hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("pkill fuzzel || caelestia clipboard"))
+        hl.bind(mainMod .. " + ALT + V", hl.dsp.exec_cmd("pkill fuzzel || caelestia clipboard -d"))
+        hl.bind(mainMod .. " + PERIOD", hl.dsp.exec_cmd("pkill fuzzel || caelestia emoji -p"))
+        hl.bind("CTRL + SHIFT + ALT", "V", hl.dsp.exec_cmd('sleep 0.5s && ydotool type -d 1 "$(cliphist list | head -1 | cliphist decode)"'), { locked = true })
 
         -- Atalhos de Sistema Hyprland
         -- Close, Float, Pseudo, Split, Fullscreen
@@ -220,16 +233,19 @@
         hl.bindm(mainMod, "mouse:272", hl.dsp.movewindow())
         hl.bindm(mainMod, "mouse:273", hl.dsp.resizewindow())
 
-        -- Atalhos de Hardware (Media/Volume/Brightness)
-        hl.bind("l",  "XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"))
-        hl.bind("l",  "XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"))
-        hl.bind("l",  "XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"))
-        hl.bind("l",  "XF86AudioStop",  hl.dsp.exec_cmd("playerctl stop"))
+        -- Atalhos de Hardware (Media/Volume/Brightness) - Caelestia OSD
+        hl.bind("", "XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"), { locked = true })
+        hl.bind("", "XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"), { locked = true })
+        hl.bind("", "XF86AudioPlay", hl.dsp.global("caelestia:mediaToggle"), { locked = true })
+        hl.bind("", "XF86AudioPause", hl.dsp.global("caelestia:mediaToggle"), { locked = true })
+        hl.bind("", "XF86AudioNext", hl.dsp.global("caelestia:mediaNext"), { locked = true })
+        hl.bind("", "XF86AudioPrev", hl.dsp.global("caelestia:mediaPrev"), { locked = true })
+        hl.bind("", "XF86AudioStop", hl.dsp.global("caelestia:mediaStop"), { locked = true })
+        
+        -- Volume (wpctl nativo)
         hl.bind("le", "XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
         hl.bind("le", "XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%-"))
         hl.bind("le", "XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-        hl.bind("le", "XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set +5%"))
-        hl.bind("le", "XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"))
         hl.bind("l",  "XF86Calculator",        hl.dsp.exec_cmd("notify-send \"Soon\""))
       '';
     };

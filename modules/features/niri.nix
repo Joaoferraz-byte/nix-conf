@@ -36,24 +36,7 @@
           };
         };
 
-        # Binds para integração com DankMaterialShell (DMS)
-        # Substitui os antigos binds do Hyprland/Ambxst
-        binds = with config.lib.niri.actions; {
-          "Mod+Return" = { spawn = [ "kitty" ]; };
-          "Mod+D" = { spawn = [ "dms" "ipc" "call" "dashboard" "toggle" ]; };
-          "Mod+A" = { spawn = [ "dms" "ipc" "call" "assistant" "toggle" ]; };
-          "Mod+V" = { spawn = [ "dms" "ipc" "call" "clipboard" "toggle" ]; };
-          "Mod+Period" = { spawn = [ "dms" "ipc" "call" "emoji" "toggle" ]; };
-          "Mod+N" = { spawn = [ "dms" "ipc" "call" "notes" "toggle" ]; };
-          "Mod+Comma" = { spawn = [ "dms" "ipc" "call" "wallpapers" "toggle" ]; };
-          "Mod+Shift+C" = { spawn = [ "dms" "ipc" "call" "settings" "toggle" ]; };
-          "Mod+Tab" = { spawn = [ "dms" "ipc" "call" "overview" "toggle" ]; };
-          "Mod+Escape" = { spawn = [ "dms" "ipc" "call" "powermenu" "toggle" ]; };
-          "Mod+S" = { spawn = [ "dms" "ipc" "call" "tools" "toggle" ]; };
-          "Mod+Shift+S" = { spawn = [ "dms" "ipc" "call" "screenshot" ]; };
-          "Mod+Shift+R" = { spawn = [ "dms" "ipc" "call" "screenrecord" ]; };
-          
-          # Window management
+        # Window management
           "Mod+Q" = close-window;
           "Mod+Left" = focus-column-left;
           "Mod+Right" = focus-column-right;

@@ -18,8 +18,8 @@
     # NOTA: nixvim aparece como input direto E dentro do vim-conf.
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
     # O vim-conf usa o nixvim internamente para construir o pacote.
-    # DankMaterialShell shell (substitui o Ambxst)
-    # O shell-conf agora consome o DMS upstream.
+    # Caelestia Shell (substitui o DMS)
+    # O shell-conf agora consome o Caelestia upstream.
     shell-conf = {
       url = "github:Joaoferraz-byte/shell-conf";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -37,7 +37,7 @@
     #   - vim-conf: configuração NixVim declarativa (plugins, languages, keymaps)
     #   - nixvim: módulo HM compartilhado para programas.nixvim.*
     #   - home-manager: configuração do usuário livara
-    #   - shell-conf: DankMaterialShell shell (Quickshell + Go + matugen)
+    #   - shell-conf: Caelestia Shell
     imports = [
       (inputs.import-tree ./modules)
     ];

@@ -10,18 +10,15 @@
     imports = [
       self.nixosModules.dellLatitude5410Hardware
       self.nixosModules.commonPackages
-      self.nixosModules.niri
+      self.nixosModules.hyprland
       self.nixosModules.greeter
       self.nixosModules.desktop-portals
       self.nixosModules.flatpak
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
-      # DankMaterialShell substitui o Ambxst.
-      # O módulo dank-material-shell.nix gerencia:
-      #   - O shell DMS (systemd service, settings, plugins)
-      #   - Audio, bluetooth, keyring (pipewire, blueman, gnome-keyring)
-      self.nixosModules.dankMaterialShell
+      # Caelestia Shell substitui o DMS.
+      self.nixosModules.caelestiaShell
     ];
     # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
@@ -53,8 +50,7 @@
     console.keyMap = "br-abnt2";
     # ── Energia ────────────────────────────────────────────────────────────
     # O Dell Latitude 5410 usa tlp (laptop), que conflita com power-profiles-daemon.
-    # O DMS nixosModule define power-profiles-daemon.enable = mkDefault true, então
-    # forçamos false aqui para manter o tlp.
+    # Forçamos false aqui para manter o tlp.
     services.power-profiles-daemon.enable = lib.mkForce false;
 
     # ── Usuário ───────────────────────────────────────────────────────────

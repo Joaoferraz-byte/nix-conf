@@ -3,7 +3,7 @@
     imports = [
       self.nixosModules.myMachineHardware
       self.nixosModules.commonPackages
-      self.nixosModules.niri
+      self.nixosModules.hyprland
       self.nixosModules.nvidia
       self.nixosModules.greeter
       self.nixosModules.desktop-portals
@@ -11,11 +11,8 @@
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
-      # DankMaterialShell substitui o Ambxst.
-      # O módulo dank-material-shell.nix gerencia:
-      #   - O shell DMS (systemd service, settings, plugins)
-      #   - Audio, bluetooth, keyring (pipewire, blueman, gnome-keyring)
-      self.nixosModules.dankMaterialShell
+      # Caelestia Shell substitui o DMS.
+      self.nixosModules.caelestiaShell
     ];
     # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
