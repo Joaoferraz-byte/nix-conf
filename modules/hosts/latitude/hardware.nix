@@ -1,15 +1,24 @@
 # ─── Latitude Hardware ──────────────────────────────────────────
 # Hardware gerado pelo nixos-generate-config.
 #
-# IMPORTANTE: Este arquivo é gerado automaticamente durante a instalação.
-# Os UUIDs abaixo são placeholders e devem ser substituídos pelos valores
-# reais da máquina após rodar `nixos-generate-config`.
+# ══════════════════════════════════════════════════════════════════
+# ATENÇÃO: ESTE HOST AINDA NÃO ESTÁ FUNCIONAL
+# ══════════════════════════════════════════════════════════════════
+# Os UUIDs de disco abaixo são PLACEHOLDERS e devem ser substituídos
+# pelos valores reais da máquina após rodar `nixos-generate-config`.
 #
 # Para gerar os valores corretos:
-#   1. Boot a partir do ISO NixOS
-#   2. nixos-generate-config --root /mnt
-#   3. Copie o conteúdo de /mnt/etc/nixos/hardware-configuration.nix
-#      para este arquivo (substituindo os placeholders abaixo)
+#   1. Boot a partir do ISO NixOS no Dell Latitude
+#   2. Particione e monte os discos em /mnt
+#   3. nixos-generate-config --root /mnt
+#   4. Copie os UUIDs de /mnt/etc/nixos/hardware-configuration.nix
+#      para este arquivo, substituindo todos os REPLACE_*_UUID abaixo.
+#   5. Rode: sudo nixos-rebuild switch --flake .#latitude
+#
+# Enquanto os UUIDs não forem substituídos, o build do host latitude
+# vai FALHAR ao tentar montar os filesystems (UUID inexistente).
+# O host myMachine (limine) não é afetado por este arquivo.
+# ══════════════════════════════════════════════════════════════════
 { ... }: {
   flake.nixosModules.latitudeHardware = { config, lib, pkgs, modulesPath, ... }: {
     imports = [
@@ -26,7 +35,8 @@
     boot.kernelModules = [ "kvm-intel" ];
 
     # ── Filesystems ───────────────────────────────────────────────────────
-    # PLACEHOLDER: substitua os UUIDs pelos valores reais da máquina
+    # TODO: substitua os UUIDs pelos valores reais da máquina.
+    # Execute `lsblk -f` ou `blkid` no live ISO para obter os UUIDs corretos.
     fileSystems."/" =
       { device = "/dev/disk/by-uuid/REPLACE_ROOT_UUID";
         fsType = "btrfs";
@@ -51,7 +61,7 @@
       };
 
     # ── Swap ──────────────────────────────────────────────────────────────
-    # PLACEHOLDER: substitua pelo UUID real
+    # TODO: substitua pelo UUID real do dispositivo de swap.
     swapDevices =
       [ { device = "/dev/disk/by-uuid/REPLACE_SWAP_UUID"; }
       ];
