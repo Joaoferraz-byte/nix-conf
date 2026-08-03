@@ -9,7 +9,7 @@
   flake.nixosModules.latitudeConfiguration = { pkgs, lib, ... }: {
     imports = [
       self.nixosModules.latitudeHardware
-      self.nixosModules.commonPackages
+      self.nixosModules.corePackages
       self.nixosModules.hyprland
       self.nixosModules.greeter
       self.nixosModules.desktop-portals
