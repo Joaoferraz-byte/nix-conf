@@ -238,10 +238,12 @@
         hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("hyprctl dispatch layoutmsg colresize +conf"))
         hl.bind(mainMod .. " + ALT + SHIFT + Left", hl.dsp.exec_cmd("hyprctl dispatch layoutmsg swapcol l"))
         hl.bind(mainMod .. " + ALT + SHIFT + Right", hl.dsp.exec_cmd("hyprctl dispatch layoutmsg swapcol r"))
-        -- Move column to workspace (1-10)
-        for i = 1, 10 do
+        -- Move column to workspace (1-9)
+        for i = 1, 9 do
           hl.bind(mainMod .. " + CTRL + ALT + " .. tostring(i), hl.dsp.exec_cmd("hyprctl dispatch layoutmsg movecoltoworkspace " .. tostring(i)))
         end
+        -- Workspace 10 via tecla 0
+        hl.bind(mainMod .. " + CTRL + ALT + 0", hl.dsp.exec_cmd("hyprctl dispatch layoutmsg movecoltoworkspace 10"))
 
         -- Lid Switch
         hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("loginctl lock-session"), { locked = true })
