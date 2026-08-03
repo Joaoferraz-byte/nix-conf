@@ -315,11 +315,11 @@
         "quickshell": "quickshell"
       },
       "locked": {
-        "lastModified": 1785766562,
-        "narHash": "sha256-1tlwXvUzr/NaXb5KdeSjunRQTU4OTK5fiNC9z8cAS5o=",
+        "lastModified": 1785768470,
+        "narHash": "sha256-KHxg1KDJNFNBEL5lLAd86lYqx0m2QFUGy86vpKDb1ns=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "70206afd553eb495f65be813fe13c2426f497b30",
+        "rev": "fccd07ae8c7f6c52ec9bde5635bd197d110b7dd6",
         "type": "github"
       },
       "original": {
