@@ -21,9 +21,8 @@
       kitty
       tmux
       fuzzel
-      networkmanagerapplet
-      blueman
-      pavucontrol
+      # Caelestia Shell provides native network, bluetooth, and audio controls.
+      # networkmanagerapplet, blueman, pavucontrol removed as redundant.
       easyeffects
       hicolor-icon-theme
     ];
