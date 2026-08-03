@@ -163,56 +163,57 @@
 
         -- Atalhos de Sistema Hyprland
         -- Close, Float, Pseudo, Split, Fullscreen
-        hl.bind(mainMod .. " + C",      hl.dsp.killactive())
-        hl.bind(mainMod .. " + F",      hl.dsp.togglefloating())
-        hl.bind(mainMod .. " + P",      hl.dsp.pseudo())
-        hl.bind(mainMod .. " + J",      hl.dsp.togglesplit())
-        hl.bind(mainMod .. " + M",      hl.dsp.fullscreen())
+        hl.bind(mainMod .. " + C",      hl.dsp.window.close())
+        hl.bind(mainMod .. " + F",      hl.dsp.window.float())
+        hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())
+        hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))
+        hl.bind(mainMod .. " + M",      hl.dsp.window.fullscreen())
         hl.bind(mainMod .. " + Delete", hl.dsp.exec_cmd("uwsm stop"))
         hl.bind("SHIFT + F11",          hl.dsp.exec_cmd("hyprctl dispatch fullscreen 0"))
 
         -- Navegação de Janelas (setas + hjkl)
         -- Focus
-        hl.bind(mainMod .. " + Left",   hl.dsp.movefocus("l"))
-        hl.bind(mainMod .. " + Right",  hl.dsp.movefocus("r"))
-        hl.bind(mainMod .. " + Up",     hl.dsp.movefocus("u"))
-        hl.bind(mainMod .. " + Down",   hl.dsp.movefocus("d"))
-        hl.bind(mainMod .. " + CTRL + H", hl.dsp.movefocus("l"))
-        hl.bind(mainMod .. " + CTRL + J", hl.dsp.movefocus("d"))
-        hl.bind(mainMod .. " + CTRL + K", hl.dsp.movefocus("u"))
-        hl.bind(mainMod .. " + CTRL + L", hl.dsp.movefocus("r"))
+        hl.bind(mainMod .. " + Left",   hl.dsp.focus({ direction = "l" }))
+        hl.bind(mainMod .. " + Right",  hl.dsp.focus({ direction = "r" }))
+        hl.bind(mainMod .. " + Up",     hl.dsp.focus({ direction = "u" }))
+        hl.bind(mainMod .. " + Down",   hl.dsp.focus({ direction = "d" }))
+        hl.bind(mainMod .. " + CTRL + H", hl.dsp.focus({ direction = "l" }))
+        hl.bind(mainMod .. " + CTRL + J", hl.dsp.focus({ direction = "d" }))
+        hl.bind(mainMod .. " + CTRL + K", hl.dsp.focus({ direction = "u" }))
+        hl.bind(mainMod .. " + CTRL + L", hl.dsp.focus({ direction = "r" }))
         -- Move window
-        hl.bind(mainMod .. " + SHIFT + Left",  hl.dsp.movewindow("l"))
-        hl.bind(mainMod .. " + SHIFT + Right", hl.dsp.movewindow("r"))
-        hl.bind(mainMod .. " + SHIFT + Up",    hl.dsp.movewindow("u"))
-        hl.bind(mainMod .. " + SHIFT + Down",  hl.dsp.movewindow("d"))
-        hl.bind(mainMod .. " + SHIFT + H",     hl.dsp.movewindow("l"))
-        hl.bind(mainMod .. " + SHIFT + J",     hl.dsp.movewindow("d"))
-        hl.bind(mainMod .. " + SHIFT + K",     hl.dsp.movewindow("u"))
-        hl.bind(mainMod .. " + SHIFT + L",     hl.dsp.movewindow("r"))
+        hl.bind(mainMod .. " + SHIFT + Left",  hl.dsp.window.move({ direction = "l" }))
+        hl.bind(mainMod .. " + SHIFT + Right", hl.dsp.window.move({ direction = "r" }))
+        hl.bind(mainMod .. " + SHIFT + Up",    hl.dsp.window.move({ direction = "u" }))
+        hl.bind(mainMod .. " + SHIFT + Down",  hl.dsp.window.move({ direction = "d" }))
+        hl.bind(mainMod .. " + SHIFT + H",     hl.dsp.window.move({ direction = "l" }))
+        hl.bind(mainMod .. " + SHIFT + J",     hl.dsp.window.move({ direction = "d" }))
+        hl.bind(mainMod .. " + SHIFT + K",     hl.dsp.window.move({ direction = "u" }))
+        hl.bind(mainMod .. " + SHIFT + L",     hl.dsp.window.move({ direction = "r" }))
 
         -- Workspaces (1-10)
         -- Super+1-0 = switch, Super+Shift+1-0 = move, Super+Alt+1-0 = move silent
         for i = 1, 9 do
-          hl.bind(mainMod .. " + " .. i, hl.dsp.workspace(tostring(i)))
-          hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.movetoworkspace(tostring(i)))
-          hl.bind(mainMod .. " + ALT + " .. i, hl.dsp.movetoworkspacesilent(tostring(i)))
+          hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }))
+          hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
+          hl.bind(mainMod .. " + ALT + " .. i, hl.dsp.window.move({ workspace = i }))
         end
-        hl.bind(mainMod .. " + 0", hl.dsp.workspace("10"))
-        hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.movetoworkspace("10"))
-        hl.bind(mainMod .. " + ALT + 0", hl.dsp.movetoworkspacesilent("10"))
+        hl.bind(mainMod .. " + 0", hl.dsp.focus({ workspace = 10 }))
+        hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
+        hl.bind(mainMod .. " + ALT + 0", hl.dsp.window.move({ workspace = 10 }))
 
         -- Navegação de Workspaces (relativo + ocupado)
-        hl.bind(mainMod .. " + Z",           hl.dsp.workspace("-1"))
-        hl.bind(mainMod .. " + X",           hl.dsp.workspace("+1"))
-        hl.bind(mainMod .. " + SHIFT + Z",  hl.dsp.workspace("e-1"))
-        hl.bind(mainMod .. " + SHIFT + X",  hl.dsp.workspace("e+1"))
-        hl.bind(mainMod .. " + mouse_up",    hl.dsp.workspace("e-1"))
-        hl.bind(mainMod .. " + mouse_down",  hl.dsp.workspace("e+1"))
+        hl.bind(mainMod .. " + Z",           hl.dsp.focus({ workspace = -1 }))
+        hl.bind(mainMod .. " + X",           hl.dsp.focus({ workspace = 1 }))
+        hl.bind(mainMod .. " + SHIFT + Z",  hl.dsp.focus({ workspace = -1 }))
+        hl.bind(mainMod .. " + SHIFT + X",  hl.dsp.focus({ workspace = 1 }))
+        hl.bind(mainMod .. " + mouse_up",    hl.dsp.focus({ workspace = -1 }))
+        hl.bind(mainMod .. " + mouse_down",  hl.dsp.focus({ workspace = 1 }))
 
         -- Special Workspace (Scratchpad)
-        hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("hyprctl dispatch togglespecialworkspace"))
-        hl.bind(mainMod .. " + ALT + V",  hl.dsp.exec_cmd("hyprctl dispatch movetoworkspace special"))
+        hl.bind(mainMod .. " + SHIFT + V", hl.dsp.workspace.toggle_special("magic"))
+        hl.bind(mainMod .. " + ALT + V",  hl.dsp.window.move({ workspace = "special:magic" }))
+
 
         -- Resize Window (repetição contínua)
         -- Usa Super+Alt+Shift+arrows para evitar conflito com movewindow
@@ -246,8 +247,8 @@
         hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("loginctl lock-session"), { locked = true })
 
         -- Mouse Binds
-        hl.bind(mainMod .. " + mouse:272", hl.dsp.movewindow(), { mouse = true })
-        hl.bind(mainMod .. " + mouse:273", hl.dsp.resizewindow(), { mouse = true })
+        hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
+        hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
         -- Atalhos de Hardware (Media/Volume/Brightness) - Caelestia OSD
         hl.bind("XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"), { locked = true })
