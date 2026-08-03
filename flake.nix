@@ -14,6 +14,11 @@
       url = "github:uiriansan/SilentSDDM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # QyLock: Coleção de temas SDDM (inclui o tema Clockwork)
+    qylock = {
+      url = "github:Darkkal44/qylock";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixvim.url = "github:nix-community/nixvim";
     # NOTA: nixvim aparece como input direto E dentro do vim-conf.
     # O input direto fornece o módulo HM compartilhado (homeModules.nixvim).
@@ -38,6 +43,7 @@
     #   - nixvim: módulo HM compartilhado para programas.nixvim.*
     #   - home-manager: configuração do usuário livara
     #   - shell-conf: Caelestia Shell
+    #   - qylock: Tema SDDM Clockwork
     imports = [
       (inputs.import-tree ./modules)
     ];
