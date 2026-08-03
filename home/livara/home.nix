@@ -1,10 +1,7 @@
 { config, pkgs, lib, inputs, self, ... }:
 
 let
-  # ── Assets: usar caminhos relativos para compatibilidade com modo pure ──
-  # No Nix Flakes, referenciar caminhos absolutos (como self.outPath) dentro
-  # de builtins.path causa erro em modo pure. Usar caminhos relativos (./..)
-  # faz com que o Nix copie o diretório para o store de forma segura.
+  # ── Assets: usar caminhos relativos para o store ──
   iconsPath = builtins.path {
     path = ../../Icons;
     name = "nix-conf-icons";
@@ -23,8 +20,6 @@ in
   programs.home-manager.enable = true;
 
   # ── Neovim (NixVim) ─────────────────────────────────────────────────────
-  # O módulo de configuração vem do flake reutilizável vim-conf; a interface
-  # `programs.nixvim` é fornecida pelo módulo oficial compartilhado no host.
   programs.nixvim = {
     enable = true;
     imports = [ inputs.vim-conf.lib.nixvimModule ];
@@ -35,19 +30,15 @@ in
     nerd-fonts.jetbrains-mono
   ];
 
-  # O greeter declara o mesmo ativo em programs.silentSDDM.profileIcons.livara,
-  # evitando cópias divergentes.
   home.file.".face.icon".source = profileIcon;
 
-  # ── Wallpapers ──────────────────────────────────────────────────────────
-  # O Caelestia Shell gerencia wallpapers dinamicamente. Para evitar erros
-  # de "pure evaluation" e conflitos com o shell, não criamos o symlink
-  # declarativo para o diretório de wallpapers aqui. O shell lerá de
-  # ~/Pictures/Wallpapers por padrão.
-  # ────────────────────────────────────────────────────────────────────────
+  # ── Wallpapers: symlink para o diretório no repo ────────────────────────
+  # Usamos mkOutOfStoreSymlink para apontar para o diretório físico onde o
+  # repositório está clonado. Isso resolve o erro de "pure evaluation" e
+  # permite que o Caelestia Shell leia os wallpapers diretamente do seu repo.
+  home.file.".config/nixos/Wallpapers".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/nixos/Wallpapers";
 
   # ── Tema de ícones GTK ───────────────────────────────────────────────────
-  # Define o tema de ícones para o sistema GTK.
   gtk = {
     enable = true;
     iconTheme = {
@@ -61,10 +52,6 @@ in
   };
 
   # ── Kitty: terminal com tema dinâmico do Caelestia ───────────────────────
-  # O Caelestia CLI gera ~/.local/state/caelestia/theme/kitty.conf a partir
-  # do template em ~/.config/caelestia/templates/kitty.conf (gerenciado pelo
-  # shell-conf).  O `include` abaixo faz o Kitty carregar esse arquivo gerado
-  # automaticamente, aplicando as cores extraídas do wallpaper atual.
   programs.kitty = {
     enable = true;
     font = {
