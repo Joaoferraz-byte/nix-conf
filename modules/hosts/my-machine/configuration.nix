@@ -13,15 +13,15 @@
     ];
     
 
-    # ── Boot ──────────────────────────────────────────────────────────────
+    # Boot
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
     boot.kernelPackages = pkgs.linuxPackages_zen;
-    # ── Rede ──────────────────────────────────────────────────────────────
+    # Rede
     networking.hostName = "limine";
     networking.networkmanager.enable = true;
-    # ── Local ─────────────────────────────────────────────────────────────
+    # Local
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
     i18n.extraLocaleSettings = {
@@ -40,7 +40,7 @@
       variant = "";
     };
     console.keyMap = "br-abnt2";
-    # ── Usuário ───────────────────────────────────────────────────────────
+    # Usuário
     users.users."livara" = {
       isNormalUser = true;
       description = "Livara";
@@ -51,8 +51,7 @@
       shell = pkgs.zsh;
     };
     programs.zsh.enable = true;
-    # ── Nix ───────────────────────────────────────────────────────────────
-    # experimental-features movido para system-hardening.nix (DRY)
+    # Nix
     system.stateVersion = "26.11";
   };
 }

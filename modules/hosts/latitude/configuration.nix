@@ -11,16 +11,16 @@
       self.nixosModules.system-hardening
     ];
 
-    # ── Boot ──────────────────────────────────────────────────────────────
+    # Boot
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.kernelPackages = pkgs.linuxPackages_latest; # Better support for 10th gen Intel
 
-    # ── Rede ──────────────────────────────────────────────────────────────
+    # Rede
     networking.hostName = "latitude";
     networking.networkmanager.enable = true;
 
-    # ── Local ─────────────────────────────────────────────────────────────
+    # Local
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
     
@@ -31,9 +31,7 @@
     };
     console.keyMap = "ie";
 
-    # ── Power Management ──────────────────────────────────────────────────
-    # Latitude 5410 is a laptop, so we need proper power management.
-    # DankMaterialShell monitors system state, but NixOS needs the backend.
+    # Power management (laptop)
     services.tlp = {
       enable = true;
       settings = {
@@ -48,7 +46,7 @@
     };
     services.thermald.enable = true; # Prevents overheating on Dell laptops
 
-    # ── Usuário ───────────────────────────────────────────────────────────
+    # Usuário
     users.users."livara" = {
       isNormalUser = true;
       description = "Livara";

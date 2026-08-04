@@ -7,7 +7,7 @@
   ...
 }:
 let
-  # ── Assets ──
+  # Assets
   iconsPath = builtins.path {
     path = ../../Icons;
     name = "nix-conf-icons";
@@ -31,8 +31,7 @@ in
 
   programs.home-manager.enable = true;
 
-  # ── Neovim (NixVim via vim-conf) ──────────────────────────────────────────
-  # Tema Catppuccin Mocha já configurado no repositório vim-conf.
+  # Neovim (NixVim via vim-conf)
   programs.nixvim = {
     enable = true;
     imports = [ inputs.vim-conf.lib.nixvimModule ];
@@ -48,7 +47,7 @@ in
   home.file.".config/nixos/Wallpapers".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/nixos/Wallpapers";
 
-  # ── Desktop Entries ───────────────────────────────────────────────────────
+  # Desktop entries
   xdg.desktopEntries.nvim = {
     name = "Neovim (NixVim)";
     genericName = "Editor";
@@ -71,7 +70,7 @@ in
     categories = [ "Development" "Utility" "TextEditor" ];
   };
 
-  # ── Shell (Zsh) ───────────────────────────────────────────────────────────
+  # Shell
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -79,7 +78,7 @@ in
     syntaxHighlighting.enable = true;
     shellAliases = {
       ll = "ls -l";
-      # O alias 'update' será definido dinamicamente ou mantido como utilitário genérico
+      # Update alias
       update = "sudo nixos-rebuild switch --flake .";
     };
     history = {
@@ -98,7 +97,7 @@ in
     enableZshIntegration = true;
   };
 
-  # ── Mime & User Dirs ──────────────────────────────────────────────────────
+  # Mime & User Dirs
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
