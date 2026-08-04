@@ -1,9 +1,13 @@
-{ config, pkgs, lib, inputs, self, ... }:
-
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  self,
+  ...
+}:
 let
   # ── Assets: usar caminhos relativos para o store ──
-  # From home/livara/home.nix, ../../Icons = home/Icons (doesn't exist).
-  # The actual icons are at nix-conf/Icons/ (one level above home/).
   iconsPath = builtins.path {
     path = ../../Icons;
     name = "nix-conf-icons";
@@ -11,35 +15,39 @@ let
   profileIcon = iconsPath + "/6afde16e1ef1cb3257b30e01890787dd.jpg";
 in
 {
+  imports = [
+    inputs.illogical-flake.homeManagerModules.default
+  ];
   home.username = "livara";
   home.homeDirectory = "/home/livara";
   home.stateVersion = "26.11";
-
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
   };
-
   programs.home-manager.enable = true;
+
+  # ── Illogical Impulse (end-4, via soymou/illogical-flake) ────────────────
+  programs.illogical-impulse = {
+    enable = true;
+    dotfiles = {
+      fish.enable = false; # você usa zsh
+      kitty.enable = false; # mantemos nossa própria config de kitty abaixo
+      starship.enable = false; # opcional — troque pra true se quiser o prompt deles
+    };
+  };
 
   # ── Neovim (NixVim) ─────────────────────────────────────────────────────
   programs.nixvim = {
     enable = true;
     imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
-
   home.packages = with pkgs; [
     manim
     nerd-fonts.jetbrains-mono
   ];
-
   home.file.".face.icon".source = profileIcon;
-
-  # ── Wallpapers: symlink para o diretório no repo ────────────────────────
-  # Usamos mkOutOfStoreSymlink para apontar para o diretório físico onde o
-  # repositório está clonado. Isso resolve o erro de "pure evaluation" e
-  # permite que o Caelestia Shell leia os wallpapers diretamente do seu repo.
-  home.file.".config/nixos/Wallpapers".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/nixos/Wallpapers";
-
+  home.file.".config/nixos/Wallpapers".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/nixos/Wallpapers";
   # ── Tema de ícones GTK ───────────────────────────────────────────────────
   gtk = {
     enable = true;
@@ -52,8 +60,7 @@ in
       name = "adw-gtk3-dark";
     };
   };
-
-  # ── Kitty: terminal com tema dinâmico do Caelestia ───────────────────────
+  # ── Kitty: terminal ───────────────────────────────────────────────────────
   programs.kitty = {
     enable = true;
     font = {
@@ -74,23 +81,17 @@ in
       wayland_titlebar_color = "background";
     };
     extraConfig = ''
-      # ── Tema dinâmico do Caelestia ────────────────────────────────────
-      include ${config.home.homeDirectory}/.local/state/caelestia/theme/kitty.conf
-
       # Clipboard integration
       map ctrl+c copy_to_clipboard
       map ctrl+v paste_from_clipboard
-
       # Open URLs with default browser
       map ctrl+shift+e open_url_with_default_browser
-
       # Font size
       map ctrl+plus change_font_size all +2.0
       map ctrl+minus change_font_size all -2.0
       map ctrl+backspace change_font_size all 0
     '';
   };
-
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       xdg-terms = [ "kitty" ];
@@ -100,7 +101,6 @@ in
       cursor-size = 24;
     };
   };
-
   xdg.desktopEntries.nvim = {
     name = "Neovim (NixVim)";
     genericName = "Editor";
@@ -120,37 +120,38 @@ in
       "text/css"
       "application/javascript"
     ];
-    categories = [ "Development" "Utility" "TextEditor" ];
+    categories = [
+      "Development"
+      "Utility"
+      "TextEditor"
+    ];
   };
-
   programs.zsh = {
     enable = true;
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    
     shellAliases = {
       ll = "ls -l";
       update = "sudo nixos-rebuild switch --flake .#latitude";
     };
-
     history = {
       size = 10000;
       path = "${config.home.homeDirectory}/.zsh_history";
     };
-
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "sudo" ];
+      plugins = [
+        "git"
+        "sudo"
+      ];
       theme = "robbyrussell";
     };
   };
-
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
   };
-
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
@@ -172,7 +173,6 @@ in
       "application/x-tar" = [ "org.gnome.FileRoller.desktop" ];
     };
   };
-
   xdg.userDirs = {
     enable = true;
     createDirectories = true;

@@ -19,6 +19,7 @@
       file-roller
       tlp
       powertop
+      code-cursor
     ];
   };
 }
