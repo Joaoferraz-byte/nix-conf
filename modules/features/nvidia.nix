@@ -18,5 +18,13 @@
       powerManagement.finegrained = false;
       nvidiaSettings = true;
     };
+
+    # Wayland/Niri environment variables for NVIDIA
+    environment.variables = {
+      LIBVA_DRIVER_NAME = "nvidia";
+      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      GBM_BACKEND = "nvidia-drm";
+      WLR_NO_HARDWARE_CURSORS = "1";
+    };
   };
 }
