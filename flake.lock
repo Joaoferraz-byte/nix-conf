@@ -387,11 +387,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785855330,
-        "narHash": "sha256-1VghLWz/IwZ9F6tYsr7VVVyEYTnO6tj9GmQV4TiZyJU=",
+        "lastModified": 1785855641,
+        "narHash": "sha256-DmjPulBdFRUGS1wTv0IQx1QdVlbUDOSJJod3+67Yf8E=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "b2bc16adc41ce4ffc506321e7d5f6596bfb34c99",
+        "rev": "54073bcd8c6ade109b32af0ab1943f3b7dcaecc1",
         "type": "github"
       },
       "original": {

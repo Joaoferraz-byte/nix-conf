@@ -4,7 +4,7 @@
       git
       gh
       nautilus
-      helium
+      firefox
       vesktop
       kdePackages.okular
       foliate
