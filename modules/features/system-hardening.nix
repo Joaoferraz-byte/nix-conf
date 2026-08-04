@@ -9,8 +9,8 @@
     networking.firewall = {
       enable = true;
 
-      # AudioRelay requires TCP port 1239 open for audio streaming
-      allowedTCPPorts = [ 1239 ];
+      # AudioRelay requires TCP port 59100 open for audio streaming
+      allowedTCPPorts = [ 59100 ];
 
       # Allow mDNS (used by Avahi, local discovery)
       allowedUDPPorts = [ 5353 ];
@@ -113,7 +113,7 @@
     };
 
     # ── Privacy & Location Services ───────────────────────────────────────
-    # geoclue2 is required for Caelestia Shell's night light (gammastep) functionality.
+    # geoclue2 is required for DankMaterialShell's night light (matugen) functionality.
     services.geoclue2.enable = true;
 
     # ── Auditd with Smart Filtering ───────────────────────────────────────

@@ -1,68 +1,62 @@
-# ─── Latitude Configuration ─────────────────────────────────────
-# Specs: Intel Core i5-10310U (10th gen), 16GB RAM, 256GB SSD,
-#        Intel UHD Graphics (integrated), 14" FHD display
-#
-# NOTE: UUIDs de disco e partições devem ser atualizados após a instalação.
-# Este arquivo serve como template; após o `nixos-generate-config` na
-# máquina real, copie os UUIDs para o hardware.nix.
 { self, ... }: {
-  flake.nixosModules.latitudeConfiguration = { pkgs, lib, ... }: {
+  flake.nixosModules.latitudeConfiguration = { pkgs, ... }: {
     imports = [
       self.nixosModules.latitudeHardware
       self.nixosModules.corePackages
-      self.nixosModules.hyprland
       self.nixosModules.greeter
       self.nixosModules.desktop-portals
       self.nixosModules.flatpak
       self.nixosModules.audiorelay
       self.nixosModules.keyd
       self.nixosModules.system-hardening
-      # Caelestia Shell substitui o DMS.
-      self.nixosModules.caelestiaShell
     ];
+
     # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
-    boot.loader.systemd-boot.configurationLimit = 10;
-    # Kernel padrão (sem Zen, mais estável para laptop corporativo)
-    boot.kernelPackages = pkgs.linuxPackages;
+    boot.kernelPackages = pkgs.linuxPackages_latest; # Better support for 10th gen Intel
+
     # ── Rede ──────────────────────────────────────────────────────────────
     networking.hostName = "latitude";
     networking.networkmanager.enable = true;
+
     # ── Local ─────────────────────────────────────────────────────────────
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
-    i18n.extraLocaleSettings = {
-      LC_ADDRESS        = "pt_BR.UTF-8";
-      LC_IDENTIFICATION = "pt_BR.UTF-8";
-      LC_MEASUREMENT    = "pt_BR.UTF-8";
-      LC_MONETARY       = "pt_BR.UTF-8";
-      LC_NAME           = "pt_BR.UTF-8";
-      LC_NUMERIC        = "pt_BR.UTF-8";
-      LC_PAPER          = "pt_BR.UTF-8";
-      LC_TELEPHONE      = "pt_BR.UTF-8";
-      LC_TIME           = "pt_BR.UTF-8";
-    };
+    
+    # Keyboard: Irish (IE)
     services.xserver.xkb = {
-      layout  = "br";
+      layout = "ie";
       variant = "";
     };
-    console.keyMap = "br-abnt2";
-    # ── Energia ────────────────────────────────────────────────────────────
-    # O Latitude usa tlp (laptop), que conflita com power-profiles-daemon.
-    # Forçamos false aqui para manter o tlp.
-    services.power-profiles-daemon.enable = lib.mkForce false;
+    console.keyMap = "ie";
+
+    # ── Power Management ──────────────────────────────────────────────────
+    # Latitude 5410 is a laptop, so we need proper power management.
+    # DankMaterialShell monitors system state, but NixOS needs the backend.
+    services.tlp = {
+      enable = true;
+      settings = {
+        CPU_SCALING_GOVERNOR_ON_AC = "performance";
+        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+        CPU_MIN_PERF_ON_AC = 0;
+        CPU_MAX_PERF_ON_AC = 100;
+        CPU_MIN_PERF_ON_BAT = 0;
+        CPU_MAX_PERF_ON_BAT = 60;
+      };
+    };
+    services.thermald.enable = true; # Prevents overheating on Dell laptops
 
     # ── Usuário ───────────────────────────────────────────────────────────
     users.users."livara" = {
       isNormalUser = true;
-      description  = "Livara";
-      extraGroups  = [ "networkmanager" "wheel" ];
-      shell        = pkgs.zsh;
+      description = "Livara";
+      extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
+      shell = pkgs.zsh;
     };
     programs.zsh.enable = true;
-    # ── Nix ───────────────────────────────────────────────────────────────
-    # experimental-features movido para system-hardening.nix (DRY)
+
     system.stateVersion = "26.11";
   };
 }

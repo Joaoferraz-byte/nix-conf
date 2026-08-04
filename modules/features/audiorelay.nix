@@ -43,7 +43,7 @@
                 "factory.name" = "support.null-audio-sink";
                 "node.name" = "audiorelay_source";
                 "node.description" = "AudioRelay (microfone do telefone)";
-                "media.class" = "Audio/Source/Virtual";
+                "media.class" = "Audio/Source";
                 "audio.position" = "FL,FR";
               };
             }
@@ -79,7 +79,7 @@
         };
 
         # ── Firewall ───────────────────────────────────────────────────────────
-        networking.firewall.allowedTCPPorts = [ audiorelayPort ];
+        # Ports are opened in system-hardening.nix
         networking.firewall.allowedUDPPorts = [ audiorelayPort ];
       };
     };

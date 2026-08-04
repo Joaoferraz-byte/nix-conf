@@ -19,6 +19,7 @@
       file-roller
       tlp
       powertop
+      thermald
       code-cursor
 
       # Niri + DMS dependencies
@@ -26,6 +27,10 @@
       wl-clipboard
       cliphist
       xwayland-satellite
+      catppuccin-gtk
+      catppuccin-kvantum
+      catppuccin-cursors
+      wezterm
     ];
   };
 }
