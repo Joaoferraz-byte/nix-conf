@@ -11,6 +11,8 @@
       self.nixosModules.keyd
       self.nixosModules.system-hardening
     ];
+    
+
     # ── Boot ──────────────────────────────────────────────────────────────
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;

@@ -62,5 +62,7 @@
 
       # ── Gnome Keyring integration for SDDM ──────────────────────────────
       security.pam.services.sddm.enableGnomeKeyring = true;
+
+      services.accounts-daemon.enable = true;
     };
 }

@@ -16,7 +16,7 @@ let
 in
 {
   imports = [
-    inputs.illogical-flake.homeManagerModules.default
+    inputs.shell-conf.homeManagerModules.default
   ];
   home.username = "livara";
   home.homeDirectory = "/home/livara";
@@ -26,15 +26,9 @@ in
   };
   programs.home-manager.enable = true;
 
-  # ── Illogical Impulse (end-4, via soymou/illogical-flake) ────────────────
-  programs.illogical-impulse = {
-    enable = true;
-    dotfiles = {
-      fish.enable = false; # você usa zsh
-      kitty.enable = false; # mantemos nossa própria config de kitty abaixo
-      starship.enable = false; # opcional — troque pra true se quiser o prompt deles
-    };
-  };
+  # ── DankMaterialShell + Niri (via shell-conf) ─────────────────────────
+  # A configuração detalhada está no flake shell-conf, que atua como wrapper.
+  # As customizações visuais e atalhos já estão configurados lá.
 
   # ── Neovim (NixVim) ─────────────────────────────────────────────────────
   programs.nixvim = {

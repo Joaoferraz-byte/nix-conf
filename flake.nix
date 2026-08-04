@@ -7,9 +7,9 @@
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
     nixvim.url = "github:nix-community/nixvim";
 
-    # Illogical Impulse (end-4), via fork soymou/illogical-flake
-    illogical-flake = {
-      url = "github:soymou/illogical-flake";
+    # DankMaterialShell + Niri via shell-conf
+    shell-conf = {
+      url = "github:Joaoferraz-byte/shell-conf";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
