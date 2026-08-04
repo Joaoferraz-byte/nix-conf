@@ -100,6 +100,26 @@
         "type": "github"
       }
     },
+    "helium": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785578300,
+        "narHash": "sha256-8BTuivejfH1Ht5jKSAvdDLcTF4jbq8YnUwNJNGX04cQ=",
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
+        "rev": "51af22a99d087deb871cbb38df1a1c467c87c98f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -212,11 +232,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1785692966,
-        "narHash": "sha256-vUfIeBEfpbAfZ5zjgIkYk7eHBeVfCYVjLbWnMkseYnk=",
+        "lastModified": 1785828668,
+        "narHash": "sha256-8fsyqeO+mJqvIzeO4xIpgJe/f7MTbbVTEC6RT6WSXNs=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "643809054d65fdd466a63e3155b8c498cb483c04",
+        "rev": "e72e4f299401a3689d4b3d5fc6496b11db7064eb",
         "type": "github"
       },
       "original": {
@@ -348,6 +368,7 @@
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
+        "helium": "helium",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
         "nix-flatpak": "nix-flatpak",
@@ -366,11 +387,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785845386,
-        "narHash": "sha256-jHUXECKddvW/biilyH4JjfWhgp4FoVlkGqHVbWegTe0=",
+        "lastModified": 1785855330,
+        "narHash": "sha256-1VghLWz/IwZ9F6tYsr7VVVyEYTnO6tj9GmQV4TiZyJU=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "9870bfe76bb98089ad6a90890fc09c905e6e4a26",
+        "rev": "b2bc16adc41ce4ffc506321e7d5f6596bfb34c99",
         "type": "github"
       },
       "original": {
