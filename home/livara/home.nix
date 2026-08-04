@@ -41,11 +41,10 @@ in
     manim
     nerd-fonts.jetbrains-mono
     wezterm
+    git
   ];
 
   home.file.".face.icon".source = profileIcon;
-  home.file.".config/nixos/Wallpapers".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/nixos/Wallpapers";
 
   # Desktop entries
   xdg.desktopEntries.nvim = {
@@ -88,7 +87,7 @@ in
     oh-my-zsh = {
       enable = true;
       plugins = [ "git" "sudo" ];
-      theme = "robbyrussell"; # Catppuccin Mocha theme for OMZ could be added later
+      theme = "robbyrussell";
     };
   };
 
@@ -114,5 +113,32 @@ in
     enable = true;
     createDirectories = true;
     setSessionVariables = true;
+  };
+
+  # Wallpapers repository — cloned/updated on each home-manager activation.
+  # The repository lives at ~/Wallpapers and is exposed to DMS via the symlink
+  # ~/.config/DankMaterialShell/wallpapers -> ~/Wallpapers.
+  home.activation.cloneWallpapers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    WALLPAPERS_DIR="${config.home.homeDirectory}/Wallpapers"
+    WALLPAPERS_REPO="https://github.com/Joaoferraz-byte/Wallpapers.git"
+
+    if [ ! -d "$WALLPAPERS_DIR/.git" ]; then
+      $DRY_RUN_CMD ${pkgs.git}/bin/git clone "$WALLPAPERS_REPO" "$WALLPAPERS_DIR"
+    else
+      $DRY_RUN_CMD ${pkgs.git}/bin/git -C "$WALLPAPERS_DIR" pull --ff-only || true
+    fi
+  '';
+
+  # Vault (Obsidian) — managed via git-sync for automatic bidirectional sync.
+  # The vault lives at ~/Vault and is kept in sync with the remote repository.
+  services.git-sync = {
+    enable = true;
+    repositories = {
+      vault = {
+        path = "${config.home.homeDirectory}/Vault";
+        uri = "git+ssh://git@github.com/Joaoferraz-byte/Vault.git";
+        interval = 300;
+      };
+    };
   };
 }

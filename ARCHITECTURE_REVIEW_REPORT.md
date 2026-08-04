@@ -22,5 +22,5 @@ As configurações dos hosts (`my-machine` e `latitude`) foram atualizadas para 
 ## Próximos Passos Recomendados
 
 - **Consolidação de Pacotes**: Criar um módulo centralizado para gerenciar pacotes de desenvolvimento (Java/C++) e evitar duplicatas entre o sistema e o Neovim.
-- **Automação de Wallpapers**: Implementar um script para sincronizar a coleção local de wallpapers com o seletor do Ambxst-X.
-- **Persistência de Widgets**: Salvar as configurações de widgets feitas via interface do Ambxst-X de volta no `shell-conf/settings/`.
+
+*(Nota: Automação de Wallpapers, Vault Sync e Persistência de Widgets JSON do DMS foram implementados na revisão de 2026-08-04).*
