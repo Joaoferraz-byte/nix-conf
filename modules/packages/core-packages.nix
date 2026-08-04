@@ -4,7 +4,7 @@
       git
       gh
       nautilus
-      brave
+      helium
       vesktop
       kdePackages.okular
       foliate

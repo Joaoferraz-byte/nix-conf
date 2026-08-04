@@ -6,6 +6,7 @@
       {
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [
+          inputs.helium.overlays.default
           (final: prev: {
             gradience = prev.writeShellScriptBin "gradience" ''
               echo "gradience foi removido do nixpkgs; stub no-op." >&2

@@ -27,6 +27,9 @@ O shell Ambxst-X foi substituído por DankMaterialShell (DMS) + Niri compositor.
 
 ## [Unreleased] - Correções e Melhorias (2026-08-04)
 
+### Changed
+- **Browser**: Substituído Brave por Helium Browser. Adicionado flake `inputs.helium` (overlay `pkgs.helium`) em ambos os hosts. Keybind `Mod+W` agora spawn Helium.
+
 ### Added
 - **Wallpapers Management**: Adicionado script de ativação no home-manager para clonar e atualizar automaticamente o repositório `Wallpapers` em `~/Wallpapers`.
 - **Vault Management**: Configurado `services.git-sync` no home-manager para sincronização bidirecional automática do repositório Obsidian Vault em `~/Vault`.
