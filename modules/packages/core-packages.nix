@@ -24,6 +24,7 @@
 
       # Niri + DMS dependencies
       kora-icon-theme
+      bibata-cursors
       wl-clipboard
       cliphist
       xwayland-satellite
