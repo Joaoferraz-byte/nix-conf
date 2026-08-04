@@ -130,6 +130,10 @@ in
 
   # Vault (Obsidian) — managed via git-sync for automatic bidirectional sync.
   # The vault lives at ~/Vault and is kept in sync with the remote repository.
+  home.activation.ensureVaultDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/Vault/06 - Config/_attachments"
+  '';
+
   services.git-sync = {
     enable = true;
     repositories = {
