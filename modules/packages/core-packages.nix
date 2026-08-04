@@ -20,6 +20,12 @@
       tlp
       powertop
       code-cursor
+
+      # Niri + DMS dependencies
+      kora-icon-theme
+      wl-clipboard
+      cliphist
+      xwayland-satellite
     ];
   };
 }
