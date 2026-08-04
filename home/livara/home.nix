@@ -40,7 +40,6 @@ in
   home.packages = with pkgs; [
     manim
     nerd-fonts.jetbrains-mono
-    wezterm
     git
   ];
 
