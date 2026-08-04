@@ -5,9 +5,11 @@
       gh
       nautilus
       firefox
+      nomacs
       vesktop
       kdePackages.okular
       foliate
+      mpv
       obsidian
       hydralauncher
       heroic
