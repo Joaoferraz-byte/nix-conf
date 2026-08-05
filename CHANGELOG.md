@@ -12,7 +12,7 @@ O shell Ambxst-X foi substituído por DankMaterialShell (DMS) + Niri compositor.
 **Adicionado:**
 - `inputs.shell-conf` no flake.nix (DMS + Niri via upstream)
 - Host `latitude` (Dell Latitude 5410)
-- Overlays para `gradience` stub e `gnome-icon-theme`
+- Overlays para `gradience` stub
 
 **Alterado:**
 - `home/livara/home.nix`: terminal de Alacritty para Wezterm
@@ -25,21 +25,26 @@ O shell Ambxst-X foi substituído por DankMaterialShell (DMS) + Niri compositor.
 - `hardware.opengl` → `hardware.graphics` (sintaxe moderna).
 - `stateVersion` atualizado para `26.11`.
 
-## [Unreleased] - Correções e Melhorias (2026-08-04)
-
-### Changed
-- **Browser**: Substituído Brave por Helium Browser. Adicionado flake `inputs.helium` (overlay `pkgs.helium`) em ambos os hosts. Keybind `Mod+W` agora spawn Helium.
-
-### Added
-- **Wallpapers Management**: Adicionado script de ativação no home-manager para clonar e atualizar automaticamente o repositório `Wallpapers` em `~/Wallpapers`.
-- **Vault Management**: Configurado `services.git-sync` no home-manager para sincronização bidirecional automática do repositório Obsidian Vault em `~/Vault`.
-
-### Changed
-- **Home Manager Configuration**: Removido symlink manual antigo para Wallpapers; `home.nix` agora gerencia Wallpapers e Vault via Git de forma declarativa.
+## Correções e Melhorias (2026-08-05)
 
 ### Fixed
-- **Niri Hotkey Overlay**: Corrigida a sintaxe da opção para desativar o overlay de hotkeys do Niri (`hotkey-overlay.skip-at-startup = true` no `shell-conf`).
-- **Limpeza de Repositório**: Removido o arquivo `ARCHITECTURE_REVIEW_REPORT.md` e o symlink físico de wallpapers no repositório `nix-conf`, conforme solicitado.
-- **DMS Keybinds**: Adicionados keybinds faltantes no Niri: `Mod+F` para maximizar coluna (maximize-column), `Mod+Shift+F` para tela cheia (fullscreen-window). O `Alt+Tab` já estava corretamente configurado para o switcher do DMS.
-- **DMS JSON Persistence**: Refatorado `dms.nix` no `shell-conf` para usar `mkOutOfStoreSymlink` para `settings.json` e `session.json`, apontando para arquivos mutáveis dentro do próprio clone do repositório `shell-conf`. Isso permite que edições feitas via interface do DMS persistam e sejam versionadas no Git.
-- **DMS Power Menu**: O power menu em runtime do DMS (`Mod+X`) já possui as dependências necessárias (`power-profiles-daemon`, `accounts-daemon`) garantidas pelo módulo NixOS do DMS, sem conflitar com o SDDM (tema Clockwork) que continua sendo o gerenciador de login padrão.
+- **Cursor Bibata no Niri**: Removido `home.pointerCursor` e `gtk.cursorTheme` (gambiarra). Agora usa o bloco nativo `cursor { xcursor-theme; xcursor-size; }` do Niri. Configurado via DMS `cursorSettings` no JSON.
+- **Cursor SDDM**: Removidas variáveis `XCURSOR_THEME` e `XCURSOR_SIZE` do `greeter.nix` (redundantes com o tema SDDM).
+- **Host Latitude — input.helium**: Removido `inputs.helium.overlays.default` (referência a input inexistente). Overlay `gnome-icon-theme` também removido.
+- **Host Latitude — keyboard**: Corrigido layout de teclado de `ie` para `br`/`abnt2` com locales `pt_BR`.
+- **Host Latitude — configuration duplicada**: Removida duplicação de blocos `services.xserver.xkb` e `services.tlp`.
+- **Zen Browser declaração dupla**: Removido pacote direto `inputs.zen-browser.packages."${pkgs.system}".default` e desktop entry manual. Agora usa `inputs.zen-browser.homeModules.beta` com `programs.zen-browser.enable`.
+- **Vault Sync**: Adicionado `home.activation.cloneVault` para clonar o repositório na primeira ativação. Adicionado `.gitignore` no Vault para excluir `plugins/`, `themes/` e `_attachments/`.
+- **WezTerm**: Removida confirmação de fechamento para shells (`zsh`, `bash`, `fish`, `nu`).
+
+### Added
+- **DMS Plugins**: Declarados via `dms-plugin-registry` — `quickCapture`, `screenCapture`, `dankQuickSearch`.
+- **Keybind Quick Capture**: `Super+Shift+S` → spawn `dms ipc plugin quickCapture capture`.
+- **Wallpaper Cycling**: Ativado no `dms-session.json` com intervalo de 900s (15 min), modo random.
+- **Fastfetch**: Configurado via `xdg.configFile` no shell-conf com logo NixOS small.
+- **DMS Session**: Removido `helium` do `browserUsageHistory`, nome do Zen Browser corrigido de "Zen Browser (Beta)" para "Zen Browser".
+- **Pacotes**: Adicionados `inotify-tools` e `fastfetch` ao `core-packages.nix`.
+
+### Changed
+- **Home Manager Configuration**: `home.nix` reorganizado por categorias (Imports, Home Profile, Environment, Programs, Packages, Desktop Entries, Mime, Git Repositories).
+- **CHANGELOG**: Removida referência ao Helium Browser (substituído pelo Zen Browser).

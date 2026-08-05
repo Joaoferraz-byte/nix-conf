@@ -14,7 +14,8 @@
     # Boot
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
-    boot.kernelPackages = pkgs.linuxPackages_latest; # Better support for 10th gen Intel
+    boot.loader.systemd-boot.configurationLimit = 10;
+    boot.kernelPackages = pkgs.linuxPackages_latest;
 
     # Rede
     networking.hostName = "latitude";
@@ -23,13 +24,21 @@
     # Local
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
-    
-    # Keyboard: Irish (IE)
-    services.xserver.xkb = {
-      layout = "ie";
-      variant = "";
+    i18n.extraLocaleSettings = {
+      LC_ADDRESS = "pt_BR.UTF-8";
+      LC_IDENTIFICATION = "pt_BR.UTF-8";
+      LC_MEASUREMENT = "pt_BR.UTF-8";
+      LC_MONETARY = "pt_BR.UTF-8";
+      LC_NAME = "pt_BR.UTF-8";
+      LC_NUMERIC = "pt_BR.UTF-8";
+      LC_PAPER = "pt_BR.UTF-8";
+      LC_TIME = "pt_BR.UTF-8";
     };
-    console.keyMap = "ie";
+    services.xserver.xkb = {
+      layout = "br";
+      variant = "abnt2";
+    };
+    console.keyMap = "br-abnt2";
 
     # Power management (laptop)
     services.tlp = {
@@ -44,7 +53,7 @@
         CPU_MAX_PERF_ON_BAT = 60;
       };
     };
-    services.thermald.enable = true; # Prevents overheating on Dell laptops
+    services.thermald.enable = true;
 
     # Usuário
     users.users."livara" = {

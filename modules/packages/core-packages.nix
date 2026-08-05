@@ -42,6 +42,8 @@
       catppuccin-kvantum
       catppuccin-cursors
       wezterm
+      inotify-tools
+      fastfetch
     ];
   };
 }

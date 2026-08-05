@@ -7,7 +7,6 @@
   ...
 }:
 let
-  # Assets
   iconsPath = builtins.path {
     path = ../../Icons;
     name = "nix-conf-icons";
@@ -15,29 +14,19 @@ let
   profileIcon = iconsPath + "/6afde16e1ef1cb3257b30e01890787dd.jpg";
 in
 {
+  # ─── Imports ────────────────────────────────────────────────────────────────
   imports = [
     inputs.shell-conf.homeManagerModules.default
+    inputs.zen-browser.homeModules.beta
   ];
 
+  # ─── Home Profile ───────────────────────────────────────────────────────────
   home.username = "livara";
   home.homeDirectory = "/home/livara";
   home.stateVersion = "26.11";
-  home.pointerCursor = {
-    gtk.enable = true;
-    x11.enable = true;
 
-    package = pkgs.bibata-cursors;
-    name = "Bibata-Modern-Classic";
-    size = 24;
-  };
-
-  gtk.cursorTheme = lib.mkForce {
-    name = "Bibata-Modern-Classic";
-    package = pkgs.bibata-cursors;
-  };
-
+  # ─── Environment Variables ──────────────────────────────────────────────────
   home.sessionVariables = {
-    XCURSOR_THEME = "Bibata-Modern-Classic";
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
     TERMINAL = "wezterm";
     EDITOR = "nvim";
@@ -45,33 +34,63 @@ in
 
   programs.home-manager.enable = true;
 
-  # Neovim (NixVim via vim-conf)
+  # ─── Avatar ─────────────────────────────────────────────────────────────────
+  home.file.".face.icon".source = profileIcon;
+
+  # ─── Programs ───────────────────────────────────────────────────────────────
+
+  # Neovim
   programs.nixvim = {
     enable = true;
     imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
 
+  # Zen Browser
+  programs.zen-browser = {
+    enable = true;
+    policies = {
+      DisableAppUpdate = true;
+      DisableTelemetry = true;
+      DisableFirefoxStudies = true;
+      DisablePocket = true;
+      DontCheckDefaultBrowser = true;
+    };
+  };
+
+  # Shell
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+    shellAliases = {
+      ll = "ls -l";
+      update = "sudo nixos-rebuild switch --flake .";
+    };
+    history = {
+      size = 10000;
+      path = "${config.home.homeDirectory}/.zsh_history";
+    };
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "git" "sudo" ];
+      theme = "robbyrussell";
+    };
+  };
+
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  # ─── Packages ───────────────────────────────────────────────────────────────
   home.packages = with pkgs; [
     manim
     nerd-fonts.jetbrains-mono
     git
-    inputs.zen-browser.packages."${pkgs.system}".default
   ];
 
-  xdg.desktopEntries.zen-browser = {
-    name = "Zen Browser";
-    exec = "zen-beta %u";
-    icon = "zen-browser";
-    terminal = false;
-    categories = [
-      "Network"
-      "WebBrowser"
-    ];
-  };
-
-  home.file.".face.icon".source = profileIcon;
-
-  # Desktop entries
+  # ─── Desktop Entries ────────────────────────────────────────────────────────
   xdg.desktopEntries.nvim = {
     name = "Neovim (NixVim)";
     genericName = "Editor";
@@ -91,44 +110,10 @@ in
       "text/css"
       "application/javascript"
     ];
-    categories = [
-      "Development"
-      "Utility"
-      "TextEditor"
-    ];
+    categories = [ "Development" "Utility" "TextEditor" ];
   };
 
-  # Shell
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
-    shellAliases = {
-      ll = "ls -l";
-      # Update alias
-      update = "sudo nixos-rebuild switch --flake .";
-    };
-    history = {
-      size = 10000;
-      path = "${config.home.homeDirectory}/.zsh_history";
-    };
-    oh-my-zsh = {
-      enable = true;
-      plugins = [
-        "git"
-        "sudo"
-      ];
-      theme = "robbyrussell";
-    };
-  };
-
-  programs.fzf = {
-    enable = true;
-    enableZshIntegration = true;
-  };
-
-  # Mime & User Dirs
+  # ─── Mime & User Dirs ───────────────────────────────────────────────────────
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
@@ -147,9 +132,9 @@ in
     setSessionVariables = true;
   };
 
-  # Wallpapers repository — cloned/updated on each home-manager activation.
-  # The repository lives at ~/Wallpapers and is exposed to DMS via the symlink
-  # ~/.config/DankMaterialShell/wallpapers -> ~/Wallpapers.
+  # ─── Git Repositories ───────────────────────────────────────────────────────
+
+  # Wallpapers — cloned/updated on each home-manager activation
   home.activation.cloneWallpapers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     WALLPAPERS_DIR="${config.home.homeDirectory}/Wallpapers"
     WALLPAPERS_REPO="https://github.com/Joaoferraz-byte/Wallpapers.git"
@@ -161,10 +146,14 @@ in
     fi
   '';
 
-  # Vault (Obsidian) — managed via git-sync for automatic bidirectional sync.
-  # The vault lives at ~/Vault and is kept in sync with the remote repository.
-  home.activation.ensureVaultDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "${config.home.homeDirectory}/Vault/06 - Config/_attachments"
+  # Vault (Obsidian) — clone + git-sync for bidirectional sync
+  home.activation.cloneVault = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    VAULT_DIR="${config.home.homeDirectory}/Vault"
+    VAULT_REPO="git@github.com:Joaoferraz-byte/Vault.git"
+
+    if [ ! -d "$VAULT_DIR/.git" ]; then
+      $DRY_RUN_CMD ${pkgs.git}/bin/git clone "$VAULT_REPO" "$VAULT_DIR" || true
+    fi
   '';
 
   services.git-sync = {

@@ -40,7 +40,7 @@ nix flake check --no-build
 # ─── Step 4: Build and switch ──────────────────────────────────────────────
 echo ""
 echo -e "${YELLOW}Building and switching to ${FLAKE_TARGET}...${NC}"
-sudo nixos-rebuild switch --flake ".#${FLAKE_TARGET}"
+sudo nixos-rebuild switch --flake ".#${FLAKE_TARGET}" 2>&1 | tee /tmp/nixos-rebuild.log
 
 # ─── Step 5: Reboot ───────────────────────────────────────────────────────
 echo ""

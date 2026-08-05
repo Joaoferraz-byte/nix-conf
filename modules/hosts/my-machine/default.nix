@@ -15,6 +15,7 @@
       }
       self.nixosModules.myMachineConfiguration
       inputs.shell-conf.nixosModules.dankMaterialShell
+      inputs.dms-plugin-registry.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager.useGlobalPkgs = true;

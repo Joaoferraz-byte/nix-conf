@@ -23,6 +23,16 @@ O DankMaterialShell + Niri é fornecido pelo flake `shell-conf`:
 
 O `dms.homeModules.niri` internamente importa `niri-flake`, evitando conflitos de opção `programs.niri`.
 
+## Plugins DMS
+
+Plugins declarados via `dms-plugin-registry`:
+
+| Plugin | Descrição |
+| :--- | :--- |
+| `quickCapture` | Screen capture com anotação e OCR |
+| `screenCapture` | Screenshot via Niri (area, fullscreen, active window) |
+| `dankQuickSearch` | Busca web rápida via prefixos de engine |
+
 ## Aplicação
 
 ```bash
@@ -42,4 +52,5 @@ nix build --dry-run --no-link .#nixosConfigurations.myMachine.config.system.buil
 
 - [DankMaterialShell](https://danklinux.com/docs/dankmaterialshell/nixos-flake)
 - [Niri-flake](https://github.com/sodiboo/niri-flake)
+- [DMS Plugin Registry](https://github.com/AvengeMedia/dms-plugin-registry)
 - [shell-conf](https://github.com/Joaoferraz-byte/shell-conf)

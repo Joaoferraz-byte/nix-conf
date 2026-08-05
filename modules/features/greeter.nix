@@ -36,11 +36,6 @@
         pkgs.bibata-cursors
       ];
 
-      environment.variables = {
-        XCURSOR_THEME = "Bibata-Modern-Classic";
-        XCURSOR_SIZE = "24";
-      };
-
       security.pam.services.sddm.enableGnomeKeyring = true;
       services.accounts-daemon.enable = true;
     };
