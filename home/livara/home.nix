@@ -53,6 +53,17 @@ in
     inputs.zen-browser.packages."${pkgs.system}".default
   ];
 
+  xdg.desktopEntries.zen-browser = {
+    name = "Zen Browser";
+    exec = "zen-beta %u";
+    icon = "zen-browser";
+    terminal = false;
+    categories = [
+      "Network"
+      "WebBrowser"
+    ];
+  };
+
   home.file.".face.icon".source = profileIcon;
 
   # Desktop entries
