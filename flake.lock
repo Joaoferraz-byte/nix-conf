@@ -23,6 +23,26 @@
         "type": "github"
       }
     },
+    "dms-plugin-registry": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785927945,
+        "narHash": "sha256-VVrq38rQ7HZiDlzxrSKz5a9LYwexVQLe2DzvoGBOU8A=",
+        "owner": "AvengeMedia",
+        "repo": "dms-plugin-registry",
+        "rev": "ade9b6087a1a875a4725f3206d084c62191e8857",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dms-plugin-registry",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -107,11 +127,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785531816,
-        "narHash": "sha256-vkMnV0JIyw+g/NmcfoajlGaAO+9a0ezia+FZohQJrik=",
+        "lastModified": 1785936982,
+        "narHash": "sha256-nuRhZbDKkfh8S+/M5TvQLVYiRXnJlvGhhybFFZW4jx4=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "bf9ce9fec78f95f374e8dd3b503863a3ec128ebe",
+        "rev": "a9bcd0057073751a54ce5fd4b0dc63a391b6f349",
         "type": "github"
       },
       "original": {
@@ -384,6 +404,7 @@
     },
     "root": {
       "inputs": {
+        "dms-plugin-registry": "dms-plugin-registry",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
@@ -404,11 +425,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785929453,
-        "narHash": "sha256-rWLQcioPphZOt9jioSu5FTjsGX0M1umYnlDrVJtXGxI=",
+        "lastModified": 1785936622,
+        "narHash": "sha256-QjpD1Dfukti6z8fQD8dvpzXRXw4+H4zzOBcbJSesCpU=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "457240364e38d7192cc482837cd81f91f60308f7",
+        "rev": "3d99ffa0c7343ae94b8bd8cbddef6727c393907c",
         "type": "github"
       },
       "original": {
@@ -455,11 +476,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1785834098,
-        "narHash": "sha256-cRD3eP5eFxGzg44ZU7tXjI7j3xfrfrwYvEMGVBDlDZ0=",
+        "lastModified": 1785936629,
+        "narHash": "sha256-RXGPnu9HhX1hgqiUHNP/o8+eBKOgdUI48WQPITiOYnU=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "648e43d8d3d4ee7e89af7a5936913e030ad85627",
+        "rev": "dfc62e4d1b60e6dc92ff52b2e56779be158632d2",
         "type": "github"
       },
       "original": {
