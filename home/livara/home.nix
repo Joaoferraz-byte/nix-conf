@@ -31,6 +31,11 @@ in
     size = 24;
   };
 
+  gtk.cursorTheme = lib.mkForce {
+    name = "Bibata-Modern-Classic";
+    package = pkgs.bibata-cursors;
+  };
+
   home.sessionVariables = {
     XCURSOR_THEME = "Bibata-Modern-Classic";
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";

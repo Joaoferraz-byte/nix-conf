@@ -18,6 +18,7 @@
       foliate
       obsidian
       tauon
+      telegram-desktop
 
       # Games
       hydralauncher
