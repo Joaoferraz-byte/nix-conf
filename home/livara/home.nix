@@ -22,8 +22,17 @@ in
   home.username = "livara";
   home.homeDirectory = "/home/livara";
   home.stateVersion = "26.11";
-  
+  home.pointerCursor = {
+    gtk.enable = true;
+    x11.enable = true;
+
+    package = pkgs.bibata-cursors;
+    name = "Bibata-Modern-Classic";
+    size = 24;
+  };
+
   home.sessionVariables = {
+    XCURSOR_THEME = "Bibata-Modern-Classic";
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
     TERMINAL = "wezterm";
     EDITOR = "nvim";
@@ -41,6 +50,7 @@ in
     manim
     nerd-fonts.jetbrains-mono
     git
+    inputs.zen-browser.packages."${pkgs.system}".default
   ];
 
   home.file.".face.icon".source = profileIcon;
@@ -65,7 +75,11 @@ in
       "text/css"
       "application/javascript"
     ];
-    categories = [ "Development" "Utility" "TextEditor" ];
+    categories = [
+      "Development"
+      "Utility"
+      "TextEditor"
+    ];
   };
 
   # Shell
@@ -85,7 +99,10 @@ in
     };
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "sudo" ];
+      plugins = [
+        "git"
+        "sudo"
+      ];
       theme = "robbyrussell";
     };
   };

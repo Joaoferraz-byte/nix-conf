@@ -6,15 +6,11 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     vim-conf.url = "github:Joaoferraz-byte/vim-conf";
     nixvim.url = "github:nix-community/nixvim";
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
     # DankMaterialShell + Niri via shell-conf
     shell-conf = {
       url = "github:Joaoferraz-byte/shell-conf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    helium = {
-      url = "github:oxcl/nix-flake-helium-browser";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
