@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] - 2026-08-06
+
+### Fixed
+- **Zen Browser DMS Theme**: Replaced `@import url("file://...")` in `userChrome.css` with a runtime symlink (`~/.config/zen/default/chrome/userChrome.css` → `~/.config/DankMaterialShell/zen.css`) via `home.activation.linkZenTheme`, resolving Chrome CSP blocking of `file://` imports in the chrome context
+- **Wallpaper Cycling**: Declarative session config in `home.nix` with `wallpaperCyclingEnabled = true`, interval 900s (15 min), mode `interval`
+- **Zen Browser Preferences**: Shell-conf module now includes modern Zen preferences (floating URL bar, smooth scrolling, workspace session restore)
+
 ## Migration: Ambxst → DankMaterialShell + Niri
 
 O shell Ambxst-X foi substituído por DankMaterialShell (DMS) + Niri compositor. A integração é feita via flake `shell-conf`.
