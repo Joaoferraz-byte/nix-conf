@@ -10,14 +10,15 @@ Configuração NixOS declarativa baseada em flakes para desktop e laptop. Compos
 | Hosts | `modules/hosts/` | Declara hardware, nome do host e escolhas específicas de cada máquina. |
 | Funcionalidades do sistema | `modules/features/` | Encapsula desktop, portais, áudio, greeter e demais serviços. |
 | Pacotes | `modules/packages/` | Declara pacotes Nix e Flatpak. |
-| Shell (DMS + Niri) | `inputs.shell-conf` | DankMaterialShell + Niri via flake separado |
+| Shell (DMS + Niri) | `inputs.shell-conf` | DankMaterialShell + Niri via flake separado. |
+| Neovim (NixVim) | `inputs.vim-conf` | IDE declarativa com tema DMS dinâmico. |
 
 ## Shell
 
 O DankMaterialShell + Niri é fornecido pelo flake `shell-conf`:
 
 | Input | Responsabilidade |
-| :--- | :--- |
+|---|---|
 | `dms.homeModules.dank-material-shell` | Configurações DMS (temas, widgets, plugins) |
 | `dms.homeModules.niri` | Integração niri + DMS (keybinds preset, spawn) |
 
@@ -28,10 +29,18 @@ O `dms.homeModules.niri` internamente importa `niri-flake`, evitando conflitos d
 Plugins declarados via `dms-plugin-registry`:
 
 | Plugin | Descrição |
-| :--- | :--- |
+|---|---|
 | `quickCapture` | Screen capture com anotação e OCR |
 | `screenCapture` | Screenshot via Niri (area, fullscreen, active window) |
 | `dankQuickSearch` | Busca web rápida via prefixos de engine |
+
+## Screenshot Keybinds (via shell-conf)
+
+| Atalho | Ação |
+|---|---|
+| Super+Shift+S | Screenshot de região selecionada |
+| Super+S | Screenshot de tela inteira |
+| Super+Ctrl+S | Screenshot da janela ativa |
 
 ## Aplicação
 
@@ -54,3 +63,4 @@ nix build --dry-run --no-link .#nixosConfigurations.myMachine.config.system.buil
 - [Niri-flake](https://github.com/sodiboo/niri-flake)
 - [DMS Plugin Registry](https://github.com/AvengeMedia/dms-plugin-registry)
 - [shell-conf](https://github.com/Joaoferraz-byte/shell-conf)
+- [vim-conf](https://github.com/Joaoferraz-byte/vim-conf)
