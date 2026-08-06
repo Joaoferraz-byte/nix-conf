@@ -166,6 +166,10 @@ in
   '';
 
   # DMS — wallpaper cycling and plugin
+  # The existing session.json may be a regular file from the legacy sync
+  # service; force the declarative state file to replace it during activation.
+  xdg.stateFile."DankMaterialShell/session.json".force = true;
+
   programs.dank-material-shell = {
     session = {
       wallpaperPath = "${config.home.homeDirectory}/Wallpapers/green7.png";
