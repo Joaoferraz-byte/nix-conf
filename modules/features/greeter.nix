@@ -31,7 +31,7 @@
       services.displayManager.defaultSession = "niri";
       programs.niri = {
         enable = true;
-        package = inputs.shell-conf.inputs.niri.packages.${pkgs.system}.niri;
+        package = pkgs.niri;
       };
 
       environment.systemPackages = [
