@@ -138,6 +138,18 @@ in
     setSessionVariables = true;
   };
 
+  # DMS session migration: remove the legacy unmanaged session.json
+  # produced by the old bidirectional sync (dms-settings-sync systemd
+  # service) so Home Manager can take ownership via xdg.stateFile.
+  home.activation.migrateDmsSession = lib.hm.dag.entryBefore [ "linkGeneration" ] ''
+    OLD_SESSION="${config.home.homeDirectory}/.local/state/DankMaterialShell/session.json"
+    if [ -f "$OLD_SESSION" ] && [ ! -L "$OLD_SESSION" ]; then
+      BACKUP="${config.home.homeDirectory}/.local/state/DankMaterialShell/session.json.legacy"
+      $DRY_RUN_CMD ${pkgs.coreutils}/bin/cp -f "$OLD_SESSION" "$BACKUP"
+      $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$OLD_SESSION"
+    fi
+  '';
+
   # DMS — wallpaper cycling and plugin
   programs.dank-material-shell = {
     session = {
