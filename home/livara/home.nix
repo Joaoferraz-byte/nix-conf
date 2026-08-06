@@ -46,6 +46,8 @@ in
   # Zen Browser
   programs.zen-browser = {
     enable = true;
+    # Força o uso do perfil que o DMS espera
+    # O DMS busca por "*Default (release)" ou "*.Default Profile"
     policies = {
       DisableAppUpdate = true;
       DisableTelemetry = true;
@@ -54,6 +56,15 @@ in
       DontCheckDefaultBrowser = true;
     };
   };
+
+  # Garantir que o userChrome.css seja ativado no Zen
+  home.file.".zen/profiles.ini".text = lib.mkAfter ''
+    [Profile0]
+    Name=default
+    IsRelative=1
+    Path=default
+    Default=1
+  '';
 
   # Shell
   programs.zsh = {
