@@ -14,30 +14,28 @@ let
   profileIcon = iconsPath + "/6afde16e1ef1cb3257b30e01890787dd.jpg";
 in
 {
-  # ─── Imports ────────────────────────────────────────────────────────────────
+  # Imports
   imports = [
     inputs.shell-conf.homeManagerModules.default
     inputs.zen-browser.homeModules.beta
   ];
 
-  # ─── Home Profile ───────────────────────────────────────────────────────────
+  # Home Profile
   home.username = "livara";
   home.homeDirectory = "/home/livara";
   home.stateVersion = "26.11";
 
-  # ─── Environment Variables ──────────────────────────────────────────────────
+  # Environment
   home.sessionVariables = {
-    PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
+    PROJECTS_DIR = "${config.home.homeDirectory}/Projetos";
     TERMINAL = "wezterm";
     EDITOR = "nvim";
   };
 
   programs.home-manager.enable = true;
 
-  # ─── Avatar ─────────────────────────────────────────────────────────────────
+  # Avatar
   home.file.".face.icon".source = profileIcon;
-
-  # ─── Programs ───────────────────────────────────────────────────────────────
 
   # Neovim
   programs.nixvim = {
@@ -83,14 +81,14 @@ in
     enableZshIntegration = true;
   };
 
-  # ─── Packages ───────────────────────────────────────────────────────────────
+  # Packages
   home.packages = with pkgs; [
     manim
     nerd-fonts.jetbrains-mono
     git
   ];
 
-  # ─── Desktop Entries ────────────────────────────────────────────────────────
+  # Desktop Entries
   xdg.desktopEntries.nvim = {
     name = "Neovim (NixVim)";
     genericName = "Editor";
@@ -113,7 +111,7 @@ in
     categories = [ "Development" "Utility" "TextEditor" ];
   };
 
-  # ─── Mime & User Dirs ───────────────────────────────────────────────────────
+  # Mime & User Dirs
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
@@ -132,9 +130,7 @@ in
     setSessionVariables = true;
   };
 
-  # ─── Git Repositories ───────────────────────────────────────────────────────
-
-  # Wallpapers — cloned/updated on each home-manager activation
+  # Wallpapers
   home.activation.cloneWallpapers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     WALLPAPERS_DIR="${config.home.homeDirectory}/Wallpapers"
     WALLPAPERS_REPO="https://github.com/Joaoferraz-byte/Wallpapers.git"
@@ -146,7 +142,7 @@ in
     fi
   '';
 
-  # Vault (Obsidian) — clone + git-sync for bidirectional sync
+  # Vault (Obsidian)
   home.activation.cloneVault = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     VAULT_DIR="${config.home.homeDirectory}/Vault"
     VAULT_REPO="git@github.com:Joaoferraz-byte/Vault.git"
