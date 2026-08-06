@@ -16,6 +16,7 @@ in
 {
   # Imports
   imports = [
+    inputs.dms-plugin-registry.homeModules.default
     inputs.shell-conf.homeManagerModules.default
     inputs.zen-browser.homeModules.beta
   ];
@@ -54,6 +55,13 @@ in
       DontCheckDefaultBrowser = true;
     };
   };
+
+  # Zen Browser — DMS Matugen theme integration (declarative)
+  # DMS generates zen.css at runtime via Matugen; we import it from the
+  # profile's userChrome so zen-browser-flake owns the chrome file.
+  programs.zen-browser.profiles.default.userChrome = ''
+    @import url("file://${config.home.homeDirectory}/.config/DankMaterialShell/zen.css");
+  '';
 
   # Shell
   programs.zsh = {
@@ -128,6 +136,21 @@ in
     enable = true;
     createDirectories = true;
     setSessionVariables = true;
+  };
+
+  # DMS — wallpaper cycling and plugin
+  programs.dank-material-shell = {
+    session = {
+      wallpaperPath = "${config.home.homeDirectory}/Wallpapers/green7.png";
+      perMonitorWallpaper = false;
+      perModeWallpaper = false;
+      wallpaperCyclingEnabled = true;
+      wallpaperCyclingMode = "interval";
+      wallpaperCyclingInterval = 900;
+      wallpaperTransition = "random";
+    };
+
+    plugins.wallpaperCarousel.enable = true;
   };
 
   # Wallpapers
