@@ -59,8 +59,23 @@ in
     };
   };
 
-  programs.zen-browser.profiles.default.userChrome = ''
-    @import url("file://${config.home.homeDirectory}/.config/DankMaterialShell/zen.css");
+  # Zen Browser theme: DMS matugen generates ~/.config/DankMaterialShell/zen.css at runtime.
+  # The official DMS approach creates a symlink from the profile's chrome/userChrome.css
+  # to the generated zen.css. We replicate this via home.activation because:
+  # 1. @import url("file://...") doesn't work in userChrome.css (chrome CSP blocks file://)
+  # 2. The zen-browser-flake userChrome option writes content at build time, but zen.css
+  #    is generated at runtime by matugen after wallpaper changes.
+  # 3. A symlink ensures the browser always reads the latest zen.css without rebuilds.
+  programs.zen-browser.profiles.default.userChrome = "";
+  home.activation.linkZenTheme = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    ZEN_PROFILE_DIR="${config.home.homeDirectory}/.config/zen/default"
+    ZEN_CSS="${config.home.homeDirectory}/.config/DankMaterialShell/zen.css"
+    USER_CHROME="$ZEN_PROFILE_DIR/chrome/userChrome.css"
+
+    if [ -f "$ZEN_CSS" ]; then
+      $DRY_RUN_CMD mkdir -p "$ZEN_PROFILE_DIR/chrome"
+      $DRY_RUN_CMD ${pkgs.coreutils}/bin/ln -sfn "$ZEN_CSS" "$USER_CHROME"
+    fi
   '';
 
   # Shell
