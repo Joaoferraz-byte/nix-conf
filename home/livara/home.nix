@@ -44,7 +44,10 @@ in
     imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
 
-  # Zen Browser
+  # Zen Browser — declarative profile configuration
+  # Preferences are written to prefs.js by zen-browser-flake.
+  # The Matugen/DMS theme is imported via userChrome; shell-conf/zen.nix
+  # already sets toolkit.legacyUserProfileCustomizations.stylesheets.
   programs.zen-browser = {
     enable = true;
     policies = {
@@ -56,9 +59,6 @@ in
     };
   };
 
-  # Zen Browser — DMS Matugen theme integration (declarative)
-  # DMS generates zen.css at runtime via Matugen; we import it from the
-  # profile's userChrome so zen-browser-flake owns the chrome file.
   programs.zen-browser.profiles.default.userChrome = ''
     @import url("file://${config.home.homeDirectory}/.config/DankMaterialShell/zen.css");
   '';
