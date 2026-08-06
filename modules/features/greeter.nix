@@ -29,7 +29,10 @@
         };
       };
       services.displayManager.defaultSession = "niri";
-      programs.niri.enable = true;
+      programs.niri = {
+        enable = true;
+        package = inputs.shell-conf.inputs.niri.packages.${pkgs.system}.niri;
+      };
 
       environment.systemPackages = [
         clockworkTheme
