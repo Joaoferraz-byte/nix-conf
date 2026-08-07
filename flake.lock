@@ -177,6 +177,26 @@
         "type": "github"
       }
     },
+    "mesa-tomate-driver": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786107023,
+        "narHash": "sha256-bkIJnie09E5n/RsUCFtRbZUdzMUIYGMRJxvMGixfw04=",
+        "owner": "Joaoferraz-byte",
+        "repo": "mesa-tomate-driver",
+        "rev": "e0e17399974ca163a667b4852b5b952db8f613af",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Joaoferraz-byte",
+        "repo": "mesa-tomate-driver",
+        "type": "github"
+      }
+    },
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -408,6 +428,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
+        "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",

@@ -24,6 +24,7 @@
       }
 
       self.nixosModules.latitudeConfiguration
+      inputs.mesa-tomate-driver.nixosModules.default
       inputs.shell-conf.nixosModules.dankMaterialShell
       inputs.dms-plugin-registry.nixosModules.default
       inputs.home-manager.nixosModules.home-manager

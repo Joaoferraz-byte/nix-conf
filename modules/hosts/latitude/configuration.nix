@@ -68,6 +68,14 @@
     };
     programs.zsh.enable = true;
 
+    # MTM-1106/T501: install the reverse-engineered USB mode activator,
+    # but keep udev auto-start disabled until the physical tablet is validated.
+    services."mtm1106-mode" = {
+      enable = true;
+      profile = "digimend";
+      autoStart = false;
+    };
+
     system.stateVersion = "26.11";
   };
 }
