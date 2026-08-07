@@ -1,85 +1,62 @@
-# nix-conf — NixOS Configuration
+# Architecture
 
-Sistema NixOS declarativo com Niri, DankMaterialShell (DMS) e ambiente de desenvolvimento Java/C++. Gerenciado por flake-parts com import-tree para módulos.
+Declarative NixOS system with Niri, DankMaterialShell (DMS), and Java/C++ development environment. Managed by flake-parts with import-tree for modules.
 
-## Estrutura
-
-```
-nix-conf/
-├── flake.nix                  # Inputs, outputs, perSystem
-├── flake.lock                 # Pino de dependências
-├── ARCHITECTURE.md            # Este arquivo
-├── CHANGELOG.md               # Histórico de mudanças
-├── Icons/                     # Avatar e assets do greeter
-├── home/livara/home.nix       # Home Manager do usuário
-├── modules/
-│   ├── README.md              # Convenções de módulos
-│   ├── parts.nix              # Sistemas suportados e composição
-│   ├── features/              # Módulos de funcionalidades
-│   ├── hosts/                 # Configurações por máquina
-│   └── packages/              # Pacotes Nix e Flatpak
-└── themes/clockwork/          # Tema SDDM
-```
-
-## Grafo de Inputs
+## File Structure
 
 ```
-flake.nix
-├── nixpkgs (nixos-unstable)
-├── flake-parts
-├── import-tree
-├── nix-flatpak
-├── home-manager → follows nixpkgs
-├── nixvim
-├── vim-conf (flake)
-│   └── nixvim (independente)
-├── shell-conf (flake) → follows nixpkgs
-│   ├── dms (DankMaterialShell)
-│   └── niri (niri-flake)
-└── dms-plugin-registry → follows nixpkgs
+├── flake.nix                  # Flake entry point
+├── flake.lock                 # Dependency pinning
+├── ARCHITECTURE.md            # This file
+├── CHANGELOG.md               # Change history
+├── README.md                  # General overview
+├── home/livara/home.nix       # User Home Manager config
+└── modules/
+    ├── README.md              # Module conventions
+    ├── parts.nix              # Systems supported and composition
+    ├── features/              # Feature modules
+    ├── hosts/                 # Machine-specific configurations
+    ├── packages/              # Package declarations
+    └── homeManagerModules.nix # Re-exported HM modules
 ```
 
-## Módulos NixOS
+## NixOS Modules
 
-| Módulo | Responsabilidade |
+| Module | Responsibility |
 |---|---|
-| `corePackages` | Pacotes de sistema (git, gh, ferramentas Java, etc.) |
-| `greeter` | SDDM + Clockwork theme + Bibata cursor |
-| `desktop-portals` | XDG portals, Polkit, GNOME Keyring |
-| `flatpak` | Flatpaks declarativos via nix-flatpak |
-| `audiorelay` | AudioRelay Flatpak + PipeWire virtual nodes |
-| `keyd` | Remapeamento `leftmeta` → `overload(meta, menu)` |
-| `nvidia` | Driver NVIDIA (my-machine only) |
-| `system-hardening` | Firewall, sudo, GC automático, zram |
-| `myMachineHardware` | Hardware, filesystems btrfs, microcode AMD |
-| `latitudeHardware` | Hardware, filesystems btrfs, microcode Intel |
-| `shell-conf` | DankMaterialShell + Niri (via inputs.shell-conf) |
+| `corePackages` | Essential CLI and system tools |
+| `nvidia` | NVIDIA proprietary drivers and settings |
+| `greeter` | SDDM with custom theme |
+| `desktop-portals` | XDG portals for Wayland |
+| `flatpak` | Flatpak support and remotes |
+| `audiorelay` | AudioRelay service |
+| `keyd` | Keyboard remapping |
+| `system-hardening` | Firewall, sudo, auto GC, zram |
 
-## Shell (shell-conf)
+## Shell Integration
 
-O `shell-conf` é um flake separado que empacota DankMaterialShell e Niri com integração:
+`shell-conf` is a separate flake that packages DankMaterialShell and Niri with integration:
 
-| Input | Responsabilidade |
+| Module | Responsibility |
 |---|---|
-| `dms.homeModules.dank-material-shell` | Configurações DMS (temas, widgets, plugins) |
-| `dms.homeModules.niri` | Integração niri + DMS (keybinds preset, spawn automático) |
+| `dms.homeModules.dank-material-shell` | DMS settings (themes, widgets, plugins) |
+| `dms.homeModules.niri` | niri + DMS integration (preset keybinds, auto spawn) |
 
-Internamente, o `dms.homeModules.niri` já importa `niri-flake` home-manager module, evitando conflitos de opção `programs.niri`.
+Internally, `dms.homeModules.niri` already imports the `niri-flake` home-manager module, avoiding `programs.niri` option conflicts.
 
-## Editor (vim-conf)
+## Neovim Integration
 
-O `vim-conf` é um flake separado que empacota a configuração NixVim com tema DMS dinâmico:
+`vim-conf` is a separate flake that packages the NixVim configuration with a dynamic DMS theme:
 
-| Input | Responsabilidade |
+| Module | Responsibility |
 |---|---|
-| `nixvim.legacyPackages` | Construção do pacote Neovim |
-| Tema DMS | Cores lidas de matugen em `~/.config/DankMaterialShell/dms.css` |
+| `nixvim.legacyPackages` | Neovim package build |
 
 ## Hosts
 
-| Host | Descrição | Kernel | GPU |
+| Host | Description | Kernel | GPU |
 |---|---|---|---|
-| `myMachine` | Desktop AMD + NVIDIA | zen | NVIDIA |
-| `latitude` | Dell Latitude 5410 (Intel) | latest | Intel iGPU |
+| `myMachine` | Main Desktop | Zen | NVIDIA |
+| `latitude` | Dell Laptop | Stable | Intel |
 
-Ambos compartilham a mesma configuração de shell (shell-conf) e home-manager (home.nix).
+Both share the same shell configuration (shell-conf) and home-manager (home.nix).

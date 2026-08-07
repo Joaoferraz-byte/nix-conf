@@ -28,7 +28,10 @@
       };
 
     fileSystems."/boot" =
-      { device = "/dev/disk/by-label/boot";
+      { # Using label "boot". If the system fails to find this, ensure the partition
+        # is labeled correctly (e.g., using 'fatlabel /dev/nvme0n1p1 boot') 
+        # or replace this with a direct UUID for better robustness.
+        device = "/dev/disk/by-label/boot";
         fsType = "vfat";
         options = [ "fmask=0077" "dmask=0077" ];
       };
