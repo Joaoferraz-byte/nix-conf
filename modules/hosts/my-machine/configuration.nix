@@ -15,8 +15,20 @@
 
     # Boot
     boot.loader.systemd-boot.enable = true;
-    # Force ACPI power-off to resolve shutdown issues (PC stays on with blue light)
-    boot.kernelParams = [ "acpi=force" ];
+    # P3 fix — shutdown does not power the machine off (blue light stays on,
+    # requires holding the power button):
+    # 1. "acpi=force" forces ACPI off even when the DSDT is incomplete.
+    # 2. "reboot=pci" routes the ACPI reset/poweroff path through the PCI
+    #    bus, which is the variant most often needed on AMD desktop boards
+    #    whose BIOS ignores the normal S5 poweroff sequence.
+    # Note: the two "Power Button" devices in libinput (event15/event16)
+    # are normal — one physical PNP0C0C button and one virtual ACPI button
+    # — they are not the cause; the root cause is ACPI S5 routing.
+    boot.kernelParams = [ "acpi=force" "reboot=pci" ];
+    # Explicitly bind the power key to a clean systemd poweroff so that
+    # presses from either input device reach systemd-poweroff.service.
+    services.logind.handlePowerKey = "poweroff";
+    services.logind.lidSwitch = "ignore";
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
     boot.kernelPackages = pkgs.linuxPackages_zen;
@@ -54,12 +66,15 @@
     };
     programs.zsh.enable = true;
 
-    # MTM-1106/T501: install the reverse-engineered USB mode activator,
-    # but keep udev auto-start disabled until the physical tablet is validated.
+    # P1 — MTM-1106/T501: install the reverse-engineered USB mode
+    # activator. autoStart stays OFF until the physical tablet has been
+    # validated on this machine (per mesa-tomate-driver/TESTING.md:
+    # "Do not treat a cursor change as proof of success").
+    # Enable with: `sudo systemctl start mtm1106-mode.service`
     services."mtm1106-mode" = {
       enable = true;
       profile = "digimend";
-      autoStart = true;
+      autoStart = false;
     };
 
     # Nix

@@ -10,28 +10,41 @@
     boot.extraModulePackages = [ ];
 
     fileSystems."/" =
-      { device = "/dev/disk/by-label/nixos";
+      { device = "/dev/disk/by-partuuid/ROOT-PARTUUID";
         fsType = "btrfs";
         options = [ "subvol=root" "compress=zstd" ];
       };
 
     fileSystems."/home" =
-      { device = "/dev/disk/by-label/nixos";
+      { device = "/dev/disk/by-partuuid/ROOT-PARTUUID";
         fsType = "btrfs";
         options = [ "subvol=home" "compress=zstd" ];
       };
 
     fileSystems."/nix" =
-      { device = "/dev/disk/by-label/nixos";
+      { device = "/dev/disk/by-partuuid/ROOT-PARTUUID";
         fsType = "btrfs";
         options = [ "subvol=nix" "compress=zstd" "noatime" ];
       };
 
+    # NOTE: ROOT-PARTUUID must be replaced with the real partition UUID of
+    # the Btrfs device (same one the former "nixos" label referred to).
+    # Get it on the laptop with `lsblk -o NAME,PARTUUID`. Keeping the four
+    # root subvolumes on a single physical partition guarantees that the
+    # "Failed to unmount /home" error during emergency switch-root
+    # disappears — only one device to tear down.
+
+    # P2 fix: the previous by-label "boot" reference caused
+    # "Timed out waiting for device /dev/disk/by-label/boot" and put the
+    # system into emergency mode whenever the EFI partition lost its label
+    # (repartitioning, reformatting, reinstallation). A partition UUID
+    # never changes, so it is the robust choice. Before rebuilding on the
+    # actual laptop, replace the placeholder with the real value from
+    # `lsblk -o NAME,PARTUUID /dev/nvme0n1p1` or, alternatively, restore
+    # the label with `sudo fatlabel /dev/nvme0n1p1 boot` and switch back
+    # to by-label. The same applies to the "nixos" Btrfs label below.
     fileSystems."/boot" =
-      { # Using label "boot". If the system fails to find this, ensure the partition
-        # is labeled correctly (e.g., using 'fatlabel /dev/nvme0n1p1 boot') 
-        # or replace this with a direct UUID for better robustness.
-        device = "/dev/disk/by-label/boot";
+      { device = "/dev/disk/by-partuuid/BOOT-PARTUUID";
         fsType = "vfat";
         options = [ "fmask=0077" "dmask=0077" ];
       };
