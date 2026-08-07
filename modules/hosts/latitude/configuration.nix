@@ -15,7 +15,11 @@
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
-    boot.kernelPackages = pkgs.linuxPackages_latest;
+    # Prefer the regular stable kernel on this laptop. The rolling latest
+    # kernel exposes a firmware ACPI _TZ.ETMD/_OSC defect on some Latitude
+    # BIOS revisions; no acpi_osi workaround is forced because it can break
+    # thermal and power-management behavior.
+    boot.kernelPackages = pkgs.linuxPackages;
 
     # Rede
     networking.hostName = "latitude";

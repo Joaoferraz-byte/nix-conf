@@ -3,6 +3,8 @@
 ## [Unreleased] - 2026-08-06
 
 ### Fixed
+- **Latitude ACPI Mitigation**: Use the regular stable Nixpkgs kernel instead of `linuxPackages_latest`; the reported `_TZ.ETMD`/`_OSC` messages are firmware ACPI-table defects exposed during kernel evaluation, so no unsafe `acpi_osi` override is forced.
+- **Removable Media Automount**: Enable the system `udisks2` service so the user-session `udiskie` service can automatically mount USB and other removable devices for Nautilus.
 - **DMS Session Reload**: Restart the active user-level DMS service after Home Manager writes the declarative session and wallpaper directory, ensuring wallpaper cycling settings are consumed without a manual service restart.
 - **Wallpaper Verification**: DMS v1.5.3 provides a native wallpaper scheduler; verification should use the generated session JSON, service logs, scheduler cache, and a manual IPC cycle before introducing an external timer.
 - **Zen Browser DMS Theme**: Replaced `@import url("file://...")` in `userChrome.css` with a runtime symlink (`~/.config/zen/default/chrome/userChrome.css` → `~/.config/DankMaterialShell/zen.css`) via `home.activation.linkZenTheme`, resolving Chrome CSP blocking of `file://` imports in the chrome context
