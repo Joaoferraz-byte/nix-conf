@@ -184,6 +184,16 @@ in
     plugins.wallpaperCarousel.enable = true;
   };
 
+  # Restart DMS after the declarative session and wallpaper directory are ready.
+  # Home Manager updates session.json but the already-running Quickshell process
+  # does not necessarily reload it when only state-file contents change.
+  home.activation.restartDms = lib.hm.dag.entryAfter [ "cloneWallpapers" ] ''
+    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet dms.service; then
+      systemctl --user daemon-reload
+      systemctl --user restart dms.service
+    fi
+  '';
+
   # Wallpapers
   home.activation.cloneWallpapers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     WALLPAPERS_DIR="${config.home.homeDirectory}/Wallpapers"

@@ -3,6 +3,8 @@
 ## [Unreleased] - 2026-08-06
 
 ### Fixed
+- **DMS Session Reload**: Restart the active user-level DMS service after Home Manager writes the declarative session and wallpaper directory, ensuring wallpaper cycling settings are consumed without a manual service restart.
+- **Wallpaper Verification**: DMS v1.5.3 provides a native wallpaper scheduler; verification should use the generated session JSON, service logs, scheduler cache, and a manual IPC cycle before introducing an external timer.
 - **Zen Browser DMS Theme**: Replaced `@import url("file://...")` in `userChrome.css` with a runtime symlink (`~/.config/zen/default/chrome/userChrome.css` → `~/.config/DankMaterialShell/zen.css`) via `home.activation.linkZenTheme`, resolving Chrome CSP blocking of `file://` imports in the chrome context
 - **Wallpaper Cycling**: Declarative session config in `home.nix` with `wallpaperCyclingEnabled = true`, interval 900s (15 min), mode `interval`
 - **Zen Browser Preferences**: Shell-conf module now includes modern Zen preferences (floating URL bar, smooth scrolling, workspace session restore)
