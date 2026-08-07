@@ -57,7 +57,7 @@
     services."mtm1106-mode" = {
       enable = true;
       profile = "digimend";
-      autoStart = false;
+      autoStart = true;
     };
 
     # Nix

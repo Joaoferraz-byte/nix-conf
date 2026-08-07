@@ -184,11 +184,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786107681,
-        "narHash": "sha256-3iXhbTjn+isMCB+8GGL6vK5DplDW60pdC0lpB9NCcRg=",
+        "lastModified": 1786108887,
+        "narHash": "sha256-v00njZTpY7q04DT9CRhDemOwDMG8U/XMaEwD5jYQbOE=",
         "owner": "Joaoferraz-byte",
         "repo": "mesa-tomate-driver",
-        "rev": "3edf17b090cfc5720c94f92613cabd8c7587b1af",
+        "rev": "627529913e30ab1079f5479e6ce503472cddf0e3",
         "type": "github"
       },
       "original": {
