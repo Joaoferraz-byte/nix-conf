@@ -1,5 +1,5 @@
 { self, ... }: {
-  flake.nixosModules.myMachineConfiguration = { pkgs, ... }: {
+  flake.nixosModules.myMachineConfiguration = { pkgs, lib, ... }: {
     imports = [
       self.nixosModules.myMachineHardware
       self.nixosModules.corePackages
@@ -32,8 +32,15 @@
     # options were removed in nixos-unstable (2026). The logind module now
     # exposes a single freeform submodule `services.logind.settings.Login`
     # that maps directly to logind.conf(5).
-    services.logind.settings.Login = {
+    # mkForce: systemd's logind default is `HandlePowerKey = "poweroff"`,
+    # but a module imported later (e.g. the desktop-portals stack) could
+    # override it with `lib.mkOverride` of lower priority than mkForce.
+    # Forcing it guarantees a single press on either power input device
+    # reaches systemd-poweroff.service instead of requiring the button
+    # to be held.
+    services.logind.settings.Login = lib.mkForce {
       HandlePowerKey = "poweroff";
+      HandlePowerKeyLongPress = "poweroff";
       HandleLidSwitch = "ignore";
     };
     boot.loader.efi.canTouchEfiVariables = true;
@@ -74,14 +81,17 @@
     programs.zsh.enable = true;
 
     # P1 — MTM-1106/T501: install the reverse-engineered USB mode
-    # activator. autoStart stays OFF until the physical tablet has been
-    # validated on this machine (per mesa-tomate-driver/TESTING.md:
-    # "Do not treat a cursor change as proof of success").
-    # Enable with: `sudo systemctl start mtm1106-mode.service`
+    # activator with autoStart ON so the tablet is switched to the full
+    # desktop-area profile automatically on every USB connection instead
+    # of needing `sudo systemctl start mtm1106-mode` manually.
+    # False-positive caution (per mesa-tomate-driver/TESTING.md): cursor
+    # movement alone is NOT proof of success. After each rebuild, validate
+    # with `libinput list-devices | grep -A8 "T501"` — the active device
+    # must show the large 993x585mm region, and pressure/buttons must work.
     services."mtm1106-mode" = {
       enable = true;
       profile = "digimend";
-      autoStart = false;
+      autoStart = true;
     };
 
     # Nix
