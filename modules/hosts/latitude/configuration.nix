@@ -1,5 +1,5 @@
 { self, ... }: {
-  flake.nixosModules.latitudeConfiguration = { pkgs, ... }: {
+  flake.nixosModules.latitudeConfiguration = { pkgs, lib, ... }: {
     imports = [
       self.nixosModules.latitudeHardware
       self.nixosModules.corePackages
@@ -58,6 +58,10 @@
       };
     };
     services.thermald.enable = true;
+
+    # The shared DMS system module enables power-profiles-daemon, but this
+    # laptop relies on TLP for power management, so disable it here.
+    services.power-profiles-daemon.enable = lib.mkForce false;
 
     # Usuário
     users.users."livara" = {

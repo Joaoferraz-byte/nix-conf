@@ -1,13 +1,13 @@
 # ─── Caelestia Shell ────────────────────────────────────────────────────────
 # Integrates the Caelestia Shell desktop shell via the shell-conf flake.
+# The shell-conf Home Manager module is imported directly in the per-user
+# Home Manager configuration (home/livara/home.nix); duplicating it here in
+# home-manager.sharedModules caused a double application of its options.
 { self, inputs, ... }: {
   flake.nixosModules.caelestiaShell = { pkgs, lib, config, ... }: {
-    # 1. Home Manager module (settings JSON, shell, cli, hyprland integration)
-    # We call the exported factory function with the shell-conf flake itself
-    home-manager.sharedModules = [
-      (inputs.shell-conf.homeManagerModules.default inputs.shell-conf)
-    ];
-    # 2. Enable Caelestia shell
+    # Caelestia Home Manager module (declares programs.caelestia options)
+    home-manager.sharedModules = [ inputs.shell-conf.homeManagerModules.caelestia ];
+    # Enable Caelestia shell
     home-manager.users.livara.programs.caelestia = {
       enable = true;
       mutableSettings = true;

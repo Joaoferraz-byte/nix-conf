@@ -24,7 +24,8 @@
       }
 
       self.nixosModules.latitudeConfiguration
-      inputs.shell-conf.nixosModules.dankMaterialShell
+      self.nixosModules.dmsSystem
+      self.nixosModules.niri
       inputs.dms-plugin-registry.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
 

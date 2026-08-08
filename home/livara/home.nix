@@ -16,7 +16,7 @@ in
 {
   # Imports
   imports = [
-    inputs.dms-plugin-registry.homeModules.default
+    # inputs.dms-plugin-registry.homeModules.default  # removed: conflicts with shell-conf HM module (double systemd.enable declaration)
     inputs.shell-conf.homeManagerModules.default
     inputs.zen-browser.homeModules.beta
   ];
@@ -68,14 +68,86 @@ in
   # 3. A symlink ensures the browser always reads the latest zen.css without rebuilds.
   programs.zen-browser.profiles.default.userChrome = "";
   home.activation.linkZenTheme = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    ZEN_PROFILE_DIR="${config.home.homeDirectory}/.config/zen/default"
+    ZEN_BASE="${config.home.homeDirectory}/.config/zen"
     ZEN_CSS="${config.home.homeDirectory}/.config/DankMaterialShell/zen.css"
-    USER_CHROME="$ZEN_PROFILE_DIR/chrome/userChrome.css"
 
     if [ -f "$ZEN_CSS" ]; then
-      $DRY_RUN_CMD mkdir -p "$ZEN_PROFILE_DIR/chrome"
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/ln -sfn "$ZEN_CSS" "$USER_CHROME"
+      # Profile directories carry a random suffix (e.g. "default-abc123"), so
+      # we locate every profile dir instead of hardcoding a single path.
+      for profile in $(find "$ZEN_BASE" -maxdepth 1 -mindepth 1 -type d 2>/dev/null); do
+        $DRY_RUN_CMD mkdir -p "$profile/chrome"
+        $DRY_RUN_CMD ${pkgs.coreutils}/bin/ln -sfn "$ZEN_CSS" "$profile/chrome/userChrome.css"
+      done
     fi
+  '';
+
+  # Niri config: niri-flake provides no Home Manager module and no NixOS
+  # `programs.niri.settings` option, so the full config is written as a plain
+  # KDL file and niri reads it from ~/.config/niri/config.kdl at startup.
+  xdg.configFile."niri/config.kdl".text = ''
+    input {
+      keyboard {
+        xkb {
+          layout "br"
+        }
+      }
+      touchpad {
+        tap
+        dwt
+        natural-scroll
+      }
+    }
+
+    layout {
+      gaps 8
+      focus-ring {
+        width 2
+        active {
+          color "#7aa2f7"
+        }
+        inactive {
+          color "#414868"
+        }
+      }
+    }
+
+    binds {
+      Mod+Return {
+        spawn kitty
+      }
+      Mod+Q close-window
+      Mod+Left focus-column-left
+      Mod+Right focus-column-right
+      Mod+Up focus-window-up
+      Mod+Down focus-window-down
+      Mod+Shift+Left move-column-left
+      Mod+Shift+Right move-column-right
+      Mod+1 focus-workspace 1
+      Mod+2 focus-workspace 2
+      Mod+3 focus-workspace 3
+      Mod+4 focus-workspace 4
+      Mod+5 focus-workspace 5
+      Mod+6 focus-workspace 6
+      Mod+7 focus-workspace 7
+      Mod+8 focus-workspace 8
+      Mod+9 focus-workspace 9
+      Mod+Shift+1 move-column-to-workspace 1
+      Mod+Shift+2 move-column-to-workspace 2
+      Mod+Shift+3 move-column-to-workspace 3
+      Mod+Shift+4 move-column-to-workspace 4
+      Mod+Shift+5 move-column-to-workspace 5
+      Mod+Shift+6 move-column-to-workspace 6
+      Mod+Shift+7 move-column-to-workspace 7
+      Mod+Shift+8 move-column-to-workspace 8
+      Mod+Shift+9 move-column-to-workspace 9
+    }
+
+    spawn-at-startup {
+      command ["xwayland-satellite" ":0"]
+    }
+    spawn-at-startup {
+      command ["swaybg" "-i" "${config.home.homeDirectory}/.config/nixos/Wallpapers/wallhaven-83qwky.png" "-m" "fill"]
+    }
   '';
 
   # Shell
@@ -180,8 +252,6 @@ in
       wallpaperCyclingInterval = 900;
       wallpaperTransition = "random";
     };
-
-    plugins.wallpaperCarousel.enable = true;
   };
 
   # Restart DMS after the declarative session and wallpaper directory are ready.

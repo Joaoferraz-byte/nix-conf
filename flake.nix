@@ -1,12 +1,30 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    import-tree.url = "github:vic/import-tree";
-    nix-flatpak.url = "github:gmodena/nix-flatpak";
-    vim-conf.url = "github:Joaoferraz-byte/vim-conf";
-    nixvim.url = "github:nix-community/nixvim";
-    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    import-tree = {
+      url = "github:vic/import-tree";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-flatpak = {
+      url = "github:gmodena/nix-flatpak";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    vim-conf = {
+      url = "github:Joaoferraz-byte/vim-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     dms-plugin-registry = {
       url = "github:AvengeMedia/dms-plugin-registry";
@@ -14,8 +32,16 @@
     };
 
     # DankMaterialShell + Niri via shell-conf
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     shell-conf = {
       url = "github:Joaoferraz-byte/shell-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    wrapper-modules = {
+      url = "github:BirdeeHub/nix-wrapper-modules";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

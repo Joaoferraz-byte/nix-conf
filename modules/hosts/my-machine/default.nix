@@ -17,7 +17,14 @@
       }
       self.nixosModules.myMachineConfiguration
       inputs.mesa-tomate-driver.nixosModules.default
-      inputs.shell-conf.nixosModules.dankMaterialShell
+      self.nixosModules.niri
+      # The upstream DMS NixOS module is intentionally NOT imported: it
+      # declares systemd.enable options in both its NixOS and Home Manager
+      # modules, which cannot be enabled together on one machine. The
+      # system-level pieces it used to provide are re-declared in
+      # dms-system.nix; the user-level pieces come from the shell-conf
+      # Home Manager module imported in home.nix.
+      self.nixosModules.dmsSystem
       inputs.dms-plugin-registry.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
       {
