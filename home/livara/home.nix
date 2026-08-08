@@ -183,6 +183,56 @@ in
     git
   ];
 
+  # ZenNotes — adaptive theme via matugen
+  # Matugen generates the theme.css at runtime from the template.
+  xdg.configFile."matugen/templates/zennotes.css".text = ''
+    :root {
+      --z-background: {{ colors.surface.dark.red }} {{ colors.surface.dark.green }} {{ colors.surface.dark.blue }};
+      --z-surface: {{ colors.surface_variant.dark.red }} {{ colors.surface_variant.dark.green }} {{ colors.surface_variant.dark.blue }};
+      --z-primary: {{ colors.primary.dark.red }} {{ colors.primary.dark.green }} {{ colors.primary.dark.blue }};
+      --z-on-primary: {{ colors.on_primary.dark.red }} {{ colors.on_primary.dark.green }} {{ colors.on_primary.dark.blue }};
+      --z-secondary: {{ colors.secondary.dark.red }} {{ colors.secondary.dark.green }} {{ colors.secondary.dark.blue }};
+      --z-text: {{ colors.on_surface.dark.red }} {{ colors.on_surface.dark.green }} {{ colors.on_surface.dark.blue }};
+      --z-text-muted: {{ colors.on_surface_variant.dark.red }} {{ colors.on_surface_variant.dark.green }} {{ colors.on_surface_variant.dark.blue }};
+    }
+  '';
+
+  xdg.configFile."zennotes/themes/dms-matugen/manifest.json".text = builtins.toJSON {
+    name = "DMS Matugen";
+    slug = "dms-matugen";
+    version = "1.0.0";
+    modes = "dark";
+  };
+
+  # ZenNotes activation: set the themeId in config.toml and add matugen template entry.
+  home.activation.configureZenNotes = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ZN_CONFIG="${config.home.homeDirectory}/.config/zennotes/config.toml"
+    MATUGEN_CONFIG="${config.home.homeDirectory}/.config/matugen/config.toml"
+
+    # Set ZenNotes theme
+    if [ -f "$ZN_CONFIG" ]; then
+      if ! grep -q 'themeId = "custom-dms-matugen"' "$ZN_CONFIG"; then
+        $DRY_RUN_CMD sed -i 's/^themeId = .*/themeId = "custom-dms-matugen"/' "$ZN_CONFIG"
+      fi
+    else
+      $DRY_RUN_CMD mkdir -p "$(dirname "$ZN_CONFIG")"
+      $DRY_RUN_CMD echo '[appearance]' > "$ZN_CONFIG"
+      $DRY_RUN_CMD echo 'themeId = "custom-dms-matugen"' >> "$ZN_CONFIG"
+    fi
+
+    # Add ZenNotes template to Matugen config if not present
+    if [ -f "$MATUGEN_CONFIG" ]; then
+      if ! grep -q '\[templates.zennotes\]' "$MATUGEN_CONFIG"; then
+        $DRY_RUN_CMD cat >> "$MATUGEN_CONFIG" <<EOF
+
+[templates.zennotes]
+input_path = '~/.config/matugen/templates/zennotes.css'
+output_path = '~/.config/zennotes/themes/dms-matugen/theme.css'
+EOF
+      fi
+    fi
+  '';
+
   # Desktop Entries
   xdg.desktopEntries.nvim = {
     name = "Neovim (NixVim)";
