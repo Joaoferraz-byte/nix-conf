@@ -7,11 +7,9 @@
     };
     import-tree = {
       url = "github:vic/import-tree";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak = {
       url = "github:gmodena/nix-flatpak";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     vim-conf = {
       url = "github:Joaoferraz-byte/vim-conf";
