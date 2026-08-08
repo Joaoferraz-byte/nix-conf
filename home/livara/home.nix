@@ -19,6 +19,9 @@ in
     # inputs.dms-plugin-registry.homeModules.default  # removed: conflicts with shell-conf HM module (double systemd.enable declaration)
     inputs.shell-conf.homeManagerModules.default
     inputs.zen-browser.homeModules.beta
+    # niri-flake Home Manager module — required by the shell-conf niri
+    # module (programs.niri.settings options) imported transitively above.
+    inputs.niri.homeModules.niri
   ];
 
   # Home Profile
@@ -81,9 +84,16 @@ in
     fi
   '';
 
-  # Niri config: niri-flake provides no Home Manager module and no NixOS
-  # `programs.niri.settings` option, so the full config is written as a plain
-  # KDL file and niri reads it from ~/.config/niri/config.kdl at startup.
+  # Niri config: the keybinds, environment, layout and wallpaper IPC
+  # bindings now come from the shell-conf `programs.niri.settings` module
+  # (transitively imported above), which uses the current KDL syntax and
+  # includes the DMS wallpaper IPC shortcut (Mod+Shift+W). Only the
+  # per-machine input settings and extra autostart commands remain here.
+  #
+  # Legacy syntax (bare `Mod+Q close-window`, `spawn-at-startup { command
+  # [...] }`) was rejected by `niri validate` — since niri v25.08, binds
+  # must be written `Mod+Q { close-window; }` with a semicolon-terminated
+  # block, and spawn-at-startup takes plain arguments.
   xdg.configFile."niri/config.kdl".text = ''
     input {
       keyboard {
@@ -98,56 +108,8 @@ in
       }
     }
 
-    layout {
-      gaps 8
-      focus-ring {
-        width 2
-        active {
-          color "#7aa2f7"
-        }
-        inactive {
-          color "#414868"
-        }
-      }
-    }
-
-    binds {
-      Mod+Return {
-        spawn kitty
-      }
-      Mod+Q close-window
-      Mod+Left focus-column-left
-      Mod+Right focus-column-right
-      Mod+Up focus-window-up
-      Mod+Down focus-window-down
-      Mod+Shift+Left move-column-left
-      Mod+Shift+Right move-column-right
-      Mod+1 focus-workspace 1
-      Mod+2 focus-workspace 2
-      Mod+3 focus-workspace 3
-      Mod+4 focus-workspace 4
-      Mod+5 focus-workspace 5
-      Mod+6 focus-workspace 6
-      Mod+7 focus-workspace 7
-      Mod+8 focus-workspace 8
-      Mod+9 focus-workspace 9
-      Mod+Shift+1 move-column-to-workspace 1
-      Mod+Shift+2 move-column-to-workspace 2
-      Mod+Shift+3 move-column-to-workspace 3
-      Mod+Shift+4 move-column-to-workspace 4
-      Mod+Shift+5 move-column-to-workspace 5
-      Mod+Shift+6 move-column-to-workspace 6
-      Mod+Shift+7 move-column-to-workspace 7
-      Mod+Shift+8 move-column-to-workspace 8
-      Mod+Shift+9 move-column-to-workspace 9
-    }
-
-    spawn-at-startup {
-      command ["xwayland-satellite" ":0"]
-    }
-    spawn-at-startup {
-      command ["swaybg" "-i" "${config.home.homeDirectory}/.config/nixos/Wallpapers/wallhaven-83qwky.png" "-m" "fill"]
-    }
+    spawn-at-startup "xwayland-satellite" ":0"
+    spawn-at-startup "swaybg" "-i" "${config.home.homeDirectory}/.config/nixos/Wallpapers/wallhaven-83qwky.png" "-m" "fill"
   '';
 
   # Shell
@@ -197,17 +159,31 @@ in
     }
   '';
 
-  xdg.configFile."zennotes/themes/dms-matugen/manifest.json".text = builtins.toJSON {
+  # ZenNotes is installed as a Flatpak (org.zennotes.ZenNotes), whose
+  # per-user config lives under ~/.var/app/org.zennotes.ZenNotes/config —
+  # the previous manifest written to ~/.config/zennotes/ was silently
+  # ignored by the Flatpak build.
+  # NOTE: home.file (not xdg.configFile) is required here — xdg.configFile
+  # would place the manifest under ~/.config/var/app/..., which ZenNotes
+  # never reads. The Flatpak data dir ~/.var/app/... must be addressed
+  # with an absolute path.
+  home.file.".var/app/org.zennotes.ZenNotes/config/zennotes/themes/dms-matugen/manifest.json".text = builtins.toJSON {
     name = "DMS Matugen";
     slug = "dms-matugen";
     version = "1.0.0";
-    modes = "dark";
+    modes = ["dark"];
   };
 
-  # ZenNotes activation: set the themeId in config.toml and add matugen template entry.
+  # ZenNotes activation: set the themeId in the Flatpak config.toml and
+  # register the matugen template. Paths must target the Flatpak runtime
+  # data directory and use absolute (no tilde) matugen input/output
+  # paths — matugen does not expand '~'.
   home.activation.configureZenNotes = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ZN_CONFIG="${config.home.homeDirectory}/.config/zennotes/config.toml"
+    ZN_DIR="${config.home.homeDirectory}/.var/app/org.zennotes.ZenNotes/config/zennotes"
+    ZN_CONFIG="${config.home.homeDirectory}/.var/app/org.zennotes.ZenNotes/config/zennotes/config.toml"
     MATUGEN_CONFIG="${config.home.homeDirectory}/.config/matugen/config.toml"
+
+    $DRY_RUN_CMD mkdir -p "$ZN_DIR/themes/dms-matugen"
 
     # Set ZenNotes theme
     if [ -f "$ZN_CONFIG" ]; then
@@ -226,8 +202,8 @@ in
         $DRY_RUN_CMD cat >> "$MATUGEN_CONFIG" <<EOF
 
 [templates.zennotes]
-input_path = '~/.config/matugen/templates/zennotes.css'
-output_path = '~/.config/zennotes/themes/dms-matugen/theme.css'
+input_path = '${config.home.homeDirectory}/.config/matugen/templates/zennotes.css'
+output_path = '${config.home.homeDirectory}/.var/app/org.zennotes.ZenNotes/config/zennotes/themes/dms-matugen/theme.css'
 EOF
       fi
     fi
