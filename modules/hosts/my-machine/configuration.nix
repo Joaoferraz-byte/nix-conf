@@ -25,10 +25,17 @@
     # are normal — one physical PNP0C0C button and one virtual ACPI button
     # — they are not the cause; the root cause is ACPI S5 routing.
     boot.kernelParams = [ "acpi=force" "reboot=pci" ];
-    # Explicitly bind the power key to a clean systemd poweroff so that
-    # presses from either input device reach systemd-poweroff.service.
-    services.logind.handlePowerKey = "poweroff";
-    services.logind.lidSwitch = "ignore";
+    # Bind the power key to a clean systemd poweroff so that presses from
+    # either input device (physical PNP0C0C / virtual ACPI button) reach
+    # systemd-poweroff.service.
+    # NOTE: the legacy `services.logind.handlePowerKey` and `lidSwitch`
+    # options were removed in nixos-unstable (2026). The logind module now
+    # exposes a single freeform submodule `services.logind.settings.Login`
+    # that maps directly to logind.conf(5).
+    services.logind.settings.Login = {
+      HandlePowerKey = "poweroff";
+      HandleLidSwitch = "ignore";
+    };
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
     boot.kernelPackages = pkgs.linuxPackages_zen;
