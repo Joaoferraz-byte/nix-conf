@@ -91,23 +91,31 @@ in
   # [...] }`) was rejected by `niri validate` — since niri v25.08, binds
   # must be written `Mod+Q { close-window; }` with a semicolon-terminated
   # block, and spawn-at-startup takes plain arguments.
-  xdg.configFile."niri/config.kdl".text = ''
-    input {
-      keyboard {
-        xkb {
-          layout "br"
-        }
+  # Add machine-specific settings to the niri-flake module. The module
+  # already owns ~/.config/niri/config.kdl, so do not declare that target
+  # separately with xdg.configFile.
+  programs.niri.settings = {
+    input = {
+      keyboard.xkb.layout = "br";
+      touchpad = {
+        tap = true;
+        dwt = true;
+        natural-scroll = true;
+      };
+    };
+    spawn-at-startup = [
+      { command = [ "xwayland-satellite" ":0" ]; }
+      {
+        command = [
+          "swaybg"
+          "-i"
+          "${config.home.homeDirectory}/.config/nixos/Wallpapers/wallhaven-83qwky.png"
+          "-m"
+          "fill"
+        ];
       }
-      touchpad {
-        tap
-        dwt
-        natural-scroll
-      }
-    }
-
-    spawn-at-startup "xwayland-satellite" ":0"
-    spawn-at-startup "swaybg" "-i" "${config.home.homeDirectory}/.config/nixos/Wallpapers/wallhaven-83qwky.png" "-m" "fill"
-  '';
+    ];
+  };
 
   # Shell
   programs.zsh = {

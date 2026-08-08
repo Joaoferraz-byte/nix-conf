@@ -673,11 +673,11 @@
         "quickshell": "quickshell_3"
       },
       "locked": {
-        "lastModified": 1786156957,
-        "narHash": "sha256-zpdsEOYRR0V7F0KrBO+JnEiOhfXw3hlc3S3oQPBsv8o=",
+        "lastModified": 1786207282,
+        "narHash": "sha256-8NfcSDa6sWM6B0S5DIi9WrlSGDzId8jcZ52c+oBMA9M=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "3ef2f717cd08db70a207289a2679a0d44a6db7cf",
+        "rev": "d4794c19fb48a059662476da7309cb4fe8a70d29",
         "type": "github"
       },
       "original": {
