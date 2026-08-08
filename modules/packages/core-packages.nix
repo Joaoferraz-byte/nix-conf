@@ -38,6 +38,7 @@
       wl-clipboard
       cliphist
       xwayland-satellite
+      adw-gtk-theme
       catppuccin-gtk
       catppuccin-kvantum
       catppuccin-cursors
