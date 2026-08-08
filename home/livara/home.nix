@@ -19,9 +19,6 @@ in
     # inputs.dms-plugin-registry.homeModules.default  # removed: conflicts with shell-conf HM module (double systemd.enable declaration)
     inputs.shell-conf.homeManagerModules.default
     inputs.zen-browser.homeModules.beta
-    # niri-flake Home Manager module — required by the shell-conf niri
-    # module (programs.niri.settings options) imported transitively above.
-    inputs.niri.homeModules.niri
   ];
 
   # Home Profile
