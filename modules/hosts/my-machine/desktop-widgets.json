@@ -1,0 +1,28 @@
+{
+  "desktopWidgets": {
+    "enabled": true,
+    "overviewEnabled": true,
+    "gridSnap": true,
+    "gridSnapScale": true,
+    "monitorWidgets": [
+      {
+        "name": "HDMI-A-1",
+        "widgets": [
+          {
+            "clockColor": "none",
+            "clockStyle": "digital",
+            "customFont": "",
+            "format": "HH:mm\\nd MMMM yyyy",
+            "id": "Clock",
+            "roundedCorners": true,
+            "scale": 1.0666666666666667,
+            "showBackground": true,
+            "useCustomFont": false,
+            "x": 1740,
+            "y": 900
+          }
+        ]
+      }
+    ]
+  }
+}
