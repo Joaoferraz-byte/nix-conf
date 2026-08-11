@@ -32,7 +32,7 @@ echo -e "${YELLOW}Generating Latitude hardware module from ${SOURCE_FILE}...${NC
 [ -s "$SOURCE_FILE" ] || fail "Source hardware configuration is empty: ${SOURCE_FILE}"
 
 grep -q 'fileSystems\.' "$SOURCE_FILE" || fail "The source does not contain fileSystems entries: ${SOURCE_FILE}"
-if grep -qE 'BOOT-PARTUUID|PARTUUID|UUID=CHANGE_ME|/dev/disk/by-label/nixos' "$SOURCE_FILE"; then
+if grep -qE 'BOOT-PARTUUID|PARTUUID([-_]?(HERE|TODO|CHANGE_ME))|UUID=CHANGE_ME|/dev/disk/by-label/(nixos|CHANGE_ME)' "$SOURCE_FILE"; then
   fail "The source contains a placeholder device identifier. Fix /etc/nixos/hardware-configuration.nix before copying it."
 fi
 
@@ -47,12 +47,14 @@ install -m 0644 "$SOURCE_FILE" "$GENERATED_FILE"
 
 cat > "$HARDWARE_FILE" <<'NIX_EOF'
 { ... }:
-let
-  generatedHardware = import ./hardware-configuration.generated.nix;
-in
 {
-  flake.nixosModules.latitudeHardware = { config, lib, pkgs, modulesPath, ... }@args:
-    (generatedHardware args) // {
+  # The generated file is a normal NixOS module produced by
+  # nixos-generate-config. It is imported; its contents are not spliced
+  # into this file and no braces are parsed by the shell script.
+  flake.nixosModules.latitudeHardware = { ... }:
+    {
+      imports = [ ./hardware-configuration.generated.nix ];
+
       hardware.graphics = {
         enable = true;
         enable32Bit = true;
@@ -63,7 +65,7 @@ NIX_EOF
 
 # Basic structural checks. Full evaluation is optional because this script may
 # run from a minimal terminal before all flake inputs are available.
-grep -q 'generatedHardware args' "$HARDWARE_FILE" || fail "Generated wrapper is incomplete."
+grep -q 'hardware-configuration.generated.nix' "$HARDWARE_FILE" || fail "Generated wrapper is incomplete."
 grep -q 'fileSystems\.' "$GENERATED_FILE" || fail "Copied source lost its fileSystems entries."
 
 if command -v nix-instantiate >/dev/null 2>&1; then
