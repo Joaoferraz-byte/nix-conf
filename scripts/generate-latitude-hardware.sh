@@ -42,15 +42,30 @@ if [ "$TARGET_ROOT" != "/" ]; then
   GEN_CONFIG_CMD+=(--root "$TARGET_ROOT")
 fi
 
+FILESYSTEMS_FROM_GENERATOR=true
 if ! "${GEN_CONFIG_CMD[@]}" \
     > "$TMP_DIR/hardware-configuration.nix" \
     2> "$TMP_DIR/nixos-generate-config.stderr"; then
-  echo -e "${RED}Failed to generate hardware configuration.${NC}" >&2
-  if [ -s "$TMP_DIR/nixos-generate-config.stderr" ]; then
-    echo -e "${YELLOW}nixos-generate-config output:${NC}" >&2
+  # O nixos-generate-config aborta inteiro quando não consegue executar
+  # `btrfs subvolume show` para uma montagem. Isso é conhecido em sistemas
+  # com bind mounts, layouts Btrfs especiais e alguns btrfs-progs recentes.
+  if grep -qiE "subvolume info|subvolume|btrfs" "$TMP_DIR/nixos-generate-config.stderr"; then
+    echo -e "${YELLOW}Btrfs filesystem detection failed; retrying hardware-only generation (--no-filesystems).${NC}" >&2
+    FILESYSTEMS_FROM_GENERATOR=false
+    FALLBACK_CMD=("${GEN_CONFIG_CMD[@]}" --no-filesystems)
+    if ! "${FALLBACK_CMD[@]}" \
+        > "$TMP_DIR/hardware-configuration.nix" \
+        2> "$TMP_DIR/nixos-generate-config-fallback.stderr"; then
+      echo -e "${RED}Failed to generate hardware configuration even with --no-filesystems.${NC}" >&2
+      cat "$TMP_DIR/nixos-generate-config.stderr" >&2
+      cat "$TMP_DIR/nixos-generate-config-fallback.stderr" >&2
+      exit 1
+    fi
+  else
+    echo -e "${RED}Failed to generate hardware configuration.${NC}" >&2
     cat "$TMP_DIR/nixos-generate-config.stderr" >&2
+    exit 1
   fi
-  exit 1
 fi
 
 if [ ! -s "$TMP_DIR/hardware-configuration.nix" ]; then
@@ -68,12 +83,23 @@ KERNEL_MODULES=$(grep -m1 "boot\.kernelModules" "$TMP_DIR/hardware-configuration
 EXTRA_MODULES=$(grep -m1 "boot\.extraModulePackages" "$TMP_DIR/hardware-configuration.nix" || echo 'boot.extraModulePackages = [ ];')
 
 # 2. FileSystems e Swap
-# Extrair o bloco de fileSystems e swapDevices com awk, garantindo que pegamos até a plataforma
-FS_AND_SWAP=$(awk '/fileSystems\."\/" =/,/nixpkgs\.hostPlatform/' "$TMP_DIR/hardware-configuration.nix" | grep -v "nixpkgs.hostPlatform" | sed '/^$/d')
+# Em layouts Btrfs problemáticos, o gerador pode detectar o hardware, mas
+# não consegue emitir fileSystems. Nesse caso, nunca inventamos UUIDs ou
+# subvolumes: preservamos o bloco já existente no hardware.nix.
+if [ "$FILESYSTEMS_FROM_GENERATOR" = true ]; then
+  FS_AND_SWAP=$(awk '/fileSystems\."\/" =/,/nixpkgs\.hostPlatform/' "$TMP_DIR/hardware-configuration.nix" | grep -v "nixpkgs.hostPlatform" | sed '/^$/d')
+else
+  FS_AND_SWAP=$(awk '/^[[:space:]]*fileSystems\."/ { found=1 } found { print } /^[[:space:]]*swapDevices[[:space:]]*=/ { exit }' "$HARDWARE_FILE")
+  if [ -z "$FS_AND_SWAP" ]; then
+    echo -e "${RED}Btrfs detection failed and no existing fileSystems block is available; refusing to invent mounts.${NC}" >&2
+    exit 1
+  fi
+  echo -e "${YELLOW}Preserving existing fileSystems/swapDevices block because the Btrfs scanner failed.${NC}" >&2
+fi
 
-# Se o bloco ficar vazio por algum motivo, criar um fallback
 if [ -z "$FS_AND_SWAP" ]; then
-  FS_AND_SWAP="    fileSystems.\"/\".device = \"/dev/disk/by-label/nixos\";\n    swapDevices = [ ];"
+  echo -e "${RED}No filesystem configuration was produced; refusing to write an incomplete hardware.nix.${NC}" >&2
+  exit 1
 fi
 
 # 3. Plataforma e CPU
