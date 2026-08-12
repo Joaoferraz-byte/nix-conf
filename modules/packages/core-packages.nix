@@ -11,6 +11,7 @@
       lombok
 
       # Personal
+      _1password-gui
       nautilus
       firefox
       vesktop
