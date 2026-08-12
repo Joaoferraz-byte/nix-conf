@@ -19,7 +19,6 @@
       nvidiaSettings = true;
     };
 
-    # Wayland/Niri environment variables for NVIDIA
     environment.variables = {
       LIBVA_DRIVER_NAME = "nvidia";
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";

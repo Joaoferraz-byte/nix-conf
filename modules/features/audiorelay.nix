@@ -24,7 +24,6 @@
 
       config = lib.mkIf cfg.enable {
 
-        # ── Nós virtuais PipeWire ──────────────────────────────────────────────
         services.pipewire.extraConfig.pipewire."99-audiorelay" = {
           "context.objects" = [
             {
@@ -53,22 +52,11 @@
         services.pipewire = {
           enable = true;
           pulse.enable = true;
-          # Fornece o session manager e `wpctl`, usado pelos binds multimídia
-          # do Hyprland para volume e mute.
           wireplumber.enable = true;
         };
 
-        # RTKit: permite escalonamento em tempo real para o PipeWire
         security.rtkit.enable = true;
 
-        # ── Overrides do Flatpak para o AudioRelay ─────────────────────────────
-        #
-        # O AudioRelay usa Java Swing/AWT. Em compositors Wayland sem GNOME,
-        # o AWT tenta detectar o gerenciador de janelas via reparenting e falha.
-        # _JAVA_AWT_WM_NONREPARENTING=1 desativa essa detecção.
-        # O Flatpak precisa de acesso ao socket X11 (XWayland) como fallback
-        # para apps Java que não suportam Wayland nativo.
-        #
         services.flatpak.overrides.settings."net.audiorelay.AudioRelay" = {
           Context = {
             sockets = [ "x11" ];
@@ -78,8 +66,6 @@
           };
         };
 
-        # ── Firewall ───────────────────────────────────────────────────────────
-        # Ports are opened in system-hardening.nix
         networking.firewall.allowedUDPPorts = [ audiorelayPort ];
       };
     };

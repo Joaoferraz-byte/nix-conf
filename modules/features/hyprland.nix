@@ -1,13 +1,6 @@
 { self, ... }: {
-  # ═══════════════════════════════════════════════════════════════════════════
-  #  NixOS Module  —  Hyprland compositor + UWSM session management
-  # ═══════════════════════════════════════════════════════════════════════════
   flake.nixosModules.hyprland = { pkgs, lib, config, ... }:
     let
-      # A entrada automática de `withUWSM` inicia o wrapper sem declarar
-      # explicitamente o DesktopNames. Em versões afetadas de UWSM/Hyprland
-      # isso resulta em XDG_CURRENT_DESKTOP=start-hyprland. Esta entrada é a
-      # única sessão UWSM local e preserva `Hyprland` em toda a sessão.
       hyprlandUwsmSession = pkgs.writeTextFile {
         name = "hyprland-uwsm";
         destination = "/share/wayland-sessions/hyprland-uwsm.desktop";
@@ -23,11 +16,8 @@
         derivationArgs.passthru.providedSessions = [ "hyprland-uwsm" ];
       };
     in {
-      # ── Hyprland compositor (system-wide) ───────────────────────────────
       programs.hyprland = {
         enable = true;
-        # A entrada automática gerada por esta opção não permite passar
-        # `-e -D Hyprland` ao UWSM. A sessão declarada acima a substitui.
         withUWSM = false;
         xwayland.enable = true;
       };

@@ -1,7 +1,5 @@
 { ... }: {
   flake.nixosModules.desktop-portals = { pkgs, ... }: {
-    # udisks2 provides the system D-Bus service used by Nautilus/udiskie
-    # to mount removable media in the user's session.
     services.udisks2.enable = true;
     security.polkit.enable = true;
     security.polkit.extraConfig = ''

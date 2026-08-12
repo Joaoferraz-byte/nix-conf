@@ -45,7 +45,6 @@
       "net.core.bpf_jit_harden" = 2;
     };
 
-    # Boot security
     boot.loader.systemd-boot.editor = false;
 
     boot.kernelParams = [
@@ -73,7 +72,6 @@
 
     services.geoclue2.enable = true; # DMS night light
 
-    # Auditd (lock mode prevents root from wiping rules)
     security.audit = {
       enable = "lock";
       rules = [

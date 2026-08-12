@@ -1,7 +1,6 @@
 { ... }: {
   flake.nixosModules.corePackages = { pkgs, ... }: {
     environment.systemPackages = with pkgs; [
-      # Development
       git
       gh
       jdk21
@@ -10,7 +9,6 @@
       spring-boot-cli
       lombok
 
-      # Personal
       _1password-gui
       nautilus
       firefox
@@ -21,11 +19,9 @@
       tauon
       telegram-desktop
 
-      # Games
       hydralauncher
       heroic
 
-      # Utilities
       mpv
       nomacs
       file-roller
@@ -33,7 +29,6 @@
       btop
       thermald
 
-      # Niri + DMS dependencies
       kora-icon-theme
       bibata-cursors
       wl-clipboard

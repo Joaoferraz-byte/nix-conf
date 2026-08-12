@@ -15,17 +15,13 @@
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.loader.systemd-boot.configurationLimit = 10;
-    # Prefer the regular stable kernel on this laptop. The rolling latest
-    # kernel exposes a firmware ACPI _TZ.ETMD/_OSC defect on some Latitude
-    # BIOS revisions; no acpi_osi workaround is forced because it can break
-    # thermal and power-management behavior.
     boot.kernelPackages = pkgs.linuxPackages;
 
-    # Rede
+    # Network
     networking.hostName = "latitude";
     networking.networkmanager.enable = true;
 
-    # Local
+    # Locale
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "en_US.UTF-8";
     i18n.extraLocaleSettings = {
@@ -44,7 +40,6 @@
     };
     console.keyMap = "br-abnt2";
 
-    # Power management (laptop)
     services.tlp = {
       enable = true;
       settings = {
@@ -59,11 +54,9 @@
     };
     services.thermald.enable = true;
 
-    # The shared DMS system module enables power-profiles-daemon, but this
-    # laptop relies on TLP for power management, so disable it here.
     services.power-profiles-daemon.enable = lib.mkForce false;
 
-    # Usuário
+    # User
     users.users."livara" = {
       isNormalUser = true;
       description = "Livara";

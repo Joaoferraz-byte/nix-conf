@@ -1,26 +1,30 @@
-# Módulos do sistema
+# NixOS Module Layout
 
-Este diretório concentra os módulos que compõem as configurações NixOS do repositório. A documentação de arquitetura, aplicação e validação está disponível no [README da raiz](../README.md).
+This directory contains the evaluated NixOS and flake-parts modules for the repository. The root [README](../README.md) describes the user-facing workflow, while [ARCHITECTURE.md](../ARCHITECTURE.md) documents the architectural decisions and validation model.
 
-| Diretório | Responsabilidade |
+| Path | Responsibility |
 |---|---|
-| `features/` | Funcionalidades reutilizáveis de sistema: greeter, portais, áudio, drivers, firewall. |
-| `packages/` | Declaração de pacotes Nix e Flatpak. |
-| `hosts/` | Configurações específicas de máquina, incluindo hardware, locale e preferências locais. |
-| `parts.nix` | Definição dos sistemas suportados e composição dos módulos de flake. |
+| `features/` | Reusable system capabilities such as portals, audio, drivers, firewall policy, DMS system dependencies, and Flatpak. |
+| `packages/` | Shared package sets and package compatibility definitions. |
+| `hosts/` | Machine composition roots, hardware declarations, locale, identity, and host-specific policy. |
+| `parts.nix` | flake-parts definitions for public module exports and shared flake metadata. |
 
-Cada feature expõe um módulo em `flake.nixosModules.<nome>` ou `flake.homeManagerModules.<nome>`, conforme o nível em que suas opções devem ser avaliadas. Os hosts importam apenas os módulos necessários e preservam os detalhes de hardware em seus próprios diretórios.
+The root `flake.nix` imports the evaluated module surface explicitly. Files under `archive/` are historical and are intentionally outside the evaluated tree. A module must expose a stable `flake.nixosModules.<name>` or `flake.homeManagerModules.<name>` contract at the level where its options are evaluated.
 
-## Novo host
+## Adding a host
 
-Para adicionar um host, crie `modules/hosts/<host>/configuration.nix`, `default.nix` e `hardware.nix`. O `configuration.nix` deve importar as features desejadas; o `default.nix` deve declarar a configuração NixOS com o nome do novo host; e o `hardware.nix` deve conter os módulos e UUIDs específicos da máquina. Quando o desktop usar widgets por monitor, inclua também `desktop-widgets.json` no diretório do host.
+Create `modules/hosts/<host>/configuration.nix`, `default.nix`, and `hardware.nix`. The configuration module should import the features required by that machine. The host assembly should declare the corresponding `nixosConfiguration` and compose the shared desktop profile when appropriate. The hardware module should contain only machine-specific devices, filesystems, kernel modules, and boot details.
 
-Depois, registre o host em `flake.nix` sob `nixosConfigurations` e valide a derivação correspondente antes de aplicar a configuração:
+Register the host by importing its assembly from the explicit list in `flake.nix`, then validate the complete system derivation before applying it:
 
 ```bash
 nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 ```
 
-## Nova feature
+## Adding a feature
 
-Uma feature deve ter uma única responsabilidade e expor um módulo NixOS ou Home Manager com nome estável. Mantenha opções de hardware e identidade de host fora de `features/`; mantenha pacotes específicos em `packages/`; e documente qualquer dependência entre módulos no cabeçalho do arquivo ou no README da raiz.
+A feature must have one coherent responsibility and expose a stable NixOS or Home Manager module. Keep hardware identity and user identity out of reusable features. Keep package definitions in `packages/` when they are shared by multiple features. If a feature crosses the NixOS/Home Manager boundary, expose the boundary through a small option or a public flake output rather than reading another module's private option tree.
+
+## Home Manager profiles
+
+The shared desktop profile is assembled in `hosts/common-desktop.nix`. The `home/livara/` profile is split by lifecycle and ownership: `session.nix` owns DMS and Niri runtime state, `themes.nix` owns theme adapters, `applications.nix` owns applications and XDG integration, and `sync.nix` owns external repository synchronization.

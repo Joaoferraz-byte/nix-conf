@@ -1,0 +1,138 @@
+{ config, pkgs, lib, inputs, self, ... }:
+let
+  xournalppLocalConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
+  xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (builtins.replaceStrings
+    [ "/home/livara/.config/xournalpp" ]
+    [ "${config.home.homeDirectory}/.config/xournalpp" ]
+    (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml"));
+in
+{
+  # Applications
+  programs.nixvim = {
+    enable = true;
+    imports = [ inputs.vim-conf.lib.nixvimModule ];
+  };
+
+  programs.zen-browser = {
+    enable = true;
+    policies = {
+      DisableAppUpdate = true;
+      DisableTelemetry = true;
+      DisableFirefoxStudies = true;
+      DisablePocket = true;
+      DontCheckDefaultBrowser = true;
+    };
+  };
+
+  programs.zen-browser.profiles.default.userChrome = "";
+
+  programs.firefox = {
+    enable = true;
+    policies = {
+      DisableAppUpdate = true;
+      DisableTelemetry = true;
+      DisableFirefoxStudies = true;
+      DisablePocket = true;
+    };
+    profiles.default = {
+      id = 0;
+      isDefault = true;
+      settings = {
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "svg.context-properties.content.enabled" = true;
+        "userChrome.theme-material" = true;
+      };
+    };
+  };
+
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+    shellAliases = {
+      ll = "ls -l";
+      update = "sudo nixos-rebuild switch --flake .";
+    };
+    history = {
+      size = 10000;
+      path = "${config.home.homeDirectory}/.zsh_history";
+    };
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "git" "sudo" ];
+      theme = "robbyrussell";
+    };
+  };
+
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  home.packages = with pkgs; [
+    manim
+    nerd-fonts.jetbrains-mono
+    git
+    xournalpp
+    texlive.combined.scheme-full
+    affinity-v3
+  ];
+
+  home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"
+    if [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
+      $DRY_RUN_CMD cp "${xournalppSettings}" "${xournalppLocalConfig}/settings.xml"
+    fi
+    if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then
+      $DRY_RUN_CMD cp "${inputs.xournal-conf}/xournalpp/toolbar.ini" "${xournalppLocalConfig}/toolbar.ini"
+    fi
+  '';
+
+  xdg.configFile."xournalpp/settings.xml".source = config.lib.file.mkOutOfStoreSymlink
+    "${xournalppLocalConfig}/settings.xml";
+  xdg.configFile."xournalpp/toolbar.ini".source = config.lib.file.mkOutOfStoreSymlink
+    "${xournalppLocalConfig}/toolbar.ini";
+  xdg.configFile."xournalpp/default_template.tex".source = "${inputs.xournal-conf}/xournalpp/default_template.tex";
+  xdg.configFile."xournalpp/palettes/tokyo-night.gpl".source = "${inputs.xournal-conf}/xournalpp/palettes/tokyo-night.gpl";
+
+  xdg.desktopEntries.nvim = {
+    name = "Neovim (NixVim)";
+    genericName = "Editor";
+    comment = "Edit text files";
+    exec = "wezterm start -- nvim %F";
+    terminal = false;
+    icon = "nvim";
+    type = "Application";
+    mimeType = [
+      "text/plain"
+      "text/x-java"
+      "text/x-csrc"
+      "text/x-c++src"
+      "text/x-python"
+      "application/json"
+      "text/html"
+      "text/css"
+      "application/javascript"
+    ];
+    categories = [ "Development" "Utility" "TextEditor" ];
+  };
+
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "application/pdf" = [ "okularApplication_pdf.desktop" ];
+      "application/epub+zip" = [ "com.github.johnfactotum.Foliate.desktop" ];
+      "text/plain" = [ "nvim.desktop" ];
+      "application/zip" = [ "org.gnome.FileRoller.desktop" ];
+      "application/x-7z-compressed" = [ "org.gnome.FileRoller.desktop" ];
+      "application/gzip" = [ "org.gnome.FileRoller.desktop" ];
+    };
+  };
+
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = true;
+    setSessionVariables = true;
+  };
+}

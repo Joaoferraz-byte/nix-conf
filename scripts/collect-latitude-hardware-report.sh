@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-# Coleta somente informações de diagnóstico; não altera hardware.nix,
-# mounts, subvolumes ou configurações do sistema.
+# Collects diagnostic information only; does not modify hardware.nix,
+# mounts, subvolumes, or system configuration.
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 REPORT_DIR="${LATITUDE_REPORT_DIR:-${REPO_ROOT}/diagnostics}"

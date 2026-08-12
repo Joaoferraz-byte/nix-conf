@@ -1,5 +1,3 @@
-# Configuração de hardware gerada pelo nixos-generate-config.
-# UUIDs de montagem e módulos do kernel são específicos da máquina; edite com cuidado.
 { ... }: {
   flake.nixosModules.myMachineHardware = { config, lib, pkgs, modulesPath, ... }: {
     imports = [
