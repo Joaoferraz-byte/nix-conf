@@ -53,6 +53,8 @@
         ./modules/parts.nix
         ./modules/features/audiorelay.nix
         ./modules/features/desktop-portals.nix
+        ./modules/features/development.nix
+        ./modules/features/embedded.nix
         ./modules/features/dms-system.nix
         ./modules/features/firejail.nix
         ./modules/features/flatpak.nix
@@ -61,6 +63,8 @@
         ./modules/features/niri.nix
         ./modules/features/nvidia.nix
         ./modules/features/system-hardening.nix
+        ./modules/features/containers.nix
+        ./modules/features/virtualization.nix
         ./modules/packages/core-packages.nix
         ./modules/hosts/common-desktop.nix
         ./modules/hosts/my-machine
@@ -82,6 +86,30 @@
               nix
               nixos-rebuild
               util-linux
+            ];
+          };
+
+          devShells.python = pkgs.mkShell {
+            packages = with pkgs; [
+              python3
+              uv
+              ruff
+              pyright
+              python3Packages.jupyterlab
+              manim
+              texlive.combined.scheme-full
+            ];
+          };
+
+          devShells.embedded = pkgs.mkShell {
+            packages = with pkgs; [
+              arduino-cli
+              avrdude
+              dfu-util
+              openocd
+              platformio
+              probe-rs-tools
+              stlink
             ];
           };
         };

@@ -62,6 +62,8 @@ imports = [
   ./modules/parts.nix
   ./modules/features/audiorelay.nix
   ./modules/features/desktop-portals.nix
+  ./modules/features/development.nix
+  ./modules/features/embedded.nix
   ./modules/features/dms-system.nix
   ./modules/features/firejail.nix
   ./modules/features/flatpak.nix
@@ -70,6 +72,8 @@ imports = [
   ./modules/features/niri.nix
   ./modules/features/nvidia.nix
   ./modules/features/system-hardening.nix
+  ./modules/features/containers.nix
+  ./modules/features/virtualization.nix
   ./modules/packages/core-packages.nix
   ./modules/hosts/common-desktop.nix
   ./modules/hosts/my-machine
@@ -83,8 +87,8 @@ The two host roots are:
 
 | Host | Composition |
 |---|---|
-| `myMachine` | Common desktop profile, desktop-specific configuration, hardware, Mesa-Tomate driver, system packages, GPU, portals, Flatpak, audio, keyd, hardening, and firejail. |
-| `latitude` | Common desktop profile, laptop configuration, hardware, laptop-specific power and graphics policy, system packages, portals, Flatpak, audio, keyd, hardening, and firejail. |
+| `myMachine` | Common desktop profile, desktop-specific configuration, hardware, Mesa-Tomate driver, development, embedded, rootless containers, libvirt virtualization, system packages, GPU, portals, Flatpak, audio, keyd, hardening, and Firejail. |
+| `latitude` | Common desktop profile, laptop configuration, hardware, laptop-specific power and graphics policy, development, embedded, rootless containers, system packages, portals, Flatpak, audio, keyd, hardening, and Firejail. |
 
 `modules/hosts/common-desktop.nix` is a composition module, not a feature. It imports Home Manager, the shared DMS system bridge, Niri, the DMS plugin registry, and the shared NixVim module. It also provides a typed `desktop.profile.userName` option and passes that identity to the DMS bridge.
 
@@ -191,6 +195,11 @@ The highest stability risk was not the number of modules. It was doing network s
 | `modules/features/niri.nix` | NixOS adapter for the public Niri module and session packages. |
 | `modules/features/dms-system.nix` | System prerequisites and plugin source bridge; no DMS lifecycle owner. |
 | `modules/features/flatpak.nix` | Single Flatpak feature; the duplicate package definition was removed. |
+| `modules/features/development.nix` | Shared workstation toolchains for Python/Manim, native, web, Go, and Rust development. |
+| `modules/features/embedded.nix` | Embedded toolchain, udev integration, and narrowly scoped serial/USB access. |
+| `modules/features/containers.nix` | Rootless Docker, Compose, Buildx, and the local `lazydocker` interface. |
+| `modules/features/virtualization.nix` | libvirt, QEMU/KVM, SPICE, virt-manager, and access for the declared VM operator. |
+| `home/livara/appimage.nix` | Firejail AppImage MIME handler with a disposable private home. |
 | `modules/hosts/common-desktop.nix` | Shared NixOS/Home Manager composition and user identity option. |
 | `modules/hosts/my-machine/default.nix` | Desktop host root, overlay selection, hardware-specific modules. |
 | `modules/hosts/latitude/default.nix` | Laptop host root, overlay selection, laptop-specific modules. |
@@ -231,6 +240,9 @@ The current refactor applied the following changes:
 13. Kept `vim-conf` as a reusable NixVim module library rather than moving editor policy into the system repository.
 14. Moved Wallpapers and Vault synchronization out of Home Manager activation into independent user services and timers.
 15. Removed the second wallpaper owner by allowing DMS to own runtime wallpaper selection.
+16. Added separate development, embedded, rootless-container, and virtualization features, with Python and embedded devShells.
+17. Added a Firejail AppImage handler that uses a temporary private home and no network by default.
+18. Corrected the Xournal++ baseline, toolbar ordering, and bidirectional synchronization helper.
 
 ## 13. Validation
 
@@ -243,9 +255,14 @@ nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
 nix eval .#nixosConfigurations.latitude.config.system.stateVersion
 nix eval .#nixosConfigurations.myMachine.config.home-manager.users.livara.programs.dank-material-shell.enable
 nix eval .#nixosConfigurations.myMachine.config.home-manager.users.livara.programs.niri.settings.prefer-no-csd
+nix eval .#nixosConfigurations.myMachine.config.virtualisation.docker.rootless.enable
+nix eval .#nixosConfigurations.myMachine.config.virtualisation.libvirtd.enable
+nix eval .#nixosConfigurations.latitude.config.virtualisation.docker.rootless.enable
+nix eval .#devShells.x86_64-linux.python.drvPath
+nix eval .#devShells.x86_64-linux.embedded.drvPath
 ```
 
-The broad `nix-conf flake check` traversal was interrupted by the sandbox while walking the complete output set; this is an environment limitation, not a reported Nix evaluation error. Before deployment, run the complete checks and builds on a normal Nix host:
+The broad `nix-conf flake check` traversal was interrupted by the sandbox while walking the complete output set; this is an environment limitation, not a reported Nix evaluation error. The Python devShell evaluates successfully, but Nixpkgs emits a non-blocking deprecation warning for `texlive.combined.scheme-full`; retain it only while Manim requires its broad package set and migrate to a non-deprecated explicit TeX package selection before Nixpkgs 27.05. An unrelated direct Nixpkgs channel query exhausted sandbox storage, so it was not used as a validation result. Before deployment, run the complete checks and builds on a normal Nix host:
 
 ```bash
 nix flake lock
@@ -272,3 +289,81 @@ The lock file has already removed stale inputs such as `import-tree`; it must be
 [11]: https://github.com/AvengeMedia/DankMaterialShell/issues/1788 "DankMaterialShell issue #1788 — Niri/Home Manager integration"
 [12]: https://github.com/srid/nixos-config "srid/nixos-config"
 [13]: https://www.reddit.com/r/NixOS/comments/1e95b69/how_do_you_guys_organize_your_nix_config_files_i/ "Reddit — How do you organize your Nix configuration files?"
+
+## 14. Development, containers, and virtualization
+
+The workstation now distinguishes **system-wide capability modules** from **project-specific development environments**. `modules/features/development.nix` supplies the common Python/Manim, C/C++, Node.js, Go, and Rust toolchains. `modules/features/embedded.nix` adds Arduino, PlatformIO, OpenOCD, probe-rs, and serial/USB access. These are appropriate as host capabilities because they provide compilers, debuggers, SDKs, and device access used across projects; application dependencies should still be pinned by each project flake or development shell.
+
+The flake also publishes focused development shells. The `python` shell is the preferred place for a reproducible Manim project, while the `embedded` shell is a starting point for projects that need an embedded toolchain. This avoids putting every Python package or board-specific dependency into the global user profile. A project should add its own `flake.nix`, lock file, and narrowly scoped packages when it needs a version different from the workstation baseline.
+
+| Capability | System feature | Project-level recommendation |
+|---|---|---|
+| Python and Manim | Shared interpreter, Manim, scientific tools, and language tooling | Pin project dependencies in a project flake or virtual environment created by the project workflow. |
+| Native development | GCC, Clang, CMake, Ninja, GDB, pkg-config, and common headers | Keep libraries and target-specific dependencies in the project shell. |
+| Web/general development | Node.js, Go, Rust, language servers, and formatters | Use per-project lock files and toolchain pins when reproducibility matters. |
+| Embedded development | Arduino CLI, PlatformIO, OpenOCD, probe-rs, USB/serial tools | Add board SDKs and exact platform versions per project; use the host only for stable tooling and device permissions. |
+| Containers | Rootless Docker, Compose, Buildx, and `lazydocker` | Use rootless contexts and Compose files in each project; do not add the user to a privileged Docker group. |
+| Virtual machines | libvirt, QEMU/KVM, virt-manager, SPICE, and USB redirection | Store VM definitions and disks outside the Nix store; use virt-manager as the GTK management interface. |
+
+Docker is configured in rootless mode with `setSocketVariable = true`. This exposes the user socket through `DOCKER_HOST` for normal CLI, Compose, Buildx, and `lazydocker` use without granting access to a root-owned daemon. The trade-off is that privileged container features, low-level networking, and some device workloads require an explicit alternative design. A future Podman migration should be treated as a separate interface decision rather than configured in parallel with Docker.
+
+Virtualization is owned by the NixOS feature module. `libvirtd` provides the service boundary, QEMU/KVM provides execution, and virt-manager provides the GTK management UI. The user is added to `libvirtd`, not to an unrelated broad administrative group. Because virt-manager is a GTK application, it consumes the GTK environment and generated `gtk.css` supplied by the DMS/Matugen theme path; no second VM-specific palette generator is required. The virtualization feature is enabled only on `myMachine`, since the Latitude host does not currently declare a VM workload.
+
+## 15. AppImage isolation
+
+The AppImage request was interpreted as **Firejail**, not Firebase. `home/livara/appimage.nix` registers a Nautilus MIME handler for `application/vnd.appimage`. It launches the selected file through Firejail with a private temporary home, no network, dropped capabilities, and a restrictive syscall profile. The private home is removed when the sandboxed process exits, and normal session cleanup removes it when the user session terminates.
+
+This is a useful default for untrusted or disposable AppImages, but it is intentionally not a complete malware guarantee. An AppImage that needs network access, persistent configuration, hardware acceleration, portals, or host files may require a reviewed exception. The default handler should therefore remain restrictive; persistent application data should be exported deliberately rather than written directly into the temporary sandbox.
+
+## 16. Corrected Xournal++ data flow
+
+Xournal++ has three distinct layers:
+
+```text
+xournal-conf/xournalpp/*
+  <-> ~/.config/nixos/xournalpp/*
+       <-> ~/.config/xournalpp/*
+             -> Xournal++
+```
+
+The repository owns versioned baseline data. The staging directory under `~/.config/nixos/xournalpp` is the editable synchronization boundary. The native Xournal++ profile under `~/.config/xournalpp` is the active runtime path and is symlinked to staging by the Home Manager application adapter. The path `~/.config/com.github.xournalpp.xournalpp` is not the active native profile for this installation; it belongs to a different packaging/profile convention and must not be used as the synchronization source.
+
+The helper now has explicit `--push` and `--pull` modes. `--pull` imports reviewed repository data into staging and `--push` copies local UI edits from staging back to the checked-out `xournal-conf` repository. The flow is therefore: edit in Xournal++, stop the application, run `sync-xournalpp-config.sh --push`, inspect the diff, commit and push `xournal-conf`, then run `--pull` on another machine before launching Xournal++.
+
+The previously observed symptoms had multiple independent causes. `settings.xml` used `useSystem` rather than `forceDark`; `toolbar.ini` placed `PLAIN` before `HIGHLIGHTER` and contained adjacent separators; the synchronization helper did not provide a repository-to-staging pull operation; and edits may have been made under the inactive `com.github.xournalpp.xournalpp` path. The current baseline forces dark mode, uses the Tokyo Night gold `#e0af68` highlighter on a black journal, places the highlighter first, places a small `VERY_FINE` eraser second, and removes the duplicate separator cluster.
+
+## 17. Operational diagnostics
+
+For a boot or service failure, inspect the current boot first and then narrow the query to failed units and the relevant user session:
+
+```bash
+systemctl --failed
+systemctl --user --failed
+journalctl -b -p warning..alert
+journalctl -b -u display-manager.service
+journalctl --user -b -p warning..alert
+systemctl status niri.service --no-pager
+systemctl --user status dms.service --no-pager
+journalctl --user -b -u dms.service --no-pager
+journalctl --user -b | grep -Ei 'niri|dms|quickshell|matugen|xournal|firejail|docker|libvirt|error|failed|warn'
+```
+
+For the Niri session, `niri msg version`, `niri msg outputs`, and `niri msg windows` confirm whether the compositor is reachable. On systems where Niri is launched by the display manager rather than as a standalone unit, the user journal is the authoritative source:
+
+```bash
+journalctl --user -b --since=today | grep -Ei 'niri|wayland|portal|dbus|gpu|xwayland'
+```
+
+For rootless Docker and libvirt, verify the actual user sockets and service ownership instead of checking only system-wide daemons:
+
+```bash
+systemctl --user status docker.service --no-pager
+printf '%s\n' "$DOCKER_HOST"
+docker info
+systemctl status libvirtd.service --no-pager
+virsh -c qemu:///system list --all
+```
+
+## 18. Follow-up recommendations
+
+The next architectural pass should split the hardening feature from desktop defaults, make Vault synchronization explicitly opt-in, add CI that evaluates both host configurations and both development shells, and test the AppImage handler with a benign sample. It should also document the expected rootless Docker context and confirm the exact embedded boards used in practice before adding board-specific SDKs globally.

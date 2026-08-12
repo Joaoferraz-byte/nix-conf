@@ -23,6 +23,9 @@
         ];
       }
       self.nixosModules.commonDesktop
+      self.nixosModules.development
+      self.nixosModules.developmentEmbedded
+      self.nixosModules.containers
       self.nixosModules.latitudeConfiguration
     ];
   };

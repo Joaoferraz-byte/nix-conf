@@ -23,6 +23,10 @@
         ];
       }
       self.nixosModules.commonDesktop
+      self.nixosModules.development
+      self.nixosModules.developmentEmbedded
+      self.nixosModules.containers
+      self.nixosModules.virtualization
       self.nixosModules.myMachineConfiguration
       inputs.mesa-tomate-driver.nixosModules.default
     ];

@@ -71,11 +71,9 @@ in
   };
 
   home.packages = with pkgs; [
-    manim
     nerd-fonts.jetbrains-mono
     git
     xournalpp
-    texlive.combined.scheme-full
     affinity-v3
   ];
 

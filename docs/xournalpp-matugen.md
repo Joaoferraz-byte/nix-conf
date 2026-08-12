@@ -1,24 +1,43 @@
-# Xournal++ declarativo via nix-conf
+# Xournal++ configuration flow
 
-O Xournal++ é instalado pelo `nix-conf`, enquanto os arquivos de configuração próprios são versionados no repositório [`Joaoferraz-byte/xournal-conf`](https://github.com/Joaoferraz-byte/xournal-conf). O `flake.nix` declara esse repositório como um input não-flake. Os arquivos `settings.xml` e `toolbar.ini` são inicializados em `~/.config/nixos/xournalpp/` e ligados para `~/.config/xournalpp/` por meio de symlinks fora do Nix store; assim, o Xournal++ pode gravar alterações neles normalmente.
+`xournal-conf` is the versioned data repository consumed by `nix-conf`. The native Xournal++ profile used by this configuration is `$XDG_CONFIG_HOME/xournalpp`, normally `~/.config/xournalpp`. The path `~/.config/com.github.xournalpp.xournalpp` is not part of the native profile contract and must not be used as a second source of truth unless a separately installed package explicitly requires it.
 
-| Fonte em `xournal-conf` | Destino declarativo |
-| --- | --- |
-| `xournalpp/settings.xml` | `~/.config/nixos/xournalpp/settings.xml` → `~/.config/xournalpp/settings.xml` |
-| `xournalpp/toolbar.ini` | `~/.config/nixos/xournalpp/toolbar.ini` → `~/.config/xournalpp/toolbar.ini` |
-| `xournalpp/default_template.tex` | `/home/livara/.config/xournalpp/default_template.tex` |
-| `xournalpp/palettes/tokyo-night.gpl` | `/home/livara/.config/xournalpp/palettes/tokyo-night.gpl` |
+## Ownership and paths
 
-O `settings.xml` seleciona o perfil personalizado **Xournal++ Copy**, o tema geral `useSystem`, o template LaTeX versionado e a paleta Tokyo Night. O template mantém os placeholders `%%XPP_TEXT_COLOR%%` e `%%XPP_TOOL_INPUT%%`, que o Xournal++ substitui ao gerar cada fórmula. A paleta possui 11 cores claras para manter contraste sobre páginas com fundo preto puro.
+| Layer | Path | Owner | Purpose |
+| --- | --- | --- | --- |
+| Versioned source | `~/Projects/xournal-conf/xournalpp/` | `xournal-conf` | Reviewed settings, toolbar, palette and LaTeX template |
+| Editable staging | `~/.config/nixos/xournalpp/` | Home Manager activation | Writable copy used by the Xournal++ UI |
+| Live application path | `~/.config/xournalpp/` | Xournal++ | Out-of-store symlinks to the editable staging files |
+| Dynamic desktop theme | `~/.config/gtk-3.0/dank-colors.css` | DMS/Matugen | GTK appearance consumed by GTK applications, including Xournal++ |
 
-Depois de editar as opções pela interface do Xournal++, execute `scripts/sync-xournalpp-config.sh /caminho/para/xournal-conf` no checkout do repositório. Revise o diff e então faça commit e push. A ativação do Home Manager só copia os arquivos do input quando eles ainda não existem, portanto não sobrescreve customizações locais.
+The application settings and toolbar are intentionally seeded only when the editable staging files do not exist. This allows the Xournal++ interface to modify them without every activation overwriting the user’s work. The palette, LaTeX template and other immutable assets remain linked from the flake input.
 
-O carregamento correto do template depende de `latexSettings.globalTemplatePath` apontar para o arquivo instalado em `~/.config/xournalpp/default_template.tex`. A configuração anterior apontava para um caminho Nix/Matugen que não existia no fluxo não gerado; esse caminho foi removido. O esquema `classic` do editor LaTeX é selecionado por ser um esquema fornecido pelo próprio GtkSourceView, sem depender de um arquivo Matugen não instalado.
+## Editing and publishing
 
-A lógica de Matugen do DMS não é usada para os arquivos deste repositório. O DMS continua responsável apenas por seus próprios temas; o Xournal++ é totalmente reproduzido pelo input do flake e pelo Home Manager.
+Close Xournal++ before synchronizing. To publish the current UI configuration into the repository, run:
 
-## Referências
+```bash
+/home/livara/Projects/nix-conf/scripts/sync-xournalpp-config.sh --push /home/livara/Projects/xournal-conf
+```
+
+Review the diff, then commit and push from the `xournal-conf` checkout. To pull a reviewed repository change into the active profile, run:
+
+```bash
+/home/livara/Projects/nix-conf/scripts/sync-xournalpp-config.sh --pull /home/livara/Projects/xournal-conf
+```
+
+Restart Xournal++ after a pull. If the user copies from `~/.config/xournalpp` directly, the path may be an out-of-store symlink; the canonical editable files are under `~/.config/nixos/xournalpp/`. Copying from the wrong path can therefore preserve stale content or overwrite the wrong repository.
+
+## Current profile decisions
+
+The versioned profile forces dark mode, uses a black page background, assigns Tokyo Night gold (`#e0af68`) to the highlighter, sets the eraser to `VERY_FINE`, and places `HIGHLIGHTER` followed by `ERASER` at the beginning of the custom tool cluster. The duplicate adjacent separators were removed from `toolbar.ini`.
+
+DMS/Matugen owns the desktop GTK palette. Xournal++ owns its semantic drawing configuration. This is deliberate: a direct Matugen template that rewrites the complete `settings.xml` would compete with UI edits and make the application profile non-deterministic. Xournal++ should consume the DMS-generated GTK appearance while keeping tool behavior and page semantics in `xournal-conf`.
+
+## References
 
 1. [Xournal++ file locations](https://xournalpp.github.io/guide/file-locations/)
-2. [Xournal++ LaTeX tool](https://xournalpp.github.io/guide/tools/latex/)
-3. [Xournal++ toolbar colors and GPL palettes](https://xournalpp.github.io/guide/config/toolbar-colors/)
+2. [Xournal++ toolbar colors](https://xournalpp.github.io/guide/config/toolbar-colors/)
+3. [Xournal++ eraser](https://xournalpp.github.io/guide/tools/eraser/)
+4. [DankMaterialShell application themes](https://danklinux.com/docs/dankmaterialshell/application-themes)
