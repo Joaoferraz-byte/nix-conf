@@ -106,7 +106,7 @@ The correct ownership model is therefore:
 | Niri compositor settings | `home/livara/session.nix` through the published Niri Home Manager contract |
 | Niri system module and package overlay | `shell-conf` public NixOS module and `shell-conf.overlays.niri` |
 | Quickshell, Matugen, Cava, Khal, NetworkManager and GLib prerequisites | `nix-conf/modules/features/dms-system.nix` |
-| Polkit, geolocation, accounts and power service defaults | NixOS feature modules, with host overrides taking precedence |
+| Polkit policy and system prerequisites | NixOS feature modules, with host overrides taking precedence. The session authentication agent has one owner supplied by the Niri desktop integration. |
 | DMS plugin source installation | `dms-system.nix`, derived from the selected user's declared plugin sources |
 
 The upstream DMS NixOS and Home Manager modules have historically exposed overlapping systemd options. Importing both as enabled lifecycle owners can produce option conflicts or duplicate DMS instances. The current configuration consequently uses the `shell-conf` Home Manager module for the user-facing DMS service and a small NixOS bridge for prerequisites and plugin source installation. The upstream DMS NixOS module is not imported by the active hosts.
@@ -182,6 +182,7 @@ The current configuration contains meaningful security and reliability controls.
 | Hardening module | The feature combines security policy with some desktop assumptions. | Preserve current behavior; split security policy from desktop defaults in a later pass. |
 | NixVim | Main risk is upstream nixpkgs compatibility, not module structure. | Preserve the library boundary and validate its package/check independently. |
 | Xournal++ | Versioned defaults and user edits have different ownership. | Seed editable local settings, normalize their profile path, and provide an explicit sync-back helper. |
+| Latitude hardware | Generated device data was previously written to an untracked sidecar and could disappear from a flake source snapshot. | Keep `hardware.nix` as a tracked entrypoint, import tracked `hardware-configuration.nix`, stage only the generated file, and never alter ACPI parameters automatically. |
 | Wallpapers and Vault | The repositories use network access and Vault uses SSH. | Synchronize through independent timers; consider making Vault opt-in under stricter trust policies. |
 
 The highest stability risk was not the number of modules. It was doing network synchronization and mutable runtime repair during a declarative activation transaction. Wallpaper and Vault synchronization now run as independent user services on timers, so network failure does not prevent a local system rebuild. Vault access remains SSH-based and should still be made explicitly opt-in if the machine is used offline or under a restricted trust policy.
@@ -203,6 +204,9 @@ The highest stability risk was not the number of modules. It was doing network s
 | `modules/hosts/common-desktop.nix` | Shared NixOS/Home Manager composition and user identity option. |
 | `modules/hosts/my-machine/default.nix` | Desktop host root, overlay selection, hardware-specific modules. |
 | `modules/hosts/latitude/default.nix` | Laptop host root, overlay selection, laptop-specific modules. |
+| `modules/hosts/latitude/hardware.nix` | Tracked hardware entrypoint and graphics adapter. |
+| `modules/hosts/latitude/hardware-configuration.nix` | Tracked machine-generated filesystems, boot modules, swap, and CPU hardware data. |
+| `scripts/generate-latitude-hardware.sh` | Safe live hardware detection, validation, backup, and Git staging for Latitude hardware data. |
 | `home/livara/home.nix` | Thin Home Manager entrypoint and user identity. |
 | `home/livara/session.nix` | Niri settings, DMS session settings, wallpaper startup adapter. |
 | `home/livara/themes.nix` | DMS/Matugen adapters and browser/GTK/ZenNotes integration. |
@@ -243,6 +247,9 @@ The current refactor applied the following changes:
 16. Added separate development, embedded, rootless-container, and virtualization features, with Python and embedded devShells.
 17. Added a Firejail AppImage handler that uses a temporary private home and no network by default.
 18. Corrected the Xournal++ baseline, toolbar ordering, and bidirectional synchronization helper.
+19. Replaced the untracked Latitude hardware sidecar with a tracked `hardware-configuration.nix` imported by the stable `hardware.nix` entrypoint.
+20. Made Latitude hardware generation use live `nixos-generate-config --show-hardware-config`, validate device identifiers, keep backups, stage the generated file, and avoid automatic ACPI kernel parameters.
+21. Removed the duplicate GNOME Polkit authentication-agent service so the Niri session integration remains the sole session-agent owner.
 
 ## 13. Validation
 
@@ -258,6 +265,7 @@ nix eval .#nixosConfigurations.myMachine.config.home-manager.users.livara.progra
 nix eval .#nixosConfigurations.myMachine.config.virtualisation.docker.rootless.enable
 nix eval .#nixosConfigurations.myMachine.config.virtualisation.libvirtd.enable
 nix eval .#nixosConfigurations.latitude.config.virtualisation.docker.rootless.enable
+nix eval .#nixosConfigurations.latitude.config.nixpkgs.hostPlatform
 nix eval .#devShells.x86_64-linux.python.drvPath
 nix eval .#devShells.x86_64-linux.embedded.drvPath
 ```

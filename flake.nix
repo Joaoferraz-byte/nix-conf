@@ -84,6 +84,7 @@
               btrfs-progs
               git
               nix
+              nixos-install-tools
               nixos-rebuild
               util-linux
             ];

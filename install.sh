@@ -3,6 +3,7 @@ set -euo pipefail
 trap 'echo "Installation aborted at line ${LINENO}: ${BASH_COMMAND}" >&2' ERR
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd -- "$SCRIPT_DIR"
 
 if [ "${NIX_CONF_DEV_SHELL:-0}" != "1" ]; then
   command -v nix >/dev/null 2>&1 || {

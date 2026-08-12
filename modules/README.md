@@ -21,6 +21,18 @@ Register the host by importing its assembly from the explicit list in `flake.nix
 nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 ```
 
+For the Latitude host, `hardware.nix` is the tracked entrypoint and imports the tracked `hardware-configuration.nix` produced from the current machine. The generator uses `nixos-generate-config --show-hardware-config`, rejects empty or placeholder device identifiers, preserves a timestamped backup under `$XDG_STATE_HOME`, stages only the generated hardware file, and never changes kernel ACPI parameters. It falls back to `/etc/nixos/hardware-configuration.nix` only when live generation is unavailable or fails.
+
+Run it from the repository root after booting the target Latitude:
+
+```bash
+./scripts/generate-latitude-hardware.sh
+git diff --cached -- modules/hosts/latitude/hardware-configuration.nix
+git status --short
+```
+
+Do not add `acpi=`, `acpi_osi=`, `acpi=noirq`, `noapic`, or `pci=biosirq` solely to silence firmware messages. Add a kernel parameter only after correlating it with a reproducible symptom such as failed suspend, missing devices, or a verified interrupt-routing failure.
+
 ## Adding a feature
 
 A feature must have one coherent responsibility and expose a stable NixOS or Home Manager module. Keep hardware identity and user identity out of reusable features. Keep package definitions in `packages/` when they are shared by multiple features. If a feature crosses the NixOS/Home Manager boundary, expose the boundary through a small option or a public flake output rather than reading another module's private option tree.
