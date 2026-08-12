@@ -32,7 +32,7 @@
       update.onActivation = false;
       update.auto.enable = false;
 
-      overrides.settings.global = {
+      overrides.global = {
         Environment = {
           XCURSOR_PATH = "/run/host/user-share/icons:/run/host/share/icons";
           XDG_DATA_DIRS = "/run/host/usr/share:/run/host/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share";

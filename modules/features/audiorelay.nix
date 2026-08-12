@@ -57,7 +57,7 @@
 
         security.rtkit.enable = true;
 
-        services.flatpak.overrides.settings."net.audiorelay.AudioRelay" = {
+        services.flatpak.overrides."net.audiorelay.AudioRelay" = {
           Context = {
             sockets = [ "x11" ];
           };
