@@ -12,6 +12,7 @@ let
     name = "nix-conf-icons";
   };
   profileIcon = iconsPath + "/6afde16e1ef1cb3257b30e01890787dd.jpg";
+  xournalppLocalConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
   randomDmsWallpaper = pkgs.writeShellScript "dms-wallpaper-random-on-login" ''
     set -eu
     wallpapers_dir="${config.home.homeDirectory}/Wallpapers"
@@ -268,11 +269,22 @@ in
     }
   '';
 
-  xdg.configFile."xournalpp/settings.xml".text = builtins.replaceStrings
-    [ "/home/livara/.config/xournalpp" ]
-    [ "${config.home.homeDirectory}/.config/xournalpp" ]
-    (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml");
-  xdg.configFile."xournalpp/toolbar.ini".source = "${inputs.xournal-conf}/xournalpp/toolbar.ini";
+  # Keep the two user-edited Xournal++ files outside the Nix store. Xournal++
+  # can update them in place, and sync-xournalpp-config.sh can copy the result
+  # back to the xournal-conf repository when the customization is ready.
+  home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"
+    if [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
+      $DRY_RUN_CMD cp "${inputs.xournal-conf}/xournalpp/settings.xml" "${xournalppLocalConfig}/settings.xml"
+    fi
+    if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then
+      $DRY_RUN_CMD cp "${inputs.xournal-conf}/xournalpp/toolbar.ini" "${xournalppLocalConfig}/toolbar.ini"
+    fi
+  '';
+  xdg.configFile."xournalpp/settings.xml".source = config.lib.file.mkOutOfStoreSymlink
+    "${xournalppLocalConfig}/settings.xml";
+  xdg.configFile."xournalpp/toolbar.ini".source = config.lib.file.mkOutOfStoreSymlink
+    "${xournalppLocalConfig}/toolbar.ini";
   xdg.configFile."xournalpp/default_template.tex".source = "${inputs.xournal-conf}/xournalpp/default_template.tex";
   xdg.configFile."xournalpp/palettes/tokyo-night.gpl".source = "${inputs.xournal-conf}/xournalpp/palettes/tokyo-night.gpl";
 
