@@ -40,3 +40,40 @@ A feature must have one coherent responsibility and expose a stable NixOS or Hom
 ## Home Manager profiles
 
 The shared desktop profile is assembled in `hosts/common-desktop.nix`. The `home/livara/` profile is split by lifecycle and ownership: `session.nix` owns DMS and Niri runtime state, `themes.nix` owns theme adapters, `applications.nix` owns applications and XDG integration, and `sync.nix` owns external repository synchronization.
+
+
+## Latitude hardware recovery
+
+The Latitude hardware entrypoint imports `modules/hosts/latitude/hardware-configuration.nix`. The generated file must be produced on the target machine or from a Live ISO with the installed root and EFI System Partition mounted. The recovery scripts never format, partition, modify firmware, change ACPI parameters, or guess between multiple EFI partitions.
+
+On an installed system, run from the repository root:
+
+```bash
+sudo ./scripts/recover-latitude-boot.sh --repo "$PWD" --target-root /
+```
+
+From a Live ISO, first mount the existing Linux root read-write at `/mnt`, mount the existing EFI System Partition at `/mnt/boot`, and place or access the repository under the installed root. Then run:
+
+```bash
+sudo ./scripts/recover-latitude-boot.sh \
+  --repo /mnt/home/livara/.config/nixos \
+  --target-root /mnt
+```
+
+The helper lists block devices with explicit `lsblk` columns, waits for udev, accepts an ESP only when its partition type is the official EFI System Partition GUID, refuses to guess when there is no candidate or more than one candidate, and invokes `nixos-generate-config --root`. The generator validates root and `/boot` entries, rejects placeholder identifiers, checks device references, creates a timestamped backup, and stages only the tracked hardware file.
+
+If the helper reports multiple or no ESP candidates, inspect the printed inventory and mount the correct existing partition manually. Do not use `mkfs`, `parted`, `fdisk`, `wipefs`, `acpi=noirq`, `noapic`, or `pci=biosirq` as a workaround.
+
+For a non-destructive report without modifying the repository configuration, run:
+
+```bash
+sudo LATITUDE_REPORT_DIR=/tmp/latitude-diagnostics \
+  ./scripts/collect-latitude-hardware-report.sh
+```
+
+Review the staged result before rebuilding:
+
+```bash
+git diff --cached -- modules/hosts/latitude/hardware-configuration.nix
+sudo nixos-rebuild test --flake .#latitude
+```

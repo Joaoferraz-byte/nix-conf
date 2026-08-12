@@ -375,3 +375,10 @@ virsh -c qemu:///system list --all
 ## 18. Follow-up recommendations
 
 The next architectural pass should split the hardening feature from desktop defaults, make Vault synchronization explicitly opt-in, add CI that evaluates both host configurations and both development shells, and test the AppImage handler with a benign sample. It should also document the expected rootless Docker context and confirm the exact embedded boards used in practice before adding board-specific SDKs globally.
+
+
+## Offline hardware recovery and boot safety
+
+Latitude hardware detection is now a console-safe two-stage flow. `recover-latitude-boot.sh` inventories block devices with explicit `lsblk` columns, waits for udev, identifies an EFI System Partition only through the official GPT partition type, refuses ambiguous candidates, and mounts an existing ESP without formatting or repartitioning. `generate-latitude-hardware.sh` then invokes the official `nixos-generate-config --root` path, validates root and `/boot` entries and device references, backs up the previous file, and stages only the tracked hardware configuration.
+
+The Latitude hardware module is fail-closed: known placeholders such as `BOOT-PARTUUID` cause Nix evaluation to stop with an actionable message rather than allowing a rebuild that can enter emergency mode. The repository intentionally does not add ACPI kernel parameters to silence firmware messages. A non-destructive `collect-latitude-hardware-report.sh` helper collects block-device, mount, Btrfs, and generator information from a console or Live ISO for later analysis.

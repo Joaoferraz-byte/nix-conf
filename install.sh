@@ -41,8 +41,10 @@ esac
 echo -e "${GREEN}Selected: ${FLAKE_TARGET}${NC}"
 
 configure_latitude_hardware() {
-  echo -e "${YELLOW}Running robust hardware generation script...${NC}"
-  "${SCRIPT_DIR}/scripts/generate-latitude-hardware.sh"
+  echo -e "${YELLOW}Running console-safe Latitude hardware recovery and generation...${NC}"
+  "${SCRIPT_DIR}/scripts/recover-latitude-boot.sh" \
+    --repo "$SCRIPT_DIR" \
+    --target-root "${NIXOS_TARGET_ROOT:-/}"
 }
 
 if [ "${FLAKE_TARGET}" = "latitude" ]; then

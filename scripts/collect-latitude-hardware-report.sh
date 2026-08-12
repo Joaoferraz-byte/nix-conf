@@ -36,7 +36,7 @@ run_shell() {
   local command="$2"
   section "$label"
   printf '$ %s\n' "$command" >> "$REPORT_FILE"
-  bash -c "$command" >> "$REPORT_FILE" 2>&1
+  REPO_ROOT="$REPO_ROOT" TARGET_ROOT="$TARGET_ROOT" bash -c "$command" >> "$REPORT_FILE" 2>&1
   local rc=$?
   printf '[exit=%s]\n' "$rc" >> "$REPORT_FILE"
   return 0
@@ -55,7 +55,7 @@ run_shell "Tool versions" 'nixos-generate-config --version 2>&1 || true; btrfs -
 run "Root mount" findmnt -no TARGET,SOURCE,FSTYPE,UUID,PARTUUID,OPTIONS / 
 run "Relevant mounts" findmnt -rn -t btrfs,vfat,ext4,xfs,bcachefs -o TARGET,SOURCE,FSTYPE,UUID,PARTUUID,OPTIONS
 run "Block devices" lsblk -e7 -o NAME,PATH,TYPE,FSTYPE,LABEL,PARTLABEL,UUID,PARTUUID,FSAVAIL,FSUSE%,MOUNTPOINTS
-run_shell "Partition metadata" 'for dev in /dev/sda /dev/sda1 /dev/sda2 /dev/nvme0n1 /dev/nvme0n1p1 /dev/nvme0n1p2; do if [ -e "$dev" ]; then echo "--- $dev ---"; blkid "$dev"; sfdisk --dump "$dev" 2>/dev/null || true; fi; done'
+run_shell "Partition metadata" 'if command -v udevadm >/dev/null 2>&1; then udevadm settle || true; fi; while read -r dev type; do [ "$type" = "disk" ] || continue; echo "--- $dev ---"; blkid "$dev" 2>/dev/null || true; if command -v sfdisk >/dev/null 2>&1; then sfdisk --dump "$dev" 2>/dev/null || true; fi; done < <(lsblk --list --paths --noheadings --raw --output NAME,TYPE)'
 run "Btrfs filesystem for root" btrfs filesystem show /
 run "Btrfs root subvolume" btrfs subvolume show /
 run "Btrfs root subvolume list" btrfs subvolume list -p /
