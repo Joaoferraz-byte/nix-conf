@@ -29,11 +29,8 @@
         { appId = "org.freesmlauncher.FreesmLauncher"; origin = "freesmlauncher"; }
       ];
 
-      update.onActivation = true;
-      update.auto = {
-        enable = true;
-        onCalendar = "weekly";
-      };
+      update.onActivation = false;
+      update.auto.enable = false;
 
       overrides.settings.global = {
         Environment = {

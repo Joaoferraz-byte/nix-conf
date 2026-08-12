@@ -63,7 +63,18 @@ nix flake check --no-build
 # ─── Step 4: Build and switch ──────────────────────────────────────────────
 echo ""
 echo -e "${YELLOW}Building and switching to ${FLAKE_TARGET}...${NC}"
-sudo nixos-rebuild switch --flake ".#${FLAKE_TARGET}" 2>&1 | tee /tmp/nixos-rebuild.log
+REBUILD_LOG="${TMPDIR:-/tmp}/nixos-rebuild.log"
+set +e
+sudo nixos-rebuild switch --flake ".#${FLAKE_TARGET}" 2>&1 | tee "$REBUILD_LOG"
+REBUILD_STATUS="${PIPESTATUS[0]}"
+set -e
+if [ "$REBUILD_STATUS" -ne 0 ]; then
+  echo -e "${RED}nixos-rebuild failed with exit code ${REBUILD_STATUS}.${NC}" >&2
+  echo "Full log: $REBUILD_LOG" >&2
+  echo "Last 80 log lines:" >&2
+  tail -n 80 "$REBUILD_LOG" >&2
+  exit "$REBUILD_STATUS"
+fi
 
 # ─── Step 5: Reboot ───────────────────────────────────────────────────────
 echo ""
