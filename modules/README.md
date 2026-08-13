@@ -35,9 +35,9 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
 ## End-4 adapter
 
-`features/end4.nix` is a Home Manager module that consumes the pinned `illogical-impulse-dotfiles` input. It links immutable QuickShell, Hyprland, Hyprlock, Fuzzel, Matugen, Wlogout, and script assets from the source tree. It also creates writable runtime directories and seeds mutable fallback files outside the Nix store.
+`features/end4.nix` is a Home Manager module that consumes the official `end-4/dots-hyprland` input pinned as `illogical-impulse-dotfiles`. It imports the native Lua entrypoint and modules, keeps the upstream QuickShell `ii` profile, and links only static assets from the source tree. Home Manager does not generate legacy `.conf` fragments for this integration.
 
-The source profile is `ii`, exposed through `QS_CONFIG` and `$qsConfig`. QuickShell generated state belongs under `~/.local/state/quickshell/user/generated/`; it must never be replaced with a Home Manager symlink to a store path. Local overrides belong in `home/livara/session.nix` and the generated `~/.config/hypr/nix-conf.conf`, not in a copied end-4 installer tree.
+The profile is `ii`, exposed through `QS_CONFIG` and the Hyprland `qsConfig` environment variable. QuickShell generated state belongs under `~/.local/state/quickshell/user/generated/`, while user configuration belongs under `~/.config/illogical-impulse/`. Runtime-writable Hyprland and Hyprlock files are seeded as ordinary files outside the Nix store, including `hyprland/shellOverrides/main.lua`, because the end-4 settings UI edits them. Local keybind overrides are declared as the `custom/keybinds.lua` module in the adapter and are shared by both hosts.
 
 ## Hardware generation
 

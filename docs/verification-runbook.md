@@ -135,7 +135,7 @@ The end-4 source assets are immutable Home Manager links. Generated state must r
 ```bash
 ls -l ~/.local/state/quickshell/user/generated
 ls -l ~/.local/state/nix-conf/theme
-ls -l ~/.config/hypr/hyprland/colors.conf ~/.config/gtk-3.0/gtk.css ~/.config/gtk-4.0/gtk.css
+ls -l ~/.config/hypr/hyprland/colors.lua ~/.config/hypr/hyprlock/colors.conf ~/.config/gtk-3.0/gtk.css ~/.config/gtk-4.0/gtk.css
 ```
 
 Select a wallpaper from `~/Pictures/Wallpapers` and verify that Matugen updates QuickShell colors, Hyprland colors, Hyprlock, Fuzzel, GTK, Firefox, Zen Browser, and ZenNotes. Do not replace these runtime outputs with Home Manager links to `/nix/store`.

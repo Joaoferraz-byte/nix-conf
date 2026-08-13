@@ -6,7 +6,7 @@ This document describes the active shortcut and window-decoration contract for t
 
 Hyprland owns compositor keybinds, focus, workspaces, window movement, fullscreen state, rounding, gaps and input settings. QuickShell owns shell surfaces such as the overview, clipboard history, session menu, cheatsheet and sidebars. The two layers communicate through QuickShell IPC calls such as `qs -c ii ipc call overviewToggle`.
 
-The source dotfile is pinned as the non-flake `illogical-impulse-dotfiles` input. Local compatibility bindings are generated at `~/.config/hypr/nix-conf.conf`; they do not modify the source checkout and are shared by both hosts.
+The source dotfile is pinned as the non-flake `illogical-impulse-dotfiles` input. Local compatibility bindings are declared in `modules/features/end4.nix` as the `custom/keybinds.lua` module; they do not modify the source checkout and are shared by both hosts.
 
 ## Shell and application shortcuts
 
@@ -22,15 +22,15 @@ The source dotfile is pinned as the non-flake `illogical-impulse-dotfiles` input
 | `Super + E` | Open Nautilus | `nautilus` |
 | `Super + O` | Open ZenNotes | `zennotes` |
 | `Super + T` or `Super + Return` | Open WezTerm | `wezterm` |
-| `Super + C` | Close the active window | Hyprland `killactive` |
+| `Super + C` | Close the active window | Lua `hl.dsp.window.close()` |
 
 The upstream end-4 bindings remain active for its overview, sidebars, media controls, brightness controls, wallpaper switching and fallback launchers. Local bindings are deliberately limited to historical nix-conf shortcuts that would otherwise collide with the imported configuration.
 
 ## Window navigation and workspaces
 
-`Super + Left/Right/Up/Down` focuses a neighboring window. `Super + F` toggles fullscreen and `Super + Shift + F` enables fullscreen without hiding the surrounding compositor state. `Super + 1-9` and `Super + 0` select workspaces 1-10. Hyprland and the upstream end-4 scripts provide additional workspace movement and scratchpad bindings.
+`Super + Left/Right/Up/Down` focuses a neighboring window. `Super + F` toggles fullscreen and `Super + Shift + F` toggles the maximized window state. `Super + 1-9` and `Super + 0` select workspaces 1-10. Hyprland and the upstream end-4 scripts provide additional workspace movement and scratchpad bindings.
 
-The active decoration contract is defined in the imported end-4 `general.conf` and `rules.conf`. Local changes belong in `home/livara/session.nix` or a future host-specific override rather than in the source input.
+The active decoration contract is defined in the imported end-4 `general.lua` and `rules.lua` modules. Local changes belong in the Lua override module or a future host-specific override rather than in the source input.
 
 ## Screenshots and visual tools
 

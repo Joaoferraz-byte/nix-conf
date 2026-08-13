@@ -102,23 +102,23 @@ in
     output_path = '~/.local/state/quickshell/user/generated/colors.json'
 
     [templates.hyprland]
-    input_path = '~/.config/matugen/templates/hyprland/colors.conf'
-    output_path = '~/.config/hypr/hyprland/colors.conf'
+    input_path = '~/.config/matugen/templates/hyprland/colors.lua'
+    output_path = '~/.config/hypr/hyprland/colors.lua'
 
     [templates.hyprlock]
-    input_path = '~/.config/matugen/templates/hyprland/hyprlock.conf'
-    output_path = '~/.config/hypr/hyprlock.conf'
+    input_path = '~/.config/matugen/templates/hyprland/hyprlock-colors.conf'
+    output_path = '~/.config/hypr/hyprlock/colors.conf'
 
     [templates.fuzzel]
     input_path = '~/.config/matugen/templates/fuzzel/fuzzel_theme.ini'
     output_path = '~/.config/fuzzel/fuzzel_theme.ini'
 
     [templates.gtk3]
-    input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
+    input_path = '~/.config/matugen/templates/gtk-3.0/gtk.css'
     output_path = '~/.config/gtk-3.0/gtk.css'
 
     [templates.gtk4]
-    input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
+    input_path = '~/.config/matugen/templates/gtk-4.0/gtk.css'
     output_path = '~/.config/gtk-4.0/gtk.css'
 
     [templates.kde_colors]

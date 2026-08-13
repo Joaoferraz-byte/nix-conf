@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   home = config.home.homeDirectory;
   randomWallpaper = pkgs.writeShellScript "end4-wallpaper-random-on-login" ''
@@ -17,36 +17,9 @@ in
 {
   wayland.windowManager.hyprland = {
     enable = true;
-    configType = "hyprlang";
+    configType = "lua";
     systemd.enable = false;
     xwayland.enable = true;
-    settings = {
-      "$qsConfig" = "ii";
-      env = [
-        "XCURSOR_SIZE,24"
-        "XCURSOR_THEME,Bibata-Modern-Classic"
-        "ELECTRON_OZONE_PLATFORM_HINT,auto"
-        "QT_QPA_PLATFORM,wayland;xcb"
-        "TERMINAL,wezterm"
-      ];
-      input = {
-        kb_layout = "br";
-        touchpad = {
-          tap-to-click = true;
-          disable_while_typing = true;
-          natural_scroll = true;
-        };
-      };
-    };
-    extraConfig = ''
-      source=~/.config/hypr/hyprland/env.conf
-      source=~/.config/hypr/hyprland/execs.conf
-      source=~/.config/hypr/hyprland/general.conf
-      source=~/.config/hypr/hyprland/rules.conf
-      source=~/.config/hypr/hyprland/colors.conf
-      source=~/.config/hypr/hyprland/keybinds.conf
-      source=~/.config/hypr/nix-conf.conf
-    '';
   };
 
   services.hypridle = {
@@ -75,70 +48,10 @@ in
     };
   };
 
-  xdg.configFile."hypr/nix-conf.conf".text = ''
-    $mod = SUPER
-
-    # QuickShell compatibility
-    unbind = $mod, Comma
-    unbind = $mod, Space
-    unbind = $mod, X
-    unbind = $mod, D
-    unbind = $mod, V
-    unbind = $mod, N
-    unbind = $mod, Tab
-    unbind = $mod, W
-    unbind = $mod, E
-    unbind = $mod, O
-    unbind = $mod, T
-    unbind = $mod, Return
-    unbind = $mod, C
-    unbind = $mod, S
-    unbind = $mod CTRL, S
-    unbind = $mod SHIFT, S
-    unbind = $mod SHIFT, W
-    unbind = $mod, F
-    unbind = $mod SHIFT, F
-    bind = $mod, Comma, exec, qs -p ~/.config/quickshell/$qsConfig/settings.qml
-    bind = $mod, Space, exec, qs -c $qsConfig ipc call overviewToggle
-    bind = $mod, X, exec, qs -c $qsConfig ipc call sessionToggle
-    bind = $mod, D, exec, qs -c $qsConfig ipc call overviewToggle
-    bind = $mod, V, exec, qs -c $qsConfig ipc call overviewClipboardToggle
-    bind = $mod, N, exec, zennotes
-    bind = $mod, Tab, exec, qs -c $qsConfig ipc call cheatsheetToggle
-
-    # Applications
-    bind = $mod, W, exec, zen-beta
-    bind = $mod, E, exec, nautilus
-    bind = $mod, O, exec, zennotes
-    bind = $mod, T, exec, wezterm
-    bind = $mod, Return, exec, wezterm
-    bind = $mod, C, killactive
-
-    # Window navigation
-    bind = $mod, Left, movefocus, l
-    bind = $mod, Right, movefocus, r
-    bind = $mod, Up, movefocus, u
-    bind = $mod, Down, movefocus, d
-    bind = $mod, F, fullscreen, 0
-    bind = $mod SHIFT, F, fullscreen, 1
-
-    # Screenshots
-    bind = $mod SHIFT, S, exec, grim -g "$(slurp)" - | satty --filename - --copy-command wl-copy --early-exit
-    bind = $mod, S, exec, grimblast --notify copy output
-    bind = $mod CTRL, S, exec, grimblast --notify copy active
-    bind = , Print, exec, grimblast --notify copy output
-    bind = CTRL, Print, exec, mkdir -p "$HOME/Pictures/Screenshots" && grimblast --notify copysave output
-
-    # Clipboard, color and wallpaper
-    bind = $mod SHIFT, C, exec, hyprpicker -a
-    bind = $mod SHIFT, W, exec, ~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh
-    bind = $mod CTRL SHIFT, W, exec, ~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh
-  '';
-
-  home.activation.removeHyprlandLua = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+  home.activation.migrateLegacyHyprlandLua = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
     stale="$HOME/.config/hypr/hyprland.lua"
-    if [ -e "$stale" ] || [ -L "$stale" ]; then
-      backup="$HOME/.local/state/nix-conf/backups/hyprland.lua.$(date +%Y%m%d%H%M%S)"
+    if [ -f "$stale" ] && [ ! -L "$stale" ] && grep -Eq '(^|[[:space:]])(source|bind|env|input|general|decoration|windowrule|exec|exec-once)[[:space:]]*=|\$[A-Za-z_]' "$stale"; then
+      backup="$HOME/.local/state/nix-conf/backups/hyprland.lua.hyprlang.$(date +%Y%m%d%H%M%S)"
       $DRY_RUN_CMD mkdir -p "$(dirname "$backup")"
       $DRY_RUN_CMD cp -a "$stale" "$backup"
       $DRY_RUN_CMD rm -f "$stale"

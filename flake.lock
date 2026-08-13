@@ -631,17 +631,17 @@
     "illogical-impulse-dotfiles": {
       "flake": false,
       "locked": {
-        "lastModified": 1754822423,
-        "narHash": "sha256-IMW3GwL3Xxo48ccRHXrvstZYUL2WZH6XE6x2UBQ0TrE=",
-        "owner": "xBLACKICEx",
+        "lastModified": 1786415325,
+        "narHash": "sha256-A94CUNEk+lFu2SB9OLE9LLM8z4pzc57W38LZc6lVI/I=",
+        "owner": "end-4",
         "repo": "dots-hyprland",
-        "rev": "7f1699663d16b612cb232fd230c06492021fa692",
+        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
         "type": "github"
       },
       "original": {
-        "owner": "xBLACKICEx",
-        "ref": "tmp",
+        "owner": "end-4",
         "repo": "dots-hyprland",
+        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
         "type": "github"
       }
     },
