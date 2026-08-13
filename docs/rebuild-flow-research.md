@@ -119,3 +119,11 @@ The gpu-screen-recorder CLI supports `-w region -region WxH+X+Y` for region capt
 
 29. [Debian gpu-screen-recorder manpage](https://manpages.debian.org/testing/gpu-screen-recorder-cli/gpu-screen-recorder.1.en.html)
 30. [GPU Screen Recorder upstream README](https://git.dec05eba.com/gpu-screen-recorder/about/)
+
+## Hyprland Lua configuration failure
+
+Hyprland 0.55+ prefers Lua when `$XDG_CONFIG_HOME/hypr/hyprland.lua` exists, and a fundamental Lua syntax error prevents later bindings in the same file from loading; Hyprland then exposes emergency bindings such as Super+Q, Super+R, and Super+M. The official migration note says that a `hyprland.lua` file takes precedence over the legacy `hyprland.conf` file at startup: https://hypr.land/news/26_lua/ and https://wiki.hypr.land/Configuring/Start/.
+
+Home Manager issue #9468 reproduces the exact error `/home/.../hyprland.lua:5: <name> expected near '$'` when `wayland.windowManager.hyprland.configType = "lua"` is combined with legacy hyprlang-style settings. The maintainer explains that Lua configuration requires Lua syntax rather than the legacy settings representation: https://github.com/nix-community/home-manager/issues/9468.
+
+The end-4 assets integrated in this repository are `.conf` fragments and use hyprlang syntax. The local session therefore explicitly sets `configType = "hyprlang"`, keeps the fragments under `~/.config/hypr/hyprland/`, and backs up/removes a stale user `hyprland.lua` during Home Manager activation so it cannot take precedence over the generated `hyprland.conf`. This is a compatibility choice for the current end-4 source; a future migration to native Lua must convert every fragment and binding rather than changing only the file extension.

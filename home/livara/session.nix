@@ -17,6 +17,7 @@ in
 {
   wayland.windowManager.hyprland = {
     enable = true;
+    configType = "hyprlang";
     systemd.enable = false;
     xwayland.enable = true;
     settings = {
@@ -132,6 +133,16 @@ in
     bind = $mod SHIFT, C, exec, hyprpicker -a
     bind = $mod SHIFT, W, exec, ~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh
     bind = $mod CTRL SHIFT, W, exec, ~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh
+  '';
+
+  home.activation.removeHyprlandLua = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+    stale="$HOME/.config/hypr/hyprland.lua"
+    if [ -e "$stale" ] || [ -L "$stale" ]; then
+      backup="$HOME/.local/state/nix-conf/backups/hyprland.lua.$(date +%Y%m%d%H%M%S)"
+      $DRY_RUN_CMD mkdir -p "$(dirname "$backup")"
+      $DRY_RUN_CMD cp -a "$stale" "$backup"
+      $DRY_RUN_CMD rm -f "$stale"
+    fi
   '';
 
   home.activation.setupScreenshots = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
