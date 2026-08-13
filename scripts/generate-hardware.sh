@@ -253,7 +253,7 @@ ensure_boot_mount() {
 }
 
 mount_records() {
-  findmnt --kernel --list --noheadings --raw --output TARGET,SOURCE,FSTYPE,OPTIONS \
+  findmnt --kernel --noheadings --raw --output TARGET,SOURCE,FSTYPE,OPTIONS \
     | awk -v root="$TARGET_ROOT" 'BEGIN { FS="[[:space:]]+"; OFS="\t"; prefix=(root == "/" ? "/" : root "/") } $1 == root || index($1, prefix) == 1 { print $1, $2, $3, $4 }'
 }
 

@@ -53,3 +53,17 @@ References:
 10. [Nix Reference: nix develop](https://nix.dev/manual/nix/2.34/command-ref/new-cli/nix3-develop)
 11. [Nix Reference: nix flake check](https://nix.dev/manual/nix/2.34/command-ref/new-cli/nix3-flake-check)
 12. [Nix Reference: nix eval](https://nix.dev/manual/nix/2.34/command-ref/new-cli/nix3-eval)
+
+## Runtime findings from the first real installer run
+
+The first real `NIX_CONF_REBUILD_MODE=test ./install.sh` run exposed two installer defects that static checks could not catch:
+
+1. The evaluator used `$flake#latitude.config...`. A flake reference must include the output namespace, so the correct installable is `$flake#nixosConfigurations.latitude.config.system.build.toplevel.drvPath`, with the host selected dynamically. The Nix reference describes `nix eval` as accepting an installable and resolving an attribute path within the flake; the NixOS system is under the `nixosConfigurations` output.[13]
+2. The hardware generator combined `findmnt --list` and `--raw`. The util-linux manual documents both as output-format selectors; the local util-linux version rejects their combination. The stable scripted form is `findmnt --kernel --noheadings --raw --output TARGET,SOURCE,FSTYPE,OPTIONS`, followed by explicit field parsing.[14]
+
+Both defects were corrected and regression-tested. The mock installer test now asserts the complete `nixosConfigurations.<host>` path, while the sandbox executes the exact `findmnt` command and verifies that mount records are produced.
+
+The operational implication is important: `nix flake check` can pass while an installer-owned `nix eval` command is still malformed, because `flake check` validates the flake's declared outputs rather than arbitrary attribute paths assembled by shell code. The installer therefore needs its own gate test, and that test must run before `nixos-rebuild`.
+
+13. [Nix Reference: nix eval](https://nix.dev/manual/nix/2.18/command-ref/new-cli/nix3-eval)
+14. [findmnt(8) Linux manual](https://man7.org/linux/man-pages/man8/findmnt.8.html)

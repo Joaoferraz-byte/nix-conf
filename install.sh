@@ -232,7 +232,7 @@ fi
 
 printf '%b\n' "${YELLOW}Evaluating selected system derivation...${NC}"
 if run_logged nix eval --raw --no-update-lock-file \
-  "$SCRIPT_DIR#$FLAKE_TARGET.config.system.build.toplevel.drvPath"; then
+  "$SCRIPT_DIR#nixosConfigurations.$FLAKE_TARGET.config.system.build.toplevel.drvPath"; then
   printf '\n'
 else
   status=$?
