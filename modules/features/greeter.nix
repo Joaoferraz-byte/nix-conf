@@ -28,11 +28,7 @@
           };
         };
       };
-      services.displayManager.defaultSession = "niri";
-      programs.niri = {
-        enable = true;
-        package = pkgs.niri;
-      };
+      services.displayManager.defaultSession = "hyprland-uwsm";
 
       environment.systemPackages = [
         clockworkTheme

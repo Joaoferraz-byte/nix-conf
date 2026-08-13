@@ -1,35 +1,63 @@
-{ config, pkgs, lib, inputs, self, ... }:
-
+{ config, lib, ... }:
+let
+  home = config.home.homeDirectory;
+  themeDir = "${config.xdg.stateHome}/nix-conf/theme";
+in
 {
-  # Themes
-  home.activation.linkFirefoxDmsTheme = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    FIREFOX_CSS="${config.home.homeDirectory}/.config/DankMaterialShell/firefox.css"
-    if [ -f "$FIREFOX_CSS" ]; then
-      for FIREFOX_BASE in \
-        "${config.home.homeDirectory}/.mozilla/firefox" \
-        "${config.home.homeDirectory}/.var/app/org.mozilla.firefox/.mozilla/firefox"; do
-        if [ -d "$FIREFOX_BASE" ]; then
-          while IFS= read -r profile; do
-            $DRY_RUN_CMD mkdir -p "$profile/chrome"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/ln -sfn "$FIREFOX_CSS" "$profile/chrome/userChrome.css"
-          done < <(find "$FIREFOX_BASE" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
-        fi
-      done
-    fi
+  xdg.configFile."matugen/templates/firefox.css".text = ''
+    :root {
+      --nix-bg: {{ colors.background.dark.hex }};
+      --nix-surface: {{ colors.surface.dark.hex }};
+      --nix-surface-variant: {{ colors.surface_variant.dark.hex }};
+      --nix-fg: {{ colors.on_surface.dark.hex }};
+      --nix-fg-muted: {{ colors.on_surface_variant.dark.hex }};
+      --nix-accent: {{ colors.primary.dark.hex }};
+      --nix-accent-container: {{ colors.primary_container.dark.hex }};
+    }
+
+    #navigator-toolbox,
+    #TabsToolbar,
+    #nav-bar,
+    #PersonalToolbar {
+      background: var(--nix-bg) !important;
+      color: var(--nix-fg) !important;
+      border-color: var(--nix-surface-variant) !important;
+    }
+
+    .tabbrowser-tab[selected] .tab-background {
+      background: var(--nix-accent-container) !important;
+    }
+
+    .tabbrowser-tab[selected] .tab-label,
+    .toolbarbutton-1,
+    .urlbar-input {
+      color: var(--nix-fg) !important;
+    }
   '';
 
-  home.activation.linkZenTheme = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    ZEN_CSS="${config.home.homeDirectory}/.config/DankMaterialShell/zen.css"
-    for ZEN_BASE in \
-      "${config.home.homeDirectory}/.config/zen" \
-      "${config.home.homeDirectory}/.var/app/app.zen_browser.zen/.zen"; do
-      if [ -d "$ZEN_BASE" ]; then
-        while IFS= read -r profile; do
-          $DRY_RUN_CMD mkdir -p "$profile/chrome"
-          $DRY_RUN_CMD ${pkgs.coreutils}/bin/ln -sfn "$ZEN_CSS" "$profile/chrome/userChrome.css"
-        done < <(find "$ZEN_BASE" -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
-      fi
-    done
+  xdg.configFile."matugen/templates/zen.css".text = ''
+    :root {
+      --zen-background: {{ colors.background.dark.hex }};
+      --zen-surface: {{ colors.surface.dark.hex }};
+      --zen-surface-variant: {{ colors.surface_variant.dark.hex }};
+      --zen-foreground: {{ colors.on_surface.dark.hex }};
+      --zen-muted: {{ colors.on_surface_variant.dark.hex }};
+      --zen-accent: {{ colors.primary.dark.hex }};
+      --zen-accent-container: {{ colors.primary_container.dark.hex }};
+    }
+
+    #navigator-toolbox,
+    #TabsToolbar,
+    #nav-bar,
+    #PersonalToolbar {
+      background-color: var(--zen-background) !important;
+      color: var(--zen-foreground) !important;
+      border-color: var(--zen-surface-variant) !important;
+    }
+
+    .tabbrowser-tab[selected] .tab-background {
+      background-color: var(--zen-accent-container) !important;
+    }
   '';
 
   xdg.configFile."matugen/templates/zennotes.css".text = ''
@@ -65,62 +93,118 @@
     }
   '';
 
-  xdg.configFile."gtk-3.0/gtk.css".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/gtk-3.0/dank-colors.css";
-  xdg.configFile."gtk-4.0/gtk.css".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/gtk-4.0/dank-colors.css";
-  xdg.configFile."environment.d/90-dms.conf".text = ''
-    DMS_ENABLE_GTK4_REFRESH=1
-  '';
-  xdg.configFile."var/app/org.gnome.Nautilus/config/gtk-3.0/gtk.css".text = ''
-    @import url("file://${config.home.homeDirectory}/.config/gtk-3.0/dank-colors.css");
-  '';
-  xdg.configFile."var/app/org.gnome.Nautilus/config/gtk-4.0/gtk.css".text = ''
-    @import url("file://${config.home.homeDirectory}/.config/gtk-4.0/dank-colors.css");
-  '';
-
   xdg.configFile."matugen/config.toml".text = ''
     [config]
+    version_check = false
+
+    [templates.m3colors]
+    input_path = '~/.config/matugen/templates/colors.json'
+    output_path = '~/.local/state/quickshell/user/generated/colors.json'
+
+    [templates.hyprland]
+    input_path = '~/.config/matugen/templates/hyprland/colors.conf'
+    output_path = '~/.config/hypr/hyprland/colors.conf'
+
+    [templates.hyprlock]
+    input_path = '~/.config/matugen/templates/hyprland/hyprlock.conf'
+    output_path = '~/.config/hypr/hyprlock.conf'
+
+    [templates.fuzzel]
+    input_path = '~/.config/matugen/templates/fuzzel/fuzzel_theme.ini'
+    output_path = '~/.config/fuzzel/fuzzel_theme.ini'
+
+    [templates.gtk3]
+    input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
+    output_path = '~/.config/gtk-3.0/gtk.css'
+
+    [templates.gtk4]
+    input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
+    output_path = '~/.config/gtk-4.0/gtk.css'
+
+    [templates.kde_colors]
+    input_path = '~/.config/matugen/templates/kde/color.txt'
+    output_path = '~/.local/state/quickshell/user/generated/color.txt'
+
+    [templates.wallpaper]
+    input_path = '~/.config/matugen/templates/wallpaper.txt'
+    output_path = '~/.local/state/quickshell/user/generated/wallpaper/path.txt'
+
+    [templates.firefox]
+    input_path = '~/.config/matugen/templates/firefox.css'
+    output_path = '~/.local/state/nix-conf/theme/firefox.css'
+
+    [templates.zen]
+    input_path = '~/.config/matugen/templates/zen.css'
+    output_path = '~/.local/state/nix-conf/theme/zen.css'
 
     [templates.zennotes]
-    input_path = "${config.home.homeDirectory}/.config/matugen/templates/zennotes.css"
-    output_path = "${config.home.homeDirectory}/.var/app/org.zennotes.ZenNotes/config/zennotes/themes/dms-matugen/theme.css"
+    input_path = '~/.config/matugen/templates/zennotes.css'
+    output_path = '~/.local/state/nix-conf/theme/zennotes.css'
   '';
 
-  home.activation.ensureDmsThemeDirs = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    $DRY_RUN_CMD mkdir -p \
-      "${config.home.homeDirectory}/.var/app/org.zennotes.ZenNotes/config/zennotes/themes/dms-matugen" \
-      "${config.home.homeDirectory}/.config/DankMaterialShell"
-  '';
-
-  home.file.".var/app/org.zennotes.ZenNotes/config/zennotes/themes/dms-matugen/manifest.json".text = builtins.toJSON {
-    name = "DMS Matugen";
-    author = "DankMaterialShell";
+  home.file.".var/app/org.zennotes.ZenNotes/config/zennotes/themes/nix-conf-matugen/manifest.json".text = builtins.toJSON {
+    name = "Nix Conf Matugen";
+    author = "Joaoferraz-byte";
     version = "1.0.0";
-    description = "A dark ZenNotes theme generated from the active DMS palette.";
+    description = "A dark ZenNotes theme generated by Matugen.";
     modes = "dark";
     preview = { dark = "#1e1e2e"; };
   };
 
-  home.activation.configureZenNotes = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ZN_CONFIG="${config.home.homeDirectory}/.var/app/org.zennotes.ZenNotes/config/zennotes/config.toml"
-    $DRY_RUN_CMD mkdir -p "$(dirname "$ZN_CONFIG")"
-    if [ -f "$ZN_CONFIG" ]; then
-      if grep -q '^themeId = ' "$ZN_CONFIG"; then
-        $DRY_RUN_CMD sed -i 's/^themeId = .*/themeId = "dms-matugen"/' "$ZN_CONFIG"
-      elif grep -q '^\[appearance\]$' "$ZN_CONFIG"; then
-        $DRY_RUN_CMD sed -i '/^\[appearance\]$/a themeId = "dms-matugen"' "$ZN_CONFIG"
-      else
-        $DRY_RUN_CMD cat >> "$ZN_CONFIG" <<EOF
-
-[appearance]
-themeId = "dms-matugen"
-EOF
-      fi
-    else
-      $DRY_RUN_CMD cat > "$ZN_CONFIG" <<EOF
-[appearance]
-themeId = "dms-matugen"
-EOF
-    fi
+  home.file.".var/app/org.gnome.Nautilus/config/gtk-3.0/gtk.css".text = ''
+    @import url("file://${home}/.config/gtk-3.0/gtk.css");
+  '';
+  home.file.".var/app/org.gnome.Nautilus/config/gtk-4.0/gtk.css".text = ''
+    @import url("file://${home}/.config/gtk-4.0/gtk.css");
   '';
 
+  home.activation.configureMatugenTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    theme_dir="${themeDir}"
+    zennotes_dir="${home}/.var/app/org.zennotes.ZenNotes/config/zennotes/themes/nix-conf-matugen"
+    $DRY_RUN_CMD mkdir -p "$theme_dir" "$zennotes_dir" "${home}/.config/gtk-3.0" "${home}/.config/gtk-4.0"
+
+    for profile_base in \
+      "${home}/.mozilla/firefox" \
+      "${home}/.var/app/org.mozilla.firefox/.mozilla/firefox"; do
+      if [ -d "$profile_base" ]; then
+        while IFS= read -r profile; do
+          $DRY_RUN_CMD mkdir -p "$profile/chrome"
+          if [ -f "$profile/chrome/userChrome.css" ] && [ ! -L "$profile/chrome/userChrome.css" ]; then
+            $DRY_RUN_CMD mv "$profile/chrome/userChrome.css" "$profile/chrome/userChrome.css.legacy"
+          fi
+          $DRY_RUN_CMD ln -sfn "$theme_dir/firefox.css" "$profile/chrome/userChrome.css"
+        done < <(find "$profile_base" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+      fi
+    done
+
+    for profile_base in \
+      "${home}/.config/zen" \
+      "${home}/.var/app/app.zen_browser.zen/.zen"; do
+      if [ -d "$profile_base" ]; then
+        while IFS= read -r profile; do
+          $DRY_RUN_CMD mkdir -p "$profile/chrome"
+          if [ -f "$profile/chrome/userChrome.css" ] && [ ! -L "$profile/chrome/userChrome.css" ]; then
+            $DRY_RUN_CMD mv "$profile/chrome/userChrome.css" "$profile/chrome/userChrome.css.legacy"
+          fi
+          $DRY_RUN_CMD ln -sfn "$theme_dir/zen.css" "$profile/chrome/userChrome.css"
+        done < <(find "$profile_base" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+      fi
+    done
+
+    $DRY_RUN_CMD ln -sfn "$theme_dir/zennotes.css" "$zennotes_dir/theme.css"
+
+    config_file="${home}/.var/app/org.zennotes.ZenNotes/config/zennotes/config.toml"
+    $DRY_RUN_CMD mkdir -p "$(dirname "$config_file")"
+    if [ -f "$config_file" ]; then
+      if grep -q '^themeId = ' "$config_file"; then
+        $DRY_RUN_CMD sed -i 's/^themeId = .*/themeId = "nix-conf-matugen"/' "$config_file"
+      elif grep -q '^\[appearance\]$' "$config_file"; then
+        $DRY_RUN_CMD sed -i '/^\[appearance\]$/a themeId = "nix-conf-matugen"' "$config_file"
+      else
+        printf '\n[appearance]\nthemeId = "nix-conf-matugen"\n' | $DRY_RUN_CMD tee -a "$config_file" >/dev/null
+      fi
+    else
+      printf '[appearance]\nthemeId = "nix-conf-matugen"\n' | $DRY_RUN_CMD tee "$config_file" >/dev/null
+    fi
+  '';
 }

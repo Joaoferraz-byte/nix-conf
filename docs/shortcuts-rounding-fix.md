@@ -1,100 +1,88 @@
-# DMS Keybinds and Window Rounding Configuration
+# Hyprland and end-4 shortcut reference
 
-This document details the configuration of DMS keybinds and window rounding settings in the Niri compositor.
+This document describes the active shortcut and window-decoration contract for the Hyprland session managed by UWSM and the end-4 QuickShell profile.
 
-## Overview
+## Ownership
 
-DMS (DankMaterialShell) manages keybinds at runtime through its daemon service. Niri provides the compositor layer and handles window decoration settings such as rounding and gaps.
+Hyprland owns compositor keybinds, focus, workspaces, window movement, fullscreen state, rounding, gaps and input settings. QuickShell owns shell surfaces such as the overview, clipboard history, session menu, cheatsheet and sidebars. The two layers communicate through QuickShell IPC calls such as `qs -c ii ipc call overviewToggle`.
 
-## Keybinds Management
+The source dotfile is pinned as the non-flake `illogical-impulse-dotfiles` input. Local compatibility bindings are generated at `~/.config/hypr/nix-conf.conf`; they do not modify the source checkout and are shared by both hosts.
 
-DMS keybinds are registered at runtime via the DMS daemon. The keybinds configuration is handled by the `CompositorKeybinds.qml` service, which communicates with the DMS daemon to apply keybinds.
+## Shell and application shortcuts
 
-### Core DMS Shortcuts
+| Key | Action | Implementation |
+| --- | --- | --- |
+| `Super + Space` | Toggle overview and launcher | `qs -c ii ipc call overviewToggle` |
+| `Super + D` | Toggle overview | `qs -c ii ipc call overviewToggle` |
+| `Super + V` | Clipboard history | `qs -c ii ipc call overviewClipboardToggle` |
+| `Super + N` | Open ZenNotes | `zennotes` |
+| `Super + Tab` | Toggle end-4 cheatsheet | `qs -c ii ipc call cheatsheetToggle` |
+| `Super + X` | Toggle session menu | `qs -c ii ipc call sessionToggle` |
+| `Super + W` | Open Zen Browser beta | `zen-beta` |
+| `Super + E` | Open Nautilus | `nautilus` |
+| `Super + O` | Open ZenNotes | `zennotes` |
+| `Super + T` or `Super + Return` | Open WezTerm | `wezterm` |
+| `Super + C` | Close the active window | Hyprland `killactive` |
+
+The upstream end-4 bindings remain active for its overview, sidebars, media controls, brightness controls, wallpaper switching and fallback launchers. Local bindings are deliberately limited to historical nix-conf shortcuts that would otherwise collide with the imported configuration.
+
+## Window navigation and workspaces
+
+`Super + Left/Right/Up/Down` focuses a neighboring window. `Super + F` toggles fullscreen and `Super + Shift + F` enables fullscreen without hiding the surrounding compositor state. `Super + 1-9` and `Super + 0` select workspaces 1-10. Hyprland and the upstream end-4 scripts provide additional workspace movement and scratchpad bindings.
+
+The active decoration contract is defined in the imported end-4 `general.conf` and `rules.conf`. Local changes belong in `home/livara/session.nix` or a future host-specific override rather than in the source input.
+
+## Screenshots and visual tools
 
 | Key | Action | Command |
-|-----|--------|---------|
-| `Super` | Launcher | `dms run launcher` |
-| `Super + D` | Dashboard | `dms run dashboard` |
-| `Super + A` | Assistant | `dms run assistant` |
-| `Super + V` | Clipboard | `dms run clipboard` |
-| `Super + .` | Emoji | `dms run emoji` |
-| `Super + N` | Notes | `dms run notes` |
-| `Super + T` | Tmux | `dms run tmux` |
-| `Super + ,` | Wallpapers | `dms run wallpapers` |
-| `Super + Shift + C` | Settings | `dms run config` |
-| `Super + Tab` | Overview | `dms run overview` |
-| `Super + Esc` | Power Menu | `dms run powermenu` |
-| `Super + S` | Tools | `dms run tools` |
-| `Super + Shift + S` | Screenshot | `dms run screenshot` |
-| `Super + Shift + R` | Screen Record | `dms run screenrecord` |
-| `Super + Shift + A` | Lens | `dms run lens` |
-| `Super + Alt + B` | Reload Shell | `dms reload` |
+| --- | --- | --- |
+| `Print` | Copy the full output | `grimblast --notify copy output` |
+| `Ctrl + Print` | Copy and save the full output | `grimblast --notify copysave output` |
+| `Super + Shift + S` | Select a region and annotate it with Satty | `grim`, `slurp` and `satty` |
+| `Super + S` | Copy the active output | `grimblast --notify copy output` |
+| `Super + Ctrl + S` | Copy the active window | `grimblast --notify copy active` |
+| `Super + Shift + C` | Pick a color and copy it | `hyprpicker -a` |
 
-### Window Navigation Shortcuts (Niri)
+The imported end-4 configuration also provides its QuickShell screenshot surface, recording scripts and OCR fallback. The local region shortcut remains available for the existing Satty workflow.
 
-- `Super + 1-9`: Switch to workspace
-- `Super + Shift + 1-9`: Move window to workspace
-- `Super + Left/Right/Up/Down`: Focus window
-- `Super + Shift + Left/Right/Up/Down`: Move window
-- `Super + C`: Close window
-- `Super + W`: Open Zen Browser
-- `Super + E`: Open File Manager
-- `Super + O`: Open ZenNotes
-- `Super + Space`: Toggle Spotlight
-- `Super + T`: Open Terminal
-- `Super + Return`: Open Terminal
+## Hardware keys
 
-### Hardware Keys (Media/Volume/Brightness)
+Volume and mute keys use `wpctl`. Brightness keys use the end-4 QuickShell brightness IPC with `brightnessctl` fallback. Media keys use `playerctl` for play/pause, previous and next actions. The keyboard layout is `br`, and the touchpad uses tap-to-click, disable-while-typing and natural scrolling.
 
-- `XF86AudioRaiseVolume`: Increase volume via `wpctl`
-- `XF86AudioLowerVolume`: Decrease volume via `wpctl`
-- `XF86AudioMute`: Mute/unmute via `wpctl`
-- `XF86MonBrightnessUp`: Increase brightness
-- `XF86MonBrightnessDown`: Decrease brightness
-- `XF86AudioPlay`: Play/pause media via `playerctl`
-- `XF86AudioNext`: Next track via `playerctl`
-- `XF86AudioPrev`: Previous track via `playerctl`
+## Applying changes
 
-## Window Decoration Settings
-
-Window rounding and gaps are configured in `modules/features/niri.nix`:
-
-- **Rounding**: 12.0 pixels (applied to all window corners)
-- **Gaps**: 5 pixels (inner gaps between windows)
-- **Border**: Disabled
-- **Focus Ring**: Disabled
-
-These settings are applied automatically when Niri starts.
-
-## Configuration Files
-
-- **DMS Keybinds**: `shell-conf/modules/services/CompositorKeybinds.qml`
-- **Niri Settings**: `shell-conf/modules/niri.nix`
-- **DMS Configuration**: `shell-conf/modules/dms.nix`
-
-## Applying Changes
-
-To apply keybinds or decoration changes:
+Run the following from the repository checkout:
 
 ```bash
 cd ~/.config/nixos
-git pull origin main
-sudo nixos-rebuild switch --flake .#myMachine
+./install.sh
 ```
 
-After the rebuild, DMS will register keybinds at runtime, and Niri will apply window decoration settings immediately.
+For an explicit host selection, use `NIX_CONF_HOST=latitude ./install.sh` or `NIX_CONF_HOST=myMachine ./install.sh`. The installer runs `nix flake check --no-build` before switching the system and does not attempt a rebuild when hardware generation fails.
 
 ## Troubleshooting
 
-If keybinds are not working:
+Check the compositor and UWSM session with:
 
-1. Check that DMS daemon is running: `systemctl --user status dms`
-2. Verify keybinds configuration: `cat ~/.config/DankMaterialShell/keybinds.json`
-3. Check Niri logs: `journalctl --user -u niri -n 50`
+```bash
+systemctl --user status graphical-session.target
+systemctl --user status hypridle.service
+pgrep -a Hyprland
+pgrep -a qs
+```
 
-If window rounding is not applied:
+Check QuickShell and Hyprland logs with:
 
-1. Verify Niri is running: `pgrep niri`
-2. Check Niri configuration: `cat ~/.config/niri/config.kdl`
-3. Reload Niri: `niri msg action load-config-file`
+```bash
+journalctl --user -b --no-pager | grep -Ei 'quickshell|hyprland|uwsm|hypridle'
+qs -c ii ipc call TEST_ALIVE
+hyprctl reload
+```
+
+If a generated palette is stale, run the end-4 wallpaper switcher after confirming that the wallpaper path exists:
+
+```bash
+~/.config/quickshell/ii/scripts/colors/switchwall.sh
+```
+
+Matugen outputs are intentionally stored under `~/.local/state/quickshell/user/generated/` and `~/.local/state/nix-conf/theme/`. They must remain writable and must not be replaced by symlinks into the Nix store.

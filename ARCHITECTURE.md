@@ -1,61 +1,60 @@
-# Architecture Review and Refactoring Record
+# nix-conf Architecture
 
 ## 1. Scope and conclusion
 
-This repository is a declarative NixOS workstation configuration composed from flake-parts modules, NixOS modules, Home Manager modules, external flakes, and application-owned data. The architecture is real and modular, but its previous boundaries were not consistently enforced. The main problem was not that the repository lacked modules; it was that some files were modules of the wrong layer, some outputs were duplicated, and several runtime concerns had more than one owner.
+`nix-conf` is a declarative NixOS workstation configuration composed from flake-parts modules, NixOS modules, Home Manager modules, pinned external inputs, and application-owned data. The repository is modular in the technical sense because its expressions are evaluated by the Nix module system, but modularity is only useful when every file has one owner, one evaluation layer, and one stable contract.
 
-This revision makes the evaluated surface explicit, separates the common desktop profile from host identity, keeps DMS as a user-session authority, exposes Niri through a public shell-conf output, and treats Xournal++ configuration as data rather than a fake Nix module. It also splits the Home Manager profile into lifecycle-oriented modules and removes explanatory comments from active Nix code. Active source comments are limited to short English category headings.
+The active architecture now uses **Hyprland with UWSM**, the **end-4 illogical-impulse QuickShell profile**, and **Matugen** as the runtime palette generator. DMS and Niri are no longer active composition dependencies. The former shell integration was replaced rather than wrapped: immutable end-4 assets are consumed from a pinned source input, while local behavior is expressed in small NixOS and Home Manager adapters.
 
-The target is a single-direction architecture:
+The dependency direction is:
 
 ```text
 flake inputs
-  -> public flake outputs
+  -> flake-parts public outputs
     -> host composition roots
       -> NixOS system features
-        -> shared desktop boundary
-          -> Home Manager user profile
-            -> application adapters and runtime services
+        -> shared desktop composition
+          -> Home Manager profile
+            -> application adapters and user services
 ```
 
-The dependency direction is deliberate. Hosts may select features. Features may consume stable public outputs from external repositories. User profiles may consume application data and Home Manager modules. A low-level application module should not reach into a host's private implementation or into the internal inputs of another flake.
+A host may select system features. A system feature may consume public contracts from an external input. A Home Manager module may own user files and user services. Application repositories provide data and templates. No active module should reach through `inputs.<flake>.inputs` or make a host-specific assumption without an option or composition boundary.
 
-## 2. What is a module?
+## 2. What counts as a module
 
-A NixOS or Home Manager module is an expression evaluated by the Nix module system. It may declare typed options, import other modules, and define values for the combined configuration. A module is therefore more than a file containing Nix syntax and more than a convenient place to store settings.
+A NixOS or Home Manager module is an expression evaluated by the Nix module system. It may import other modules, declare typed options, and contribute configuration to a combined evaluation. A file containing Nix syntax is not automatically a module; a data file containing CSS, XML, JSON, or INI is not a module unless a consumer declares how it is installed or transformed.
 
-> A module has a coherent responsibility, a well-defined evaluation layer, and an explicit contract with the modules that consume it.
+> A module has a coherent responsibility, a defined evaluation layer, and an explicit contract with its consumers.
 
-The canonical module shape is based on `imports`, `options`, and `config`. A reusable feature should expose options when consumers need to vary behavior. A fixed composition root may intentionally expose no options, but it should remain a composition module rather than pretending to be a reusable feature. Static XML, CSS, JSON, images, palettes, and templates are data inputs. They become part of a module only when a module declares how they are installed, generated, or adapted.
-
-The repository uses four different kinds of Nix expressions:
-
-| Kind | Evaluation layer | Examples | Architectural responsibility |
+| Expression kind | Evaluation layer | Examples | Correct responsibility |
 |---|---|---|---|
-| flake-parts module | Flake evaluation | `modules/parts.nix`, feature files, host `default.nix` files | Publishes outputs and composes systems. |
-| NixOS module | System evaluation | `features/flatpak.nix`, `features/dms-system.nix`, host `configuration.nix` | Declares services, packages, boot, hardware, security, and system policy. |
-| Home Manager module | User-profile evaluation | `home/livara/session.nix`, `themes.nix`, `applications.nix` | Declares user services, programs, XDG files, and activation behavior. |
-| Data input | Installed or transformed by a consumer | `xournal-conf/xournalpp/*`, icons, wallpapers | Provides application-owned content without pretending to be a module. |
+| Flake-parts module | Flake evaluation | `flake.nix`, `modules/parts.nix`, feature files, host assemblies | Publishes outputs and composes systems. |
+| NixOS module | System evaluation | `modules/features/*.nix`, host `configuration.nix`, hardware entrypoints | Owns boot, services, system packages, security, drivers, and system policy. |
+| Home Manager module | User-profile evaluation | `home/livara/session.nix`, `themes.nix`, `applications.nix` | Owns user programs, user services, XDG files, and activation adapters. |
+| Application data | Installed or transformed by a consumer | `xournal-conf/xournalpp/*`, icons, templates | Remains application-owned content rather than pretending to be system policy. |
+| Runtime state | Created outside the store | QuickShell generated JSON, Matugen outputs, browser profiles | Is writable and must not be represented as an immutable store symlink. |
 
-This distinction is more important than the number of files. Splitting one concern into many files does not create modularity if all of them still depend on the same private state.
+The repository should prefer one module per coherent concern, not one module per option. A composition module may intentionally expose no reusable options, but it should be documented as a composition root instead of being treated as a general feature.
 
-## 3. Repository boundaries
+## 3. Repository and input boundaries
 
-The repositories form a small configuration platform rather than one monolithic repository. `nix-conf` is the system composition root. `shell-conf` publishes the DMS/Niri session integration. `vim-conf` publishes a reusable NixVim module and a standalone editor package. `xournal-conf` publishes application data. `mesa-tomate-driver` publishes a NixOS hardware/service module.
+`nix-conf` is the system composition root. `vim-conf` is the editor library. `xournal-conf` is an application-data repository. `mesa-tomate-driver` is a system feature for the tablet driver. The end-4 dotfiles source is an immutable data input, and QuickShell is a separate flake input that provides the runtime package.
 
-| Repository | Public contract | Correct boundary |
+| Repository or input | Public contract | Ownership |
 |---|---|---|
-| `nix-conf` | NixOS configurations and system modules | Owns host composition, system policy, user-profile selection, and cross-repository integration. |
-| `shell-conf` | `nixosModules.niri`, `nixosModules.dankMaterialShell`, `overlays.niri`, and Home Manager modules | Owns the packaging and user-session integration of DMS and Niri. |
-| `vim-conf` | `lib.nixvimModule`, `lib.nixvimModules.default`, package, and check | Owns editor policy and NixVim composition. |
-| `xournal-conf` | Versioned XML, INI, GPL, and TeX data | Owns Xournal++ data, not host or system policy. |
-| `mesa-tomate-driver` | `nixosModules.default` | Owns the tablet service, udev integration, and its own typed options. |
+| `nix-conf` | NixOS configurations, system features, Home Manager composition, scripts, and documentation | Host composition and cross-repository integration. |
+| `xBLACKICEx/dots-hyprland` | Pinned non-flake source tree from branch `tmp` | Immutable end-4 QuickShell, Hyprland, Matugen, Fuzzel, Hyprlock, Wlogout, and script assets. |
+| `outfoxxed/quickshell` | `packages.${system}.default` | QuickShell runtime package. |
+| `vim-conf` | NixVim module library and package | Editor policy and NixVim composition. |
+| `xournal-conf` | XML, INI, GPL, and TeX data | Versioned Xournal++ application data. |
+| `mesa-tomate-driver` | NixOS module | Tablet service, udev integration, and typed driver options. |
+| `zen-browser-flake` | Home Manager browser module | Zen Browser package and profile integration. |
 
-The consumer should use these public contracts. It should not navigate through `inputs.shell-conf.inputs.niri` or through another repository's private module tree. The refactor changes the Niri overlay consumption to `inputs.shell-conf.overlays.niri`.
+The active flake does not import `shell-conf` or `dms-plugin-registry`. The old DMS/Niri files remain only in historical or archived locations when explicitly retained for reference; they are not evaluated by the active import list.
 
-## 4. Evaluated composition
+## 4. Composition root and host model
 
-The root `flake.nix` now imports the evaluated surface explicitly:
+The root `flake.nix` is the evaluated composition boundary. Its import list is explicit, so adding a file to an archive or scratch directory cannot silently alter a system output.
 
 ```nix
 imports = [
@@ -64,12 +63,12 @@ imports = [
   ./modules/features/desktop-portals.nix
   ./modules/features/development.nix
   ./modules/features/embedded.nix
-  ./modules/features/dms-system.nix
   ./modules/features/firejail.nix
   ./modules/features/flatpak.nix
+  ./modules/features/end4.nix
   ./modules/features/greeter.nix
+  ./modules/features/hyprland.nix
   ./modules/features/keyd.nix
-  ./modules/features/niri.nix
   ./modules/features/nvidia.nix
   ./modules/features/system-hardening.nix
   ./modules/features/containers.nix
@@ -81,312 +80,248 @@ imports = [
 ];
 ```
 
-This list is intentionally explicit. A new file placed in `archive/` or a future scratch directory cannot silently become an evaluated output. Historical material now lives in `archive/`, outside the evaluated module tree.
+The host roots intentionally share the same desktop and user profile. They differ in hardware, graphics, power, and machine-specific feature selection rather than carrying divergent shell implementations.
 
-The two host roots are:
+| Host | Shared layer | Host-specific layer |
+|---|---|---|
+| `latitude` | Hyprland/UWSM, end-4, Home Manager, NixVim, applications, themes, Xournal++, development, containers, security, Flatpak, audio, and keyd | Dell Latitude hardware, ext4 root, Intel graphics, laptop power policy, and tracked ESP/swap configuration. |
+| `myMachine` | The same desktop and user profile as Latitude | AMD microcode, Btrfs root with `@`, `home`, and `nix` subvolumes, desktop hardware, NVIDIA and virtualization policy. |
 
-| Host | Composition |
+`modules/hosts/common-desktop.nix` is a composition module. It imports Home Manager, the local Hyprland NixOS module, the local end-4 Home Manager module, and the reusable NixVim module. It exposes `desktop.profile.userName` so the user identity is passed into the profile rather than hard-coded inside reusable features.
+
+## 5. System feature boundaries
+
+The feature directory contains system-level capabilities. A feature should not own a user-specific file when the corresponding concern belongs in Home Manager, and a user module should not silently enable system drivers or privileged services.
+
+| File | Layer and responsibility |
 |---|---|
-| `myMachine` | Common desktop profile, desktop-specific configuration, hardware, Mesa-Tomate driver, development, embedded, rootless containers, libvirt virtualization, system packages, GPU, portals, Flatpak, audio, keyd, hardening, and Firejail. |
-| `latitude` | Common desktop profile, laptop configuration, hardware, laptop-specific power and graphics policy, development, embedded, rootless containers, system packages, portals, Flatpak, audio, keyd, hardening, and Firejail. |
+| `modules/features/hyprland.nix` | Enables Hyprland through the official NixOS module path, sets `withUWSM = true`, installs compositor-level screenshot and Wayland tools, and publishes the Home Manager cursor/session boundary. |
+| `modules/features/end4.nix` | Home Manager adapter for the pinned end-4 source. Links immutable assets, provides QuickShell and Qt runtime packages, and seeds writable runtime directories without symlinking generated state into the store. |
+| `modules/features/greeter.nix` | SDDM, Clockwork theme, cursor, keyring, and the `hyprland-uwsm` default session. |
+| `modules/features/desktop-portals.nix` | Portals, GTK fallback, polkit, UDisks, and keyring prerequisites. The Hyprland portal is preferred for the Hyprland session with GTK as fallback. |
+| `modules/features/development.nix` | Shared Python/Manim, native, web, Go, Rust, language-server, and build tools. Project-specific versions remain in project shells. |
+| `modules/features/embedded.nix` | Arduino, PlatformIO, OpenOCD, probe-rs, serial tools, and narrowly scoped device access. |
+| `modules/features/containers.nix` | Rootless Docker, Compose, Buildx, and user-facing container tools without requiring a privileged Docker group. |
+| `modules/features/virtualization.nix` | libvirt, QEMU/KVM, SPICE, virt-manager, and access for the declared VM operator. |
+| `modules/features/flatpak.nix` | Flatpak remotes, installed applications, update policy, and environment overrides. |
+| `modules/features/system-hardening.nix` | Firewall, audit, kernel restrictions, journald policy, boot restrictions, and related security controls. |
+| `modules/features/firejail.nix` | Firejail support and application sandbox integration. |
+| `modules/features/audiorelay.nix` | Audio relay and related service policy. |
+| `modules/features/keyd.nix` | Key remapping daemon and its system service. |
+| `modules/features/nvidia.nix` | NVIDIA-specific system policy selected by the relevant host. |
+| `modules/packages/core-packages.nix` | Shared system package baseline and compatibility packages. |
 
-`modules/hosts/common-desktop.nix` is a composition module, not a feature. It imports Home Manager, the shared DMS system bridge, Niri, the DMS plugin registry, and the shared NixVim module. It also provides a typed `desktop.profile.userName` option and passes that identity to the DMS bridge.
+The separation is adaptive rather than ceremonial. For example, a screenshot binary is a system package because both the compositor bindings and user scripts need it, while a QuickShell IPC binding is a Home Manager concern because it belongs to the user session.
 
-## 5. DMS and Niri: contextual architecture
+## 6. End-4, Hyprland, and UWSM architecture
 
-### 5.1 Ownership model
+### 6.1 Ownership model
 
-DankMaterialShell is a complete Wayland desktop shell, not merely a status bar. It owns user-session presentation, widgets, shell state, runtime theme generation, plugins, and its user service. Niri owns compositor semantics: input, layout, window rules, startup commands, and compositor keybindings. NixOS owns system prerequisites such as portals, polkit, power services, packages, and hardware support.
-
-The correct ownership model is therefore:
+Hyprland owns compositor semantics: input, focus, workspace behavior, window rules, monitor handling, and dispatch commands. UWSM owns the lifecycle of the desktop session launched from the display manager. QuickShell owns the shell surface: bars, overview, session menu, notifications, widgets, settings, and shell-specific state. Matugen owns runtime palette transformation.
 
 | Concern | Owner |
 |---|---|
-| DMS service, session settings, plugins, dynamic palette | `shell-conf` Home Manager modules and `home/livara/session.nix` |
-| Niri compositor settings | `home/livara/session.nix` through the published Niri Home Manager contract |
-| Niri system module and package overlay | `shell-conf` public NixOS module and `shell-conf.overlays.niri` |
-| Quickshell, Matugen, Cava, Khal, NetworkManager and GLib prerequisites | `nix-conf/modules/features/dms-system.nix` |
-| Polkit policy and system prerequisites | NixOS feature modules, with host overrides taking precedence. The session authentication agent has one owner supplied by the Niri desktop integration. |
-| DMS plugin source installation | `dms-system.nix`, derived from the selected user's declared plugin sources |
+| Login session and compositor package | `programs.hyprland` with `withUWSM = true` in `hyprland.nix` |
+| User-session lifecycle integration | UWSM; Home Manager sets `wayland.windowManager.hyprland.systemd.enable = false` |
+| Immutable end-4 assets | `inputs.illogical-impulse-dotfiles` through `end4.nix` |
+| QuickShell executable | `inputs.quickshell.packages.${system}.default` |
+| QuickShell profile | `ii`, selected with `QS_CONFIG` and `$qsConfig` |
+| Local compositor overrides | `home/livara/session.nix` and generated `~/.config/hypr/nix-conf.conf` |
+| Shell runtime state | `~/.local/state/quickshell/user/generated/` |
+| System portal and polkit prerequisites | NixOS feature modules |
+| User authentication agent | One end-4 startup command adapted to the Nix store executable |
 
-The upstream DMS NixOS and Home Manager modules have historically exposed overlapping systemd options. Importing both as enabled lifecycle owners can produce option conflicts or duplicate DMS instances. The current configuration consequently uses the `shell-conf` Home Manager module for the user-facing DMS service and a small NixOS bridge for prerequisites and plugin source installation. The upstream DMS NixOS module is not imported by the active hosts.
+The integration deliberately does not run the end-4 installer. It links the source assets that are safe to keep immutable, creates local runtime directories, and applies local overrides after the upstream configuration. This makes the two hosts share the same shell while keeping host hardware policy outside the shell source tree.
 
-### 5.2 What was wrong before
+### 6.2 Why Hyprland replaces Niri
 
-The previous design had four issues. First, the host assembly accessed `inputs.shell-conf.inputs.niri.overlays.niri`, which crossed a private input boundary. Second, `dms-system.nix` hard-coded `livara` and reached into `home-manager.users.livara.programs.dank-material-shell`. Third, the Home Manager profile declared a second `systemd.user.services.dms` lifecycle block and manually restarted DMS during activation even though the upstream Home Manager module already owns that service. Fourth, the `shell-conf` flake exposed a local file as a NixOS module even though that file was Home Manager-oriented and did not represent a valid NixOS contract.
+Niri and DMS previously divided compositor and shell responsibilities across a user policy, a public shell-conf output, a DMS registry, and a compatibility bridge. That arrangement had too many lifecycle owners and made the shell behavior dependent on the exact adapter version. The end-4 ecosystem is authored for Hyprland and QuickShell. Keeping Niri would therefore require a second compositor-specific translation layer and would discard the upstream end-4 configuration model.
 
-The DMS implementation was therefore not conceptually hopeless, but it was poorly layered and fragile. It mixed a compatibility bridge with lifecycle ownership. The refactor keeps the bridge because the upstream conflict is real, but limits it to system prerequisites and plugin sources, parameterizes the user identity, and leaves service lifecycle to the Home Manager DMS module.
+Hyprland is the adaptive choice because it matches the end-4 source, provides a supported NixOS module path, integrates with UWSM, and exposes dispatches that can be used from the existing shortcut compatibility file. The migration is not a blind compositor swap: every previous Niri action was classified as a shell action, compositor action, application launch, or screenshot action and moved to the appropriate owner.
 
-### 5.3 Niri configuration ownership
+### 6.3 Shortcut migration
 
-Niri configuration is declared through the Niri Home Manager module in `home/livara/session.nix`. The NixOS feature imports the published Niri NixOS module and enables the compositor at the system boundary. This avoids declaring `programs.niri` without first importing the module that defines its options.
+The upstream end-4 keybindings are sourced first. `session.nix` then writes a compatibility fragment that unbinds conflicting defaults and restores the shortcuts users already relied on.
 
-The current configuration still uses a small activation reload hook and a startup command for Xwayland Satellite and the wallpaper. Those are runtime adapters, not a second Niri configuration owner. Any future DMS include mechanism must not also own `~/.config/niri/config.kdl`; one mechanism must be selected and documented.
-
-## 6. Theme architecture
-
-The themes were not fully standardized before the refactor. They were coherent as a practical hybrid, but the authority boundaries were implicit. DMS/Matugen generated runtime colors, Firefox and Zen received symlinked DMS CSS, GTK loaded DMS-generated CSS, ZenNotes received a Matugen template, and Xournal++ used a static Tokyo Night palette. NixVim consumed a DMS-generated Base46 colorscheme at runtime. Fonts, cursors, icons, and login assets were separate stable identity settings.
-
-This is not automatically a defect. Dynamic wallpaper-derived colors and static application palettes are different contracts. The defect would be allowing Stylix and DMS/Matugen to generate the same target independently. This repository intentionally keeps DMS/Matugen as the runtime color authority and does not introduce Stylix as a competing color authority.
-
-The refactored theme model is:
-
-| Theme category | Authority | Consumers |
-|---|---|---|
-| Runtime palette | DMS and Matugen | DMS, GTK, Firefox, Zen, ZenNotes, NixVim adapter. |
-| Stable appearance identity | Home Manager and package declarations | Fonts, cursors, icons, profile icon, login assets. |
-| Application-specific static theme | Application repository | Xournal++ Tokyo Night palette and templates. |
-| Editor runtime adapter | DMS-generated Base46 file consumed by `vim-conf` | NixVim colorscheme `dms`. |
-
-`home/livara/themes.nix` now owns the theme adapters and generated template declarations. `applications.nix` owns application installation and Xournal++ data mapping. This prevents the application module from also becoming the theme authority.
-
-### 6.1 Remaining theme stability considerations
-
-DMS-generated CSS is mutable runtime output, while Home Manager-managed links are declarative references. That boundary is acceptable only because the generated file is intentionally produced outside the Nix store. The current design should not be described as fully immutable. A future hardening pass may replace direct out-of-store links with DMS-supported templates or a dedicated user service, but it must preserve one runtime generator.
-
-Xournal++ remains static because its palette and template formats are application-owned. The consumer seeds `settings.xml` and `toolbar.ini` into `~/.config/nixos/xournalpp` only when they do not already exist, with the profile prefix normalized to `config.home.homeDirectory`. Home Manager then exposes those user-owned files through out-of-store links. This preserves a portable versioned baseline while allowing deliberate application edits. `scripts/sync-xournalpp-config.sh` copies reviewed local changes back to the xournal-conf checkout.
-
-## 7. NixVim architecture
-
-The NixVim boundary is one of the stronger parts of the system. `vim-conf` publishes `lib.nixvimModule`, and `nix-conf` imports it inside `programs.nixvim.imports`. That is the correct layer: the editor library owns editor options, plugins, keymaps, language tooling, UI behavior, and controlled Lua escape hatches. The host should not duplicate those policies.
-
-The NixVim repository also publishes a standalone package and a check. Its plugin aggregation is real module composition rather than an arbitrary collection of files. The main compatibility risk is input lineage: NixVim is tested against a specific nixpkgs revision, so forcing follows relationships must be intentional. The current `vim-conf` input contract remains separate and is not rewritten to force a new nixpkgs relationship.
-
-The DMS colorscheme is an explicit runtime adapter. It does not make the editor architecture unsound because the editor still builds declaratively and only the palette file is runtime-generated. The adapter should remain small; editor behavior must not depend on DMS being available during Nix evaluation.
-
-## 8. Xournal++ architecture
-
-`xournal-conf` is correctly modeled as a data repository. Its files are application-owned XML, INI, GPL, and TeX assets. They do not need `options`, `config`, or a flake output. `nix-conf` installs those assets through a focused Home Manager application module.
-
-The important separation is:
-
-```text
-xournal-conf data
-  -> applications.nix path and installation adapter
-    -> Xournal++ runtime configuration
-```
-
-The refactor avoids promoting Xournal++ data into a NixOS feature. It also removes the consumer's hard dependency on `/home/livara` when installing the palette and LaTeX template. Device-class entries such as `MTM-1106 Pen` remain application configuration because the Mesa-Tomate driver owns device activation and Xournal++ owns input-class behavior.
-
-## 9. Security and stability assessment
-
-The current configuration contains meaningful security and reliability controls. It enables a firewall, restricts kernel pointers and dmesg access, configures audit rules, limits boot entries, configures zram, caps journald retention, enables Firejail support, and separates system packages from user packages. These are useful controls, but their presence does not make the system automatically secure.
-
-| Area | Assessment | Refactor decision |
-|---|---|---|
-| DMS lifecycle | Previously duplicated and coupled to a hard-coded user. | Keep one Home Manager owner; retain only a small NixOS prerequisite bridge. |
-| Niri evaluation | Previously relied on an undeclared or private Niri path. | Import the public Niri module through `shell-conf` and consume its public overlay. |
-| Theme state | Runtime output is intentionally mutable. | Keep DMS/Matugen as the only runtime palette authority and document the boundary. |
-| Home Manager activation | Network-dependent cloning and `git pull` made activation slow and failure-prone. | Moved synchronization to independent user services and timers. |
-| Trusted users | A broad trusted-user setting can weaken the trust boundary. | Do not silently change it in this structural refactor; review it separately. |
-| Hardening module | The feature combines security policy with some desktop assumptions. | Preserve current behavior; split security policy from desktop defaults in a later pass. |
-| NixVim | Main risk is upstream nixpkgs compatibility, not module structure. | Preserve the library boundary and validate its package/check independently. |
-| Xournal++ | Versioned defaults and user edits have different ownership. | Seed editable local settings, normalize their profile path, and provide an explicit sync-back helper. |
-| Latitude hardware | Generated device data was previously written to an untracked sidecar and the recovery flow assumed a fixed root. | Keep `hardware.nix` as a tracked entrypoint, autodetect or explicitly select the installed root and ESP, import tracked `hardware-configuration.nix`, stage only the generated file, and never alter ACPI parameters automatically. |
-| Wallpapers and Vault | The repositories use network access and Vault uses SSH. | Synchronize through independent timers; consider making Vault opt-in under stricter trust policies. |
-
-The highest stability risk was not the number of modules. It was doing network synchronization and mutable runtime repair during a declarative activation transaction. Wallpaper and Vault synchronization now run as independent user services on timers, so network failure does not prevent a local system rebuild. Vault access remains SSH-based and should still be made explicitly opt-in if the machine is used offline or under a restricted trust policy.
-
-## 10. File-level architecture after refactoring
-
-| File or directory | Role after refactoring |
+| Previous action | New owner and implementation |
 |---|---|
-| `flake.nix` | Explicit flake-parts import boundary and inputs. |
-| `modules/parts.nix` | Shared flake-parts system list. |
-| `modules/features/niri.nix` | NixOS adapter for the public Niri module and session packages. |
-| `modules/features/dms-system.nix` | System prerequisites and plugin source bridge; no DMS lifecycle owner. |
-| `modules/features/flatpak.nix` | Single Flatpak feature; the duplicate package definition was removed. |
-| `modules/features/development.nix` | Shared workstation toolchains for Python/Manim, native, web, Go, and Rust development. |
-| `modules/features/embedded.nix` | Embedded toolchain, udev integration, and narrowly scoped serial/USB access. |
-| `modules/features/containers.nix` | Rootless Docker, Compose, Buildx, and the local `lazydocker` interface. |
-| `modules/features/virtualization.nix` | libvirt, QEMU/KVM, SPICE, virt-manager, and access for the declared VM operator. |
-| `home/livara/appimage.nix` | Firejail AppImage MIME handler with a disposable private home. |
-| `modules/hosts/common-desktop.nix` | Shared NixOS/Home Manager composition and user identity option. |
-| `modules/hosts/my-machine/default.nix` | Desktop host root, overlay selection, hardware-specific modules. |
-| `modules/hosts/latitude/default.nix` | Laptop host root, overlay selection, laptop-specific modules. |
-| `modules/hosts/latitude/hardware.nix` | Tracked hardware entrypoint and graphics adapter. |
-| `modules/hosts/latitude/hardware-configuration.nix` | Tracked machine-generated filesystems, boot modules, swap, and CPU hardware data. |
-| `scripts/generate-latitude-hardware.sh` | Adaptive hardware detection, mount validation, backup, and Git staging for Latitude hardware data. |
-| `scripts/recover-latitude-boot.sh` | Root/ESP discovery and mount-only recovery for installed systems, emergency shells, and Live ISOs. |
-| `home/livara/home.nix` | Thin Home Manager entrypoint and user identity. |
-| `home/livara/session.nix` | Niri settings, DMS session settings, wallpaper startup adapter. |
-| `home/livara/themes.nix` | DMS/Matugen adapters and browser/GTK/ZenNotes integration. |
-| `home/livara/applications.nix` | Applications, XDG associations, NixVim import, and Xournal++ baseline/edited-data adapter. |
-| `home/livara/sync.nix` | Wallpaper and Vault repository synchronization. |
-| `shell-conf/flake.nix` | Public NixOS, Home Manager, and Niri overlay contracts. |
-| `vim-conf/flake.nix` | Public NixVim library/package/check contract. |
-| `xournal-conf/xournalpp/*` | Versioned application data. |
-| `archive/` | Historical material outside the evaluated module tree. |
+| Former DMS settings action | `qs -p ~/.config/quickshell/$qsConfig/settings.qml` |
+| Former DMS power-menu action | `qs -c $qsConfig ipc call sessionToggle` |
+| Former DMS dashboard/launcher action | `qs -c $qsConfig ipc call overviewToggle` |
+| Former DMS clipboard action | `qs -c $qsConfig ipc call overviewClipboardToggle` |
+| Former DMS keybind-overlay action | `qs -c $qsConfig ipc call cheatsheetToggle` |
+| ZenNotes | Application launch through `zennotes` |
+| Window focus and close | Hyprland `movefocus` and `killactive` dispatchers |
+| Region screenshot | `grim -g "$(slurp)" - \\| satty ...` |
+| Fullscreen and active-window screenshot | `grimblast` with copy/save actions |
+| Wallpaper selection | end-4 `switchwall.sh`, with `--image` for login selection |
 
-## 11. Refactoring principles
+The local fragment intentionally does not reimplement the complete end-4 keymap. It only resolves collisions and preserves behavior that was part of the previous nix-conf contract.
 
-The repository should continue to use one module per coherent concern, not one file per option. A host root may compose many features, but a feature should not assume a particular host name, disk layout, user name, or desktop session unless that assumption is expressed as an option.
+## 7. Theme architecture
 
-System modules should own system services and prerequisites. Home Manager modules should own user services and user files. Cross-layer adapters should be narrow and typed. Runtime-generated files should be isolated from store-managed files. External repositories should expose stable outputs, and consumers should never reach through `inputs.<flake>.inputs` to obtain a private implementation detail.
+Matugen is the sole runtime palette generator. This avoids a conflict in which DMS, Stylix, QuickShell, and a browser theme each generate different versions of the same colors. Static visual identity such as the cursor, icon theme, and profile icon remains declarative and is not confused with wallpaper-derived runtime state.
 
-The repository should prefer build-time validation for structured Niri and NixVim configuration, explicit activation ordering for unavoidable runtime adapters, and separate maintenance commands for network synchronization. These rules are more important than whether the directory tree contains ten or one hundred files.
-
-## 12. Applied changes
-
-The current refactor applied the following changes:
-
-1. Replaced recursive module discovery with an explicit evaluated import list.
-2. Moved historical modules from `modules/archive/` to `archive/`.
-3. Removed the duplicate `modules/packages/flatpak.nix` definition.
-4. Removed the unused `modules/homeManagerModules.nix` placeholder.
-5. Published `shell-conf.overlays.niri` and consumed it from `nix-conf`.
-6. Corrected `shell-conf.nixosModules.niri` so it exposes the upstream NixOS Niri module rather than a Home Manager-oriented local file.
-7. Added the shared `commonDesktop` composition root and parameterized the desktop user identity.
-8. Moved the DMS system bridge to `modules/features/dms-system.nix`, parameterized its user, and made plugin filtering null-safe.
-9. Removed the duplicate DMS user service and activation-time restart from the Home Manager session.
-10. Split the Home Manager profile into `applications.nix`, `session.nix`, `themes.nix`, and `sync.nix`.
-11. Seeded editable Xournal++ settings locally, normalized their profile path at the consumer boundary, and retained a reviewed sync-back helper.
-12. Removed verbose comments from active Nix files and translated remaining active comments and public descriptions to English.
-13. Kept `vim-conf` as a reusable NixVim module library rather than moving editor policy into the system repository.
-14. Moved Wallpapers and Vault synchronization out of Home Manager activation into independent user services and timers.
-15. Removed the second wallpaper owner by allowing DMS to own runtime wallpaper selection.
-16. Added separate development, embedded, rootless-container, and virtualization features, with Python and embedded devShells.
-17. Added a Firejail AppImage handler that uses a temporary private home and no network by default.
-18. Corrected the Xournal++ baseline, toolbar ordering, and bidirectional synchronization helper.
-19. Replaced the untracked Latitude hardware sidecar with a tracked `hardware-configuration.nix` imported by the stable `hardware.nix` entrypoint.
-20. Made Latitude hardware generation use live `nixos-generate-config --show-hardware-config`, validate device identifiers, keep backups, stage the generated file, and avoid automatic ACPI kernel parameters.
-21. Removed the duplicate GNOME Polkit authentication-agent service so the Niri session integration remains the sole session-agent owner.
-22. Made Latitude recovery detect installed roots and EFI partitions conservatively across the running system, emergency shell, and Live ISO, with explicit selection when ambiguous and no partitioning or formatting operations.
-23. Changed the installer to use the locked flake inputs by default; updating inputs is now explicit through `NIX_CONF_UPDATE_FLAKE=1`.
-
-## 13. Validation
-
-The refactor was checked with repository status, path/reference checks, duplicate-output checks, balanced-delimiter checks, English active-source scans, Bash syntax checks, hardware fixtures, and `git diff --check`. The restored sandbox used for this adaptive revision does not contain a Nix executable, so Nix evaluation must be run on the target NixOS or a normal Nix host. The earlier published commits contain the targeted Nix evaluations for the existing host contracts; this revision adds no new Nix module options.
-
-The following commands are the required targeted evaluations on a normal Nix host after the real Latitude hardware file has been generated; the earlier published commits recorded successful evaluations for the pre-existing host contracts:
-
-```bash
-nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
-nix eval .#nixosConfigurations.latitude.config.system.stateVersion
-nix eval .#nixosConfigurations.myMachine.config.home-manager.users.livara.programs.dank-material-shell.enable
-nix eval .#nixosConfigurations.myMachine.config.home-manager.users.livara.programs.niri.settings.prefer-no-csd
-nix eval .#nixosConfigurations.myMachine.config.virtualisation.docker.rootless.enable
-nix eval .#nixosConfigurations.myMachine.config.virtualisation.libvirtd.enable
-nix eval .#nixosConfigurations.latitude.config.virtualisation.docker.rootless.enable
-nix eval .#nixosConfigurations.latitude.config.nixpkgs.hostPlatform
-nix eval .#devShells.x86_64-linux.python.drvPath
-nix eval .#devShells.x86_64-linux.embedded.drvPath
-```
-
-The full traversal must be run on a normal Nix host after hardware generation. The Latitude guard is expected to reject the repository placeholder before that step; this is intentional and prevents an invalid boot configuration from being installed. Before deployment, run the complete checks and builds on a normal Nix host:
-
-```bash
-nix flake lock
-nix flake check --all-systems
-nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
-nix build .#nixosConfigurations.latitude.config.system.build.toplevel
-nix build github:Joaoferraz-byte/vim-conf#nixvim
-```
-
-The lock file has already removed stale inputs such as `import-tree`; it must be refreshed again after the dependent repositories receive their final commits so `nix-conf` points at their new revisions.
-
-## References
-
-[1]: https://nixos.wiki/wiki/NixOS_modules "NixOS Wiki — NixOS modules"
-[2]: https://nixos.org/manual/nixos/stable/ "NixOS Manual — Writing NixOS modules"
-[3]: https://home-manager.dev/manual/25.05/ "Home Manager Manual 25.05"
-[4]: https://flake.parts/ "flake-parts — Introduction"
-[5]: https://github.com/denful/import-tree "import-tree — Recursive Nix module imports"
-[6]: https://danklinux.com/docs/dankmaterialshell/nixos-flake "DankMaterialShell — NixOS flake installation"
-[7]: https://danklinux.com/docs/dankmaterialshell/application-themes "DankMaterialShell — Application themes"
-[8]: https://github.com/sodiboo/niri-flake "sodiboo/niri-flake"
-[9]: https://github.com/nix-community/nixvim "nix-community/nixvim"
-[10]: https://nix-community.github.io/stylix/configuration.html "Stylix — Configuration"
-[11]: https://github.com/AvengeMedia/DankMaterialShell/issues/1788 "DankMaterialShell issue #1788 — Niri/Home Manager integration"
-[12]: https://github.com/srid/nixos-config "srid/nixos-config"
-[13]: https://www.reddit.com/r/NixOS/comments/1e95b69/how_do_you_guys_organize_your_nix_config_files_i/ "Reddit — How do you organize your Nix configuration files?"
-[14]: https://wiki.nixos.org/wiki/Nixos-generate-config "NixOS Wiki — nixos-generate-config"
-[15]: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/installer/tools/nixos-generate-config.pl "Nixpkgs — nixos-generate-config source"
-[16]: https://github.com/nix-community/nixos-anywhere/blob/main/docs/reference.md "nixos-anywhere — reference"
-[17]: https://github.com/nix-community/nixos-facter "nixos-facter — hardware facts"
-[18]: https://man7.org/linux/man-pages/man8/lsblk.8.html "util-linux — lsblk manual"
-
-## 14. Development, containers, and virtualization
-
-The workstation now distinguishes **system-wide capability modules** from **project-specific development environments**. `modules/features/development.nix` supplies the common Python/Manim, C/C++, Node.js, Go, and Rust toolchains. `modules/features/embedded.nix` adds Arduino, PlatformIO, OpenOCD, probe-rs, and serial/USB access. These are appropriate as host capabilities because they provide compilers, debuggers, SDKs, and device access used across projects; application dependencies should still be pinned by each project flake or development shell.
-
-The flake also publishes focused development shells. The `python` shell is the preferred place for a reproducible Manim project, while the `embedded` shell is a starting point for projects that need an embedded toolchain. This avoids putting every Python package or board-specific dependency into the global user profile. A project should add its own `flake.nix`, lock file, and narrowly scoped packages when it needs a version different from the workstation baseline.
-
-| Capability | System feature | Project-level recommendation |
+| Theme artifact | Authority | Consumer |
 |---|---|---|
-| Python and Manim | Shared interpreter, Manim, scientific tools, and language tooling | Pin project dependencies in a project flake or virtual environment created by the project workflow. |
-| Native development | GCC, Clang, CMake, Ninja, GDB, pkg-config, and common headers | Keep libraries and target-specific dependencies in the project shell. |
-| Web/general development | Node.js, Go, Rust, language servers, and formatters | Use per-project lock files and toolchain pins when reproducibility matters. |
-| Embedded development | Arduino CLI, PlatformIO, OpenOCD, probe-rs, USB/serial tools | Add board SDKs and exact platform versions per project; use the host only for stable tooling and device permissions. |
-| Containers | Rootless Docker, Compose, Buildx, and `lazydocker` | Use rootless contexts and Compose files in each project; do not add the user to a privileged Docker group. |
-| Virtual machines | libvirt, QEMU/KVM, virt-manager, SPICE, and USB redirection | Store VM definitions and disks outside the Nix store; use virt-manager as the GTK management interface. |
+| QuickShell `colors.json` | Matugen output in user state | QuickShell end-4 profile |
+| Hyprland and Hyprlock colors | Matugen output in user config | Hyprland and Hyprlock |
+| GTK 3/4 CSS | Matugen output in user config | GTK applications and Nautilus |
+| Fuzzel and KDE color files | Matugen output | Fuzzel and Qt/KDE integration |
+| Firefox CSS | Local Matugen template to stable user state | Firefox profiles |
+| Zen Browser CSS | Local Matugen template to stable user state | Zen profiles |
+| ZenNotes CSS | Local Matugen template to stable user state | ZenNotes theme |
+| Xournal++ settings and toolbar | `xournal-conf` data and user edits | Xournal++ |
+| NixVim appearance | NixVim module and its palette adapter | Neovim |
 
-Docker is configured in rootless mode with `setSocketVariable = true`. This exposes the user socket through `DOCKER_HOST` for normal CLI, Compose, Buildx, and `lazydocker` use without granting access to a root-owned daemon. The trade-off is that privileged container features, low-level networking, and some device workloads require an explicit alternative design. A future Podman migration should be treated as a separate interface decision rather than configured in parallel with Docker.
+`home/livara/themes.nix` owns templates and links browser profiles to stable state files. It does not symlink generated CSS to a Nix store path. The activation hook backs up an existing regular `userChrome.css` before replacing it with a link to the runtime theme. GTK files are generated in the user configuration directory and imported by Flatpak Nautilus through `~/.var/app`.
 
-Virtualization is owned by the NixOS feature module. `libvirtd` provides the service boundary, QEMU/KVM provides execution, and virt-manager provides the GTK management UI. The user is added to `libvirtd`, not to an unrelated broad administrative group. Because virt-manager is a GTK application, it consumes the GTK environment and generated `gtk.css` supplied by the DMS/Matugen theme path; no second VM-specific palette generator is required. The virtualization feature is enabled only on `myMachine`, since the Latitude host does not currently declare a VM workload.
+The Xournal++ boundary is intentionally different. Its semantic toolbar and settings data must remain editable by the application and reviewable in `xournal-conf`. Matugen supplies the desktop GTK palette; it does not rewrite the entire Xournal++ settings file on every activation.
 
-## 15. AppImage isolation
+## 8. Home Manager and application architecture
 
-The AppImage request was interpreted as **Firejail**, not Firebase. `home/livara/appimage.nix` registers a Nautilus MIME handler for `application/vnd.appimage`. It launches the selected file through Firejail with a private temporary home, no network, dropped capabilities, and a restrictive syscall profile. The private home is removed when the sandboxed process exits, and normal session cleanup removes it when the user session terminates.
+`home/livara/home.nix` is a thin profile entrypoint. It sets identity, state version, environment variables, profile icon, and imports the user modules. It does not own compositor policy directly.
 
-This is a useful default for untrusted or disposable AppImages, but it is intentionally not a complete malware guarantee. An AppImage that needs network access, persistent configuration, hardware acceleration, portals, or host files may require a reviewed exception. The default handler should therefore remain restrictive; persistent application data should be exported deliberately rather than written directly into the temporary sandbox.
+| File | Responsibility and stability boundary |
+|---|---|
+| `home/livara/session.nix` | Hyprland settings, input, UWSM-compatible systemd behavior, QuickShell compatibility bindings, idle policy, screenshot directory, and wallpaper startup. |
+| `home/livara/themes.nix` | Matugen templates, browser CSS adapters, GTK imports, ZenNotes manifest/configuration, and theme activation. |
+| `home/livara/applications.nix` | Applications, MIME handlers, Zen Browser, NixVim, Xournal++ staging, and XDG directories. |
+| `home/livara/sync.nix` | Independent wallpaper and Vault synchronization services and timers. Network failure does not block a local rebuild. |
+| `home/livara/appimage.nix` | Firejail AppImage desktop handler with private home, dropped capabilities, seccomp, and no network by default. |
 
-## 16. Corrected Xournal++ data flow
+### 8.1 NixVim
 
-Xournal++ has three distinct layers:
+The NixVim boundary is structurally sound. `vim-conf` publishes a reusable NixVim module, and `nix-conf` imports it through `programs.nixvim.imports`. Editor behavior, plugins, language tooling, keymaps, and Lua policy belong to `vim-conf`; host hardware and shell concerns do not.
+
+The main NixVim risk is input compatibility rather than module design. The flake lock must be refreshed and both host evaluations must be run when NixVim or nixpkgs revisions change. A runtime palette adapter may consume generated colors, but editor evaluation must not require QuickShell or Matugen to be running.
+
+### 8.2 Xournal++
+
+`xournal-conf` is correctly modeled as application data. The flow is:
 
 ```text
 xournal-conf/xournalpp/*
-  <-> ~/.config/nixos/xournalpp/*
-       <-> ~/.config/xournalpp/*
-             -> Xournal++
+  -> local editable staging under ~/.config/nixos/xournalpp
+    -> out-of-store links under ~/.config/xournalpp
+      -> Xournal++ runtime
 ```
 
-The repository owns versioned baseline data. The staging directory under `~/.config/nixos/xournalpp` is the editable synchronization boundary. The native Xournal++ profile under `~/.config/xournalpp` is the active runtime path and is symlinked to staging by the Home Manager application adapter. The path `~/.config/com.github.xournalpp.xournalpp` is not the active native profile for this installation; it belongs to a different packaging/profile convention and must not be used as the synchronization source.
+The staging files are seeded only when absent so the Xournal++ interface can edit them without Home Manager overwriting changes. `scripts/sync-xournalpp-config.sh` copies reviewed `settings.xml` and `toolbar.ini` changes back to the separate repository. The black page background, dark mode, Tokyo Night highlighter, fine eraser, and corrected toolbar separators remain application configuration rather than Matugen-generated desktop policy.
 
-The helper now has explicit `--push` and `--pull` modes. `--pull` imports reviewed repository data into staging and `--push` copies local UI edits from staging back to the checked-out `xournal-conf` repository. The flow is therefore: edit in Xournal++, stop the application, run `sync-xournalpp-config.sh --push`, inspect the diff, commit and push `xournal-conf`, then run `--pull` on another machine before launching Xournal++.
+## 9. Hardware and installer architecture
 
-The previously observed symptoms had multiple independent causes. `settings.xml` used `useSystem` rather than `forceDark`; `toolbar.ini` placed `PLAIN` before `HIGHLIGHTER` and contained adjacent separators; the synchronization helper did not provide a repository-to-staging pull operation; and edits may have been made under the inactive `com.github.xournalpp.xournalpp` path. The current baseline forces dark mode, uses the Tokyo Night gold `#e0af68` highlighter on a black journal, places the highlighter first, places a small `VERY_FINE` eraser second, and removes the duplicate separator cluster.
+The stable hardware entrypoint is `modules/hosts/<host>/hardware.nix`. It imports the tracked `hardware-configuration.nix` and adds only host-specific microcode or graphics policy. The generated file is the machine-specific data boundary; it is not a temporary sidecar and must not remain untracked.
 
-## 17. Operational diagnostics
+`scripts/generate-hardware.sh` is the single generator for both hosts. It accepts `--host latitude|myMachine`, `--repo`, `--target-root`, `--esp`, `--source`, and `--dry-run`. It detects the mounted installed root conservatively, distinguishes ext4 from Btrfs, validates the ESP, invokes `nixos-generate-config` when possible, and uses mounted kernel topology as a non-destructive Btrfs fallback when subvolume probing fails.
 
-For a boot or service failure, inspect the current boot first and then narrow the query to failed units and the relevant user session:
+| Property | Latitude | myMachine |
+|---|---|---|
+| Root filesystem | ext4 | Btrfs |
+| Root device | `/dev/sda2` in the current installation | Same filesystem UUID with subvolume layout |
+| ESP | Existing vfat ESP, currently `/dev/sda1` | Host-specific existing ESP |
+| Subvolume handling | None; no Btrfs options emitted | Preserves `@`, `home`, and `nix` mount options |
+| Generated contract | `modules/hosts/latitude/hardware-configuration.nix` | `modules/hosts/my-machine/hardware-configuration.nix` |
+
+The installer at `install.sh` runs from its own checkout, which is expected to be `~/.config/nixos`. It selects the host, calls the unified generator, preserves the exact hardware exit code, runs an automatic sanitized Latitude diagnostic only after a failure, executes `nix flake check --no-build`, and rebuilds only after the validation gate succeeds. It uses locked inputs by default; `NIX_CONF_UPDATE_FLAKE=1` is an explicit opt-in to update them.
+
+The installer does not format disks, partition storage, unlock encrypted devices, modify firmware, guess among ambiguous roots, or add ACPI kernel parameters. ACPI firmware messages must be investigated as hardware or firmware symptoms rather than silenced by speculative boot flags.
+
+## 10. Security and stability assessment
+
+The system contains meaningful controls: firewall policy, audit rules, kernel pointer and dmesg restrictions, journald limits, boot-entry limits, zram, Firejail support, rootless containers, and narrow device permissions. These controls improve the default posture but do not make the workstation automatically secure.
+
+| Area | Assessment | Current decision |
+|---|---|---|
+| Shell lifecycle | The former DMS/Niri integration had overlapping owners and private input boundaries. | One UWSM compositor lifecycle, one end-4 QuickShell startup, and one Home Manager session adapter. |
+| Runtime state | QuickShell and Matugen must write after activation. | Mutable state is isolated under user state/config paths, never represented as store symlinks. |
+| Hardware safety | Automatic hardware generation can be destructive if it formats or guesses. | Detection is mount-based, non-destructive, validates devices, and refuses ambiguity. |
+| Audit service | Immutable audit mode prevents later rule reloads. | `security.audit.enable = true` is used rather than a literal immutable lock mode. |
+| Containers | A privileged Docker group would weaken the boundary. | Rootless Docker and per-user tooling remain the default. |
+| AppImages | Arbitrary AppImages can write to the user home. | Firejail handler uses a private home, dropped capabilities, seccomp, and no network. |
+| Network synchronization | Activation-time network work can break rebuilds. | Wallpaper and Vault synchronization run as independent user services and timers. |
+| Trusted users | Broad trusted-user settings can weaken the Nix trust boundary. | Review separately; this shell refactor does not silently change policy. |
+| Nix inputs | Unlocked or stale inputs reduce reproducibility. | Keep `flake.lock` under review and update intentionally. |
+
+The main remaining operational risk is the unavailable Nix validation gate in the analysis sandbox. The target NixOS checkout must run `nix flake lock`, `nix flake check --no-build`, and host builds before switching to the new generation.
+
+## 11. File-level architecture
+
+| File or directory | Role in the active architecture |
+|---|---|
+| `flake.nix` | Public inputs and explicit evaluated import boundary. |
+| `flake.lock` | Reproducibility record for all system, user, browser, editor, QuickShell, and end-4 dependencies. |
+| `modules/parts.nix` | Shared flake-parts outputs and host list. |
+| `modules/features/hyprland.nix` | NixOS Hyprland/UWSM boundary and compositor-level packages. |
+| `modules/features/end4.nix` | Home Manager end-4 source adapter and writable runtime seed. |
+| `modules/features/greeter.nix` | SDDM and `hyprland-uwsm` login session. |
+| `modules/features/desktop-portals.nix` | Portal, polkit, UDisks, and keyring prerequisites. |
+| `modules/features/development.nix` | General programming capabilities and toolchains. |
+| `modules/features/embedded.nix` | Embedded development tools and device permissions. |
+| `modules/features/containers.nix` | Rootless Docker and Compose capability. |
+| `modules/features/virtualization.nix` | libvirt/QEMU/KVM and virt-manager capability. |
+| `modules/features/system-hardening.nix` | Security and audit policy. |
+| `modules/hosts/common-desktop.nix` | Shared NixOS/Home Manager composition and user identity option. |
+| `modules/hosts/latitude/default.nix` | Latitude system root and host-specific policy. |
+| `modules/hosts/latitude/hardware.nix` | Latitude hardware entrypoint. |
+| `modules/hosts/latitude/hardware-configuration.nix` | Tracked Latitude filesystems, boot modules, swap, and CPU data. |
+| `modules/hosts/my-machine/default.nix` | myMachine system root and host-specific policy. |
+| `modules/hosts/my-machine/hardware.nix` | myMachine hardware entrypoint and AMD microcode. |
+| `modules/hosts/my-machine/hardware-configuration.nix` | Tracked Btrfs filesystems, subvolumes, boot modules, swap, and CPU data. |
+| `home/livara/home.nix` | Thin Home Manager profile entrypoint. |
+| `home/livara/session.nix` | Hyprland settings, shortcut compatibility, screenshots, idle, and wallpaper startup. |
+| `home/livara/themes.nix` | Matugen outputs and browser/GTK/ZenNotes adapters. |
+| `home/livara/applications.nix` | Applications, NixVim, Xournal++, MIME, and XDG integration. |
+| `home/livara/sync.nix` | Independent repository synchronization services and timers. |
+| `scripts/generate-hardware.sh` | Unified ext4/Btrfs detection, generation, validation, backup, and staging. |
+| `scripts/collect-latitude-diagnostic.sh` | Sanitized Latitude diagnostic collection and optional upload. |
+| `scripts/sync-xournalpp-config.sh` | Explicit reviewed Xournal++ push/pull helper. |
+| `install.sh` | Host selection, hardware gate, flake gate, and rebuild orchestration. |
+| `docs/xournalpp-matugen.md` | Xournal++ ownership and synchronization documentation. |
+| `docs/end4-integration-research.md` | External source facts and integration contract record. |
+| `archive/` | Historical material outside the evaluated module tree. |
+
+Unnecessary legacy scripts for the old Latitude-specific hardware flow and DMS asset synchronization are deleted. The active scripts have one purpose each and pass Bash syntax checks.
+
+## 12. Validation model
+
+The validation sequence is intentionally layered. Cheap checks run first; Nix evaluation and builds run before a system switch.
 
 ```bash
-systemctl --failed
-systemctl --user --failed
-journalctl -b -p warning..alert
-journalctl -b -u display-manager.service
-journalctl --user -b -p warning..alert
-systemctl status niri.service --no-pager
-systemctl --user status dms.service --no-pager
-journalctl --user -b -u dms.service --no-pager
-journalctl --user -b | grep -Ei 'niri|dms|quickshell|matugen|xournal|firejail|docker|libvirt|error|failed|warn'
+git diff --check
+find scripts -maxdepth 1 -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+nix flake lock
+nix flake check --no-build
+nix eval .#nixosConfigurations.latitude.config.system.stateVersion
+nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
+nix build .#nixosConfigurations.latitude.config.system.build.toplevel
+nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
+sudo nixos-rebuild test --flake .#latitude
 ```
 
-For the Niri session, `niri msg version`, `niri msg outputs`, and `niri msg windows` confirm whether the compositor is reachable. On systems where Niri is launched by the display manager rather than as a standalone unit, the user journal is the authoritative source:
+The hardware generator should be tested independently with `--dry-run` and with ext4/Btrfs fixtures before a real rebuild. The installer must never proceed to `nixos-rebuild` when hardware generation or the flake check fails.
 
-```bash
-journalctl --user -b --since=today | grep -Ei 'niri|wayland|portal|dbus|gpu|xwayland'
-```
+## 13. Design principles
 
-For rootless Docker and libvirt, verify the actual user sockets and service ownership instead of checking only system-wide daemons:
+The repository should continue to use explicit composition roots, one owner per runtime concern, public contracts between repositories, and typed options for meaningful variation. System modules own privileged services and machine policy. Home Manager modules own user files and user services. Runtime-generated data stays outside the Nix store. Application repositories remain data repositories. Network maintenance runs independently from activation. External source instructions are treated as reference data and are never executed as installers.
 
-```bash
-systemctl --user status docker.service --no-pager
-printf '%s\n' "$DOCKER_HOST"
-docker info
-systemctl status libvirtd.service --no-pager
-virsh -c qemu:///system list --all
-```
+This architecture is more stable than the former shell design because it matches the end-4 source model, removes DMS/Niri lifecycle overlap, keeps host differences typed by composition, and makes mutable state visible instead of accidentally hiding it behind store links.
 
-## 18. Follow-up recommendations
+## References
 
-The next architectural pass should split the hardening feature from desktop defaults, make Vault synchronization explicitly opt-in, add CI that evaluates both host configurations and both development shells, and test the AppImage handler with a benign sample. It should also document the expected rootless Docker context and confirm the exact embedded boards used in practice before adding board-specific SDKs globally.
-
-
-## Offline hardware recovery and boot safety
-
-Latitude hardware detection is now a console-safe two-stage flow. `recover-latitude-boot.sh` inventories block devices with explicit `lsblk` columns, waits for udev, identifies an EFI System Partition only through the official GPT partition type, refuses ambiguous candidates, and mounts an existing ESP without formatting or repartitioning. `generate-latitude-hardware.sh` then invokes the official `nixos-generate-config --root` path, validates root and `/boot` entries and device references, backs up the previous file, and stages only the tracked hardware configuration.
-
-The Latitude hardware module is fail-closed: known placeholders such as `BOOT-PARTUUID` cause Nix evaluation to stop with an actionable message rather than allowing a rebuild that can enter emergency mode. The repository intentionally does not add ACPI kernel parameters to silence firmware messages. A non-destructive `collect-latitude-hardware-report.sh` helper collects block-device, mount, Btrfs, and generator information from a console or Live ISO for later analysis.
+[1]: https://nixos.org/manual/nixos/stable/#sec-writing-modules "NixOS manual — writing modules"
+[2]: https://home-manager.dev/manual/ "Home Manager manual"
+[3]: https://flake.parts/ "flake-parts"
+[4]: https://github.com/xBLACKICEx/dots-hyprland/tree/tmp "end-4 illogical-impulse source"
+[5]: https://github.com/xBLACKICEx/end-4-dots-hyprland-nixos "end-4 NixOS adapter"
+[6]: https://git.outfoxxed.me/outfoxxed/quickshell "QuickShell source"
+[7]: https://wiki.hypr.land/Nix/Hyprland-on-NixOS/ "Hyprland on NixOS"
+[8]: https://github.com/InioX/matugen "Matugen"
+[9]: https://github.com/nix-community/nixvim "NixVim"
+[10]: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/installer/tools/nixos-generate-config.pl "nixos-generate-config source"
+[11]: https://man7.org/linux/man-pages/man8/lsblk.8.html "lsblk manual"
+[12]: https://man7.org/linux/man-pages/man8/findmnt.8.html "findmnt manual"
+[13]: https://xournalpp.github.io/guide/file-locations/ "Xournal++ file locations"
+[14]: https://github.com/end-4/dots-hyprland/discussions/1093 "end-4 discussion referenced by the integration brief"
+[15]: https://github.com/ilyamiro/serpantinum "serpantinum reference"
+[16]: https://github.com/end-4/CirnOS "CirnOS reference"

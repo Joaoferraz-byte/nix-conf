@@ -8,7 +8,6 @@ let
 in
 {
   imports = [
-    inputs.dms-plugin-registry.homeModules.default
     inputs.zen-browser.homeModules.beta
     ./appimage.nix
     ./applications.nix

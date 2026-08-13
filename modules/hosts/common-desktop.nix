@@ -6,9 +6,7 @@
     in
     {
       imports = [
-        self.nixosModules.dmsSystem
-        self.nixosModules.niri
-        inputs.dms-plugin-registry.nixosModules.default
+        self.nixosModules.hyprland
         inputs.home-manager.nixosModules.home-manager
       ];
 
@@ -19,8 +17,6 @@
       };
 
       config = {
-        services.dank-material-shell.userName = cfg.userName;
-
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
@@ -30,9 +26,8 @@
             userName = cfg.userName;
           };
           sharedModules = [
-            inputs.shell-conf.homeManagerModules.dms
-            inputs.shell-conf.homeManagerModules.desktopPolicy
-            inputs.shell-conf.homeManagerModules.niriPolicy
+            self.homeManagerModules.hyprland
+            self.homeManagerModules.end4
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

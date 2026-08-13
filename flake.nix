@@ -26,14 +26,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dms-plugin-registry = {
-      url = "github:AvengeMedia/dms-plugin-registry";
+    quickshell = {
+      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    shell-conf = {
-      url = "github:Joaoferraz-byte/shell-conf";
-      inputs.nixpkgs.follows = "nixpkgs";
+    illogical-impulse-dotfiles = {
+      url = "github:xBLACKICEx/dots-hyprland?ref=tmp";
+      flake = false;
     };
 
     mesa-tomate-driver = {
@@ -55,12 +55,12 @@
         ./modules/features/desktop-portals.nix
         ./modules/features/development.nix
         ./modules/features/embedded.nix
-        ./modules/features/dms-system.nix
         ./modules/features/firejail.nix
         ./modules/features/flatpak.nix
+        ./modules/features/end4.nix
         ./modules/features/greeter.nix
+        ./modules/features/hyprland.nix
         ./modules/features/keyd.nix
-        ./modules/features/niri.nix
         ./modules/features/nvidia.nix
         ./modules/features/system-hardening.nix
         ./modules/features/containers.nix

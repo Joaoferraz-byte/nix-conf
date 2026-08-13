@@ -12,7 +12,6 @@
       {
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [
-          inputs.shell-conf.overlays.niri
           inputs.affinity-nix.overlays.default
           (final: prev: {
             libdisplay-info_0_2 = final.libdisplay-info;

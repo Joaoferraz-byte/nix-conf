@@ -1,5 +1,11 @@
 # Changelog
 
+## Migration to end-4 QuickShell (2026-08-13)
+
+The active desktop shell now uses the end-4 illogical-impulse QuickShell profile on Hyprland with the NixOS UWSM integration. DMS, Niri and the shell-conf adapter were removed from the active composition. Matugen now owns wallpaper-derived colors for QuickShell, Hyprland, GTK, Firefox, Zen Browser and ZenNotes.
+
+The Latitude-specific hardware scripts were replaced by one adaptive generator that supports ext4 and Btrfs for both hosts. The installer now validates hardware before rebuilding, propagates the original failure code, and uses the repository checkout at `~/.config/nixos`.
+
 ## Migration to DankMaterialShell (2026-08-06)
 
 The Ambxst-X shell has been replaced by DankMaterialShell (DMS) + Niri compositor. Integration is done via the `shell-conf` flake.

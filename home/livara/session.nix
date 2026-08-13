@@ -1,116 +1,153 @@
-{ config, pkgs, lib, inputs, self, ... }:
+{ config, pkgs, lib, ... }:
 let
-  randomDmsWallpaper = pkgs.writeShellScript "dms-wallpaper-random-on-login" ''
+  home = config.home.homeDirectory;
+  randomWallpaper = pkgs.writeShellScript "end4-wallpaper-random-on-login" ''
     set -eu
-    wallpapers_dir="${config.home.homeDirectory}/Wallpapers"
+    wallpapers_dir="${home}/Pictures/Wallpapers"
     wallpaper="$(${pkgs.findutils}/bin/find "$wallpapers_dir" -type f \
       \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
-      -print | ${pkgs.coreutils}/bin/shuf -n 1)"
+      -print 2>/dev/null | ${pkgs.coreutils}/bin/shuf -n 1)"
     if [ -z "$wallpaper" ]; then
-      exit 1
+      exit 0
     fi
-    for attempt in $(${pkgs.coreutils}/bin/seq 1 30); do
-      if dms ipc call wallpaper set "$wallpaper"; then
-        exit 0
-      fi
-      ${pkgs.coreutils}/bin/sleep 1
-    done
-    exit 1
+    ${pkgs.coreutils}/bin/sleep 2
+    exec "${home}/.config/quickshell/ii/scripts/colors/switchwall.sh" --image "$wallpaper"
   '';
 in
 {
-  programs.niri.settings = {
-    input = {
-      keyboard.xkb.layout = "br";
-      touchpad = {
-        tap = true;
-        dwt = true;
-        natural-scroll = true;
+  wayland.windowManager.hyprland = {
+    enable = true;
+    systemd.enable = false;
+    xwayland.enable = true;
+    settings = {
+      "$qsConfig" = "ii";
+      env = [
+        "XCURSOR_SIZE,24"
+        "XCURSOR_THEME,Bibata-Modern-Classic"
+        "ELECTRON_OZONE_PLATFORM_HINT,auto"
+        "QT_QPA_PLATFORM,wayland;xcb"
+        "TERMINAL,wezterm"
+      ];
+      input = {
+        kb_layout = "br";
+        touchpad = {
+          tap-to-click = true;
+          disable_while_typing = true;
+          natural_scroll = true;
+        };
       };
     };
-    spawn-at-startup = [
-      { command = [ "xwayland-satellite" ":0" ]; }
-    ];
+    extraConfig = ''
+      source=~/.config/hypr/hyprland/env.conf
+      source=~/.config/hypr/hyprland/execs.conf
+      source=~/.config/hypr/hyprland/general.conf
+      source=~/.config/hypr/hyprland/rules.conf
+      source=~/.config/hypr/hyprland/colors.conf
+      source=~/.config/hypr/hyprland/keybinds.conf
+      source=~/.config/hypr/nix-conf.conf
+    '';
   };
 
-  home.activation.reloadNiriConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    if command -v niri >/dev/null 2>&1 && [ -n "''${NIRI_SOCKET:-}" ]; then
-      niri msg action load-config-file >/dev/null 2>&1 || true
-    fi
-  '';
-
-  home.activation.migrateDmsSession = lib.hm.dag.entryBefore [ "linkGeneration" ] ''
-    OLD_SESSION="${config.home.homeDirectory}/.local/state/DankMaterialShell/session.json"
-    if [ -f "$OLD_SESSION" ] && [ ! -L "$OLD_SESSION" ]; then
-      BACKUP="${config.home.homeDirectory}/.local/state/DankMaterialShell/session.json.legacy"
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/cp -f "$OLD_SESSION" "$BACKUP"
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$OLD_SESSION"
-    fi
-  '';
-
-  xdg.stateFile."DankMaterialShell/session.json".force = true;
-
-  programs.dank-material-shell = {
-    plugins.wallpaperCarousel = {
-      enable = true;
-      settings.wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
-    };
-    session = {
-      perMonitorWallpaper = false;
-      perModeWallpaper = false;
-      wallpaperCyclingEnabled = false;
-      wallpaperTransition = "random";
-      isLightMode = false;
-      doNotDisturb = false;
-      doNotDisturbUntil = 0;
-      nightModeEnabled = false;
-      nightModeTemperature = 4500;
-      nightModeHighTemperature = 6500;
-      nightModeAutoEnabled = false;
-      nightModeAutoMode = "time";
-      nightModeStartHour = 18;
-      nightModeStartMinute = 0;
-      nightModeEndHour = 6;
-      nightModeEndMinute = 0;
-      themeModeAutoEnabled = false;
-      themeModeAutoMode = "time";
-      themeModeStartHour = 18;
-      themeModeStartMinute = 0;
-      themeModeEndHour = 6;
-      themeModeEndMinute = 0;
-      themeModeShareGammaSettings = true;
-      latitude = -23.599722;
-      longitude = -46.791389;
-      nightModeUseIPLocation = false;
-      nightModeLocationProvider = "";
-      weatherLocation = "Jardim João XXIII, São Paulo, SP, Brasil";
-      weatherCoordinates = "-23.599722,-46.791389";
-      weatherHourlyDetailed = true;
-      showThirdPartyPlugins = false;
-      pluginBrowserInstalledFirst = false;
-      pluginBrowserSortMode = "default";
-      launchPrefix = "";
-      searchAppActions = true;
-      locale = "pt_BR";
-      timeLocale = "pt_BR";
-      appOverrides."zen-beta".name = "Zen Browser";
+  services.hypridle = {
+    enable = true;
+    settings = {
+      general = {
+        lock_cmd = "pidof hyprlock || hyprlock";
+        before_sleep_cmd = "loginctl lock-session";
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+      };
+      listener = [
+        {
+          timeout = 300;
+          on-timeout = "loginctl lock-session";
+        }
+        {
+          timeout = 600;
+          on-timeout = "hyprctl dispatch dpms off";
+          on-resume = "hyprctl dispatch dpms on";
+        }
+        {
+          timeout = 900;
+          on-timeout = "systemctl suspend || loginctl suspend";
+        }
+      ];
     };
   };
 
-  systemd.user.services.dms-wallpaper-random-on-login = {
+  xdg.configFile."hypr/nix-conf.conf".text = ''
+    $mod = SUPER
+
+    # QuickShell compatibility
+    unbind = $mod, Comma
+    unbind = $mod, Space
+    unbind = $mod, X
+    unbind = $mod, D
+    unbind = $mod, V
+    unbind = $mod, N
+    unbind = $mod, Tab
+    unbind = $mod, W
+    unbind = $mod, E
+    unbind = $mod, O
+    unbind = $mod, T
+    unbind = $mod, Return
+    unbind = $mod, C
+    unbind = $mod, S
+    unbind = $mod CTRL, S
+    unbind = $mod SHIFT, S
+    unbind = $mod SHIFT, W
+    unbind = $mod, F
+    unbind = $mod SHIFT, F
+    bind = $mod, Comma, exec, qs -p ~/.config/quickshell/$qsConfig/settings.qml
+    bind = $mod, Space, exec, qs -c $qsConfig ipc call overviewToggle
+    bind = $mod, X, exec, qs -c $qsConfig ipc call sessionToggle
+    bind = $mod, D, exec, qs -c $qsConfig ipc call overviewToggle
+    bind = $mod, V, exec, qs -c $qsConfig ipc call overviewClipboardToggle
+    bind = $mod, N, exec, zennotes
+    bind = $mod, Tab, exec, qs -c $qsConfig ipc call cheatsheetToggle
+
+    # Applications
+    bind = $mod, W, exec, zen-beta
+    bind = $mod, E, exec, nautilus
+    bind = $mod, O, exec, zennotes
+    bind = $mod, T, exec, wezterm
+    bind = $mod, Return, exec, wezterm
+    bind = $mod, C, killactive
+
+    # Window navigation
+    bind = $mod, Left, movefocus, l
+    bind = $mod, Right, movefocus, r
+    bind = $mod, Up, movefocus, u
+    bind = $mod, Down, movefocus, d
+    bind = $mod, F, fullscreen, 0
+    bind = $mod SHIFT, F, fullscreen, 1
+
+    # Screenshots
+    bind = $mod SHIFT, S, exec, grim -g "$(slurp)" - | satty --filename - --copy-command wl-copy --early-exit
+    bind = $mod, S, exec, grimblast --notify copy output
+    bind = $mod CTRL, S, exec, grimblast --notify copy active
+    bind = , Print, exec, grimblast --notify copy output
+    bind = CTRL, Print, exec, mkdir -p "$HOME/Pictures/Screenshots" && grimblast --notify copysave output
+
+    # Clipboard, color and wallpaper
+    bind = $mod SHIFT, C, exec, hyprpicker -a
+    bind = $mod SHIFT, W, exec, ~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh
+    bind = $mod CTRL SHIFT, W, exec, ~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh
+  '';
+
+  home.activation.setupScreenshots = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD mkdir -p "${home}/Pictures/Screenshots"
+  '';
+
+  systemd.user.services.end4-wallpaper-random-on-login = {
     Unit = {
-      Description = "Select one random DMS wallpaper at graphical session start";
-      After = [ "dms.service" "niri.service" ];
-      PartOf = [ "niri.service" ];
+      Description = "Select a random end-4 wallpaper at graphical session start";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
     };
     Service = {
       Type = "oneshot";
-      Environment = [
-        "PATH=/run/current-system/sw/bin:${config.home.homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin"
-      ];
-      ExecStart = randomDmsWallpaper;
+      ExecStart = randomWallpaper;
     };
-    Install.WantedBy = [ "niri.service" ];
+    Install.WantedBy = [ "graphical-session.target" ];
   };
-
 }

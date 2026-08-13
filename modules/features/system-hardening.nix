@@ -70,7 +70,7 @@
       }];
     };
 
-    services.geoclue2.enable = true; # DMS night light
+    services.geoclue2.enable = true; # Location service for night-light integrations
 
     security.audit = {
       enable = true;
