@@ -36,6 +36,62 @@
           sed -i '1c\\#!/usr/bin/env python3' "$script"
         done
       '';
+      recordScript = pkgs.writeShellScript "end4-record" ''
+        set -euo pipefail
+
+        getdate() {
+          date '+%Y-%m-%d_%H.%M.%S'
+        }
+
+        getactive_monitor() {
+          hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name'
+        }
+
+        video_dir="$(xdg-user-dir VIDEOS 2>/dev/null || true)"
+        if [[ -z "$video_dir" || "$video_dir" == "$HOME" ]]; then
+          video_dir="$HOME/Videos"
+        fi
+        mkdir -p "$video_dir"
+        cd "$video_dir"
+
+        if pgrep -x gpu-screen-recorder >/dev/null; then
+          notify-send "Recording stopped" "Saved in $video_dir" -a Recorder || true
+          pkill -SIGINT -x gpu-screen-recorder
+          exit 0
+        fi
+
+        output="$video_dir/recording_$(getdate).mp4"
+        audio_args=()
+        capture_args=()
+        case "''${1:-}" in
+          --fullscreen-sound)
+            audio_args=(-a default_output)
+            capture_args=(-w "$(getactive_monitor)")
+            ;;
+          --fullscreen)
+            capture_args=(-w "$(getactive_monitor)")
+            ;;
+          --sound)
+            audio_args=(-a default_output)
+            ;;
+          *)
+            if ! region="$(slurp -f '%wx%h+%x+%y')"; then
+              notify-send "Recording cancelled" "Selection was cancelled" -a Recorder || true
+              exit 1
+            fi
+            capture_args=(-w region -region "$region")
+            ;;
+        esac
+
+        notify-send "Starting recording" "$output" -a Recorder || true
+        exec gpu-screen-recorder "''${capture_args[@]}" -f 60 -k h264 -c mp4 "''${audio_args[@]}" -o "$output"
+      '';
+      hyprScripts = pkgs.runCommand "end4-hypr-scripts" { } ''
+        cp -R ${source "hypr/hyprland/scripts"} "$out"
+        chmod -R u+w "$out"
+        cp ${recordScript} "$out/record.sh"
+        chmod +x "$out/record.sh"
+      '';
       seedRuntime = pkgs.writeShellScript "seed-end4-runtime" ''
         set -eu
 
@@ -111,7 +167,9 @@
         hyprpicker
         hyprshot
         hyprsunset
+        gpu-screen-recorder
         easyeffects
+        libnotify
         jq
         libqalculate
         matugen
@@ -124,9 +182,9 @@
         tesseract
         upower
         wlogout
+        xdg-user-dirs
         wl-clip-persist
         wl-clipboard
-        wf-recorder
         wtype
         ydotool
         kdePackages.kdialog
@@ -177,7 +235,7 @@
         "hypr/hyprland/general.conf".source = source "hypr/hyprland/general.conf";
         "hypr/hyprland/keybinds.conf".source = source "hypr/hyprland/keybinds.conf";
         "hypr/hyprland/rules.conf".source = source "hypr/hyprland/rules.conf";
-        "hypr/hyprland/scripts".source = source "hypr/hyprland/scripts";
+        "hypr/hyprland/scripts".source = hyprScripts;
         "hypr/hyprlock".source = source "hypr/hyprlock";
         "hypr/shaders".source = source "hypr/shaders";
         "fuzzel/fuzzel.ini".source = source "fuzzel/fuzzel.ini";

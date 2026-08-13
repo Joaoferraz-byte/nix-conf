@@ -97,3 +97,25 @@ The laptop exposed a second, distinct failure after the QuickShell release fix: 
 21. [Nix issue: Git flake `ref` behavior](https://github.com/NixOS/nix/issues/8790)
 22. [Nix manual: `builtins.fetchGit`](https://nix.dev/manual/nix/2.28/language/builtins.html)
 23. [Nix discourse: Git tags in flake inputs](https://discourse.nixos.org/t/git-tags-in-flakes-inputs/25511)
+
+## wf-recorder / FFmpeg build failure
+
+The real build reached Home Manager package closure construction and failed while compiling `wf-recorder-0.6.0`; it did not reach activation. The compiler error is the removed `AVCodec::sample_fmts` field. Upstream packaging work for newer FFmpeg replaces direct access to `pix_fmts`, `ch_layouts`, and `sample_fmts` with `avcodec_get_supported_config`, confirming an FFmpeg API compatibility break rather than a NixOS service or hardware issue.[24] The nixpkgs package remains a standalone wlroots screen recorder.[25]
+
+This configuration implements screenshots with `grim`, `slurp`, `satty`, and `grimblast`; the active screenshot bindings do not require `wf-recorder`. The safest architecture is to remove `wf-recorder` from the runtime closure rather than add an unreviewed FFmpeg override or carry a local C++ patch. The optional end-4 recording entry point is preserved through a local wrapper around `gpu-screen-recorder`, whose package is maintained separately from the broken wf-recorder build and must be tested on the Latitude Intel/VAAPI stack.
+
+24. [FreeBSD ports: wf-recorder FFmpeg 9 compatibility patch](https://cgit.freebsd.org/ports/commit/?id=09573f914766a0bc86a694c47aeeef7776757dc9)
+25. [MyNixOS: wf-recorder package](https://mynixos.com/nixpkgs/package/wf-recorder)
+26. [wf-recorder upstream README](https://github.com/ammen99/wf-recorder)
+
+## Recording alternatives
+
+The NixOS Wiki documents `gpu-screen-recorder` as a GPU-based Wayland recorder with H.264/HEVC/AV1 and Opus/AAC/FLAC support, and nixpkgs provides a package with PipeWire and Wayland support.[27] The current Hyprland documentation still lists wf-recorder for simple wlroots recording, but the local nixpkgs build is broken against the selected FFmpeg API.[28] The active configuration therefore removes wf-recorder and uses a small local gpu-screen-recorder wrapper for the optional recording script. Screenshots remain independent of this recorder and continue to use grim/grimblast/slurp/satty.
+
+27. [Official NixOS Wiki: gpu-screen-recorder](https://wiki.nixos.org/wiki/Gpu-screen-recorder)
+28. [Hyprland Wiki: Screenshots and Recording](https://wiki.hypr.land/Useful-Utilities/Screenshots-and-Recording/)
+
+The gpu-screen-recorder CLI supports `-w region -region WxH+X+Y` for region capture, `-w screen` or a monitor name for fullscreen capture, `-a default_output` for audio, and SIGINT for a clean stop. The local wrapper selects the focused Hyprland monitor through `hyprctl monitors -j`, uses `slurp -f '%wx%h+%x+%y'` for region selection, and writes MP4 files under the user's Videos directory. These options are documented in the Debian manpage and upstream README mirrors.[29] [30]
+
+29. [Debian gpu-screen-recorder manpage](https://manpages.debian.org/testing/gpu-screen-recorder-cli/gpu-screen-recorder.1.en.html)
+30. [GPU Screen Recorder upstream README](https://git.dec05eba.com/gpu-screen-recorder/about/)
