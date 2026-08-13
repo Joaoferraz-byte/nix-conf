@@ -21,13 +21,15 @@ Register the host by importing its assembly from the explicit list in `flake.nix
 nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 ```
 
-For the Latitude host, `hardware.nix` is the tracked entrypoint and imports the tracked `hardware-configuration.nix` produced from the current machine. The generator uses `nixos-generate-config --show-hardware-config`, rejects empty or placeholder device identifiers, preserves a timestamped backup under `$XDG_STATE_HOME`, stages only the generated hardware file, and never changes kernel ACPI parameters. It falls back to `/etc/nixos/hardware-configuration.nix` only when live generation is unavailable or fails.
+For both hosts, `hardware.nix` is the tracked entrypoint and imports the tracked `hardware-configuration.nix` produced from the current machine. The common generator uses `nixos-generate-config` when possible, rejects empty or placeholder device identifiers, preserves a timestamped backup under `$XDG_STATE_HOME`, stages only the selected host hardware file, and never changes kernel ACPI parameters. When the official generator cannot inspect a Btrfs subvolume, it reconstructs the configuration from the mounted kernel topology. Ext4 roots are emitted without Btrfs subvolume options.
 
-Run it from the repository root after booting the target Latitude:
+Run it from the repository root on the target host:
 
 ```bash
-./scripts/generate-latitude-hardware.sh
+sudo ./scripts/generate-hardware.sh --host latitude
 git diff --cached -- modules/hosts/latitude/hardware-configuration.nix
+sudo ./scripts/generate-hardware.sh --host myMachine
+git diff --cached -- modules/hosts/my-machine/hardware-configuration.nix
 git status --short
 ```
 
@@ -42,47 +44,38 @@ A feature must have one coherent responsibility and expose a stable NixOS or Hom
 The shared desktop profile is assembled in `hosts/common-desktop.nix`. The `home/livara/` profile is split by lifecycle and ownership: `session.nix` owns DMS and Niri runtime state, `themes.nix` owns theme adapters, `applications.nix` owns applications and XDG integration, and `sync.nix` owns external repository synchronization.
 
 
-## Latitude hardware recovery
+## Hardware detection and recovery
 
-The Latitude hardware entrypoint imports `modules/hosts/latitude/hardware-configuration.nix`. The generated file must be produced on the target machine or from a Live ISO. The adaptive recovery scripts detect the installed root from `/`, `/mnt`, `/target`, `/mnt/nixos`, or `/media/nixos`, reject Live ISO filesystems, and require explicit selection when multiple roots or EFI System Partitions are possible. They never format, partition, modify firmware, change ACPI parameters, or guess between multiple installations.
+The hardware entrypoints import each host's tracked `hardware-configuration.nix`. The common `generate-hardware.sh` detects the installed root from `/`, `/mnt`, `/target`, `/mnt/nixos`, or `/media/nixos`, rejects Live ISO filesystems, and requires explicit selection when multiple roots or EFI System Partitions are possible. It never formats, partitions, modifies firmware, changes ACPI parameters, or guesses between multiple installations.
 
-Preview the detected topology without mounting anything:
+Preview the detected topology without writing the repository:
 
 ```bash
-sudo ./scripts/recover-latitude-boot.sh --repo "$PWD" --dry-run
+sudo ./scripts/generate-hardware.sh --host latitude --dry-run
+sudo ./scripts/generate-hardware.sh --host myMachine --dry-run
 ```
 
-On an installed system or emergency shell, run without a target argument; `/` is selected only when it is a mounted non-temporary filesystem containing NixOS files:
+On an installed system, use the repository checkout as the working directory:
 
 ```bash
-sudo ./scripts/recover-latitude-boot.sh --repo "$PWD"
+cd ~/.config/nixos
+sudo ./scripts/generate-hardware.sh --host latitude
 ```
 
-From a Live ISO, mount the existing Linux root read-write at `/mnt`, but do not format or repartition it. The helper can autodetect `/mnt`; if the layout is ambiguous, select both values explicitly:
+From a Live ISO, mount the existing Linux root at `/mnt`, mount its existing ESP at `/mnt/boot`, and use the checkout inside the installed home filesystem:
 
 ```bash
-sudo ./scripts/recover-latitude-boot.sh \
+sudo ./scripts/generate-hardware.sh \
+  --host latitude \
   --repo /mnt/home/livara/.config/nixos \
-  --target-root /mnt \
-  --esp /dev/disk/by-partuuid/REAL-ESP-PARTUUID
+  --target-root /mnt
 ```
 
-The helper lists block devices with explicit `lsblk` columns, waits for udev, accepts an ESP only when its partition type is the official EFI System Partition GUID, refuses to guess when there is no candidate or more than one candidate, and invokes `nixos-generate-config` with `--root` only for a non-root target. The generator validates root and `/boot` entries, rejects placeholder identifiers, checks device references, creates a timestamped backup, and stages only the tracked hardware file.
+The generator accepts only an existing ESP with the official EFI System Partition GUID, reuses an existing `/boot` mount, and refuses ambiguous candidates. It invokes `nixos-generate-config --root` for a non-root target, validates root and `/boot` entries, rejects placeholders, checks device references, creates a timestamped backup, and stages only the selected tracked hardware file.
 
-When the official generator reports `Failed to retrieve subvolume info` for Btrfs, the generator uses a non-destructive fallback. It reads `TARGET`, `SOURCE`, `FSTYPE`, and `OPTIONS` from the kernel mount table, preserves the actual Btrfs `subvol=` option, resolves stable `/dev/disk/by-*` paths when available, and writes one valid hardware module. It does not infer an unmounted root, unlock storage, format disks, or choose between ambiguous installations.
+The filesystem layer supports `ext4` and `btrfs`. For ext4 it preserves the stable device path and emits no Btrfs options. For Btrfs it preserves the actual `subvol=` or `subvolid=` mount option for each subvolume. When the official generator cannot inspect a Btrfs subvolume, the generator uses a non-destructive fallback based on `findmnt --kernel` and the mounted topology. It does not infer an unmounted root, unlock storage, format disks, or choose between ambiguous installations.
 
-`nixos-facter` can provide richer hardware facts in a future extension, but it does not choose an existing installation disk; Disko is deliberately excluded from this recovery path because it can change disk layouts.
-
-If the helper reports multiple or no ESP candidates, inspect the printed inventory and mount the correct existing partition manually. Do not use `mkfs`, `parted`, `fdisk`, `wipefs`, `acpi=noirq`, `noapic`, or `pci=biosirq` as a workaround.
-
-For a non-destructive report without modifying the repository configuration, run:
-
-```bash
-sudo LATITUDE_REPORT_DIR=/tmp/latitude-diagnostics \
-  ./scripts/collect-latitude-hardware-report.sh
-```
-
-The installer uses the existing flake lock by default; set `NIX_CONF_UPDATE_FLAKE=1` only when an input update is intentional.
+The installer uses the existing flake lock by default; set `NIX_CONF_UPDATE_FLAKE=1` only when an input update is intentional. The sanitized diagnostic collector remains available as `scripts/collect-latitude-diagnostic.sh` and is invoked automatically only after Latitude hardware detection fails.
 
 Review the staged result before rebuilding:
 

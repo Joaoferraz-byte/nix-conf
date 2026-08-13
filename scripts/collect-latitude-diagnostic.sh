@@ -220,7 +220,7 @@ fi
 section "Repository context"
 if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git -C "$REPO_ROOT" status --short 2>&1 | sanitize >> "$OUTPUT"
-  git -C "$REPO_ROOT" log -1 --format='%h %s' -- scripts/generate-latitude-hardware.sh modules/hosts/latitude/hardware.nix 2>&1 | sanitize >> "$OUTPUT"
+  git -C "$REPO_ROOT" log -1 --format='%h %s' -- scripts/generate-hardware.sh modules/hosts/latitude/hardware.nix 2>&1 | sanitize >> "$OUTPUT"
   sha256sum "$REPO_ROOT/modules/hosts/latitude/hardware.nix" 2>/dev/null | sanitize >> "$OUTPUT" || true
 else
   printf 'Repository is not a Git worktree.\n' >> "$OUTPUT"

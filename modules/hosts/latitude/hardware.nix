@@ -14,7 +14,7 @@
       assertions = [
         {
           assertion = !hasPlaceholder;
-          message = "Latitude hardware-configuration.nix still contains a placeholder. Run scripts/recover-latitude-boot.sh on the target machine before rebuilding.";
+          message = "Latitude hardware-configuration.nix still contains a placeholder. Run scripts/generate-hardware.sh --host latitude on the target machine before rebuilding.";
         }
       ];
 
