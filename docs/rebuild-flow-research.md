@@ -89,3 +89,11 @@ The end-4 QML source uses standard `Quickshell`, `Quickshell.Wayland`, `Quickshe
 18. [QuickShell v0.2.0 package expression](https://git.outfoxxed.me/quickshell/quickshell/raw/tag/v0.2.0/default.nix)
 19. [QuickShell v0.3.0 package expression](https://git.outfoxxed.me/quickshell/quickshell/raw/tag/v0.3.0/default.nix)
 20. [Nix Archive format](https://nix.dev/manual/nix/2.22/protocols/nix-archive)
+
+## Git tag reference correction
+
+The laptop exposed a second, distinct failure after the QuickShell release fix: `ref=v0.3.0` was resolved as `refs/heads/v0.3.0`, but the upstream repository publishes `v0.3.0` as a tag. Nix's Git flake behavior has a documented history around this distinction; a bare `ref` is not a reliable tag selector for this remote/backend. The robust solution is to use the immutable commit in the flake URL (`rev=59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83`) and retain the tag as a human-readable comment/documentation reference, or explicitly use `ref=refs/tags/v0.3.0` only if the backend accepts the fully qualified tag ref. The immutable revision avoids branch/tag namespace ambiguity and makes the source reproducible.
+
+21. [Nix issue: Git flake `ref` behavior](https://github.com/NixOS/nix/issues/8790)
+22. [Nix manual: `builtins.fetchGit`](https://nix.dev/manual/nix/2.28/language/builtins.html)
+23. [Nix discourse: Git tags in flake inputs](https://discourse.nixos.org/t/git-tags-in-flakes-inputs/25511)

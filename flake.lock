@@ -654,14 +654,13 @@
       "locked": {
         "lastModified": 1777871389,
         "narHash": "sha256-gU+VGpwGJ2vvg0mtYqVvj5u+2LteuHlpokH6JSAtueY=",
-        "ref": "v0.3.0",
         "rev": "59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83",
         "revCount": 815,
         "type": "git",
         "url": "https://git.outfoxxed.me/quickshell/quickshell"
       },
       "original": {
-        "ref": "v0.3.0",
+        "rev": "59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83",
         "type": "git",
         "url": "https://git.outfoxxed.me/quickshell/quickshell"
       }
