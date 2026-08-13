@@ -26,8 +26,8 @@
             userName = cfg.userName;
           };
           sharedModules = [
-            self.homeManagerModules.hyprland
-            self.homeManagerModules.end4
+            self.homeModules.hyprland
+            self.homeModules.end4
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

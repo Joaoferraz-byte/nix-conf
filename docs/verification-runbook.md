@@ -1,79 +1,164 @@
-# Ambxst Experience Verification Runbook
+# nix-conf Verification Runbook
 
-This document outlines the steps to verify the fixes and new integrations implemented in the `nix-conf` and `shell-conf` repositories for the Ambxst experience.
+This runbook verifies the active `nix-conf` architecture: NixOS modules, Home Manager, Hyprland with UWSM, the end-4 illogical-impulse QuickShell profile, Matugen runtime colors, Xournal++, NixVim, and the unified hardware generator.
 
-## 1. Environment Setup
+## 1. Repository preflight
 
-Before proceeding with the verification steps, ensure your NixOS system is updated with the latest configurations from the `nix-conf` and `shell-conf` repositories.
+Run these commands as the user who owns `~/.config/nixos`. Do not run the repository installer as root.
 
 ```bash
-cd ~/nix-conf
-git pull
-nixos-rebuild switch --flake .#limine
-
-cd ~/shell-conf
-git pull
-home-manager switch --flake .#livara
+cd ~/.config/nixos
+printf 'Repository: '; git rev-parse --show-toplevel
+printf 'Commit: '; git rev-parse --short HEAD
+git status --short
+git diff --check
+git diff --name-only --diff-filter=U
 ```
 
-## 2. Verification Steps
+The last command must produce no output. If `.git/objects` is not writable, repair ownership before pulling or running the installer:
 
-### 2.1. Shortcuts and Window Rounding (Hyprland/axctl Integration)
+```bash
+sudo chown -R "$(id -u):$(id -g)" .git
+```
 
-**Objective**: Verify that Hyprland shortcuts are correctly recognized and window rounding is applied as expected, indicating proper `axctl` integration.
+If local work exists, preserve it before synchronizing with `origin/main`:
 
-**Steps**:
-1. Open a terminal (Kitty).
-2. Execute `hyprctl clients` and observe the output. Look for properties related to window rounding (e.g., `rounding: 1`).
-3. Test a custom shortcut defined in Ambxst (e.g., `Super + Q` to close a window, `Super + Space` to open the launcher).
-4. Open multiple windows and verify that they have rounded corners.
+```bash
+git stash push -u -m 'local changes before nix-conf sync'
+git fetch origin main
+git merge --ff-only origin/main
+```
 
-**Expected Outcome**: All Hyprland windows should have rounded corners, and custom shortcuts should function correctly.
+Do not use `git reset --hard` to resolve a stash conflict. Keep the stash entry and resolve only the affected files.
 
-### 2.2. Presets (Exclusions for `general.json`)
+## 2. Flake and host evaluation
 
-**Objective**: Verify that `general.json` is excluded from preset operations to prevent overwriting user terminal settings.
+The default gate must not update inputs or mutate the lockfile:
 
-**Steps**:
-1. Open Ambxst and navigate to the Presets section.
-2. Attempt to save a new preset or load an existing one.
-3. After the operation, check the contents of `~/.local/share/ambxst/presets/` (or the relevant preset directory). Ensure that `general.json` is not present or modified by the preset operation.
-4. Verify that your terminal settings (e.g., font, colors) remain unchanged after saving/loading presets.
+```bash
+nix flake check --no-build --no-update-lock-file --show-trace
+nix eval --raw --no-update-lock-file '.#nixosConfigurations.latitude.config.system.build.toplevel.drvPath'
+nix eval --raw --no-update-lock-file '.#nixosConfigurations.myMachine.config.system.build.toplevel.drvPath'
+```
 
-**Expected Outcome**: `general.json` should not be affected by preset operations, and terminal settings should persist.
+A successful `nix flake check --no-build` verifies evaluation and expected output types. It does not build the complete system or activate it. Build each target when validating a substantial feature:
 
-### 2.3. Kora Icons (Systemd Service and Fallback)
+```bash
+nix build --no-update-lock-file '.#nixosConfigurations.latitude.config.system.build.toplevel'
+nix build --no-update-lock-file '.#nixosConfigurations.myMachine.config.system.build.toplevel'
+```
 
-**Objective**: Verify that Kora icons are correctly applied across the system and within Ambxst, and that the fallback mechanism works.
+Warnings about deprecated packages or omitted incompatible systems are not equivalent to evaluation failures. Treat an actual `error:` line, a non-zero exit status, or a failed derivation as a blocker.
 
-**Steps**:
-1. Log out and log back into your Hyprland session to ensure all environment variables are reloaded.
-2. Open various applications (e.g., a file manager, web browser, terminal). Observe if Kora icons are consistently applied.
-3. Open Ambxst and check if its internal icons are using the Kora theme.
-4. (Optional, for fallback verification): Temporarily remove `kora-icon-theme` package from your NixOS configuration, rebuild, and observe if a default icon theme is used instead of breaking.
+## 3. Hardware verification
 
-**Expected Outcome**: Kora icons should be consistently displayed across the system and within Ambxst. If Kora is unavailable, a graceful fallback to a default theme should occur.
+Preview the detected topology without writing files:
 
-### 2.4. Neovim + Kitty Integration and GitHub Dark Theme
+```bash
+./scripts/generate-hardware.sh --host latitude --dry-run
+./scripts/generate-hardware.sh --host myMachine --dry-run
+```
 
-**Objective**: Verify that Neovim launches in Kitty, clipboard integration works, and the GitHub Dark theme is correctly applied.
+The generator supports the Latitude ext4 root and the myMachine Btrfs subvolume layout. It uses `nixos-generate-config` when possible and falls back to the mounted kernel topology when Btrfs subvolume inspection fails. It never formats disks or adds ACPI workarounds.
 
-**Steps**:
-1. Open a terminal (Kitty).
-2. Type `nvim` and press Enter. Neovim should launch within the Kitty terminal.
-3. Inside Neovim, copy some text (`yy`) and paste it (`p`). Then, try pasting it into another application outside Neovim (e.g., a web browser or another terminal). Verify that the clipboard content is correctly transferred.
-4. Observe the color scheme within Neovim. It should display the GitHub Dark theme.
-5. Test font resizing shortcuts in Kitty (`Ctrl + Plus`, `Ctrl + Minus`, `Ctrl + Backspace`).
+If a tracked hardware file is modified, the generator validates and reuses it rather than overwriting it. Regenerate only after taking a backup and explicitly opting in:
 
-**Expected Outcome**: Neovim should open in Kitty, clipboard operations should work seamlessly between Neovim and other applications, and the GitHub Dark theme should be visible. Font resizing in Kitty should also work.
+```bash
+NIX_CONF_ALLOW_HARDWARE_REPLACE=1 ./scripts/generate-hardware.sh --host latitude
+```
 
-## 3. Documentation Updates
+Review the resulting diff before any rebuild:
 
-**Objective**: Verify that all relevant documentation files (`nix-conf/docs/`, `shell-conf/docs/`) have been updated to reflect the changes.
+```bash
+git diff -- modules/hosts/latitude/hardware-configuration.nix
+git diff -- modules/hosts/my-machine/hardware-configuration.nix
+```
 
-**Steps**:
-1. Navigate to the `nix-conf/docs/` and `shell-conf/docs/` directories.
-2. Open and review the documentation files (e.g., `README.md`, `axctl-decision.md`, or any new files created).
-3. Ensure that the documentation accurately describes the current state of the configuration, including the fixes and new integrations.
+## 4. Rebuild progression
 
-**Expected Outcome**: Documentation should be up-to-date and reflect all implemented changes.
+For a new shell, hardware change, or uncertain activation, use the installer in progressively stronger modes:
+
+```bash
+NIX_CONF_HOST=latitude NIX_CONF_REBUILD_MODE=dry-activate ./install.sh
+NIX_CONF_HOST=latitude NIX_CONF_REBUILD_MODE=test ./install.sh
+NIX_CONF_HOST=latitude NIX_CONF_REBUILD_MODE=switch ./install.sh
+```
+
+`dry-activate` reports activation changes without applying them. `test` activates the generation without selecting it as the bootloader default. `switch` applies the generation and makes it the default. The installer runs hardware validation, `nix flake check`, and target derivation evaluation before any of these modes.
+
+For a deliberate input update, keep it separate from normal rebuild validation:
+
+```bash
+NIX_CONF_UPDATE_FLAKE=1 NIX_CONF_UPDATE_INPUTS='quickshell' ./install.sh
+```
+
+Review `flake.lock` and rerun the evaluation gate after an update. Do not combine an input update with unreviewed hardware regeneration.
+
+## 5. Desktop session verification
+
+After a successful switch and login, verify that the supported UWSM session is active:
+
+```bash
+printf 'Session: %s\n' "${XDG_CURRENT_DESKTOP:-unset}"
+printf 'Desktop: %s\n' "${XDG_SESSION_DESKTOP:-unset}"
+hyprctl version
+hyprctl monitors
+qs -c ii ipc call stateVersion
+```
+
+The SDDM session should be `hyprland-uwsm`. Home Manager must not enable Hyprland's independent systemd session when UWSM owns the lifecycle.
+
+Verify the preserved compatibility actions:
+
+| Shortcut | Expected result |
+|---|---|
+| `Super+Space` | QuickShell overview or launcher. |
+| `Super+V` | QuickShell clipboard history. |
+| `Super+X` | QuickShell session/power menu. |
+| `Super+N` / `Super+O` | ZenNotes. |
+| `Super+Shift+S` | Region capture using `grim`, `slurp`, and `satty`. |
+| `Super+S` | Full-output capture using `grimblast`. |
+| `Super+Ctrl+S` | Active-window capture using `grimblast`. |
+
+If a shortcut fails, inspect the generated Hyprland configuration and logs before changing bindings:
+
+```bash
+hyprctl binds
+hyprctl configerrors
+journalctl --user -b --no-pager | grep -Ei 'quickshell|hyprland|matugen|switchwall|grimblast'
+```
+
+## 6. Theme and mutable-state verification
+
+The end-4 source assets are immutable Home Manager links. Generated state must remain writable:
+
+```bash
+ls -l ~/.local/state/quickshell/user/generated
+ls -l ~/.local/state/nix-conf/theme
+ls -l ~/.config/hypr/hyprland/colors.conf ~/.config/gtk-3.0/gtk.css ~/.config/gtk-4.0/gtk.css
+```
+
+Select a wallpaper from `~/Pictures/Wallpapers` and verify that Matugen updates QuickShell colors, Hyprland colors, Hyprlock, Fuzzel, GTK, Firefox, Zen Browser, and ZenNotes. Do not replace these runtime outputs with Home Manager links to `/nix/store`.
+
+## 7. Application flows
+
+Open Zen Browser and confirm its profile theme follows the current Matugen palette. Open Xournal++ and confirm that its application-owned configuration remains under `~/.config/xournalpp`, its Matugen GTK integration remains under `~/.config/com.github.xournalpp.xournalpp`, and reviewed repository changes are synchronized through `scripts/sync-xournalpp-config.sh`.
+
+Open Neovim and verify that NixVim loads without an independent Home Manager switch. The user profile is applied by the same `nixos-rebuild` that owns the system generation.
+
+## 8. Failure recovery
+
+The installer writes the complete rebuild output to `/tmp/nixos-rebuild.log` by default. If a rebuild fails, inspect the last section and list generations:
+
+```bash
+tail -n 100 /tmp/nixos-rebuild.log
+sudo nixos-rebuild list-generations
+```
+
+If activation leaves the running system unusable, boot a known-good generation from the bootloader. From a usable system, the previous generation can be activated with:
+
+```bash
+sudo nixos-rebuild --rollback switch
+```
+
+A failed `nixos-rebuild switch` does not justify deleting the Git checkout, the lockfile, or the Nix store. Resolve the configuration error, rerun the evaluation gate, and use `test` before the next `switch`.

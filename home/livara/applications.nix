@@ -52,7 +52,7 @@ in
     syntaxHighlighting.enable = true;
     shellAliases = {
       ll = "ls -l";
-      update = "sudo nixos-rebuild switch --flake .";
+      update = "cd ~/.config/nixos && ./install.sh";
     };
     history = {
       size = 10000;

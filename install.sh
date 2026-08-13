@@ -2,16 +2,60 @@
 set -euo pipefail
 trap 'printf "Installation aborted at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 cd -- "$SCRIPT_DIR"
+
+if [ "$(id -u)" -eq 0 ]; then
+  printf '%s\n' 'Error: run ./install.sh as the checkout owner, not as root. The installer uses sudo only for privileged system operations.' >&2
+  exit 1
+fi
+
+preflight_git_worktree() {
+  local git_root git_dir git_objects git_index
+  command -v git >/dev/null 2>&1 || {
+    printf '%s\n' 'Error: Git is required.' >&2
+    exit 1
+  }
+  git_root="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)" || {
+    printf '%s\n' "Error: the installer directory is not a Git worktree: $SCRIPT_DIR" >&2
+    exit 1
+  }
+  [ "$git_root" = "$SCRIPT_DIR" ] || {
+    printf '%s\n' "Error: the installer must run from the repository root: $SCRIPT_DIR" >&2
+    exit 1
+  }
+  git_dir="$(git -C "$SCRIPT_DIR" rev-parse --git-dir)"
+  git_objects="$(git -C "$SCRIPT_DIR" rev-parse --git-path objects)"
+  git_index="$(git -C "$SCRIPT_DIR" rev-parse --git-path index)"
+  [ -w "$git_objects" ] || {
+    printf '%s\n' "Error: Git object storage is not writable: $git_objects" >&2
+    printf '%s\n' "Fix with: sudo chown -R \"$(id -u):$(id -g)\" \"$git_dir\"" >&2
+    exit 1
+  }
+  if [ -e "$git_index" ] && [ ! -w "$git_index" ]; then
+    printf '%s\n' "Error: Git index is not writable: $git_index" >&2
+    printf '%s\n' "Fix with: sudo chown -R \"$(id -u):$(id -g)\" \"$git_dir\"" >&2
+    exit 1
+  fi
+  if git -C "$SCRIPT_DIR" diff --name-only --diff-filter=U | grep -q .; then
+    printf '%s\n' 'Error: the checkout contains unresolved Git conflicts.' >&2
+    exit 1
+  fi
+  if [ -f "$SCRIPT_DIR/flake.lock" ] && grep -nE '^(<<<<<<<|=======|>>>>>>>)' "$SCRIPT_DIR/flake.lock" >/dev/null; then
+    printf '%s\n' 'Error: flake.lock contains merge-conflict markers. Resolve or restore it before running the installer.' >&2
+    exit 1
+  fi
+}
+
+preflight_git_worktree
 
 if [ "${NIX_CONF_DEV_SHELL:-0}" != "1" ]; then
   command -v nix >/dev/null 2>&1 || {
-    printf 'Error: the Nix command is required.\n' >&2
+    printf '%s\n' 'Error: the Nix command is required.' >&2
     exit 1
   }
   export NIX_CONF_DEV_SHELL=1
-  exec nix develop "$SCRIPT_DIR" --command bash "$SCRIPT_DIR/install.sh" "$@"
+  exec nix develop --no-update-lock-file "$SCRIPT_DIR" --command bash "$SCRIPT_DIR/install.sh" "$@"
 fi
 
 RED='\033[0;31m'
@@ -19,8 +63,38 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-HOST_CHOICE=""
+FLAKE_TARGET=""
 REBOOT=""
+REBUILD_MODE="${NIX_CONF_REBUILD_MODE:-switch}"
+REBUILD_LOG="${NIX_CONF_REBUILD_LOG:-${TMPDIR:-/tmp}/nixos-rebuild.log}"
+
+fail() {
+  printf '%b\n' "${RED}$*${NC}" >&2
+  exit 1
+}
+
+run_logged() {
+  local status
+  set +e
+  "$@" 2>&1 | tee -a "$REBUILD_LOG"
+  status=${PIPESTATUS[0]}
+  set -e
+  return "$status"
+}
+
+report_gate_failure() {
+  local status="$1"
+  printf '%b\n' "${RED}Pre-rebuild validation failed with exit code $status.${NC}" >&2
+  printf 'Full log: %s\n' "$REBUILD_LOG" >&2
+  tail -n 100 "$REBUILD_LOG" >&2 || true
+  exit "$status"
+}
+
+case "$REBUILD_MODE" in
+  dry-activate|test|boot|switch) ;;
+  *) fail "Unsupported NIX_CONF_REBUILD_MODE '$REBUILD_MODE'. Use dry-activate, test, boot, or switch." ;;
+esac
+
 if [ -n "${NIX_CONF_HOST:-}" ]; then
   FLAKE_TARGET="${NIX_CONF_HOST}"
 elif [ "${NIX_CONF_NONINTERACTIVE:-0}" = "1" ]; then
@@ -34,18 +108,53 @@ else
   case "$HOST_CHOICE" in
     1) FLAKE_TARGET='myMachine' ;;
     2) FLAKE_TARGET='latitude' ;;
-    *) printf '%b\n' "${RED}Invalid host selection.${NC}" >&2; exit 1 ;;
+    *) fail 'Invalid host selection.' ;;
   esac
 fi
 
 case "$FLAKE_TARGET" in
   myMachine|my-machine|my_machine) FLAKE_TARGET='myMachine' ;;
   latitude) ;;
-  *) printf '%b\n' "${RED}Unsupported host: $FLAKE_TARGET${NC}" >&2; exit 1 ;;
+  *) fail "Unsupported host: $FLAKE_TARGET" ;;
 esac
 
-printf '%b\n' "${GREEN}Repository: $SCRIPT_DIR${NC}"
-printf '%b\n' "${GREEN}Selected host: $FLAKE_TARGET${NC}"
+preflight_repository() {
+  local git_root git_dir git_objects git_index
+
+  preflight_git_worktree
+  command -v git >/dev/null 2>&1 || fail 'Git is required.'
+  command -v nix >/dev/null 2>&1 || fail 'Nix is required.'
+  command -v nixos-rebuild >/dev/null 2>&1 || fail 'nixos-rebuild is required.'
+  command -v sudo >/dev/null 2>&1 || fail 'sudo is required for system activation.'
+
+  git_root="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)" \
+    || fail "The installer directory is not a Git worktree: $SCRIPT_DIR"
+  [ "$git_root" = "$SCRIPT_DIR" ] \
+    || fail "The installer must run from the repository root: $SCRIPT_DIR"
+
+  git_dir="$(git -C "$SCRIPT_DIR" rev-parse --git-dir)"
+  git_objects="$(git -C "$SCRIPT_DIR" rev-parse --git-path objects)"
+  git_index="$(git -C "$SCRIPT_DIR" rev-parse --git-path index)"
+  [ -w "$git_objects" ] \
+    || fail "Git object storage is not writable: $git_objects. Fix ownership with: sudo chown -R \"$(id -u):$(id -g)\" \"$git_dir\""
+  if [ -e "$git_index" ] && [ ! -w "$git_index" ]; then
+    fail "Git index is not writable: $git_index. Fix ownership with: sudo chown -R \"$(id -u):$(id -g)\" \"$git_dir\""
+  fi
+
+  git -C "$SCRIPT_DIR" ls-files --error-unmatch flake.nix flake.lock >/dev/null \
+    || fail 'flake.nix and flake.lock must be tracked files.'
+  if git -C "$SCRIPT_DIR" diff --name-only --diff-filter=U | grep -q .; then
+    fail 'The checkout contains unresolved Git conflicts. Resolve them before running the installer.'
+  fi
+  if grep -nE '^(<<<<<<<|=======|>>>>>>>)' "$SCRIPT_DIR/flake.lock" >/dev/null; then
+    fail 'flake.lock contains merge-conflict markers. Restore or resolve it before running the installer.'
+  fi
+
+  if [ "${NIX_CONF_UPDATE_FLAKE:-0}" = '1' ]; then
+    [ -w "$SCRIPT_DIR/flake.lock" ] \
+      || fail 'NIX_CONF_UPDATE_FLAKE=1 requires a writable flake.lock.'
+  fi
+}
 
 configure_hardware() {
   local status
@@ -68,6 +177,13 @@ configure_hardware() {
   return "$status"
 }
 
+preflight_repository
+
+printf '%b\n' "${GREEN}Repository: $SCRIPT_DIR${NC}"
+printf '%b\n' "${GREEN}Selected host: $FLAKE_TARGET${NC}"
+printf '%b\n' "${GREEN}Rebuild mode: $REBUILD_MODE${NC}"
+printf '%s\n' "Current commit: $(git -C "$SCRIPT_DIR" rev-parse --short HEAD)"
+
 if configure_hardware; then
   :
 else
@@ -77,33 +193,74 @@ else
 fi
 
 if [ "${NIX_CONF_UPDATE_FLAKE:-0}" = '1' ]; then
+  LOCK_BACKUP="${TMPDIR:-/tmp}/nix-conf-flake.lock.$(date +%Y%m%d-%H%M%S)"
+  cp -p "$SCRIPT_DIR/flake.lock" "$LOCK_BACKUP"
   printf '%b\n' "${YELLOW}Updating flake inputs by explicit request...${NC}"
-  nix flake update
-else
+  if [ -n "${NIX_CONF_UPDATE_INPUTS:-}" ]; then
+    read -r -a UPDATE_INPUTS <<< "${NIX_CONF_UPDATE_INPUTS}"
+    if nix flake update "${UPDATE_INPUTS[@]}"; then
+      :
+    else
+      status=$?
+      cp -p "$LOCK_BACKUP" "$SCRIPT_DIR/flake.lock"
+      fail "Flake input update failed with exit code $status; the previous lockfile was restored from $LOCK_BACKUP."
+    fi
+  elif nix flake update; then
+    :
+  else
+    status=$?
+    cp -p "$LOCK_BACKUP" "$SCRIPT_DIR/flake.lock"
+    fail "Flake input update failed with exit code $status; the previous lockfile was restored from $LOCK_BACKUP."
+  fi
+  printf 'Previous lockfile backup: %s\n' "$LOCK_BACKUP"
+elif [ "${NIX_CONF_UPDATE_FLAKE:-0}" = '0' ]; then
   printf '%b\n' "${GREEN}Using locked flake inputs. Set NIX_CONF_UPDATE_FLAKE=1 to update them.${NC}"
 fi
 
-printf '%b\n' "${YELLOW}Checking flake...${NC}"
-nix flake check --no-build
+mkdir -p "$(dirname -- "$REBUILD_LOG")" \
+  || fail "Cannot create the rebuild log directory: $(dirname -- "$REBUILD_LOG")"
+: > "$REBUILD_LOG" \
+  || fail "Cannot write the rebuild log: $REBUILD_LOG"
 
-REBUILD_LOG="${TMPDIR:-/tmp}/nixos-rebuild.log"
-printf '%b\n' "${YELLOW}Building and switching to $FLAKE_TARGET...${NC}"
+printf '%b\n' "${YELLOW}Checking flake evaluation and output types...${NC}"
+if run_logged nix flake check --no-build --no-update-lock-file --show-trace; then
+  :
+else
+  status=$?
+  report_gate_failure "$status"
+fi
+
+printf '%b\n' "${YELLOW}Evaluating selected system derivation...${NC}"
+if run_logged nix eval --raw --no-update-lock-file \
+  "$SCRIPT_DIR#$FLAKE_TARGET.config.system.build.toplevel.drvPath"; then
+  printf '\n'
+else
+  status=$?
+  report_gate_failure "$status"
+fi
+
+printf '%b\n' "${YELLOW}Running nixos-rebuild $REBUILD_MODE for $FLAKE_TARGET...${NC}"
+REBUILD_CMD=(sudo nixos-rebuild "$REBUILD_MODE" --flake "$SCRIPT_DIR#$FLAKE_TARGET" --show-trace)
 set +e
-sudo nixos-rebuild switch --flake ".#$FLAKE_TARGET" 2>&1 | tee "$REBUILD_LOG"
+"${REBUILD_CMD[@]}" 2>&1 | tee -a "$REBUILD_LOG"
 REBUILD_STATUS="${PIPESTATUS[0]}"
 set -e
 if [ "$REBUILD_STATUS" -ne 0 ]; then
   printf '%b\n' "${RED}nixos-rebuild failed with exit code $REBUILD_STATUS.${NC}" >&2
   printf 'Full log: %s\n' "$REBUILD_LOG" >&2
-  tail -n 80 "$REBUILD_LOG" >&2
+  tail -n 100 "$REBUILD_LOG" >&2
+  printf '%s\n' 'The previous generation remains available. Inspect it with:' >&2
+  printf '%s\n' '  sudo nixos-rebuild list-generations' >&2
+  printf '%s\n' 'If the current system is unusable, recover with:' >&2
+  printf '%s\n' '  sudo nixos-rebuild --rollback switch' >&2
   exit "$REBUILD_STATUS"
 fi
 
 printf '%b\n' "${GREEN}Rebuild successful.${NC}"
-if [ "${NIX_CONF_NONINTERACTIVE:-0}" = '1' ]; then
+if [ "${NIX_CONF_NONINTERACTIVE:-0}" = '1' ] || [ "$REBUILD_MODE" != 'switch' ]; then
   exit 0
 fi
-read -r -p 'Reboot now? [y/N]: ' REBOOT
+read -r -p 'Reboot now? [y/N] ' REBOOT
 case "$REBOOT" in
   y|Y|yes) sudo reboot ;;
   *) printf '%s\n' 'Reboot skipped.' ;;

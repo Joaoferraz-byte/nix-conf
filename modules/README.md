@@ -9,7 +9,7 @@ This directory contains the evaluated NixOS and flake-parts modules for the repo
 | `hosts/` | Machine composition roots, hardware declarations, locale, identity, and host-specific policy. |
 | `parts.nix` | flake-parts definitions for public module exports and shared flake metadata. |
 
-The root `flake.nix` imports the evaluated module surface explicitly. Files under `archive/` are historical and remain outside the evaluated tree. A reusable feature must expose a stable `flake.nixosModules.<name>` or `flake.homeManagerModules.<name>` contract at the layer where its options are evaluated.
+The root `flake.nix` imports the evaluated module surface explicitly. Files under `archive/` are historical and remain outside the evaluated tree. A reusable feature must expose a stable `flake.nixosModules.<name>` or `flake.homeModules.<name>` contract at the layer where its options are evaluated.
 
 ## Adding a host
 
@@ -49,23 +49,23 @@ Preview the result without modifying the repository:
 
 ```bash
 cd ~/.config/nixos
-sudo ./scripts/generate-hardware.sh --host latitude --dry-run
-sudo ./scripts/generate-hardware.sh --host myMachine --dry-run
+./scripts/generate-hardware.sh --host latitude --dry-run
+./scripts/generate-hardware.sh --host myMachine --dry-run
 ```
 
 Generate and stage a selected host file:
 
 ```bash
-sudo ./scripts/generate-hardware.sh --host latitude
-git diff --cached -- modules/hosts/latitude/hardware-configuration.nix
-sudo ./scripts/generate-hardware.sh --host myMachine
-git diff --cached -- modules/hosts/my-machine/hardware-configuration.nix
+./scripts/generate-hardware.sh --host latitude
+git diff -- modules/hosts/latitude/hardware-configuration.nix
+./scripts/generate-hardware.sh --host myMachine
+git diff -- modules/hosts/my-machine/hardware-configuration.nix
 ```
 
 From a Live ISO, mount the installed root at `/mnt`, its existing ESP at `/mnt/boot`, and use the checkout inside the installed home filesystem:
 
 ```bash
-sudo ./scripts/generate-hardware.sh \
+./scripts/generate-hardware.sh \
   --host latitude \
   --repo /mnt/home/livara/.config/nixos \
   --target-root /mnt
@@ -73,7 +73,11 @@ sudo ./scripts/generate-hardware.sh \
 
 The generator accepts only an existing EFI System Partition, reuses an existing `/boot` mount, validates root and boot entries, checks device references, creates a timestamped backup, and stages only the selected tracked file. Do not add `acpi=`, `acpi_osi=`, `acpi=noirq`, `noapic`, or `pci=biosirq` solely to silence firmware messages.
 
-The installer uses the existing flake lock by default. Set `NIX_CONF_UPDATE_FLAKE=1` only when an input update is intentional. Latitude diagnostics are collected automatically only after hardware detection fails and are sanitized before upload.
+The installer uses the existing flake lock by default. Set `NIX_CONF_UPDATE_FLAKE=1` only when an input update is intentional. A modified tracked hardware file is validated and reused instead of overwritten; set `NIX_CONF_ALLOW_HARDWARE_REPLACE=1` only for an intentional replacement. Latitude diagnostics are collected automatically only after hardware detection fails and are sanitized before upload.
+
+## Rebuild flow
+
+`install.sh` owns the normal workflow. It refuses to run as root, checks Git permissions and conflict state, validates or reuses hardware, runs `nix flake check --no-build --no-update-lock-file`, evaluates the selected system derivation, and invokes `nixos-rebuild` only after those gates pass. Use `NIX_CONF_REBUILD_MODE=dry-activate` or `test` before `switch` for a new shell or hardware change. On activation failure, inspect the saved log and recover with `sudo nixos-rebuild --rollback switch` if necessary.
 
 ## Validation
 
@@ -82,7 +86,7 @@ The minimum gate for a feature or host change is:
 ```bash
 git diff --check
 find scripts -maxdepth 1 -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
-nix flake check --no-build
+nix flake check --no-build --no-update-lock-file --show-trace
 ```
 
 Then evaluate or build each affected host:

@@ -1,72 +1,56 @@
-# Correção: Permissões de escrita e diretório Wallpapers ausente
+# Historical runtime-state permission issue
 
-## Sintoma
+This document records a permission failure from the retired Ambxst shell. Ambxst, DMS, and the old `shell-conf` integration are not part of the active composition. The current shell is end-4 QuickShell on Hyprland with UWSM.
 
-O serviço `ambxst.service` registrava erros repetidos no `journalctl`:
+## Historical symptom
 
-```
-Write of /home/livara/.local/state/ambxst/config/dock.json failed: Permission denied
-```
+The old shell attempted to write files such as:
 
-(o mesmo para `bar.json`, `compositor.json`, `notch.json`, `overview.json`, `workspaces.json`, `performance.json`)
-
-Adicionalmente, o seletor de wallpapers falhava com:
-
-```
-find: '~/.config/nixos/Wallpapers': No such file or directory
+```text
+/home/livara/.local/state/ambxst/config/dock.json
 ```
 
-## Causa Raiz
+and failed when the directory was absent or owned by `root`. The old service started before its configuration directory was guaranteed to exist, which made the error appear intermittently after a rebuild.
 
-### Permissão negada nos arquivos de configuração
+## Current state ownership
 
-A cadeia de resolução de path para os arquivos de configuração do Ambxst é:
+The active end-4 adapter uses the following ownership model:
 
-1. O launcher (`nix/packages/default.nix` no shell-conf) define `AMBXST_CONFIG_ROOT` como `${XDG_STATE_HOME:-$HOME/.local/state}/ambxst`.
-2. `Config.qml` usa `Quickshell.env("AMBXST_CONFIG_ROOT")` para determinar `configRoot`.
-3. `configDir = configRoot + "/config"` resulta em `/home/livara/.local/state/ambxst/config`.
-4. Os componentes `FileView` escrevem atomicamente em arquivos como `configDir + "/dock.json"`.
+| Path | Owner | Mutability |
+|---|---|---|
+| `~/.config/quickshell/ii` | Home Manager and the pinned end-4 source | Immutable source link |
+| `~/.config/hypr/hyprland/*.conf` | Home Manager plus local overrides | Source fragments are immutable; local generated files are writable where required |
+| `~/.local/state/quickshell/user/generated` | QuickShell and Matugen | Writable runtime state |
+| `~/.local/state/nix-conf/theme` | Matugen and browser/theme adapters | Writable generated theme state |
+| `~/Pictures/Wallpapers` | User | Writable wallpaper input |
 
-O serviço systemd `ambxst.service` não possuía nenhuma diretiva `ExecStartPre` para garantir a existência do diretório de configuração antes de iniciar. Embora o processo `ensureConfigDir` dentro do `Config.qml` execute `mkdir -p` via shell, isso ocorre **depois** que os `FileView` components tentam carregar e salvar seus arquivos. Se o diretório ainda não existir (e.g., primeira execução após rebuild, ou se o diretório foi criado com ownership errado), o `FileView.save()` falha com "Permission denied".
+Do not recreate `~/.local/state/ambxst`, add an `ambxst.service`, or restore a shell-conf symlink to solve a current QuickShell issue. Those actions would reintroduce a retired owner and could cause two shells to compete for the same session resources.
 
-### Diretório Wallpapers ausente
+## Current diagnostic procedure
 
-O caminho `~/.config/nixos/Wallpapers` **não é referenciado em nenhum lugar** do código-fonte do shell-conf ou do Ambxst upstream. Ele é um valor de configuração do usuário, persistido em `~/.cache/ambxst/wallpapers.json` como `wallpaperConfig.adapter.wallPath`. O nix-conf armazena wallpapers em `self.outPath + "/Wallpapers"` (rastreado pelo git), mas não havia nenhum symlink ou declaração Home Manager que criasse `~/.config/nixos/Wallpapers`.
+Check ownership and links as the logged-in user:
 
-## Correção
-
-### 1. ExecStartPre no systemd unit (`modules/features/ambxst.nix`)
-
-Adicionado `ExecStartPre` ao serviço `ambxst` para garantir que o diretório de configuração exista antes da execução:
-
-```nix
-serviceConfig = {
-  ExecStartPre = [ "-${pkgs.coreutils}/bin/mkdir -p %h/.local/state/ambxst/config" ];
-  ...
-};
+```bash
+find ~/.local/state/quickshell ~/.local/state/nix-conf/theme -maxdepth 3 -printf '%M %u:%g %p\n' 2>/dev/null
+ls -ld ~/.config/quickshell/ii ~/.config/hypr
+journalctl --user -b --no-pager | grep -Ei 'quickshell|matugen|switchwall|permission denied'
 ```
 
-### 2. Environment XDG_STATE_HOME no systemd unit
+If a runtime directory is owned by `root`, repair only the user-owned state directory:
 
-Adicionado `Environment` para garantir que `XDG_STATE_HOME` seja consistente, independentemente da herança de sessão:
-
-```nix
-environment = {
-  XDG_STATE_HOME = "/home/${config.users.users.livara.name}/.local/state";
-};
+```bash
+sudo chown -R "$(id -u):$(id -g)" ~/.local/state/quickshell ~/.local/state/nix-conf ~/.config/quickshell ~/.config/hypr
 ```
 
-### 3. Symlink para Wallpapers (`home/livara/home.nix`)
+Do not run `home-manager`, the end-4 scripts, or `install.sh` through `sudo`. The installer refuses to run as root because root-owned files in the user checkout or Home Manager profile are a common source of later failures.
 
-Adicionado um symlink declarativo que conecta `~/.config/nixos/Wallpapers` ao diretório de wallpapers versionado no flake:
+For a configuration change, use the repository workflow:
 
-```nix
-home.file.".config/nixos/Wallpapers".source = self.outPath + "/Wallpapers";
+```bash
+cd ~/.config/nixos
+NIX_CONF_REBUILD_MODE=dry-activate ./install.sh
+NIX_CONF_REBUILD_MODE=test ./install.sh
+./install.sh
 ```
 
-Isso garante que o caminho configurado pelo usuário no seletor de wallpapers sempre resolva para um diretório válido.
-
-## Notas
-
-- O diretório `~/.local/state/ambxst/config/` é seedado pelo módulo Home Manager do shell-conf (`prepareAmbxstRuntimeState`) durante a ativação, copiando os templates de `settings/`. O `ExecStartPre` é uma garantia adicional para casos em que o serviço inicie antes ou independentemente da ativação do Home Manager.
-- O symlink de Wallpapers pode ser substituído no futuro por uma declaração explícita do path em um arquivo JSON de configuração, caso o nix-conf adote uma abordagem totalmente declarativa para a seleção de wallpapers.
+The writable-state rule is the same as for the old issue, but the active paths and owner have changed: QuickShell and Matugen own their generated state, while Nix owns the immutable source assets.

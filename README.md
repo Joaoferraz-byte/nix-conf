@@ -64,16 +64,33 @@ Matugen is the single runtime palette authority. Its stable output contract is:
 
 These generated files must not be symlinked into the Nix store. Xournal++ keeps its reviewed semantic drawing configuration in `xournal-conf`; the GTK palette is consumed separately.
 
-## Installation
+## Installation and rebuild flow
 
-The intended installed-system workflow uses the checkout at `~/.config/nixos` and requires no repository relocation:
+The intended installed-system workflow uses the checkout at `~/.config/nixos` and requires no repository relocation. Run the installer as `livara`, not as root:
 
 ```bash
 cd ~/.config/nixos
 ./install.sh
 ```
 
-The installer detects the selected host, generates or validates its tracked hardware configuration, runs `nix flake check --no-build`, and only then performs `nixos-rebuild switch`. Hardware failure stops the rebuild and, for Latitude, triggers the sanitized diagnostic collector when enabled.
+The installer performs a preflight before entering the development shell. It verifies that the checkout is a Git worktree owned by the current user, that `.git/objects` and the index are writable, that there are no unresolved conflicts or `flake.lock` conflict markers, and that the required Nix commands are available. It then validates or reuses hardware, checks the flake without changing the lockfile, evaluates the selected system derivation, and only then invokes `nixos-rebuild`.
+
+The default mode is `switch`. Safer modes are available through `NIX_CONF_REBUILD_MODE`:
+
+| Mode | Effect |
+|---|---|
+| `dry-activate` | Builds the system and reports activation changes without activating it. |
+| `test` | Builds and activates the generation without making it the bootloader default. |
+| `boot` | Builds and selects the generation for the next boot without activating it now. |
+| `switch` | Builds, creates a generation, updates the boot default, and activates immediately. |
+
+For a first end-4 or hardware test, use `dry-activate` or `test` before `switch`:
+
+```bash
+NIX_CONF_HOST=latitude NIX_CONF_REBUILD_MODE=dry-activate ./install.sh
+NIX_CONF_HOST=latitude NIX_CONF_REBUILD_MODE=test ./install.sh
+NIX_CONF_HOST=latitude ./install.sh
+```
 
 To select a host without the prompt:
 
@@ -82,42 +99,58 @@ NIX_CONF_HOST=latitude ./install.sh
 NIX_CONF_HOST=myMachine ./install.sh
 ```
 
-To use the existing lockfile, leave `NIX_CONF_UPDATE_FLAKE` unset. Updating inputs is explicit:
+The existing `flake.lock` is used by default. The installer never updates inputs during its `nix develop` bootstrap or normal check. Update inputs only by explicit request, optionally selecting input names:
 
 ```bash
 NIX_CONF_UPDATE_FLAKE=1 ./install.sh
+NIX_CONF_UPDATE_FLAKE=1 NIX_CONF_UPDATE_INPUTS='quickshell illogical-impulse-dotfiles' ./install.sh
 ```
+
+The installer backs up `flake.lock` before an explicit update. It does not pull Git branches automatically, because pulling over local hardware or Xournal++ changes can create conflicts that must be resolved deliberately. Preserve local work before synchronizing:
+
+```bash
+git status --short
+git stash push -u -m 'local changes before nix-conf sync'
+git fetch origin main
+git merge --ff-only origin/main
+nix flake check --no-build --no-update-lock-file
+git stash pop
+```
+
+If `git stash pop` reports a conflict, do not use `git reset --hard` or delete the conflict files. Keep the stash entry and resolve only the affected files.
 
 ## Hardware generation
 
-The unified generator supports the Latitude ext4 layout and the myMachine Btrfs layout:
+The unified generator supports the Latitude ext4 layout and the myMachine Btrfs layout. Run it as the checkout owner; it invokes `sudo` only when it must mount an existing ESP:
 
 ```bash
 cd ~/.config/nixos
-sudo ./scripts/generate-hardware.sh --host latitude --dry-run
-sudo ./scripts/generate-hardware.sh --host myMachine --dry-run
+./scripts/generate-hardware.sh --host latitude --dry-run
+./scripts/generate-hardware.sh --host myMachine --dry-run
 ```
 
-The generator uses `nixos-generate-config` when it can inspect the mounted system and falls back to mounted-kernel topology for Btrfs subvolume probing failures. It validates device references, preserves backups, stages only the selected tracked hardware file, and never formats disks, edits firmware settings, or adds ACPI kernel parameters.
+When a tracked hardware file has local modifications, the generator validates and reuses it instead of overwriting it. Set `NIX_CONF_ALLOW_HARDWARE_REPLACE=1` only after reviewing a backup and intentionally requesting regeneration. The generator uses `nixos-generate-config` when it can inspect the mounted system and falls back to mounted-kernel topology for Btrfs subvolume probing failures. It validates device references, preserves backups, stages only the selected tracked hardware file, and never formats disks, edits firmware settings, or adds ACPI kernel parameters.
 
 ## Validation
 
 Run the following commands on a normal NixOS system or another host with Nix available. The sandbox used for repository analysis does not contain the Nix executable, so this is a required target-host gate:
 
 ```bash
-nix flake lock
-nix flake check --no-build
-nix eval .#nixosConfigurations.latitude.config.system.stateVersion
-nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
-nix build .#nixosConfigurations.latitude.config.system.build.toplevel
-nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
+git diff --check
+nix flake check --no-build --no-update-lock-file --show-trace
+nix eval --raw --no-update-lock-file '.#nixosConfigurations.latitude.config.system.build.toplevel.drvPath'
+nix eval --raw --no-update-lock-file '.#nixosConfigurations.myMachine.config.system.build.toplevel.drvPath'
+nix build --no-update-lock-file '.#nixosConfigurations.latitude.config.system.build.toplevel'
+nix build --no-update-lock-file '.#nixosConfigurations.myMachine.config.system.build.toplevel'
 ```
 
-Run a test activation before switching when changing the shell or hardware:
+Use `nix flake lock` only after adding inputs and use `nix flake update <input>` only when intentionally changing a pinned revision. A successful `nix flake check --no-build` proves evaluation and output shape, not activation; `nix eval` prints a derivation path but does not build or activate it.
+
+For recovery after an activation failure, list generations and select the previous generation:
 
 ```bash
-sudo nixos-rebuild test --flake .#latitude
-sudo nixos-rebuild test --flake .#myMachine
+sudo nixos-rebuild list-generations
+sudo nixos-rebuild --rollback switch
 ```
 
 ## Development, containers, and virtualization

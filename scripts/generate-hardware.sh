@@ -117,10 +117,14 @@ command -v lsblk >/dev/null 2>&1 || fail "lsblk is required."
 command -v realpath >/dev/null 2>&1 || fail "realpath is required."
 command -v mount >/dev/null 2>&1 || fail "mount is required."
 
-if [ "$(id -u)" -ne 0 ]; then
-  command -v sudo >/dev/null 2>&1 || fail "Run as root or install sudo."
-  exec sudo -- "$0" "$@"
+if [ "$(id -u)" -eq 0 ]; then
+  if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
+    exec sudo -u "${SUDO_USER}" -H -- "$0" "$@"
+  fi
+  fail "Run this script as the user who owns the Git checkout; it uses sudo only for privileged mount operations."
 fi
+
+command -v sudo >/dev/null 2>&1 || fail "sudo is required when an existing ESP must be mounted."
 
 REPO_ROOT="$(realpath -e "$REPO_ROOT")" || fail "Repository path does not exist: $REPO_ROOT"
 HOST_DIR="${REPO_ROOT}/modules/hosts/${HOST_SLUG}"
@@ -243,7 +247,7 @@ ensure_boot_mount() {
   }
   [ -n "$ESP_DEVICE" ] || discover_esp
   validate_esp_device "$ESP_DEVICE"
-  mount "$ESP_DEVICE" "$BOOT_DIR"
+  sudo -- mount "$ESP_DEVICE" "$BOOT_DIR"
   printf 'Mounted existing ESP: '
   findmnt -rn -M "$BOOT_DIR" -o SOURCE,FSTYPE,TARGET
 }
@@ -464,6 +468,18 @@ print_detected_mounts
 [ "$DRY_RUN" -eq 1 ] && exit 0
 
 [ -w "$HOST_DIR" ] || fail "Hardware host directory is not writable: $HOST_DIR"
+
+if [ "${NIX_CONF_ALLOW_HARDWARE_REPLACE:-0}" != "1" ] \
+  && { ! git -C "$REPO_ROOT" diff --quiet -- "$HARDWARE_FILE" \
+    || ! git -C "$REPO_ROOT" diff --cached --quiet -- "$HARDWARE_FILE"; }; then
+  printf 'Tracked hardware file has local changes; validating and reusing it without replacement: %s\n' "$HARDWARE_FILE"
+  cp -- "$HARDWARE_FILE" "$TEMP_FILE"
+  SOURCE_LABEL="$HARDWARE_FILE (reused local configuration)"
+  validate_generated_config
+  printf 'Reused and validated: %s\n' "$HARDWARE_FILE"
+  printf 'Source: %s\n' "$SOURCE_LABEL"
+  exit 0
+fi
 
 if [ -n "$SOURCE_OVERRIDE" ]; then
   SOURCE_OVERRIDE="$(realpath -e "$SOURCE_OVERRIDE")" || fail "Hardware source does not exist: $SOURCE_OVERRIDE"

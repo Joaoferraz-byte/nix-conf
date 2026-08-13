@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.homeManagerModules = {
+  flake.homeModules = {
     hyprland = { pkgs, ... }:
       {
         home.pointerCursor = {
