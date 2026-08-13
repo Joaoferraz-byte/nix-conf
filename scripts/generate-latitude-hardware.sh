@@ -228,6 +228,21 @@ relative_mountpoint() {
   fi
 }
 
+print_detected_mounts() {
+  local mountpoint source fstype options relative
+  printf '%s\n' 'Detected filesystem mapping:'
+  while IFS=$'\t' read -r mountpoint source fstype options; do
+    [ -n "$mountpoint" ] || continue
+    case "$mountpoint" in
+      "$TARGET_ROOT"|"$TARGET_ROOT"/*) ;;
+      *) continue ;;
+    esac
+    relative="$(relative_mountpoint "$mountpoint")"
+    source="${source%%[*}"
+    printf '  %s <- %s (%s) [%s]\n' "$relative" "$source" "$fstype" "$options"
+  done < <(findmnt --kernel --noheadings --raw --output TARGET,SOURCE,FSTYPE,OPTIONS | awk -v root="$TARGET_ROOT" 'BEGIN { FS="[[:space:]]+"; OFS="\t" } $1 == root || index($1, root "/") == 1 { print $1, $2, $3, $4 }')
+}
+
 btrfs_subvolume_option() {
   local options="$1"
   local option
@@ -375,6 +390,7 @@ validate_generated_config() {
 TARGET_ROOT="$(realpath -e "$TARGET_ROOT")" || fail "Target root does not exist: $TARGET_ROOT"
 require_target_root
 require_boot_mount
+print_detected_mounts
 [ -w "$HOST_DIR" ] || fail "Repository host directory is not writable: $HOST_DIR. Remount the target root read-write or choose a writable checkout."
 
 if [ -n "$SOURCE_OVERRIDE" ]; then

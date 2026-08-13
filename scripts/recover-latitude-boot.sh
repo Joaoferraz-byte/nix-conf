@@ -132,17 +132,18 @@ validate_esp_device() {
 }
 
 discover_esp() {
-  local path type fstype parttype mountpoints
+  local path type fstype parttype
   local -a candidates=()
-  while read -r path type fstype parttype mountpoints; do
+  while read -r path type fstype parttype; do
     [ "$type" = "part" ] || continue
     [ "$fstype" = "vfat" ] || continue
     [ "${parttype,,}" = "c12a7328-f81f-11d2-ba4b-00a0c93ec93b" ] || continue
-    case "$mountpoints" in
-      *"$BOOT_DIR"*) return 0 ;;
-      *) candidates+=("$path") ;;
-    esac
-  done < <(lsblk --list --paths --noheadings --raw --output NAME,TYPE,FSTYPE,PARTTYPE,MOUNTPOINTS)
+    if findmnt -rn -S "$path" -o TARGET 2>/dev/null | grep -Fxq "$BOOT_DIR"; then
+      ESP_DEVICE="$path"
+      return 0
+    fi
+    candidates+=("$path")
+  done < <(lsblk --list --paths --noheadings --raw --output NAME,TYPE,FSTYPE,PARTTYPE)
 
   case "${#candidates[@]}" in
     0) fail "No unmounted EFI System Partition was detected. Unlock or mount the existing ESP manually." ;;
