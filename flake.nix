@@ -27,7 +27,7 @@
     };
 
     quickshell = {
-      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell?ref=v0.3.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

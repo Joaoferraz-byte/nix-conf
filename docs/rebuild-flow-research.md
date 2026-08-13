@@ -67,3 +67,25 @@ The operational implication is important: `nix flake check` can pass while an in
 
 13. [Nix Reference: nix eval](https://nix.dev/manual/nix/2.18/command-ref/new-cli/nix3-eval)
 14. [findmnt(8) Linux manual](https://man7.org/linux/man-pages/man8/findmnt.8.html)
+
+## QuickShell/Qt build failure
+
+The real build failed while compiling QuickShell 0.2.0, before any NixOS activation. The dependency chain was `quickshell -> quickshell-wrapped -> home-manager-path -> home-manager-generation -> user-environment -> etc -> nixos-system`; the root cause was the CMake target `Qt6::WaylandClientPrivate` being absent, not a service or hardware problem.
+
+The QuickShell upstream CMake intentionally links `Qt6::WaylandClientPrivate` for generated Wayland protocol modules and calls `Qt6::qtwaylandscanner`. The official installation guide states that the embedded QuickShell flake must follow the same nixpkgs as the host because mismatched system dependencies can cause crashes and other issues. It also documents `quickshell.packages.<system>.default` as the supported flake package.[15] [16]
+
+A closely related nixpkgs failure was fixed upstream by correcting the Qt6 `find_package` handling in the affected CMake project, confirming that this class of error is generally a Qt package integration/version issue rather than a missing runtime package.[17]
+
+The current nix-conf uses the QuickShell `master` flake with `inputs.nixpkgs.follows = "nixpkgs"`, while the failing derivation is version 0.2.0. The next correction must therefore verify the locked QuickShell revision and its Qt dependency graph, prefer a compatible tagged release or a known-good upstream revision, and avoid adding arbitrary Qt packages only to make CMake appear to configure. The end-4 module currently adds Qt runtime packages to `home.packages`, but that cannot repair a missing CMake imported target in the QuickShell build derivation itself.
+
+15. [QuickShell installation and setup](https://quickshell.org/docs/v0.3.0/guide/install-setup/)
+16. [QuickShell Wayland CMake integration](https://github.com/quickshell-mirror/quickshell/blob/master/src/wayland/CMakeLists.txt)
+17. [Nixpkgs PR #455451: upstream Qt6 find_package fix](https://github.com/NixOS/nixpkgs/pull/455451)
+
+The release comparison identified the precise compatibility fix. QuickShell v0.2.0 always placed `qt6.qtwayland` in `buildInputs`; its package therefore fails against the Qt 6.10 layout used by the current nixpkgs revision, where CMake does not expose the expected `Qt6::WaylandClientPrivate` imported target in that configuration. QuickShell v0.3.0 updates its Nix expression: it keeps `qt6.qtwayland` as a native build dependency for the Wayland scanner, but only adds it to runtime `buildInputs` when `qt6.qtbase.version < 6.10.0`. The project is therefore pinned to the upstream `v0.3.0` tag rather than applying an ad-hoc local CMake patch.
+
+The end-4 QML source uses standard `Quickshell`, `Quickshell.Wayland`, `Quickshell.Hyprland`, `Quickshell.Widgets`, and service modules without an explicit 0.2-only API declaration in the audited tree. This makes the v0.3.0 tag the supported compatibility upgrade for the current dotfiles revision. The lockfile must be regenerated for the changed tag; it must not be hand-edited with an invented NAR hash.
+
+18. [QuickShell v0.2.0 package expression](https://git.outfoxxed.me/quickshell/quickshell/raw/tag/v0.2.0/default.nix)
+19. [QuickShell v0.3.0 package expression](https://git.outfoxxed.me/quickshell/quickshell/raw/tag/v0.3.0/default.nix)
+20. [Nix Archive format](https://nix.dev/manual/nix/2.22/protocols/nix-archive)

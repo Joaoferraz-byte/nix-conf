@@ -49,11 +49,72 @@ preflight_git_worktree() {
 
 preflight_git_worktree
 
+verify_locked_flake() {
+  local metadata_log status
+
+  [ "${NIX_CONF_UPDATE_FLAKE:-0}" = "1" ] && return 0
+  metadata_log="${TMPDIR:-/tmp}/nix-conf-flake-metadata.$$.log"
+  set +e
+  nix flake metadata --no-update-lock-file "$SCRIPT_DIR" >"$metadata_log" 2>&1
+  status=$?
+  set -e
+  if [ "$status" -eq 0 ]; then
+    rm -f "$metadata_log"
+    return 0
+  fi
+  printf '%s\n' 'Error: flake.nix and flake.lock are not synchronized, or a locked input cannot be resolved.' >&2
+  printf '%s\n' 'If the input revision was intentionally changed, run:' >&2
+  printf '%s\n' '  NIX_CONF_UPDATE_FLAKE=1 NIX_CONF_UPDATE_INPUTS=quickshell ./install.sh' >&2
+  printf '%s\n' 'Metadata diagnostic:' >&2
+  cat "$metadata_log" >&2 || true
+  rm -f "$metadata_log"
+  exit "$status"
+}
+
+update_flake_inputs_if_requested() {
+  local lock_backup status
+  local -a update_inputs=()
+
+  [ "${NIX_CONF_UPDATE_FLAKE:-0}" = "1" ] || return 0
+  [ -w "$SCRIPT_DIR/flake.lock" ] || {
+    printf '%s\n' 'Error: NIX_CONF_UPDATE_FLAKE=1 requires a writable flake.lock.' >&2
+    exit 1
+  }
+
+  lock_backup="${TMPDIR:-/tmp}/nix-conf-flake.lock.$(date +%Y%m%d-%H%M%S)"
+  cp -p "$SCRIPT_DIR/flake.lock" "$lock_backup"
+  printf '%s\n' 'Updating flake inputs by explicit request before entering the devShell...'
+
+  if [ -n "${NIX_CONF_UPDATE_INPUTS:-}" ]; then
+    read -r -a update_inputs <<< "${NIX_CONF_UPDATE_INPUTS}"
+    if nix flake update "${update_inputs[@]}"; then
+      :
+    else
+      status=$?
+      cp -p "$lock_backup" "$SCRIPT_DIR/flake.lock"
+      printf '%s\n' "Error: flake input update failed with exit code $status; restored $lock_backup." >&2
+      exit "$status"
+    fi
+  elif nix flake update; then
+    :
+  else
+    status=$?
+    cp -p "$lock_backup" "$SCRIPT_DIR/flake.lock"
+    printf '%s\n' "Error: flake input update failed with exit code $status; restored $lock_backup." >&2
+    exit "$status"
+  fi
+
+  printf 'Previous lockfile backup: %s\n' "$lock_backup"
+  export NIX_CONF_LOCK_UPDATED=1
+}
+
 if [ "${NIX_CONF_DEV_SHELL:-0}" != "1" ]; then
   command -v nix >/dev/null 2>&1 || {
     printf '%s\n' 'Error: the Nix command is required.' >&2
     exit 1
   }
+  verify_locked_flake
+  update_flake_inputs_if_requested
   export NIX_CONF_DEV_SHELL=1
   exec nix develop --no-update-lock-file "$SCRIPT_DIR" --command bash "$SCRIPT_DIR/install.sh" "$@"
 fi
@@ -192,29 +253,12 @@ else
   exit "$status"
 fi
 
-if [ "${NIX_CONF_UPDATE_FLAKE:-0}" = '1' ]; then
-  LOCK_BACKUP="${TMPDIR:-/tmp}/nix-conf-flake.lock.$(date +%Y%m%d-%H%M%S)"
-  cp -p "$SCRIPT_DIR/flake.lock" "$LOCK_BACKUP"
-  printf '%b\n' "${YELLOW}Updating flake inputs by explicit request...${NC}"
-  if [ -n "${NIX_CONF_UPDATE_INPUTS:-}" ]; then
-    read -r -a UPDATE_INPUTS <<< "${NIX_CONF_UPDATE_INPUTS}"
-    if nix flake update "${UPDATE_INPUTS[@]}"; then
-      :
-    else
-      status=$?
-      cp -p "$LOCK_BACKUP" "$SCRIPT_DIR/flake.lock"
-      fail "Flake input update failed with exit code $status; the previous lockfile was restored from $LOCK_BACKUP."
-    fi
-  elif nix flake update; then
-    :
-  else
-    status=$?
-    cp -p "$LOCK_BACKUP" "$SCRIPT_DIR/flake.lock"
-    fail "Flake input update failed with exit code $status; the previous lockfile was restored from $LOCK_BACKUP."
-  fi
-  printf 'Previous lockfile backup: %s\n' "$LOCK_BACKUP"
+if [ "${NIX_CONF_UPDATE_FLAKE:-0}" = '1' ] && [ "${NIX_CONF_LOCK_UPDATED:-0}" != '1' ]; then
+  update_flake_inputs_if_requested
 elif [ "${NIX_CONF_UPDATE_FLAKE:-0}" = '0' ]; then
   printf '%b\n' "${GREEN}Using locked flake inputs. Set NIX_CONF_UPDATE_FLAKE=1 to update them.${NC}"
+else
+  printf '%b\n' "${GREEN}Flake inputs were updated before entering the devShell.${NC}"
 fi
 
 mkdir -p "$(dirname -- "$REBUILD_LOG")" \
