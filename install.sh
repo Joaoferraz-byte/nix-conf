@@ -41,10 +41,14 @@ esac
 echo -e "${GREEN}Selected: ${FLAKE_TARGET}${NC}"
 
 configure_latitude_hardware() {
-  echo -e "${YELLOW}Running console-safe Latitude hardware recovery and generation...${NC}"
+  echo -e "${YELLOW}Running adaptive Latitude hardware recovery and generation...${NC}"
+  local -a target_args=()
+  if [ -n "${NIXOS_TARGET_ROOT:-}" ]; then
+    target_args=(--target-root "$NIXOS_TARGET_ROOT")
+  fi
   "${SCRIPT_DIR}/scripts/recover-latitude-boot.sh" \
     --repo "$SCRIPT_DIR" \
-    --target-root "${NIXOS_TARGET_ROOT:-/}"
+    "${target_args[@]}"
 }
 
 if [ "${FLAKE_TARGET}" = "latitude" ]; then
@@ -52,10 +56,14 @@ if [ "${FLAKE_TARGET}" = "latitude" ]; then
   configure_latitude_hardware
 fi
 
-# ─── Step 2: Ensure flake inputs are up to date ────────────────────────────
+# ─── Step 2: Use the locked flake inputs ────────────────────────────────────
 echo ""
-echo -e "${YELLOW}Updating flake inputs...${NC}"
-nix flake update
+if [ "${NIX_CONF_UPDATE_FLAKE:-0}" = "1" ]; then
+  echo -e "${YELLOW}Updating flake inputs by explicit request...${NC}"
+  nix flake update
+else
+  echo -e "${GREEN}Using locked flake inputs. Set NIX_CONF_UPDATE_FLAKE=1 to update them.${NC}"
+fi
 
 # ─── Step 3: Verify flake evaluates correctly ──────────────────────────────
 echo ""

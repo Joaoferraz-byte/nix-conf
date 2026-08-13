@@ -44,23 +44,30 @@ The shared desktop profile is assembled in `hosts/common-desktop.nix`. The `home
 
 ## Latitude hardware recovery
 
-The Latitude hardware entrypoint imports `modules/hosts/latitude/hardware-configuration.nix`. The generated file must be produced on the target machine or from a Live ISO with the installed root and EFI System Partition mounted. The recovery scripts never format, partition, modify firmware, change ACPI parameters, or guess between multiple EFI partitions.
+The Latitude hardware entrypoint imports `modules/hosts/latitude/hardware-configuration.nix`. The generated file must be produced on the target machine or from a Live ISO. The adaptive recovery scripts detect the installed root from `/`, `/mnt`, `/target`, `/mnt/nixos`, or `/media/nixos`, reject Live ISO filesystems, and require explicit selection when multiple roots or EFI System Partitions are possible. They never format, partition, modify firmware, change ACPI parameters, or guess between multiple installations.
 
-On an installed system, run from the repository root:
+Preview the detected topology without mounting anything:
 
 ```bash
-sudo ./scripts/recover-latitude-boot.sh --repo "$PWD" --target-root /
+sudo ./scripts/recover-latitude-boot.sh --repo "$PWD" --dry-run
 ```
 
-From a Live ISO, first mount the existing Linux root read-write at `/mnt`, mount the existing EFI System Partition at `/mnt/boot`, and place or access the repository under the installed root. Then run:
+On an installed system or emergency shell, run without a target argument; `/` is selected only when it is a mounted non-temporary filesystem containing NixOS files:
+
+```bash
+sudo ./scripts/recover-latitude-boot.sh --repo "$PWD"
+```
+
+From a Live ISO, mount the existing Linux root read-write at `/mnt`, but do not format or repartition it. The helper can autodetect `/mnt`; if the layout is ambiguous, select both values explicitly:
 
 ```bash
 sudo ./scripts/recover-latitude-boot.sh \
   --repo /mnt/home/livara/.config/nixos \
-  --target-root /mnt
+  --target-root /mnt \
+  --esp /dev/disk/by-partuuid/REAL-ESP-PARTUUID
 ```
 
-The helper lists block devices with explicit `lsblk` columns, waits for udev, accepts an ESP only when its partition type is the official EFI System Partition GUID, refuses to guess when there is no candidate or more than one candidate, and invokes `nixos-generate-config --root`. The generator validates root and `/boot` entries, rejects placeholder identifiers, checks device references, creates a timestamped backup, and stages only the tracked hardware file.
+The helper lists block devices with explicit `lsblk` columns, waits for udev, accepts an ESP only when its partition type is the official EFI System Partition GUID, refuses to guess when there is no candidate or more than one candidate, and invokes `nixos-generate-config` with `--root` only for a non-root target. The generator validates root and `/boot` entries, rejects placeholder identifiers, checks device references, creates a timestamped backup, and stages only the tracked hardware file. `nixos-facter` can provide richer hardware facts in a future extension, but it does not choose an existing installation disk; Disko is deliberately excluded from this recovery path because it can change disk layouts.
 
 If the helper reports multiple or no ESP candidates, inspect the printed inventory and mount the correct existing partition manually. Do not use `mkfs`, `parted`, `fdisk`, `wipefs`, `acpi=noirq`, `noapic`, or `pci=biosirq` as a workaround.
 
@@ -70,6 +77,8 @@ For a non-destructive report without modifying the repository configuration, run
 sudo LATITUDE_REPORT_DIR=/tmp/latitude-diagnostics \
   ./scripts/collect-latitude-hardware-report.sh
 ```
+
+The installer uses the existing flake lock by default; set `NIX_CONF_UPDATE_FLAKE=1` only when an input update is intentional.
 
 Review the staged result before rebuilding:
 

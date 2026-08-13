@@ -182,7 +182,7 @@ The current configuration contains meaningful security and reliability controls.
 | Hardening module | The feature combines security policy with some desktop assumptions. | Preserve current behavior; split security policy from desktop defaults in a later pass. |
 | NixVim | Main risk is upstream nixpkgs compatibility, not module structure. | Preserve the library boundary and validate its package/check independently. |
 | Xournal++ | Versioned defaults and user edits have different ownership. | Seed editable local settings, normalize their profile path, and provide an explicit sync-back helper. |
-| Latitude hardware | Generated device data was previously written to an untracked sidecar and could disappear from a flake source snapshot. | Keep `hardware.nix` as a tracked entrypoint, import tracked `hardware-configuration.nix`, stage only the generated file, and never alter ACPI parameters automatically. |
+| Latitude hardware | Generated device data was previously written to an untracked sidecar and the recovery flow assumed a fixed root. | Keep `hardware.nix` as a tracked entrypoint, autodetect or explicitly select the installed root and ESP, import tracked `hardware-configuration.nix`, stage only the generated file, and never alter ACPI parameters automatically. |
 | Wallpapers and Vault | The repositories use network access and Vault uses SSH. | Synchronize through independent timers; consider making Vault opt-in under stricter trust policies. |
 
 The highest stability risk was not the number of modules. It was doing network synchronization and mutable runtime repair during a declarative activation transaction. Wallpaper and Vault synchronization now run as independent user services on timers, so network failure does not prevent a local system rebuild. Vault access remains SSH-based and should still be made explicitly opt-in if the machine is used offline or under a restricted trust policy.
@@ -206,7 +206,8 @@ The highest stability risk was not the number of modules. It was doing network s
 | `modules/hosts/latitude/default.nix` | Laptop host root, overlay selection, laptop-specific modules. |
 | `modules/hosts/latitude/hardware.nix` | Tracked hardware entrypoint and graphics adapter. |
 | `modules/hosts/latitude/hardware-configuration.nix` | Tracked machine-generated filesystems, boot modules, swap, and CPU hardware data. |
-| `scripts/generate-latitude-hardware.sh` | Safe live hardware detection, validation, backup, and Git staging for Latitude hardware data. |
+| `scripts/generate-latitude-hardware.sh` | Adaptive hardware detection, mount validation, backup, and Git staging for Latitude hardware data. |
+| `scripts/recover-latitude-boot.sh` | Root/ESP discovery and mount-only recovery for installed systems, emergency shells, and Live ISOs. |
 | `home/livara/home.nix` | Thin Home Manager entrypoint and user identity. |
 | `home/livara/session.nix` | Niri settings, DMS session settings, wallpaper startup adapter. |
 | `home/livara/themes.nix` | DMS/Matugen adapters and browser/GTK/ZenNotes integration. |
@@ -250,12 +251,14 @@ The current refactor applied the following changes:
 19. Replaced the untracked Latitude hardware sidecar with a tracked `hardware-configuration.nix` imported by the stable `hardware.nix` entrypoint.
 20. Made Latitude hardware generation use live `nixos-generate-config --show-hardware-config`, validate device identifiers, keep backups, stage the generated file, and avoid automatic ACPI kernel parameters.
 21. Removed the duplicate GNOME Polkit authentication-agent service so the Niri session integration remains the sole session-agent owner.
+22. Made Latitude recovery detect installed roots and EFI partitions conservatively across the running system, emergency shell, and Live ISO, with explicit selection when ambiguous and no partitioning or formatting operations.
+23. Changed the installer to use the locked flake inputs by default; updating inputs is now explicit through `NIX_CONF_UPDATE_FLAKE=1`.
 
 ## 13. Validation
 
-The refactor was checked with repository status, path/reference checks, duplicate-output checks, balanced-delimiter checks, English active-source scans, and `git diff --check`. Nix 2.18 was installed in the sandbox for evaluation. The standalone `shell-conf` and `vim-conf` flakes passed `nix flake check --no-build`; the nix-conf host contracts also evaluated successfully with local overrides for the refactored inputs.
+The refactor was checked with repository status, path/reference checks, duplicate-output checks, balanced-delimiter checks, English active-source scans, Bash syntax checks, hardware fixtures, and `git diff --check`. The restored sandbox used for this adaptive revision does not contain a Nix executable, so Nix evaluation must be run on the target NixOS or a normal Nix host. The earlier published commits contain the targeted Nix evaluations for the existing host contracts; this revision adds no new Nix module options.
 
-The following targeted evaluations passed for both desktop hosts where applicable:
+The following commands are the required targeted evaluations on a normal Nix host after the real Latitude hardware file has been generated; the earlier published commits recorded successful evaluations for the pre-existing host contracts:
 
 ```bash
 nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
@@ -270,7 +273,7 @@ nix eval .#devShells.x86_64-linux.python.drvPath
 nix eval .#devShells.x86_64-linux.embedded.drvPath
 ```
 
-The broad `nix-conf flake check` traversal was interrupted by the sandbox while walking the complete output set; this is an environment limitation, not a reported Nix evaluation error. The Python devShell evaluates successfully, but Nixpkgs emits a non-blocking deprecation warning for `texlive.combined.scheme-full`; retain it only while Manim requires its broad package set and migrate to a non-deprecated explicit TeX package selection before Nixpkgs 27.05. An unrelated direct Nixpkgs channel query exhausted sandbox storage, so it was not used as a validation result. Before deployment, run the complete checks and builds on a normal Nix host:
+The full traversal must be run on a normal Nix host after hardware generation. The Latitude guard is expected to reject the repository placeholder before that step; this is intentional and prevents an invalid boot configuration from being installed. Before deployment, run the complete checks and builds on a normal Nix host:
 
 ```bash
 nix flake lock
@@ -297,6 +300,11 @@ The lock file has already removed stale inputs such as `import-tree`; it must be
 [11]: https://github.com/AvengeMedia/DankMaterialShell/issues/1788 "DankMaterialShell issue #1788 — Niri/Home Manager integration"
 [12]: https://github.com/srid/nixos-config "srid/nixos-config"
 [13]: https://www.reddit.com/r/NixOS/comments/1e95b69/how_do_you_guys_organize_your_nix_config_files_i/ "Reddit — How do you organize your Nix configuration files?"
+[14]: https://wiki.nixos.org/wiki/Nixos-generate-config "NixOS Wiki — nixos-generate-config"
+[15]: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/installer/tools/nixos-generate-config.pl "Nixpkgs — nixos-generate-config source"
+[16]: https://github.com/nix-community/nixos-anywhere/blob/main/docs/reference.md "nixos-anywhere — reference"
+[17]: https://github.com/nix-community/nixos-facter "nixos-facter — hardware facts"
+[18]: https://man7.org/linux/man-pages/man8/lsblk.8.html "util-linux — lsblk manual"
 
 ## 14. Development, containers, and virtualization
 
