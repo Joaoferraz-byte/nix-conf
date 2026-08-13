@@ -67,7 +67,11 @@ sudo ./scripts/recover-latitude-boot.sh \
   --esp /dev/disk/by-partuuid/REAL-ESP-PARTUUID
 ```
 
-The helper lists block devices with explicit `lsblk` columns, waits for udev, accepts an ESP only when its partition type is the official EFI System Partition GUID, refuses to guess when there is no candidate or more than one candidate, and invokes `nixos-generate-config` with `--root` only for a non-root target. The generator validates root and `/boot` entries, rejects placeholder identifiers, checks device references, creates a timestamped backup, and stages only the tracked hardware file. `nixos-facter` can provide richer hardware facts in a future extension, but it does not choose an existing installation disk; Disko is deliberately excluded from this recovery path because it can change disk layouts.
+The helper lists block devices with explicit `lsblk` columns, waits for udev, accepts an ESP only when its partition type is the official EFI System Partition GUID, refuses to guess when there is no candidate or more than one candidate, and invokes `nixos-generate-config` with `--root` only for a non-root target. The generator validates root and `/boot` entries, rejects placeholder identifiers, checks device references, creates a timestamped backup, and stages only the tracked hardware file.
+
+When the official generator reports `Failed to retrieve subvolume info` for Btrfs, the generator uses a non-destructive fallback. It reads `TARGET`, `SOURCE`, `FSTYPE`, and `OPTIONS` from the kernel mount table, preserves the actual Btrfs `subvol=` option, resolves stable `/dev/disk/by-*` paths when available, and writes one valid hardware module. It does not infer an unmounted root, unlock storage, format disks, or choose between ambiguous installations.
+
+`nixos-facter` can provide richer hardware facts in a future extension, but it does not choose an existing installation disk; Disko is deliberately excluded from this recovery path because it can change disk layouts.
 
 If the helper reports multiple or no ESP candidates, inspect the printed inventory and mount the correct existing partition manually. Do not use `mkfs`, `parted`, `fdisk`, `wipefs`, `acpi=noirq`, `noapic`, or `pci=biosirq` as a workaround.
 
