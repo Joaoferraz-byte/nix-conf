@@ -233,10 +233,25 @@ if [ "$UPLOAD" -eq 1 ]; then
   case "$PAD" in
     *[!A-Za-z0-9._-]*) fail "Dontpad name contains unsupported characters." ;;
   esac
-  URL="https://dontpad.com/${PAD}"
-  curl --fail --silent --show-error --location \
-    --data-urlencode "text@${OUTPUT}" "$URL" >/dev/null
-  printf 'Sanitized report uploaded to: %s\n' "$URL"
+  PAGE_URL="https://dontpad.com/${PAD}"
+  API_BASE="https://api.dontpad.com"
+  BODY_URL="${API_BASE}/${PAD}.body.json?lastModified=0"
+  body_json="$(curl --fail --silent --show-error --location --max-time 30 \
+    -H 'Accept: application/json' "$BODY_URL")" || \
+    fail "Could not read the Dontpad version."
+  last_modified="$(printf '%s' "$body_json" | sed -nE 's/.*"lastModified"[[:space:]]*:[[:space:]]*([0-9]+).*/\1/p')"
+  [ -n "$last_modified" ] || fail "Dontpad returned an invalid version: $body_json"
+  response="$(curl --fail --silent --show-error --location --max-time 30 \
+    -H 'Accept: application/json' \
+    --data-urlencode "text@${OUTPUT}" \
+    --data-urlencode "lastModified=${last_modified}" \
+    --data-urlencode 'force=false' \
+    "${API_BASE}/${PAD}")" || \
+    fail "Dontpad rejected the report upload."
+  case "$response" in
+    *[!0-9]*) fail "Dontpad returned an invalid upload response: $response" ;;
+  esac
+  printf 'Sanitized report uploaded to: %s\n' "$PAGE_URL"
 else
   printf 'Upload disabled; report remains at %s\n' "$OUTPUT"
 fi
