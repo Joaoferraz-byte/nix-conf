@@ -1,6 +1,21 @@
 { inputs, ... }:
 {
-  flake.homeManagerModules.end4 = { config, lib, pkgs, ... }:
+  flake.homeManagerModules = {
+    hyprland = { pkgs, ... }:
+      {
+        home.pointerCursor = {
+          enable = true;
+          name = "Bibata-Modern-Classic";
+          package = pkgs.bibata-cursors;
+          size = 24;
+          gtk.enable = true;
+          x11.enable = true;
+        };
+
+        wayland.systemd.target = "graphical-session.target";
+      };
+
+    end4 = { config, lib, pkgs, ... }:
     let
       dotfiles = inputs.illogical-impulse-dotfiles;
       quickshell = inputs.quickshell.packages.${pkgs.system}.default;
@@ -181,4 +196,5 @@
         $DRY_RUN_CMD ${seedRuntime}
       '';
     };
+  };
 }
