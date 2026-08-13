@@ -166,11 +166,11 @@ BOOT_DIR="${TARGET_ROOT%/}/boot"
 [ -d "$BOOT_DIR" ] || fail "Boot directory does not exist: $BOOT_DIR"
 
 printf 'Selected NixOS root: %s\n' "$TARGET_ROOT"
-findmnt -M "$TARGET_ROOT" -no SOURCE,FSTYPE,MOUNTPOINT
+findmnt -M "$TARGET_ROOT" --noheadings --raw --output SOURCE,FSTYPE,TARGET
 
 if is_mounted_target "$BOOT_DIR"; then
   printf 'Existing boot mount: '
-  findmnt -M "$BOOT_DIR" -no SOURCE,FSTYPE,MOUNTPOINT
+  findmnt -M "$BOOT_DIR" --noheadings --raw --output SOURCE,FSTYPE,TARGET
 else
   if [ -z "$ESP_DEVICE" ]; then
     discover_esp
@@ -182,7 +182,7 @@ else
   }
   mount "$ESP_DEVICE" "$BOOT_DIR"
   printf 'Mounted existing ESP: '
-  findmnt -M "$BOOT_DIR" -no SOURCE,FSTYPE,MOUNTPOINT
+  findmnt -M "$BOOT_DIR" --noheadings --raw --output SOURCE,FSTYPE,TARGET
 fi
 
 [ "$DRY_RUN" -eq 1 ] && exit 0
