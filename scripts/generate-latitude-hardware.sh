@@ -182,7 +182,7 @@ find_fallback_source() {
 validate_device_references() {
   local device
   local -a devices
-  mapfile -t devices < <(sed -nE 's/^[[:space:]]*device[[:space:]]*=[[:space:]]*"([^"]+)"[[:space:]]*;.*/\1/p' "$TEMP_FILE")
+  mapfile -t devices < <(sed -nE 's/.*(^|[[:space:]\{])device[[:space:]]*=[[:space:]]*"([^"]+)"[[:space:]]*;.*/\2/p' "$TEMP_FILE")
   [ "${#devices[@]}" -gt 0 ] || fail "Generated hardware configuration contains no device references: $SOURCE_LABEL"
 
   for device in "${devices[@]}"; do
