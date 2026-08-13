@@ -73,7 +73,7 @@
     services.geoclue2.enable = true; # DMS night light
 
     security.audit = {
-      enable = "lock";
+      enable = true;
       rules = [
         "-a always,exit -F arch=b64 -S open,openat -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access_denied"
         "-a always,exit -F arch=b64 -S open,openat -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access_denied"
