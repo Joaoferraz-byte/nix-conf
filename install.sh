@@ -46,9 +46,19 @@ configure_latitude_hardware() {
   if [ -n "${NIXOS_TARGET_ROOT:-}" ]; then
     target_args=(--target-root "$NIXOS_TARGET_ROOT")
   fi
-  "${SCRIPT_DIR}/scripts/recover-latitude-boot.sh" \
+  if "${SCRIPT_DIR}/scripts/recover-latitude-boot.sh" \
     --repo "$SCRIPT_DIR" \
-    "${target_args[@]}"
+    "${target_args[@]}"; then
+    return 0
+  fi
+
+  local recovery_status=$?
+  echo -e "${YELLOW}Hardware recovery failed. Collecting a sanitized Latitude diagnostic...${NC}" >&2
+  if [ "${NIX_CONF_AUTO_DIAGNOSTIC:-1}" = "1" ] && [ -x "${SCRIPT_DIR}/scripts/collect-latitude-diagnostic.sh" ]; then
+    "${SCRIPT_DIR}/scripts/collect-latitude-diagnostic.sh" || \
+      echo -e "${YELLOW}Diagnostic collection or upload failed; continuing with the original recovery error.${NC}" >&2
+  fi
+  return "$recovery_status"
 }
 
 if [ "${FLAKE_TARGET}" = "latitude" ]; then
