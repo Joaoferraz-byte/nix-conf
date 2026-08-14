@@ -13,17 +13,17 @@ A composição está em `modules/hosts/common-desktop.nix`. Ela injeta o mesmo m
 
 ## Shell
 
-O shell visual ativo é o [Serpantinum](https://github.com/ilyamiro/serpantinum), adaptado e publicado pelo repositório [shell-conf](https://github.com/Joaoferraz-byte/shell-conf). O upstream não fornece um flake NixOS pronto, então `shell-conf` contém a árvore QuickShell/Hyprland revisada e expõe `homeManagerModules.default`.
+O shell visual ativo é o Serpantinum, adaptado e publicado pelo repositório [shell-conf](https://github.com/Joaoferraz-byte/shell-conf). A árvore local contém a cópia QuickShell/Hyprland revisada e expõe `homeManagerModules.default`; o flake local é um adaptador NixOS/Home Manager, não um flake fornecido pela fonte original.
 
 NixOS habilita Hyprland com UWSM e fornece dependências system-side; Home Manager instala o shell e seus serviços de usuário; `serpantinum-shell` inicia QuickShell; `serpantinum-wallpaper-daemon` gerencia `awww`; e `serpantinum-wallpaper-random-on-login` seleciona a imagem inicial e executa Matugen.
 
 ## Tema adaptativo
 
-O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para QuickShell, Hyprland, GTK3/GTK4, Qt, Kitty/WezTerm, Neovim, Firefox/Zen e ZenNotes. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
+O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. O weather usa Open-Meteo por coordenadas de Jardim João XXIII, com cache e fallback offline. O launcher usa a API nativa `DesktopEntries` do QuickShell; `Super+H` e o ícone correspondente da barra abrem `~/.config/nixos` com Neo-tree no Neovim. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para QuickShell, Hyprland, GTK3/GTK4, Qt, WezTerm (com template Kitty de compatibilidade), Neovim, Firefox/Zen e ZenNotes. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
 
 Firefox e Zen usam `chrome/userChrome.css` e `toolkit.legacyUserProfileCustomizations.stylesheets`. ZenNotes usa o tema customizado `custom-serpantinum`, com `theme.css`, `manifest.json`, `theme_family = "custom"`, `theme_id = "custom-serpantinum"` e `theme_mode = "dark"`.
 
-## Teclado 60%
+## Atalhos, locale e teclado 60%
 
 A tradução global de `Ctrl+H/J/K/L` é feita em `modules/features/keyd.nix`, não no compositor. A camada keyd `[control:C]` emite `left`, `down`, `up` e `right`, de modo que os aplicativos recebam eventos de seta genuínos antes de interpretar H/J/K/L. O wildcard cobre os dois hosts; IDs específicos podem ser configurados depois de validar `keyd monitor` em cada teclado.
 

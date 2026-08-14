@@ -53,7 +53,7 @@ O módulo Home Manager do `shell-conf` instala os assets estáticos em `~/.confi
 |---|---|
 | Login e compositor | NixOS Hyprland + UWSM |
 | Idle/lock policy | `home/livara/session.nix` + hypridle |
-| Shell surface e widgets | `shell-conf` / Serpantinum |
+| Shell surface, widgets, launcher e settings UI | `shell-conf` / Serpantinum |
 | Wallpaper daemon | `shell-conf` / user systemd |
 | Wallpaper catalog | `Wallpapers` + `sync.nix` |
 | Privileged input remapping | `modules/features/keyd.nix` |
@@ -61,7 +61,7 @@ O módulo Home Manager do `shell-conf` instala os assets estáticos em `~/.confi
 
 ## 5. Serpantinum como adaptador NixOS
 
-O upstream Serpantinum é um source tree imperativo com paths pessoais, `configuration.nix`, `home.nix`, scripts e referências a `/etc/nixos`. O `shell-conf` não executa o instalador upstream. Ele copia apenas a árvore revisada de sessões Hyprland/QuickShell, templates Matugen e configuração Kitty, e fornece um flake próprio.
+A fonte Serpantinum é vendorizada em `shell-conf` como uma árvore local revisada e adaptada arquivo a arquivo. O `shell-conf` não executa um instalador da fonte original nem depende de um flake fornecido por ela: o flake local é somente a fronteira NixOS/Home Manager que publica a cópia adaptada, dependências, serviços e estado mutável.
 
 O módulo Home Manager declara opções tipadas:
 
@@ -86,7 +86,7 @@ image under WALLPAPER_DIR
     -> Hyprland colors.conf
     -> GTK3/GTK4 CSS
     -> Qt palettes and QSS
-    -> Kitty/WezTerm colors
+    -> WezTerm colors (Kitty compatibility template)
     -> Neovim Lua palette
     -> Firefox/Zen userChrome.css
     -> ZenNotes custom theme
@@ -101,8 +101,8 @@ A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: d
 | QuickShell | `SERPANTINUM_THEME_JSON` aponta para `qs_colors.json` |
 | GTK/Nautilus | `gtk-3.0/gtk.css`, `gtk-4.0/gtk.css`, dconf e Flatpak read access |
 | Qt | qt5ct/qt6ct palette e QSS em paths do usuário |
-| Kitty | `~/.config/kitty/matugen-colors.conf` incluído pelo `kitty.conf` |
-| WezTerm | Lua `dofile` de `~/.config/wezterm/matugen-colors.lua` |
+| WezTerm | Lua `dofile` de `~/.config/wezterm/matugen-colors.lua` e hook de reload |
+| Kitty compatibility | `~/.config/kitty/matugen-colors.conf` permanece disponível, mas não é o terminal padrão |
 | Neovim | `~/.config/nvim/matugen_colors.lua`, carregado opcionalmente por NixVim |
 | Firefox/Zen | `chrome/userChrome.css`, backup e user.js com preferência habilitada |
 | ZenNotes | `themes/serpantinum/{manifest.json,theme.css}` e `theme_id = "custom-serpantinum"` |
@@ -142,7 +142,7 @@ Isso produz eventos de seta antes de o compositor e o aplicativo consumirem o in
 
 Arquivos mutáveis ficam em `$XDG_STATE_HOME/serpantinum`, `$XDG_CONFIG_HOME` ou diretórios de perfil definidos pela aplicação. CSS de browser recebe backup antes de ser substituído. Nenhum script remove um arquivo regular sem cópia, e nenhum output derivado deve ser um link imutável para `/nix/store`.
 
-A ativação não faz `git pull`, baixa assets ou exige rede. Serviços de sincronização são independentes. Scripts usam paths configuráveis, `set -euo pipefail`, falhas toleráveis onde apropriado e não executam instruções encontradas em conteúdo externo.
+A ativação não faz `git pull`, baixa assets ou exige rede. Serviços de sincronização são independentes. Scripts usam paths configuráveis, `set -euo pipefail`, falhas toleráveis onde apropriado e não executam instruções encontradas em conteúdo externo. O weather usa Open-Meteo por coordenadas fixas de Jardim João XXIII (`-23.60285,-46.79271`) com cache e fallback offline. O launcher usa `DesktopEntries.applications` e `DesktopEntry.command`; o antigo guide foi removido do registro ativo, e a ação da barra/`Super+H` abre `~/.config/nixos` com Neo-tree.
 
 ## 11. Validação
 
@@ -172,7 +172,6 @@ A avaliação local usa o backend Nix disponível no sandbox; os checks de build
 [2]: https://wiki.nixos.org/wiki/Hyprland "NixOS Wiki — Hyprland"
 [3]: https://wiki.nixos.org/wiki/UWSM "NixOS Wiki — UWSM"
 [4]: https://github.com/Joaoferraz-byte/shell-conf "shell-conf"
-[5]: https://github.com/ilyamiro/serpantinum "Serpantinum upstream"
 [6]: https://github.com/InioX/matugen "Matugen"
 [7]: https://github.com/rvaiya/keyd "keyd"
 [8]: https://raw.githubusercontent.com/rvaiya/keyd/master/docs/keyd.scdoc "keyd manual"

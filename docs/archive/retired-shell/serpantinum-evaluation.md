@@ -27,9 +27,9 @@ Only isolated visual ideas may be ported later. Each asset would need a license 
 
 ## References
 
-1. [Serpantinum repository](https://github.com/ilyamiro/serpantinum)
-2. [Serpantinum configuration](https://raw.githubusercontent.com/ilyamiro/serpantinum/master/configuration.nix)
-3. [Serpantinum Home Manager profile](https://raw.githubusercontent.com/ilyamiro/serpantinum/master/home.nix)
-4. [Serpantinum Hyprland session](https://raw.githubusercontent.com/ilyamiro/serpantinum/master/config/sessions/hyprland/default.nix)
+1. [Serpantinum adapter](https://github.com/Joaoferraz-byte/shell-conf)
+2. Vendored source: `shell-conf/src/serpantinum/`
+3. Home Manager adapter: `shell-conf/modules/home-manager.nix`
+4. Hyprland session adapter: `shell-conf/src/serpantinum/sessions/`
 5. [Hyprland current Lua configuration contract](https://wiki.hypr.land/Configuring/Start/)
 6. [Home Manager Hyprland module](https://raw.githubusercontent.com/nix-community/home-manager/master/modules/services/window-managers/hyprland/default.nix)
