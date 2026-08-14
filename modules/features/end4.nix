@@ -212,6 +212,7 @@
           eza
           foot
           fuzzel
+          glib
           grim
           grimblast
           hypridle

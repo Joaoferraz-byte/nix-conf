@@ -212,6 +212,7 @@ in
   };
 
   home.activation.configureMatugenTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export PATH="${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.gawk pkgs.glib pkgs.gnugrep pkgs.gnused ]}:$PATH"
     ${themeSyncScript} dark
   '';
 }
