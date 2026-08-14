@@ -1,4 +1,4 @@
-{ config, inputs, userName ? "livara", ... }:
+{ config, inputs, hostName ? "unknown", userName ? "livara", ... }:
 let
   iconsPath = builtins.path {
     path = ../../Icons;
@@ -12,6 +12,7 @@ in
     ./appimage.nix
     ./applications.nix
     ./session.nix
+    (import ./monitors.nix { inherit hostName; })
     ./themes.nix
     ./sync.nix
   ];

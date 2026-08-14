@@ -24,6 +24,7 @@
           extraSpecialArgs = {
             inherit inputs self;
             userName = cfg.userName;
+            hostName = config.networking.hostName;
           };
           sharedModules = [
             self.homeModules.hyprland

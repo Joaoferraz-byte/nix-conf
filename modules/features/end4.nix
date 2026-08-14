@@ -26,7 +26,7 @@
           pythonPackages.materialyoucolor
           pythonPackages.pillow
         ]);
-        polkitAgent = lib.getExe pkgs.kdePackages.polkit-kde-agent-1;
+        polkitAgent = lib.getExe' pkgs.kdePackages.polkit-kde-agent-1 "polkit-kde-authentication-agent-1";
         home = config.home.homeDirectory;
 
         quickshellConfig = pkgs.runCommand "end4-quickshell-ii" { } ''
@@ -38,6 +38,8 @@
           ShapeCanvas 1.0 ShapeCanvas.qml
           example 1.0 example.qml
           EOF
+          sed -i '/^    post_process "\$max_width_desired" "\$max_height_desired" "\$imgpath"$/a\    "\$HOME/.local/bin/sync-matugen-apps"' "$out/scripts/colors/switchwall.sh"
+          sed -i 's/property real implicitSize: 26/property real implicitSize: 30/' "$out/modules/common/widgets/AppIcon.qml"
           for script in \
             "$out/scripts/colors/generate_colors_material.py" \
             "$out/scripts/hyprland/get_keybinds.py" \
@@ -387,27 +389,27 @@
               }
 
               for key, direction in pairs(navigation) do
-                hl.bind(mod .. " + CTRL + " .. key, hl.dsp.focus({ direction = direction }), {
+                hl.bind("CTRL + " .. mod .. " + " .. key, hl.dsp.focus({ direction = direction }), {
                   description = "Window: Focus " .. direction,
                 })
               end
 
               local functionKeys = {
-                ["1"] = "F1",
-                ["2"] = "F2",
-                ["3"] = "F3",
-                ["4"] = "F4",
-                ["5"] = "F5",
-                ["6"] = "F6",
-                ["7"] = "F7",
-                ["8"] = "F8",
-                ["9"] = "F9",
-                ["0"] = "F10",
+                { code = 10, key = "F1" },
+                { code = 11, key = "F2" },
+                { code = 12, key = "F3" },
+                { code = 13, key = "F4" },
+                { code = 14, key = "F5" },
+                { code = 15, key = "F6" },
+                { code = 16, key = "F7" },
+                { code = 17, key = "F8" },
+                { code = 18, key = "F9" },
+                { code = 19, key = "F10" },
               }
 
-              for key, functionKey in pairs(functionKeys) do
-                hl.bind("CTRL + " .. key, hl.dsp.send_shortcut({ mods = "", key = functionKey }), {
-                  description = "Keyboard: " .. key .. " to " .. functionKey,
+              for _, binding in ipairs(functionKeys) do
+                hl.bind("CTRL + code:" .. binding.code, hl.dsp.send_shortcut({ mods = "", key = binding.key }), {
+                  description = "Keyboard: code " .. binding.code .. " to " .. binding.key,
                 })
               end
             '';
