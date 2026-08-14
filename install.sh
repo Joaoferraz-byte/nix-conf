@@ -173,11 +173,19 @@ else
   esac
 fi
 
-case "$FLAKE_TARGET" in
-  myMachine|my-machine|my_machine) FLAKE_TARGET='myMachine' ;;
-  latitude) ;;
-  *) fail "Unsupported host: $FLAKE_TARGET" ;;
-esac
+normalize_flake_host() {
+  local normalized
+  normalized="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]_-')"
+  case "$normalized" in
+    latitude|latitude5410|delllatitude|delllatitude5410) printf 'latitude\n' ;;
+    mymachine|desktop|desktopamdnvidia) printf 'myMachine\n' ;;
+    *) return 1 ;;
+  esac
+}
+
+if ! FLAKE_TARGET="$(normalize_flake_host "$FLAKE_TARGET")"; then
+  fail "Unsupported host: $FLAKE_TARGET. Use latitude or myMachine."
+fi
 
 preflight_repository() {
   local git_root git_dir git_objects git_index

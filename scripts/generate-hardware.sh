@@ -99,16 +99,32 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-case "$HOST_NAME" in
+normalize_host() {
+  local normalized
+  normalized="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]_-')"
+  case "$normalized" in
+    latitude|latitude5410|delllatitude|delllatitude5410)
+      printf 'latitude\n'
+      ;;
+    mymachine|desktop|desktopamdnvidia)
+      printf 'my-machine\n'
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+if ! HOST_SLUG="$(normalize_host "$HOST_NAME")"; then
+  fail "Unsupported host '$HOST_NAME'. Use --host latitude or --host myMachine."
+fi
+
+case "$HOST_SLUG" in
   latitude)
-    HOST_SLUG="latitude"
+    HOST_NAME="latitude"
     ;;
-  myMachine|my-machine|my_machine)
+  my-machine)
     HOST_NAME="myMachine"
-    HOST_SLUG="my-machine"
-    ;;
-  *)
-    fail "Unsupported host '$HOST_NAME'. Use --host latitude or --host myMachine."
     ;;
 esac
 
