@@ -23,21 +23,23 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
 ## Shared desktop profile
 
-`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the local Hyprland system module, the end-4 Home Manager adapter, and the NixVim module. The `home/livara/` profile is split by ownership:
+`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the local Hyprland/UWSM system module, the Serpantinum Home Manager adapter, and the NixVim module. The `home/livara/` profile is split by ownership:
 
 | File | Owner |
 |---|---|
-| `session.nix` | Hyprland settings, UWSM-compatible session behavior, input, compatibility shortcuts, screenshots, idle, and wallpaper startup. |
-| `themes.nix` | Matugen templates, generated output paths, GTK, Firefox, Zen Browser, ZenNotes, and browser profile adapters. |
+| `session.nix` | Hypridle, UWSM-compatible user behavior, screenshots, and legacy session-file cleanup. |
+| `themes.nix` | Explicit boundary module; theme generation and application adapters are owned by Serpantinum. |
 | `applications.nix` | Applications, XDG associations, NixVim, and Xournal++ data synchronization. |
 | `sync.nix` | Independent wallpaper and Vault synchronization services and timers. |
 | `home.nix` | Thin profile entrypoint, identity, environment, and imports. |
 
-## End-4 adapter
+## Serpantinum adapter
 
-`features/end4.nix` is a Home Manager module that consumes the official `end-4/dots-hyprland` input pinned as `illogical-impulse-dotfiles`. It imports the native Lua entrypoint and modules, keeps the upstream QuickShell `ii` profile, and links only static assets from the source tree. Home Manager does not generate legacy `.conf` fragments for this integration.
+The active shell is provided by `inputs.shell-conf.homeManagerModules.default`. It imports the reviewed Serpantinum source tree from `Joaoferraz-byte/shell-conf`, starts QuickShell and the wallpaper daemon as user services, and keeps generated Matugen outputs outside the Nix store. The source tree is shared by both hosts and receives only a small `hostProfile` plus Wi-Fi/Bluetooth capability flags.
 
-The profile is `ii`, exposed through `QS_CONFIG` and the Hyprland `qsConfig` environment variable. QuickShell generated state belongs under `~/.local/state/quickshell/user/generated/`, while user configuration belongs under `~/.config/illogical-impulse/`. Runtime-writable Hyprland and Hyprlock files are seeded as ordinary files outside the Nix store, including `hyprland/shellOverrides/main.lua`, because the end-4 settings UI edits them. Local keybind overrides are declared as the `custom/keybinds.lua` module in the adapter and are shared by both hosts.
+The wallpaper repository is synchronized to `~/Wallpapers`, exposed as `WALLPAPER_DIR`, and used by both the picker and the random-on-login service. The active theme is generated once per wallpaper and adapted for QuickShell, GTK, Qt, Kitty/WezTerm, Neovim, Firefox/Zen, and ZenNotes.
+
+The Ctrl+H/J/K/L translation is deliberately not a Hyprland or QuickShell binding. It is owned by `features/keyd.nix`, where keyd emits real arrow events in the `[control:C]` layer before applications consume the input.
 
 ## Hardware generation
 

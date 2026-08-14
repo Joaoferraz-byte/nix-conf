@@ -1,3 +1,7 @@
+# Superseded evaluation record
+
+> This document records the pre-migration decision. The current implementation uses the adapter in `shell-conf`; consult `ARCHITECTURE.md` for the active contract.
+
 # Serpantinum evaluation
 
 ## Decision

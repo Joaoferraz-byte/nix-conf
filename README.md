@@ -1,184 +1,66 @@
 # nix-conf
 
-## Overview
+Configuração declarativa de NixOS para dois hosts, com uma base compartilhada de Hyprland/UWSM, Home Manager, NixVim, Serpantinum e serviços de desktop. O objetivo é manter a experiência comum entre notebook e computador, deixando divergências limitadas a hardware e pequenas capacidades de interface.
 
-`nix-conf` is a declarative NixOS configuration for a desktop host and a Dell Latitude laptop. The system layer is composed with flake-parts and NixOS modules. The user session is built from Hyprland with UWSM, the end-4 illogical-impulse QuickShell shell, and Matugen-generated runtime colors.
+## Hosts
 
-| Area | Location | Responsibility |
+| Host | Perfil | Diferenças intencionais |
 |---|---|---|
-| Flake and pinned inputs | `flake.nix`, `flake.lock` | Defines public outputs and pins system, Home Manager, QuickShell, end-4, browser, editor, and application data inputs. |
-| Host composition | `modules/hosts/` | Selects hardware, host identity, and machine-specific policy. |
-| System features | `modules/features/` | Provides Hyprland/UWSM, portals, audio, greeter, hardening, containers, virtualization, development, and Flatpak capabilities. |
-| User profile | `home/livara/` | Owns applications, Hyprland session settings, end-4 integration, Matugen adapters, Xournal++ flow, and user synchronization services. |
-| End-4 assets | `inputs.illogical-impulse-dotfiles` | Provides the pinned immutable QuickShell, Hyprland, Matugen, Fuzzel, Hyprlock, and Wlogout source tree. |
-| Editor | `inputs.vim-conf` | Provides the reusable NixVim module and editor policy. |
-| Xournal++ | `inputs.xournal-conf` | Provides versioned application data without becoming a system module. |
+| `latitude` | notebook | energia, Intel, ext4 e widgets de Wi-Fi/Bluetooth prioritários |
+| `myMachine` | desktop | GPU/monitores, Btrfs/virtualização e Bluetooth opcional na interface |
 
-## Desktop shell
+A composição está em `modules/hosts/common-desktop.nix`. Ela injeta o mesmo módulo Home Manager do `shell-conf`, o NixVim e o perfil do usuário; hardware e política específica continuam nos módulos de cada host.
 
-The active desktop stack is **Hyprland + UWSM + QuickShell**, using the end-4 illogical-impulse profile named `ii`. `programs.hyprland.withUWSM = true` creates the supported login session, while Home Manager sets `wayland.windowManager.hyprland.systemd.enable = false` so UWSM remains the session lifecycle owner.
+## Shell
 
-The end-4 source is pinned as a non-flake input. Immutable source assets are linked through Home Manager, while QuickShell-generated colors, wallpaper state, notifications, todos, and other runtime data remain writable under `~/.local/state/quickshell/user/generated/`. The integration does not run the end-4 installer and does not copy a complete mutable `.config` tree into the user home.
+O shell visual ativo é o [Serpantinum](https://github.com/ilyamiro/serpantinum), adaptado e publicado pelo repositório [shell-conf](https://github.com/Joaoferraz-byte/shell-conf). O upstream não fornece um flake NixOS pronto, então `shell-conf` contém a árvore QuickShell/Hyprland revisada e expõe `homeManagerModules.default`.
 
-| Concern | Owner |
-|---|---|
-| Compositor, session entry, graphics prerequisites | `modules/features/hyprland.nix` |
-| QuickShell and end-4 source assets | `modules/features/end4.nix` |
-| Hyprland settings, compatibility shortcuts, screenshots, touchpad, and wallpaper startup | `home/livara/session.nix` |
-| Runtime palette generation | Matugen and `home/livara/themes.nix` |
-| Browser, GTK, ZenNotes, Xournal++, and NixVim adapters | `home/livara/themes.nix` and `home/livara/applications.nix` |
+NixOS habilita Hyprland com UWSM e fornece dependências system-side; Home Manager instala o shell e seus serviços de usuário; `serpantinum-shell` inicia QuickShell; `serpantinum-wallpaper-daemon` gerencia `awww`; e `serpantinum-wallpaper-random-on-login` seleciona a imagem inicial e executa Matugen.
 
-## Preserved shortcuts and screenshots
+## Tema adaptativo
 
-The local compatibility file is loaded after the upstream end-4 keybindings and explicitly unbinds conflicting defaults before restoring the historical nix-conf actions.
+O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para QuickShell, Hyprland, GTK3/GTK4, Qt, Kitty/WezTerm, Neovim, Firefox/Zen e ZenNotes. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
 
-| Shortcut | Action |
-|---|---|
-| Super+Comma | QuickShell settings |
-| Super+Space | QuickShell overview and launcher |
-| Super+X | QuickShell session/power menu |
-| Super+D | QuickShell overview/dashboard |
-| Super+V | QuickShell clipboard history |
-| Super+N / Super+O | ZenNotes |
-| Super+Tab | QuickShell cheatsheet |
-| Super+Shift+S | Region capture with `grim`, `slurp`, and `satty` |
-| Super+S | Full output capture through `grimblast` |
-| Super+Ctrl+S | Active window capture through `grimblast` |
+Firefox e Zen usam `chrome/userChrome.css` e `toolkit.legacyUserProfileCustomizations.stylesheets`. ZenNotes usa o tema customizado `custom-serpantinum`, com `theme.css`, `manifest.json`, `theme_family = "custom"`, `theme_id = "custom-serpantinum"` e `theme_mode = "dark"`.
 
-The keyboard layout is `br`. Touchpad policy keeps tap-to-click, disable-while-typing, and natural scrolling enabled. The Xournal++ configuration remains application-owned and is synchronized through `scripts/sync-xournalpp-config.sh`.
+## Teclado 60%
 
-## Themes
+A tradução global de `Ctrl+H/J/K/L` é feita em `modules/features/keyd.nix`, não no compositor. A camada keyd `[control:C]` emite `left`, `down`, `up` e `right`, de modo que os aplicativos recebam eventos de seta genuínos antes de interpretar H/J/K/L. O wildcard cobre os dois hosts; IDs específicos podem ser configurados depois de validar `keyd monitor` em cada teclado.
 
-Matugen is the single runtime palette authority. Its stable output contract is:
+## Wallpaper e sincronização
 
-| Output | Consumer |
-|---|---|
-| `~/.local/state/quickshell/user/generated/colors.json` | QuickShell |
-| `~/.config/hypr/hyprland/colors.conf` | Hyprland |
-| `~/.config/hypr/hyprlock.conf` | Hyprlock |
-| `~/.config/fuzzel/fuzzel_theme.ini` | Fuzzel |
-| `~/.config/gtk-3.0/gtk.css`, `gtk-4.0/gtk.css` | GTK applications and Nautilus |
-| `~/.local/state/nix-conf/theme/firefox.css` | Firefox profiles |
-| `~/.local/state/nix-conf/theme/zen.css` | Zen Browser profiles |
-| `~/.local/state/nix-conf/theme/zennotes.css` | ZenNotes |
+`home/livara/sync.nix` mantém timers independentes para Wallpapers e Vault. O clone inicial é atômico; atualizações usam fetch/fast-forward e falhas de rede mantêm o último checkout válido. O wallpaper service não depende de um `git pull` bem-sucedido para iniciar a sessão.
 
-These generated files must not be symlinked into the Nix store. Xournal++ keeps its reviewed semantic drawing configuration in `xournal-conf`; the GTK palette is consumed separately.
+## Repositórios relacionados
 
-## Installation and rebuild flow
+`vim-conf` continua sendo o owner de NixVim, plugins, linguagens e keymaps. `xournal-conf` continua sendo o owner dos arquivos editáveis de Xournal++, como `settings.xml`, `toolbar.ini`, template LaTeX e paletas. `Wallpapers` é tratado como catálogo de assets, sem lógica de sessão.
 
-The intended installed-system workflow uses the checkout at `~/.config/nixos` and requires no repository relocation. Run the installer as `livara`, not as root:
+## Instalação e validação
+
+A instalação normal é realizada por `install.sh`, que deve ser executado como usuário comum. A configuração valida hardware, árvore Git, `nix flake check --no-build --no-update-lock-file` e avaliação do host antes de chamar `nixos-rebuild`.
 
 ```bash
-cd ~/.config/nixos
 ./install.sh
 ```
 
-The installer performs a preflight before entering the development shell. It verifies that the checkout is a Git worktree owned by the current user, that `.git/objects` and the index are writable, that there are no unresolved conflicts or `flake.lock` conflict markers, and that the required Nix commands are available. It then validates or reuses hardware, checks the flake without changing the lockfile, evaluates the selected system derivation, and only then invokes `nixos-rebuild`.
-
-The default mode is `switch`. Safer modes are available through `NIX_CONF_REBUILD_MODE`:
-
-| Mode | Effect |
-|---|---|
-| `dry-activate` | Builds the system and reports activation changes without activating it. |
-| `test` | Builds and activates the generation without making it the bootloader default. |
-| `boot` | Builds and selects the generation for the next boot without activating it now. |
-| `switch` | Builds, creates a generation, updates the boot default, and activates immediately. |
-
-For a first end-4 or hardware test, use `dry-activate` or `test` before `switch`:
-
-```bash
-NIX_CONF_HOST=latitude NIX_CONF_REBUILD_MODE=dry-activate ./install.sh
-NIX_CONF_HOST=latitude NIX_CONF_REBUILD_MODE=test ./install.sh
-NIX_CONF_HOST=latitude ./install.sh
-```
-
-To select a host without the prompt:
-
-```bash
-NIX_CONF_HOST=latitude ./install.sh
-NIX_CONF_HOST=myMachine ./install.sh
-```
-
-The existing `flake.lock` is used by default. The installer never updates inputs during its `nix develop` bootstrap or normal check. Update inputs only by explicit request, optionally selecting input names:
-
-```bash
-NIX_CONF_UPDATE_FLAKE=1 ./install.sh
-NIX_CONF_UPDATE_FLAKE=1 NIX_CONF_UPDATE_INPUTS='quickshell illogical-impulse-dotfiles' ./install.sh
-```
-
-The installer backs up `flake.lock` before an explicit update. It does not pull Git branches automatically, because pulling over local hardware or Xournal++ changes can create conflicts that must be resolved deliberately. Preserve local work before synchronizing:
-
-```bash
-git status --short
-git stash push -u -m 'local changes before nix-conf sync'
-git fetch origin main
-git merge --ff-only origin/main
-nix flake check --no-build --no-update-lock-file
-git stash pop
-```
-
-If `git stash pop` reports a conflict, do not use `git reset --hard` or delete the conflict files. Keep the stash entry and resolve only the affected files.
-
-## Hardware generation
-
-The unified generator supports the Latitude ext4 layout and the myMachine Btrfs layout. Run it as the checkout owner; it invokes `sudo` only when it must mount an existing ESP:
-
-```bash
-cd ~/.config/nixos
-./scripts/generate-hardware.sh --host latitude --dry-run
-./scripts/generate-hardware.sh --host myMachine --dry-run
-```
-
-When a tracked hardware file has local modifications, the generator validates and reuses it instead of overwriting it. Set `NIX_CONF_ALLOW_HARDWARE_REPLACE=1` only after reviewing a backup and intentionally requesting regeneration. The generator uses `nixos-generate-config` when it can inspect the mounted system and falls back to mounted-kernel topology for Btrfs subvolume probing failures. It validates device references, preserves backups, stages only the selected tracked hardware file, and never formats disks, edits firmware settings, or adds ACPI kernel parameters.
-
-## Validation
-
-Run the following commands on a normal NixOS system or another host with Nix available. The sandbox used for repository analysis does not contain the Nix executable, so this is a required target-host gate:
+Para validar:
 
 ```bash
 git diff --check
 nix flake check --no-build --no-update-lock-file --show-trace
-nix eval --raw --no-update-lock-file '.#nixosConfigurations.latitude.config.system.build.toplevel.drvPath'
-nix eval --raw --no-update-lock-file '.#nixosConfigurations.myMachine.config.system.build.toplevel.drvPath'
-nix build --no-update-lock-file '.#nixosConfigurations.latitude.config.system.build.toplevel'
-nix build --no-update-lock-file '.#nixosConfigurations.myMachine.config.system.build.toplevel'
+nix eval .#nixosConfigurations.latitude.config.system.stateVersion
+nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
+nix build .#nixosConfigurations.latitude.config.system.build.toplevel
+nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
 ```
 
-Use `nix flake lock` only after adding inputs and use `nix flake update <input>` only when intentionally changing a pinned revision. A successful `nix flake check --no-build` proves evaluation and output shape, not activation; `nix eval` prints a derivation path but does not build or activate it.
-
-For recovery after an activation failure, list generations and select the previous generation:
+Depois da ativação, confira:
 
 ```bash
-sudo nixos-rebuild list-generations
-sudo nixos-rebuild --rollback switch
+systemctl --user status serpantinum-shell.service
+systemctl --user status serpantinum-wallpaper-daemon.service
+systemctl --user status serpantinum-wallpaper-random-on-login.service
+keyd monitor
 ```
 
-## Development, containers, and virtualization
-
-The repository keeps shared workstation capabilities in system features and project-specific dependencies in focused devShells. The `python` shell provides the baseline for Python and Manim work; the `embedded` shell provides Arduino, PlatformIO, OpenOCD, probe-rs, and serial tooling. Rootless Docker, Compose, Buildx, libvirt, QEMU/KVM, SPICE, and virt-manager remain independent features and are not coupled to the desktop shell.
-
-## End-4 runtime preferences
-
-The end-4 settings interface writes user-owned runtime state rather than Nix expressions. After changing settings in QuickShell, review and export the state explicitly:
-
-```bash
-cd ~/.config/nixos
-./scripts/sync-end4-state.sh status
-./scripts/sync-end4-state.sh export
-git diff -- home/livara/end4-state
-```
-
-Commit only reviewed files. To apply a reviewed state, run `./scripts/sync-end4-state.sh import` and then reload Hyprland and QuickShell. Matugen outputs and QuickShell caches remain derived runtime data and are not committed.
-
-## References
-
-- [Pinned official end-4 illogical-impulse source](https://github.com/end-4/dots-hyprland/commit/69f1a543196d47286a4630c2c0868a1827e512f2)
-- [Hyprland Lua configuration contract](https://wiki.hypr.land/Configuring/Start/)
-- [Serpantinum evaluation](./docs/end4-integration-research.md)
-- [QuickShell](https://git.outfoxxed.me/outfoxxed/quickshell)
-- [Hyprland on NixOS](https://wiki.hypr.land/Nix/Hyprland-on-NixOS/)
-- [Matugen](https://github.com/InioX/matugen)
-- [Home Manager manual](https://home-manager.dev/manual/)
-- [NixOS module system](https://nixos.org/manual/nixos/stable/#sec-writing-modules)
-- [vim-conf](https://github.com/Joaoferraz-byte/vim-conf)
-- [xournal-conf](https://github.com/Joaoferraz-byte/xournal-conf)
+A auditoria usa Nix em modo local para avaliação; builds completos e `nixos-rebuild switch` devem ainda ser executados no NixOS real, com os drivers e hardware de cada host.

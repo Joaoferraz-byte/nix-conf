@@ -22,10 +22,6 @@ let
         output = "DP-1";
         scale = 1.0;
       }
-      {
-        output = "";
-        scale = "auto";
-      }
     ];
     myMachine = [ ];
   };
@@ -33,20 +29,13 @@ let
   rules = monitorRules.${hostName} or [ ];
   renderRule = rule:
     let
-      scale = if builtins.isString rule.scale then builtins.toJSON rule.scale else toString rule.scale;
+      scale = if builtins.isString rule.scale then rule.scale else toString rule.scale;
     in
-    ''
-      hl.monitor({
-        output = "${rule.output}",
-        mode = "preferred",
-        position = "auto",
-        scale = ${scale}
-      })
-    '';
+    "monitor = ${rule.output}, preferred, auto, ${scale}\n";
 in
 {
-  wayland.windowManager.hyprland.extraLuaFiles."monitors.lua" = {
-    content = builtins.concatStringsSep "\n" (map renderRule rules);
-    autoLoad = false;
-  };
+  # The Serpantinum source includes monitors.conf. This file is the small
+  # host-specific overlay loaded after it by hyprland.conf.
+  home.file.".config/hypr/config/monitors.local.conf".text =
+    builtins.concatStringsSep "" (map renderRule rules);
 }

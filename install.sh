@@ -64,7 +64,7 @@ verify_locked_flake() {
   fi
   printf '%s\n' 'Error: flake.nix and flake.lock are not synchronized, or a locked input cannot be resolved.' >&2
   printf '%s\n' 'If the input revision was intentionally changed, run:' >&2
-  printf '%s\n' '  NIX_CONF_UPDATE_FLAKE=1 NIX_CONF_UPDATE_INPUTS=quickshell ./install.sh' >&2
+  printf '%s\n' '  NIX_CONF_UPDATE_FLAKE=1 NIX_CONF_UPDATE_INPUTS="shell-conf vim-conf" ./install.sh' >&2
   printf '%s\n' 'Metadata diagnostic:' >&2
   cat "$metadata_log" >&2 || true
   rm -f "$metadata_log"

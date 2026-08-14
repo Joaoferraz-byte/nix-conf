@@ -27,8 +27,7 @@
             hostName = config.networking.hostName;
           };
           sharedModules = [
-            self.homeModules.hyprland
-            self.homeModules.end4
+            inputs.shell-conf.homeManagerModules.default
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

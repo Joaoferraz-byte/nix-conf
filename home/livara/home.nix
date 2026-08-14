@@ -23,10 +23,17 @@ in
   home.stateVersion = "26.11";
   programs.home-manager.enable = true;
   home.file.".face.icon".source = profileIcon;
-  home.file.".local/bin/sync-end4-state".source = ../../scripts/sync-end4-state.sh;
   home.file."Fire/.keep".text = "";
 
   # Environment
+  programs.serpantinum = {
+    enable = true;
+    hostProfile = if hostName == "latitude" then "laptop" else "desktop";
+    networkWidgets = true;
+    bluetoothWidgets = hostName == "latitude";
+    wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
+  };
+
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projetos";
     TERMINAL = "wezterm";

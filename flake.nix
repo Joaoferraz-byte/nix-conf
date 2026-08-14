@@ -14,6 +14,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    shell-conf = {
+      url = "github:Joaoferraz-byte/shell-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     xournal-conf = {
       url = "github:Joaoferraz-byte/xournal-conf";
       flake = false;
@@ -24,16 +29,6 @@
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell?rev=59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    illogical-impulse-dotfiles = {
-      url = "git+https://github.com/end-4/dots-hyprland.git?rev=69f1a543196d47286a4630c2c0868a1827e512f2&submodules=1";
-      flake = false;
     };
 
     mesa-tomate-driver = {
@@ -58,7 +53,6 @@
         ./modules/features/embedded.nix
         ./modules/features/firejail.nix
         ./modules/features/flatpak.nix
-        ./modules/features/end4.nix
         ./modules/features/greeter.nix
         ./modules/features/hyprland.nix
         ./modules/features/keyd.nix

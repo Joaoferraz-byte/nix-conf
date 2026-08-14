@@ -4,29 +4,44 @@ let
   vaultDirectory = "${config.home.homeDirectory}/Vault";
   git = "${pkgs.git}/bin/git";
 
-  syncWallpapers = pkgs.writeShellScript "sync-wallpapers" ''
-    set -eu
-    repository="https://github.com/Joaoferraz-byte/Wallpapers.git"
-    directory="${wallpapersDirectory}"
+  syncRepository = { repository, directory, label }:
+    pkgs.writeShellScript "sync-${label}" ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+      export GIT_TERMINAL_PROMPT=0
 
-    if [ ! -d "$directory/.git" ]; then
-      ${git} clone "$repository" "$directory"
-    else
-      ${git} -C "$directory" pull --ff-only
-    fi
-  '';
+      repository="${repository}"
+      directory="${directory}"
+      mkdir -p "$(dirname "$directory")"
 
-  syncVault = pkgs.writeShellScript "sync-vault" ''
-    set -eu
-    repository="git@github.com:Joaoferraz-byte/Vault.git"
-    directory="${vaultDirectory}"
+      if [[ ! -d "$directory/.git" ]]; then
+        tmp="''${directory}.tmp.$$"
+        rm -rf "$tmp"
+        if ! ${git} clone --depth 1 "$repository" "$tmp"; then
+          rm -rf "$tmp"
+          exit 0
+        fi
+        mv "$tmp" "$directory"
+        exit 0
+      fi
 
-    if [ ! -d "$directory/.git" ]; then
-      ${git} clone "$repository" "$directory"
-    else
-      ${git} -C "$directory" pull --ff-only
-    fi
-  '';
+      # Keep the last valid checkout if the network is unavailable or the
+      # remote history cannot be fast-forwarded. The shell remains usable.
+      ${git} -C "$directory" fetch --prune origin || exit 0
+      ${git} -C "$directory" merge --ff-only "origin/HEAD" || exit 0
+    '';
+
+  syncWallpapers = syncRepository {
+    repository = "https://github.com/Joaoferraz-byte/Wallpapers.git";
+    directory = wallpapersDirectory;
+    label = "wallpapers";
+  };
+
+  syncVault = syncRepository {
+    repository = "git@github.com:Joaoferraz-byte/Vault.git";
+    directory = vaultDirectory;
+    label = "vault";
+  };
 
   mkSyncTimer = service: {
     Timer = {
@@ -50,9 +65,9 @@ let
   };
 in
 {
-  systemd.user.services.wallpapers-sync = mkSyncService "Sync the wallpaper repository" syncWallpapers;
+  systemd.user.services.wallpapers-sync = mkSyncService "Sync the canonical wallpaper repository" syncWallpapers;
   systemd.user.timers.wallpapers-sync = mkSyncTimer "wallpapers-sync";
 
-  systemd.user.services.vault-sync = mkSyncService "Sync the Vault repository" syncVault;
+  systemd.user.services.vault-sync = mkSyncService "Sync the Markdown vault repository" syncVault;
   systemd.user.timers.vault-sync = mkSyncTimer "vault-sync";
 }

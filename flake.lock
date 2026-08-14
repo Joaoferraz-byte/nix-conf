@@ -252,25 +252,6 @@
         "type": "github"
       }
     },
-    "illogical-impulse-dotfiles": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786415325,
-        "narHash": "sha256-1pQZJVd9ZMCL0GW0EVvoX4V4Kh1QV2OW8ePMhnHpxzY=",
-        "ref": "refs/heads/main",
-        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
-        "revCount": 6290,
-        "submodules": true,
-        "type": "git",
-        "url": "https://github.com/end-4/dots-hyprland.git"
-      },
-      "original": {
-        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
-        "submodules": true,
-        "type": "git",
-        "url": "https://github.com/end-4/dots-hyprland.git"
-      }
-    },
     "mesa-tomate-driver": {
       "inputs": {
         "nixpkgs": [
@@ -509,6 +490,7 @@
     "quickshell": {
       "inputs": {
         "nixpkgs": [
+          "shell-conf",
           "nixpkgs"
         ]
       },
@@ -532,12 +514,11 @@
         "affinity-nix": "affinity-nix",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
-        "illogical-impulse-dotfiles": "illogical-impulse-dotfiles",
         "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
-        "quickshell": "quickshell",
+        "shell-conf": "shell-conf",
         "vim-conf": "vim-conf",
         "xournal-conf": "xournal-conf",
         "zen-browser": "zen-browser"
@@ -557,6 +538,27 @@
         "owner": "rust-lang",
         "ref": "nightly",
         "repo": "rust-analyzer",
+        "type": "github"
+      }
+    },
+    "shell-conf": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "quickshell": "quickshell"
+      },
+      "locked": {
+        "lastModified": 1786722892,
+        "narHash": "sha256-6qjgzzw2dwAPFDltxBMXEdX4IwF9QltRB2GfsNmmzvU=",
+        "owner": "Joaoferraz-byte",
+        "repo": "shell-conf",
+        "rev": "02250a386d8b926f4bd10e48cb80b7276188948e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Joaoferraz-byte",
+        "repo": "shell-conf",
         "type": "github"
       }
     },
@@ -618,11 +620,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1786535914,
-        "narHash": "sha256-a7OUpIaomanCpmwqiGaC6/bCA0XCfxMDNTI+n65HZXk=",
+        "lastModified": 1786722984,
+        "narHash": "sha256-/3Qq7C4nU2pqyfXYJ8/Lfc+fHD1KsMytm2wMA3534mE=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "589267641d2676c10ec08a602fd27d0b3d594a59",
+        "rev": "8c2a930b898632da6b0311525490228dea37c91d",
         "type": "github"
       },
       "original": {
