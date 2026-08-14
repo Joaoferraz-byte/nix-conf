@@ -122,6 +122,14 @@
             "$config_dir/matugen/templates/gtk-4.0" \
             "$config_dir/illogical-impulse"
           mkdir -p "$state_dir/wallpaper" "$venv_dir/bin"
+
+          if [ -L "$config_dir/illogical-impulse/config.json" ]; then
+            rm -f "$config_dir/illogical-impulse/config.json"
+          fi
+          if [ ! -e "$config_dir/illogical-impulse/config.json" ]; then
+            printf '{}\n' > "$config_dir/illogical-impulse/config.json"
+          fi
+
           printf '%s\n' \
             'export VIRTUAL_ENV="${config.xdg.stateHome}/quickshell/.venv"' \
             'export PATH="${pythonEnv}/bin:$PATH"' \
@@ -129,6 +137,7 @@
 
           for output in \
             "$config_dir/hypr/hyprland/colors.lua" \
+            "$config_dir/hypr/hyprland/shellOverrides/main.lua" \
             "$config_dir/hypr/hyprlock/colors.conf" \
             "$config_dir/fuzzel/fuzzel_theme.ini" \
             "$config_dir/gtk-3.0/gtk.css" \
@@ -174,6 +183,8 @@
           enable = true;
           platformTheme.name = "kde";
         };
+
+        home.sessionPath = [ "${quickshell}/bin" ];
 
         home.sessionVariables = {
           ILLOGICAL_IMPULSE_VIRTUAL_ENV = "${config.xdg.stateHome}/quickshell/.venv";
@@ -290,10 +301,12 @@
           "hyprland/execs.lua" = {
             content = builtins.replaceStrings
               [
+                "    hl.exec_cmd(\"qs -c $qsConfig\")"
                 "    hl.exec_cmd(\"hypridle\")"
                 "    hl.exec_cmd(\"easyeffects --hide-window --service-mode\")"
               ]
               [
+                "    hl.exec_cmd(\"${lib.getExe quickshell} -c $qsConfig\")"
                 "    hl.exec_cmd(\"hypridle\")"
                 "    hl.exec_cmd(\"${polkitAgent}\")\n    hl.exec_cmd(\"easyeffects --hide-window --service-mode\")"
               ]
@@ -352,35 +365,28 @@
 
               hl.bind(mod .. " + Comma", hl.dsp.exec_cmd("qs -p ~/.config/quickshell/$qsConfig/settings.qml"))
               hl.bind(mod .. " + Space", hl.dsp.exec_cmd(qs .. "overviewToggle"))
-              hl.bind(mod .. " + X", hl.dsp.exec_cmd(qs .. "sessionToggle"))
-              hl.bind(mod .. " + D", hl.dsp.exec_cmd(qs .. "overviewToggle"))
-              hl.bind(mod .. " + V", hl.dsp.exec_cmd(qs .. "overviewClipboardToggle"))
-              hl.bind(mod .. " + N", hl.dsp.exec_cmd("zennotes"))
-              hl.bind(mod .. " + Tab", hl.dsp.exec_cmd(qs .. "cheatsheetToggle"))
+              hl.bind(mod .. " + ALT + X", hl.dsp.exec_cmd(qs .. "sessionToggle"))
 
-              hl.bind(mod .. " + W", hl.dsp.exec_cmd("zen-beta"))
-              hl.bind(mod .. " + E", hl.dsp.exec_cmd("nautilus"))
-              hl.bind(mod .. " + O", hl.dsp.exec_cmd("zennotes"))
-              hl.bind(mod .. " + T", hl.dsp.exec_cmd("wezterm"))
-              hl.bind(mod .. " + Return", hl.dsp.exec_cmd("wezterm"))
-              hl.bind(mod .. " + C", hl.dsp.window.close())
-
-              hl.bind(mod .. " + Left", hl.dsp.focus({ direction = "l" }))
-              hl.bind(mod .. " + Right", hl.dsp.focus({ direction = "r" }))
-              hl.bind(mod .. " + Up", hl.dsp.focus({ direction = "u" }))
-              hl.bind(mod .. " + Down", hl.dsp.focus({ direction = "d" }))
-              hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
-              hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
-
-              hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | satty --filename - --copy-command wl-copy --early-exit"))
-              hl.bind(mod .. " + S", hl.dsp.exec_cmd("grimblast --notify copy output"))
-              hl.bind(mod .. " + CTRL + S", hl.dsp.exec_cmd("grimblast --notify copy active"))
-              hl.bind("Print", hl.dsp.exec_cmd("grimblast --notify copy output"))
-              hl.bind("CTRL + Print", hl.dsp.exec_cmd("mkdir -p \"$HOME/Pictures/Screenshots\" && grimblast --notify copysave output"))
-
-              hl.bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"))
+              hl.bind(mod .. " + Z", hl.dsp.exec_cmd("zennotes"))
+              hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd("zen-beta"))
               hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh"))
               hl.bind(mod .. " + CTRL + SHIFT + W", hl.dsp.exec_cmd("~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh"))
+
+              local navigation = {
+                H = "l",
+                J = "d",
+                K = "u",
+                L = "r",
+              }
+
+              for key, direction in pairs(navigation) do
+                hl.bind(mod .. " + ALT + " .. key, hl.dsp.focus({ direction = direction }), {
+                  description = "Window: Focus " .. direction,
+                })
+                hl.bind(mod .. " + CTRL + " .. key, hl.dsp.window.move({ direction = direction }), {
+                  description = "Window: Move " .. direction,
+                })
+              end
             '';
             autoLoad = false;
           };
