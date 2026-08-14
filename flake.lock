@@ -252,6 +252,23 @@
         "type": "github"
       }
     },
+    "illogical-impulse-dotfiles": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786415325,
+        "narHash": "sha256-A94CUNEk+lFu2SB9OLE9LLM8z4pzc57W38LZc6lVI/I=",
+        "owner": "end-4",
+        "repo": "dots-hyprland",
+        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "end-4",
+        "repo": "dots-hyprland",
+        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
+        "type": "github"
+      }
+    },
     "mesa-tomate-driver": {
       "inputs": {
         "nixpkgs": [
@@ -487,20 +504,41 @@
         "type": "github"
       }
     },
+    "quickshell": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1777871389,
+        "narHash": "sha256-gU+VGpwGJ2vvg0mtYqVvj5u+2LteuHlpokH6JSAtueY=",
+        "ref": "refs/heads/master",
+        "rev": "59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83",
+        "revCount": 815,
+        "type": "git",
+        "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
+      },
+      "original": {
+        "rev": "59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83",
+        "type": "git",
+        "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
+      }
+    },
     "root": {
       "inputs": {
         "affinity-nix": "affinity-nix",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
+        "illogical-impulse-dotfiles": "illogical-impulse-dotfiles",
         "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
+        "quickshell": "quickshell",
         "vim-conf": "vim-conf",
         "xournal-conf": "xournal-conf",
-        "zen-browser": "zen-browser",
-        "illogical-impulse-dotfiles": "illogical-impulse-dotfiles",
-        "quickshell": "quickshell"
+        "zen-browser": "zen-browser"
       }
     },
     "rust-analyzer-src": {
@@ -626,43 +664,6 @@
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
         "type": "github"
-      }
-    },
-    "illogical-impulse-dotfiles": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786415325,
-        "narHash": "sha256-A94CUNEk+lFu2SB9OLE9LLM8z4pzc57W38LZc6lVI/I=",
-        "owner": "end-4",
-        "repo": "dots-hyprland",
-        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "end-4",
-        "repo": "dots-hyprland",
-        "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
-        "type": "github"
-      }
-    },
-    "quickshell": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1777871389,
-        "narHash": "sha256-gU+VGpwGJ2vvg0mtYqVvj5u+2LteuHlpokH6JSAtueY=",
-        "rev": "59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83",
-        "revCount": 815,
-        "type": "git",
-        "url": "https://git.outfoxxed.me/quickshell/quickshell"
-      },
-      "original": {
-        "rev": "59e9c47b0eb48a9e4bcf9631fa062ee939bd2e83",
-        "type": "git",
-        "url": "https://git.outfoxxed.me/quickshell/quickshell"
       }
     }
   },

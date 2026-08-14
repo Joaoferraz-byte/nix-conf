@@ -261,7 +261,25 @@
         wayland.windowManager.hyprland.extraConfig = ''
           local hm_xdg_config_home = os.getenv("XDG_CONFIG_HOME") or "${config.xdg.configHome}"
           package.path = hm_xdg_config_home .. "/hypr/?.lua;" .. hm_xdg_config_home .. "/hypr/?/init.lua;" .. package.path
-          ${builtins.readFile (source "hypr/hyprland.lua")}
+          ${builtins.replaceStrings
+            [ "require(\"hyprland.colors\")" ]
+            [ ''
+              local colors_loaded = pcall(require, "hyprland.colors")
+              if not colors_loaded then
+                hl.config({
+                  general = {
+                    col = {
+                      active_border = "rgba(44464f77)",
+                      inactive_border = "rgba(1a1b2033)",
+                    },
+                  },
+                  misc = {
+                    background_color = "rgba(121318FF)",
+                  },
+                })
+              end
+            '' ]
+            (builtins.readFile (source "hypr/hyprland.lua"))}
         '';
 
         wayland.windowManager.hyprland.extraLuaFiles = {
@@ -284,6 +302,10 @@
           };
           "hyprland/general.lua" = {
             content = builtins.readFile (source "hypr/hyprland/general.lua");
+            autoLoad = false;
+          };
+          "hyprland/colors.lua" = {
+            content = builtins.readFile (source "hypr/hyprland/colors.lua");
             autoLoad = false;
           };
           "hyprland/keybinds.lua" = {
