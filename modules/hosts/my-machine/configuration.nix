@@ -28,6 +28,14 @@
     # Network
     networking.hostName = "limine";
     networking.networkmanager.enable = true;
+
+    # Bluetooth is intentionally absent from the desktop system and UI.
+    hardware.bluetooth = {
+      enable = false;
+      powerOnBoot = false;
+    };
+    services.blueman.enable = false;
+
     # Locale
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "pt_BR.UTF-8";
