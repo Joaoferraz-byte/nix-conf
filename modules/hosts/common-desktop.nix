@@ -17,6 +17,14 @@
       };
 
       config = {
+        hardware.bluetooth = {
+          enable = true;
+          powerOnBoot = true;
+          settings.General.Experimental = true;
+        };
+
+        services.blueman.enable = true;
+
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
