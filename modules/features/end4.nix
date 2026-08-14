@@ -328,6 +328,10 @@
             content = builtins.readFile (source "hypr/hyprland/services/create_custom_config.lua");
             autoLoad = false;
           };
+          "hyprland/shellOverrides/main.lua" = {
+            content = builtins.readFile (source "hypr/hyprland/shellOverrides/main.lua");
+            autoLoad = false;
+          };
           "hyprland/variables.lua" = {
             content = builtins.replaceStrings
               [
