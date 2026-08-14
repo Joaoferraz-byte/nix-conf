@@ -256,17 +256,19 @@
       "flake": false,
       "locked": {
         "lastModified": 1786415325,
-        "narHash": "sha256-A94CUNEk+lFu2SB9OLE9LLM8z4pzc57W38LZc6lVI/I=",
-        "owner": "end-4",
-        "repo": "dots-hyprland",
+        "narHash": "sha256-1pQZJVd9ZMCL0GW0EVvoX4V4Kh1QV2OW8ePMhnHpxzY=",
+        "ref": "refs/heads/main",
         "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
-        "type": "github"
+        "revCount": 6290,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/end-4/dots-hyprland.git"
       },
       "original": {
-        "owner": "end-4",
-        "repo": "dots-hyprland",
         "rev": "69f1a543196d47286a4630c2c0868a1827e512f2",
-        "type": "github"
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/end-4/dots-hyprland.git"
       }
     },
     "mesa-tomate-driver": {

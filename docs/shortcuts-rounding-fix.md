@@ -40,9 +40,9 @@ The local adapter intentionally does not duplicate these bindings. This prevents
 
 ## Window navigation and the 60% keyboard layer
 
-`Super + Left/Right/Up/Down` focuses a neighboring window. The local 60% layer provides the same focus operation without requiring arrow keys: `Super + Alt + H/J/K/L` focuses left/down/up/right respectively. `Super + Ctrl + H/J/K/L` moves the active window left/down/up/right respectively. `Super + Shift + L` remains owned by the upstream configuration for suspend and is intentionally not reused.
+`Super + Left/Right/Up/Down` focuses a neighboring window. The local 60% layer provides the same focus operation without requiring arrow keys: `Super + Ctrl + H/J/K/L` focuses left/down/up/right respectively. `Super + Shift + Left/Right/Up/Down` remains the upstream window-movement layer. `Super + Ctrl + H/J/K/L` is intentionally reserved for focus and does not duplicate the upstream move bindings.
 
-`Super + Shift + Left/Right/Up/Down` remains the upstream window-movement layer. `Super + D` toggles maximized state and `Super + F` toggles fullscreen. `Super + 1-9` and `Super + 0` select workspaces 1-10. Hyprland and the upstream end-4 scripts provide additional workspace movement and scratchpad bindings.
+The function-key layer maps `Ctrl + 1` through `Ctrl + 9` to `F1` through `F9`, and `Ctrl + 0` to `F10`, using Hyprland's native `send_shortcut` dispatcher with an empty modifier set. `Super + D` toggles maximized state and `Super + F` toggles fullscreen. `Super + 1-9` and `Super + 0` select workspaces 1-10. Hyprland and the upstream end-4 scripts provide additional workspace movement and scratchpad bindings.
 
 The active decoration contract is defined in the imported end-4 `general.lua` and `rules.lua` modules. Local changes belong in the Lua override module or a future host-specific override rather than in the source input.
 
@@ -103,7 +103,7 @@ pkill -x qs || true
 qs -c ii
 ```
 
-The official end-4 configuration file is `~/.config/illogical-impulse/config.json`. The adapter creates `{}` only when the file is absent, so the QuickShell `JsonAdapter` can materialize its defaults without overwriting user preferences. [1] [2]
+The official end-4 configuration file is `~/.config/illogical-impulse/config.json`. The adapter creates `{}` only when the file is absent, so the QuickShell `JsonAdapter` can materialize its defaults without overwriting user preferences. The `rounded-polygon-qmljs` Git submodule is fetched explicitly and the adapter adds its required `qmldir` declaration for QuickShell 0.3. [1] [2] [3]
 
 If a generated palette is stale, run the end-4 wallpaper switcher after confirming that the wallpaper path exists:
 
@@ -117,3 +117,4 @@ Matugen outputs are intentionally stored under `~/.local/state/quickshell/user/g
 
 [1]: https://ii.clsty.link/en/ii-qs/03config/ "illogical-impulse configuration documentation"
 [2]: https://github.com/end-4/dots-hyprland/issues/1407 "end-4 QuickShell config.json reload issue"
+[3]: https://ii.clsty.link/en/ii-qs/04troubleshooting/ "illogical-impulse troubleshooting and submodule guidance"

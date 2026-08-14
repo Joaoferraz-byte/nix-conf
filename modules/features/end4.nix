@@ -32,6 +32,12 @@
         quickshellConfig = pkgs.runCommand "end4-quickshell-ii" { } ''
           cp -R ${source "quickshell/ii"} "$out"
           chmod -R u+w "$out"
+          cat > "$out/modules/common/widgets/shapes/qmldir" <<'EOF'
+          module qs.modules.common.widgets.shapes
+          example-squircle 1.0 example-squircle.qml
+          ShapeCanvas 1.0 ShapeCanvas.qml
+          example 1.0 example.qml
+          EOF
           for script in \
             "$out/scripts/colors/generate_colors_material.py" \
             "$out/scripts/hyprland/get_keybinds.py" \
@@ -226,7 +232,6 @@
           xdg-user-dirs
           wl-clip-persist
           wl-clipboard
-          wtype
           ydotool
           kdePackages.kdialog
           kdePackages.qt5compat
@@ -382,11 +387,27 @@
               }
 
               for key, direction in pairs(navigation) do
-                hl.bind(mod .. " + ALT + " .. key, hl.dsp.focus({ direction = direction }), {
+                hl.bind(mod .. " + CTRL + " .. key, hl.dsp.focus({ direction = direction }), {
                   description = "Window: Focus " .. direction,
                 })
-                hl.bind(mod .. " + CTRL + " .. key, hl.dsp.window.move({ direction = direction }), {
-                  description = "Window: Move " .. direction,
+              end
+
+              local functionKeys = {
+                ["1"] = "F1",
+                ["2"] = "F2",
+                ["3"] = "F3",
+                ["4"] = "F4",
+                ["5"] = "F5",
+                ["6"] = "F6",
+                ["7"] = "F7",
+                ["8"] = "F8",
+                ["9"] = "F9",
+                ["0"] = "F10",
+              }
+
+              for key, functionKey in pairs(functionKeys) do
+                hl.bind("CTRL + " .. key, hl.dsp.send_shortcut({ mods = "", key = functionKey }), {
+                  description = "Keyboard: " .. key .. " to " .. functionKey,
                 })
               end
             '';

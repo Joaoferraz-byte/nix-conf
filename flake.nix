@@ -32,7 +32,7 @@
     };
 
     illogical-impulse-dotfiles = {
-      url = "github:end-4/dots-hyprland?rev=69f1a543196d47286a4630c2c0868a1827e512f2";
+      url = "git+https://github.com/end-4/dots-hyprland.git?rev=69f1a543196d47286a4630c2c0868a1827e512f2&submodules=1";
       flake = false;
     };
 
