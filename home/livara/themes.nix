@@ -205,11 +205,13 @@ in
   '';
 
   home.file = {
+    ".local/share/themes/adw-gtk3".source = "${pkgs.adw-gtk3}/share/themes/adw-gtk3";
+    ".local/share/themes/adw-gtk3-dark".source = "${pkgs.adw-gtk3}/share/themes/adw-gtk3-dark";
     ".var/app/org.zennotes.ZenNotes/config/zennotes/themes/nix-conf-matugen/manifest.json".text = themeManifest;
     ".config/zennotes/themes/nix-conf-matugen/manifest.json".text = themeManifest;
   };
 
   home.activation.configureMatugenTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${themeSyncScript}
+    ${themeSyncScript} dark
   '';
 }

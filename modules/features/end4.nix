@@ -38,7 +38,7 @@
           ShapeCanvas 1.0 ShapeCanvas.qml
           example 1.0 example.qml
           EOF
-          sed -i '/^    post_process "\$max_width_desired" "\$max_height_desired" "\$imgpath"$/a\    "\$HOME/.local/bin/sync-matugen-apps"' "$out/scripts/colors/switchwall.sh"
+          sed -i '/^    post_process "\$max_width_desired" "\$max_height_desired" "\$imgpath"$/a\    "\$HOME/.local/bin/sync-matugen-apps" "''${mode_flag:-}"' "$out/scripts/colors/switchwall.sh"
           sed -i \
             -e 's/property real implicitSize: 26/property real implicitSize: 32/' \
             -e 's/roundToIconSize: false/roundToIconSize: true/' \

@@ -122,22 +122,31 @@ sync_zennotes() {
   set_toml_key "$config" theme_id '"custom-nix-conf-matugen"'
 }
 
-sync_gtk_sandbox() {
-  local root="$1"
-  mkdir -p "$root/gtk-3.0" "$root/gtk-4.0"
-  [[ -f "$XDG_CONFIG_HOME/gtk-3.0/gtk.css" ]] && cp -L "$XDG_CONFIG_HOME/gtk-3.0/gtk.css" "$root/gtk-3.0/gtk.css"
-  [[ -f "$XDG_CONFIG_HOME/gtk-4.0/gtk.css" ]] && cp -L "$XDG_CONFIG_HOME/gtk-4.0/gtk.css" "$root/gtk-4.0/gtk.css"
+sync_flatpak_theme() {
+  local app="$1"
+  local mode="$2"
+  local gtk_theme="adw-gtk3"
+
+  command -v flatpak >/dev/null 2>&1 || return 0
+  flatpak info "$app" >/dev/null 2>&1 || return 0
+  [[ "$mode" == dark ]] && gtk_theme="adw-gtk3-dark"
+
+  flatpak override --user "$app" \
+    --filesystem=xdg-config/gtk-3.0:ro \
+    --filesystem=xdg-config/gtk-4.0:ro \
+    --filesystem=xdg-data/themes:ro \
+    --env="GTK_THEME=$gtk_theme" \
+    || true
 }
 
-sync_xournalpp_palette() {
-  local root="$1"
-  local source="$XDG_CONFIG_HOME/xournalpp/palettes/matugen.gpl"
-  local target="$root/palettes/matugen.gpl"
+sync_flatpak_xournalpp_palette() {
+  local app="com.github.xournalpp.xournalpp"
+  local palette_dir="$XDG_CONFIG_HOME/xournalpp/palettes"
 
-  [[ -f "$source" ]] || return 0
-  [[ "$source" == "$target" ]] && return 0
-  mkdir -p "$root/palettes"
-  cp -L "$source" "$target"
+  command -v flatpak >/dev/null 2>&1 || return 0
+  flatpak info "$app" >/dev/null 2>&1 || return 0
+  [[ -d "$palette_dir" ]] || return 0
+  flatpak override --user "$app" --filesystem="$palette_dir:ro" || true
 }
 
 sync_browser_profiles "$HOME/.mozilla/firefox" "$FIREFOX_CSS"
@@ -146,10 +155,15 @@ sync_browser_profiles "$HOME/.zen" "$ZEN_CSS"
 sync_browser_profiles "$XDG_CONFIG_HOME/zen" "$ZEN_CSS"
 sync_browser_profiles "$HOME/.var/app/app.zen_browser.zen/.zen" "$ZEN_CSS"
 
-sync_gtk_mode "$(detect_theme_mode)"
+mode="${1:-${END4_COLOR_MODE:-}}"
+if [[ "$mode" != light && "$mode" != dark ]]; then
+  mode="$(detect_theme_mode)"
+fi
+mkdir -p "$THEME_DIR"
+printf '%s\n' "$mode" > "$THEME_DIR/mode"
+sync_gtk_mode "$mode"
 sync_zennotes "$XDG_CONFIG_HOME/zennotes"
 sync_zennotes "$HOME/.var/app/org.zennotes.ZenNotes/config/zennotes"
-sync_gtk_sandbox "$HOME/.var/app/org.gnome.Nautilus/config"
-sync_gtk_sandbox "$HOME/.var/app/com.github.xournalpp.xournalpp/config"
-sync_xournalpp_palette "$XDG_CONFIG_HOME/xournalpp"
-sync_xournalpp_palette "$HOME/.var/app/com.github.xournalpp.xournalpp/config/xournalpp"
+sync_flatpak_theme org.gnome.Nautilus "$mode"
+sync_flatpak_theme com.github.xournalpp.xournalpp "$mode"
+sync_flatpak_xournalpp_palette
