@@ -28,7 +28,7 @@
           };
         };
       };
-      services.displayManager.defaultSession = "hyprland-uwsm";
+      services.displayManager.defaultSession = lib.mkForce "hyprland-uwsm";
 
       environment.systemPackages = [
         clockworkTheme

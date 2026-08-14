@@ -360,7 +360,7 @@
           };
         };
 
-        home.activation.seedEnd4Runtime = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        home.activation.seedEnd4Runtime = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
           $DRY_RUN_CMD ${seedRuntime}
         '';
       };
