@@ -44,7 +44,7 @@
     };
     services.xserver.xkb = {
       layout = "br";
-      variant = "";
+      variant = "abnt2";
     };
     console.keyMap = "br-abnt2";
     # User

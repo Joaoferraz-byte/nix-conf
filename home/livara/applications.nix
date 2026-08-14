@@ -5,6 +5,10 @@ let
     [ "/home/livara/.config/xournalpp" ]
     [ "${config.home.homeDirectory}/.config/xournalpp" ]
     (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml"));
+  xournalppToolbar = pkgs.writeText "xournalpp-toolbar.ini" (builtins.replaceStrings
+    [ "toolbarTop1=PEN,ERASER,HIGHLIGHTER" ]
+    [ "toolbarTop1=HIGHLIGHTER,ERASER,PEN" ]
+    (builtins.readFile "${inputs.xournal-conf}/xournalpp/toolbar.ini"));
 in
 {
   # Applications
@@ -24,8 +28,6 @@ in
     };
   };
 
-  programs.zen-browser.profiles.default.userChrome = "";
-
   programs.firefox = {
     enable = true;
     policies = {
@@ -39,6 +41,7 @@ in
       isDefault = true;
       settings = {
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "layout.css.prefers-color-scheme.content-override" = 2;
         "svg.context-properties.content.enabled" = true;
         "userChrome.theme-material" = true;
       };
@@ -83,7 +86,7 @@ in
       $DRY_RUN_CMD cp "${xournalppSettings}" "${xournalppLocalConfig}/settings.xml"
     fi
     if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then
-      $DRY_RUN_CMD cp "${inputs.xournal-conf}/xournalpp/toolbar.ini" "${xournalppLocalConfig}/toolbar.ini"
+      $DRY_RUN_CMD cp "${xournalppToolbar}" "${xournalppLocalConfig}/toolbar.ini"
     fi
   '';
 

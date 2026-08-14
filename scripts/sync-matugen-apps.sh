@@ -21,21 +21,34 @@ link_css() {
   ln -sfn "$css" "$target"
 }
 
+set_user_pref() {
+  local user_js="$1"
+  local key="$2"
+  local value="$3"
+  local tmp="$user_js.tmp"
+
+  awk -v key="$key" -v value="$value" '
+    BEGIN {
+      prefix = "user_pref(\"" key "\",";
+      replacement = "user_pref(\"" key "\", " value ");";
+      found = 0;
+    }
+    index($0, prefix) == 1 { print replacement; found = 1; next }
+    { print }
+    END { if (!found) print replacement }
+  ' "$user_js" > "$tmp"
+  mv "$tmp" "$user_js"
+}
+
 ensure_firefox_pref() {
   local profile="$1"
   local user_js="$profile/user.js"
 
   [[ -d "$profile" ]] || return 0
-  if [[ -L "$user_js" ]]; then
-    return 0
-  fi
+  [[ -L "$user_js" ]] && return 0
   touch "$user_js"
-  if ! grep -Fq 'toolkit.legacyUserProfileCustomizations.stylesheets' "$user_js"; then
-    printf '%s\n' 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$user_js"
-  fi
-  if ! grep -Fq 'layout.css.prefers-color-scheme.content-override' "$user_js"; then
-    printf '%s\n' 'user_pref("layout.css.prefers-color-scheme.content-override", 2);' >> "$user_js"
-  fi
+  set_user_pref "$user_js" toolkit.legacyUserProfileCustomizations.stylesheets true
+  set_user_pref "$user_js" layout.css.prefers-color-scheme.content-override 2
 }
 
 sync_browser_profiles() {
@@ -116,6 +129,17 @@ sync_gtk_sandbox() {
   [[ -f "$XDG_CONFIG_HOME/gtk-4.0/gtk.css" ]] && cp -L "$XDG_CONFIG_HOME/gtk-4.0/gtk.css" "$root/gtk-4.0/gtk.css"
 }
 
+sync_xournalpp_palette() {
+  local root="$1"
+  local source="$XDG_CONFIG_HOME/xournalpp/palettes/matugen.gpl"
+  local target="$root/palettes/matugen.gpl"
+
+  [[ -f "$source" ]] || return 0
+  [[ "$source" == "$target" ]] && return 0
+  mkdir -p "$root/palettes"
+  cp -L "$source" "$target"
+}
+
 sync_browser_profiles "$HOME/.mozilla/firefox" "$FIREFOX_CSS"
 sync_browser_profiles "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox" "$FIREFOX_CSS"
 sync_browser_profiles "$HOME/.zen" "$ZEN_CSS"
@@ -127,3 +151,5 @@ sync_zennotes "$XDG_CONFIG_HOME/zennotes"
 sync_zennotes "$HOME/.var/app/org.zennotes.ZenNotes/config/zennotes"
 sync_gtk_sandbox "$HOME/.var/app/org.gnome.Nautilus/config"
 sync_gtk_sandbox "$HOME/.var/app/com.github.xournalpp.xournalpp/config"
+sync_xournalpp_palette "$XDG_CONFIG_HOME/xournalpp"
+sync_xournalpp_palette "$HOME/.var/app/com.github.xournalpp.xournalpp/config/xournalpp"

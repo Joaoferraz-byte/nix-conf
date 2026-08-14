@@ -106,6 +106,32 @@ in
       --z-glass-a3: 0.32;
       --z-glass-a4: 0.22;
     }
+
+    :root[data-theme-mode="dark"] {
+      color-scheme: dark;
+      --z-bg: {{ colors.background.dark.red }} {{ colors.background.dark.green }} {{ colors.background.dark.blue }};
+      --z-bg-softer: {{ colors.surface_container.dark.red }} {{ colors.surface_container.dark.green }} {{ colors.surface_container.dark.blue }};
+      --z-bg-1: {{ colors.surface.dark.red }} {{ colors.surface.dark.green }} {{ colors.surface.dark.blue }};
+      --z-bg-2: {{ colors.surface_container_high.dark.red }} {{ colors.surface_container_high.dark.green }} {{ colors.surface_container_high.dark.blue }};
+      --z-bg-3: {{ colors.surface_container_highest.dark.red }} {{ colors.surface_container_high.dark.green }} {{ colors.surface_container_high.dark.blue }};
+      --z-bg-4: {{ colors.outline.dark.red }} {{ colors.outline.dark.green }} {{ colors.outline.dark.blue }};
+      --z-fg: {{ colors.on_surface.dark.red }} {{ colors.on_surface.dark.green }} {{ colors.on_surface.dark.blue }};
+      --z-fg-1: {{ colors.on_surface.dark.red }} {{ colors.on_surface.dark.green }} {{ colors.on_surface.dark.blue }};
+      --z-fg-2: {{ colors.on_surface_variant.dark.red }} {{ colors.on_surface_variant.dark.green }} {{ colors.on_surface_variant.dark.blue }};
+      --z-grey-2: {{ colors.on_surface_variant.dark.red }} {{ colors.on_surface_variant.dark.green }} {{ colors.on_surface_variant.dark.blue }};
+      --z-grey-1: {{ colors.outline.dark.red }} {{ colors.outline.dark.green }} {{ colors.outline.dark.blue }};
+      --z-grey-0: {{ colors.outline_variant.dark.red }} {{ colors.outline_variant.dark.green }} {{ colors.outline_variant.dark.blue }};
+      --z-grey-dim: {{ colors.outline.dark.red }} {{ colors.outline.dark.green }} {{ colors.outline.dark.blue }};
+      --z-accent: {{ colors.primary.dark.red }} {{ colors.primary.dark.green }} {{ colors.primary.dark.blue }};
+      --z-accent-soft: {{ colors.secondary.dark.red }} {{ colors.secondary.dark.green }} {{ colors.secondary.dark.blue }};
+      --z-accent-muted: {{ colors.tertiary.dark.red }} {{ colors.tertiary.dark.green }} {{ colors.tertiary.dark.blue }};
+      --z-red: {{ colors.error.dark.red }} {{ colors.error.dark.green }} {{ colors.error.dark.blue }};
+      --z-green: {{ colors.tertiary_container.dark.red }} {{ colors.tertiary_container.dark.green }} {{ colors.tertiary_container.dark.blue }};
+      --z-yellow: {{ colors.inverse_on_surface.dark.red }} {{ colors.inverse_on_surface.dark.green }} {{ colors.inverse_on_surface.dark.blue }};
+      --z-blue: {{ colors.secondary_container.dark.red }} {{ colors.secondary_container.dark.green }} {{ colors.secondary_container.dark.blue }};
+      --z-purple: {{ colors.tertiary.dark.red }} {{ colors.tertiary.dark.green }} {{ colors.tertiary.dark.blue }};
+      --z-aqua: {{ colors.on_tertiary.dark.red }} {{ colors.on_tertiary.dark.green }} {{ colors.on_tertiary.dark.blue }};
+    }
   '';
 
   xdg.configFile."matugen/templates/xournalpp.gpl".text = ''

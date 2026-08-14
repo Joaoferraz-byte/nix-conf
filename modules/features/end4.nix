@@ -39,7 +39,10 @@
           example 1.0 example.qml
           EOF
           sed -i '/^    post_process "\$max_width_desired" "\$max_height_desired" "\$imgpath"$/a\    "\$HOME/.local/bin/sync-matugen-apps"' "$out/scripts/colors/switchwall.sh"
-          sed -i 's/property real implicitSize: 26/property real implicitSize: 30/' "$out/modules/common/widgets/AppIcon.qml"
+          sed -i \
+            -e 's/property real implicitSize: 26/property real implicitSize: 32/' \
+            -e 's/roundToIconSize: false/roundToIconSize: true/' \
+            "$out/modules/common/widgets/AppIcon.qml"
           for script in \
             "$out/scripts/colors/generate_colors_material.py" \
             "$out/scripts/hyprland/get_keybinds.py" \
@@ -382,15 +385,19 @@
               hl.bind(mod .. " + CTRL + SHIFT + W", hl.dsp.exec_cmd("~/.config/quickshell/$qsConfig/scripts/colors/switchwall.sh"))
 
               local navigation = {
-                H = "l",
-                J = "d",
-                K = "u",
-                L = "r",
+                { code = 35, label = "H", direction = "l", arrow = "Left" },
+                { code = 36, label = "J", direction = "d", arrow = "Down" },
+                { code = 37, label = "K", direction = "u", arrow = "Up" },
+                { code = 38, label = "L", direction = "r", arrow = "Right" },
               }
 
-              for key, direction in pairs(navigation) do
-                hl.bind("CTRL + " .. mod .. " + " .. key, hl.dsp.focus({ direction = direction }), {
-                  description = "Window: Focus " .. direction,
+              for _, binding in ipairs(navigation) do
+                local key = "code:" .. binding.code
+                hl.bind("CTRL + " .. key, hl.dsp.send_shortcut({ mods = "", key = binding.arrow }), {
+                  description = "Keyboard: Ctrl+" .. binding.label .. " to " .. binding.arrow,
+                })
+                hl.bind("CTRL + " .. mod .. " + " .. key, hl.dsp.focus({ direction = binding.direction }), {
+                  description = "Window: Focus " .. binding.direction,
                 })
               end
 
