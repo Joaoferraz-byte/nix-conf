@@ -157,10 +157,24 @@ sudo nixos-rebuild --rollback switch
 
 The repository keeps shared workstation capabilities in system features and project-specific dependencies in focused devShells. The `python` shell provides the baseline for Python and Manim work; the `embedded` shell provides Arduino, PlatformIO, OpenOCD, probe-rs, and serial tooling. Rootless Docker, Compose, Buildx, libvirt, QEMU/KVM, SPICE, and virt-manager remain independent features and are not coupled to the desktop shell.
 
+## End-4 runtime preferences
+
+The end-4 settings interface writes user-owned runtime state rather than Nix expressions. After changing settings in QuickShell, review and export the state explicitly:
+
+```bash
+cd ~/.config/nixos
+./scripts/sync-end4-state.sh status
+./scripts/sync-end4-state.sh export
+git diff -- home/livara/end4-state
+```
+
+Commit only reviewed files. To apply a reviewed state, run `./scripts/sync-end4-state.sh import` and then reload Hyprland and QuickShell. Matugen outputs and QuickShell caches remain derived runtime data and are not committed.
+
 ## References
 
-- [end-4 illogical-impulse](https://github.com/xBLACKICEx/dots-hyprland/tree/tmp)
-- [end-4 NixOS adapter](https://github.com/xBLACKICEx/end-4-dots-hyprland-nixos)
+- [Pinned official end-4 illogical-impulse source](https://github.com/end-4/dots-hyprland/commit/69f1a543196d47286a4630c2c0868a1827e512f2)
+- [Hyprland Lua configuration contract](https://wiki.hypr.land/Configuring/Start/)
+- [Serpantinum evaluation](./docs/end4-integration-research.md)
 - [QuickShell](https://git.outfoxxed.me/outfoxxed/quickshell)
 - [Hyprland on NixOS](https://wiki.hypr.land/Nix/Hyprland-on-NixOS/)
 - [Matugen](https://github.com/InioX/matugen)

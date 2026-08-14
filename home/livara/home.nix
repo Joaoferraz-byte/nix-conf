@@ -22,6 +22,7 @@ in
   home.stateVersion = "26.11";
   programs.home-manager.enable = true;
   home.file.".face.icon".source = profileIcon;
+  home.file.".local/bin/sync-end4-state".source = ../../scripts/sync-end4-state.sh;
   home.file."Fire/.keep".text = "";
 
   # Environment

@@ -43,7 +43,7 @@ The repository should prefer one module per coherent concern, not one module per
 | Repository or input | Public contract | Ownership |
 |---|---|---|
 | `nix-conf` | NixOS configurations, system features, Home Manager composition, scripts, and documentation | Host composition and cross-repository integration. |
-| `xBLACKICEx/dots-hyprland` | Pinned non-flake source tree from branch `tmp` | Immutable end-4 QuickShell, Hyprland, Matugen, Fuzzel, Hyprlock, Wlogout, and script assets. |
+| `end-4/dots-hyprland` | Pinned non-flake source tree at immutable revision `69f1a543196d47286a4630c2c0868a1827e512f2` | Immutable end-4 QuickShell, Hyprland Lua, Matugen, Fuzzel, Hyprlock, Wlogout, and script assets. |
 | `outfoxxed/quickshell` | `packages.${system}.default` | QuickShell runtime package. |
 | `vim-conf` | NixVim module library and package | Editor policy and NixVim composition. |
 | `xournal-conf` | XML, INI, GPL, and TeX data | Versioned Xournal++ application data. |
@@ -126,7 +126,7 @@ Hyprland owns compositor semantics: input, focus, workspace behavior, window rul
 | Immutable end-4 assets | `inputs.illogical-impulse-dotfiles` through `end4.nix` |
 | QuickShell executable | `inputs.quickshell.packages.${system}.default` |
 | QuickShell profile | `ii`, selected with `QS_CONFIG` and `$qsConfig` |
-| Local compositor overrides | `home/livara/session.nix` and generated `~/.config/hypr/nix-conf.conf` |
+| Local compositor overrides | `home/livara/session.nix`, `extraLuaFiles`, and optional user-owned `~/.config/hypr/custom/` files |
 | Shell runtime state | `~/.local/state/quickshell/user/generated/` |
 | System portal and polkit prerequisites | NixOS feature modules |
 | User authentication agent | One end-4 startup command adapted to the Nix store executable |
@@ -312,8 +312,8 @@ This architecture is more stable than the former shell design because it matches
 [1]: https://nixos.org/manual/nixos/stable/#sec-writing-modules "NixOS manual — writing modules"
 [2]: https://home-manager.dev/manual/ "Home Manager manual"
 [3]: https://flake.parts/ "flake-parts"
-[4]: https://github.com/xBLACKICEx/dots-hyprland/tree/tmp "end-4 illogical-impulse source"
-[5]: https://github.com/xBLACKICEx/end-4-dots-hyprland-nixos "end-4 NixOS adapter"
+[4]: https://github.com/end-4/dots-hyprland/commit/69f1a543196d47286a4630c2c0868a1827e512f2 "Pinned official end-4 source"
+[5]: https://wiki.hypr.land/Configuring/Start/ "Hyprland Lua configuration contract"
 [6]: https://git.outfoxxed.me/outfoxxed/quickshell "QuickShell source"
 [7]: https://wiki.hypr.land/Nix/Hyprland-on-NixOS/ "Hyprland on NixOS"
 [8]: https://github.com/InioX/matugen "Matugen"
