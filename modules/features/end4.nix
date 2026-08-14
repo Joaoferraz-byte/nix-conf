@@ -266,7 +266,7 @@
 
         wayland.windowManager.hyprland.extraLuaFiles = {
           "hyprland/env.lua" = {
-            content = source "hypr/hyprland/env.lua";
+            content = builtins.readFile (source "hypr/hyprland/env.lua");
             autoLoad = false;
           };
           "hyprland/execs.lua" = {
@@ -283,27 +283,27 @@
             autoLoad = false;
           };
           "hyprland/general.lua" = {
-            content = source "hypr/hyprland/general.lua";
+            content = builtins.readFile (source "hypr/hyprland/general.lua");
             autoLoad = false;
           };
           "hyprland/keybinds.lua" = {
-            content = source "hypr/hyprland/keybinds.lua";
+            content = builtins.readFile (source "hypr/hyprland/keybinds.lua");
             autoLoad = false;
           };
           "hyprland/lib/init.lua" = {
-            content = source "hypr/hyprland/lib/init.lua";
+            content = builtins.readFile (source "hypr/hyprland/lib/init.lua");
             autoLoad = false;
           };
           "hyprland/rules.lua" = {
-            content = source "hypr/hyprland/rules.lua";
+            content = builtins.readFile (source "hypr/hyprland/rules.lua");
             autoLoad = false;
           };
           "hyprland/services/init.lua" = {
-            content = source "hypr/hyprland/services/init.lua";
+            content = builtins.readFile (source "hypr/hyprland/services/init.lua");
             autoLoad = false;
           };
           "hyprland/services/create_custom_config.lua" = {
-            content = source "hypr/hyprland/services/create_custom_config.lua";
+            content = builtins.readFile (source "hypr/hyprland/services/create_custom_config.lua");
             autoLoad = false;
           };
           "hyprland/variables.lua" = {
