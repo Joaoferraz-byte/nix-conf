@@ -19,7 +19,9 @@
       let
         dotfiles = inputs.illogical-impulse-dotfiles;
         source = path: builtins.toPath "${dotfiles}/dots/.config/${path}";
-        quickshell = inputs.quickshell.packages.${pkgs.system}.default;
+        quickshell = inputs.quickshell.packages.${pkgs.system}.default.withModules [
+          pkgs.kdePackages.kirigami
+        ];
         pythonEnv = pkgs.python3.withPackages (pythonPackages: [
           pythonPackages.materialyoucolor
           pythonPackages.pillow
