@@ -21,6 +21,14 @@
     networking.hostName = "latitude";
     networking.networkmanager.enable = true;
 
+    # Bluetooth is a laptop-only capability in the shared Serpantinum setup.
+    hardware.bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+      settings.General.Experimental = true;
+    };
+    services.blueman.enable = true;
+
     # Locale
     time.timeZone = "America/Sao_Paulo";
     i18n.defaultLocale = "pt_BR.UTF-8";

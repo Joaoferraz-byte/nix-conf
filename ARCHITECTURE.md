@@ -73,7 +73,7 @@ programs.serpantinum.networkWidgets
 programs.serpantinum.bluetoothWidgets
 ```
 
-O shell recebe essas opções por `SERPANTINUM_*`. O QML detecta hardware de rede por capacidade e não pelo hostname; o perfil apenas controla pequenas decisões de apresentação, especialmente Wi-Fi/Bluetooth no notebook.
+O shell recebe essas opções por `SERPANTINUM_*`. O QML detecta hardware de rede por capacidade e não pelo hostname; o perfil controla pequenas decisões de apresentação, especialmente Wi-Fi/Bluetooth no notebook. Bluetooth é habilitado no NixOS somente em `latitude`, com `hardware.bluetooth`, `powerOnBoot` e Blueman; `myMachine` não declara o serviço, recebe `SERPANTINUM_BLUETOOTH_WIDGETS=0`, não cria o pill Bluetooth e não inicia scan pelo `qs_manager.sh` ou pelo `NetworkPopup`.
 
 ## 6. Tema adaptativo
 
@@ -90,9 +90,12 @@ image under WALLPAPER_DIR
     -> Neovim Lua palette
     -> Firefox/Zen userChrome.css
     -> ZenNotes custom theme
+    -> Xournal++ GPL palette + colorPalette setting
+    -> Vesktop/Vencord local CSS theme
+    -> Freesm/Qt applications through qt5ct/qt6ct
 ```
 
-A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: dconf `prefer-dark`, GTK `adw-gtk3-dark`, Qt via qt6ct e ZenNotes `theme_mode = "dark"`. A pipeline não tenta transformar Xournal++ em estado derivado; `settings.xml` e `toolbar.ini` permanecem editáveis.
+A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: dconf `prefer-dark`, GTK `adw-gtk3-dark`, Qt via qt6ct e ZenNotes `theme_mode = "dark"`. Cada consumidor recebe somente o formato que seu ecossistema entende. Xournal++ mantém `settings.xml` e `toolbar.ini` editáveis, mas o adapter atualiza idempotentemente apenas `colorPalette` no owner real em `~/.config/nixos/xournalpp`; a paleta `.gpl` é regenerada pelo Matugen. Vesktop/Vencord recebe um tema CSS local em `themes/` e seu nome é mantido em `settings.json.enabledThemes`; o plugin `ClientTheme` não é usado como substituto para uma paleta multi-token.
 
 ### Consumidores
 
@@ -106,6 +109,9 @@ A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: d
 | Neovim | `~/.config/nvim/matugen_colors.lua`, carregado opcionalmente por NixVim |
 | Firefox/Zen | `chrome/userChrome.css`, backup e user.js com preferência habilitada |
 | ZenNotes | `themes/serpantinum/{manifest.json,theme.css}` e `theme_id = "custom-serpantinum"` |
+| Xournal++ | `palettes/serpantinum.gpl` em formato GIMP e `settings.xml` com `colorPalette` |
+| Vesktop/Vencord | `themes/serpantinum.theme.css` e `settings/settings.json.enabledThemes` |
+| Freesm Launcher | Flatpak override Qt6ct + QSS/palette; o launcher continua usando seus próprios ícones/recursos |
 
 Firefox e Zen dependem de CSS interno não estável; o adapter deve ser pequeno, versionável e sempre ter backup. ZenNotes documenta `theme_id` para o id resolvido `custom-<slug>`, por isso `custom-serpantinum` é usado explicitamente.
 
