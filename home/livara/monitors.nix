@@ -34,9 +34,9 @@ let
     "  hl.monitor({ output = \"${rule.output}\", mode = \"preferred\", position = \"auto\", scale = ${scale} })\n";
 in
 {
-  # The Serpantinum source loads this module from config/monitors.lua.
+  # The Serpantinum source loads this module from hyprland.lua.
   # Host-specific monitor rules are applied after the generic fallback.
-  home.file.".config/hypr/config/monitors_host.lua".text = ''
+  home.file.".config/hypr/monitors_host.lua".text = ''
     local M = {}
     function M.apply()
 ${builtins.concatStringsSep "" (map renderRule rules)}    end
