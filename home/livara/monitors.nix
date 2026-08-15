@@ -31,11 +31,15 @@ let
     let
       scale = if builtins.isString rule.scale then rule.scale else toString rule.scale;
     in
-    "monitor = ${rule.output}, preferred, auto, ${scale}\n";
+    "  hl.monitor({ output = \"${rule.output}\", mode = \"preferred\", position = \"auto\", scale = ${scale} })\n";
 in
 {
-  # The Serpantinum source includes monitors.conf. This file is the small
-  # host-specific overlay loaded after it by hyprland.conf.
-  home.file.".config/hypr/config/monitors.local.conf".text =
-    builtins.concatStringsSep "" (map renderRule rules);
+  # The Serpantinum source loads this module from config/monitors.lua.
+  # Host-specific monitor rules are applied after the generic fallback.
+  home.file.".config/hypr/config/monitors_host.lua".text = ''
+    local M = {}
+    function M.apply()
+${builtins.concatStringsSep "" (map renderRule rules)}    end
+    return M
+  '';
 }
