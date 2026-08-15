@@ -19,7 +19,7 @@ NixOS habilita Hyprland com UWSM e fornece dependências system-side; Home Manag
 
 ## Tema adaptativo
 
-O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. O weather usa Open-Meteo por coordenadas de Jardim João XXIII, com cache e fallback offline. O launcher usa a API nativa `DesktopEntries` do QuickShell; `Super+H` e o ícone correspondente da barra abrem `~/.config/nixos` com Neo-tree no Neovim. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para QuickShell, Hyprland, GTK3/GTK4, Qt, WezTerm (com template Kitty de compatibilidade), Neovim, Firefox/Zen e ZenNotes. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
+O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. O weather usa Open-Meteo por coordenadas de Jardim João XXIII, com cache e fallback offline. O launcher usa a API nativa `DesktopEntries` do QuickShell; `Super+H` e o ícone correspondente da barra abrem `~/.config/nixos` com Neo-tree no Neovim. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para QuickShell, Hyprland, GTK3/GTK4, Qt, WezTerm, Neovim, Firefox/Zen, ZenNotes, Xournal++ e Vesktop/Vencord. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
 
 Firefox e Zen usam `chrome/userChrome.css` e `toolkit.legacyUserProfileCustomizations.stylesheets`. ZenNotes usa o tema customizado `custom-serpantinum`, com `theme.css`, `manifest.json`, `theme_family = "custom"`, `theme_id = "custom-serpantinum"` e `theme_mode = "dark"`.
 

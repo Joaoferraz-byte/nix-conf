@@ -105,7 +105,6 @@ A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: d
 | GTK/Nautilus | `gtk-3.0/gtk.css`, `gtk-4.0/gtk.css`, dconf e Flatpak read access |
 | Qt | qt5ct/qt6ct palette e QSS em paths do usuário |
 | WezTerm | Lua `dofile` de `~/.config/wezterm/matugen-colors.lua` e hook de reload |
-| Kitty compatibility | `~/.config/kitty/matugen-colors.conf` permanece disponível, mas não é o terminal padrão |
 | Neovim | `~/.config/nvim/matugen_colors.lua`, carregado opcionalmente por NixVim |
 | Firefox/Zen | `chrome/userChrome.css`, backup e user.js com preferência habilitada |
 | ZenNotes | `themes/serpantinum/{manifest.json,theme.css}` e `theme_id = "custom-serpantinum"` |

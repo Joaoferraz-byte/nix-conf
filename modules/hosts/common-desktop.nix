@@ -17,6 +17,12 @@
       };
 
       config = {
+        services.xserver.xkb = {
+          layout = "br";
+          variant = "abnt2";
+          options = "";
+        };
+
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
