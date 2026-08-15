@@ -6,7 +6,7 @@ The active desktop shell now uses the Serpantinum QuickShell profile on Hyprland
 
 The Latitude-specific hardware scripts were replaced by one adaptive generator that supports ext4 and Btrfs for both hosts. The installer now validates hardware before rebuilding, propagates the original failure code, and uses the repository checkout at `~/.config/nixos`.
 
-## Retired shell experiment: DankMaterialShell (2026-08-06)
+## Retired shell experiment: previous desktop profile (2026-08-06)
 
 Historical record of an intermediate shell experiment. It is no longer part of the active composition.
 
