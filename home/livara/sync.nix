@@ -65,7 +65,18 @@ let
   };
 in
 {
-  systemd.user.services.wallpapers-sync = mkSyncService "Sync the canonical wallpaper repository" syncWallpapers;
+  systemd.user.services.wallpapers-sync = {
+    Unit = {
+      Description = "Sync the canonical wallpaper repository and apply its theme";
+      After = [ "network-online.target" "serpantinum-wallpaper-daemon.service" ];
+      Wants = [ "network-online.target" "serpantinum-wallpaper-daemon.service" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = syncWallpapers;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
   systemd.user.timers.wallpapers-sync = mkSyncTimer "wallpapers-sync";
 
   systemd.user.services.vault-sync = mkSyncService "Sync the Markdown vault repository" syncVault;

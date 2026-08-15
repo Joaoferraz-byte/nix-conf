@@ -27,7 +27,9 @@
       powerOnBoot = true;
       settings.General.Experimental = true;
     };
-    services.blueman.enable = true;
+    # Bluetooth is controlled by the Serpantinum network panel; do not start
+    # Blueman's tray applet as a duplicate background application.
+    services.blueman.enable = false;
 
     # Locale
     time.timeZone = "America/Sao_Paulo";

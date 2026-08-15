@@ -73,7 +73,7 @@ programs.serpantinum.networkWidgets
 programs.serpantinum.bluetoothWidgets
 ```
 
-O shell recebe essas opções por `SERPANTINUM_*`. O QML detecta hardware de rede por capacidade e não pelo hostname; o perfil controla pequenas decisões de apresentação, especialmente Wi-Fi/Bluetooth no notebook. Bluetooth é habilitado no NixOS somente em `latitude`, com `hardware.bluetooth`, `powerOnBoot` e Blueman; `myMachine` não declara o serviço, recebe `SERPANTINUM_BLUETOOTH_WIDGETS=0`, não cria o pill Bluetooth e não inicia scan pelo `qs_manager.sh` ou pelo `NetworkPopup`.
+O shell recebe essas opções por `SERPANTINUM_*`. O QML detecta hardware de rede por capacidade e não pelo hostname; o perfil controla pequenas decisões de apresentação, especialmente Wi-Fi/Bluetooth no notebook. Bluetooth é habilitado no NixOS somente em `latitude`, com `hardware.bluetooth` e `powerOnBoot`; o applet Blueman permanece desabilitado porque o painel Serpantinum é o único owner da interface. `myMachine` recebe `hardware.bluetooth.enable=false` e `SERPANTINUM_BLUETOOTH_WIDGETS=0`, não cria o pill Bluetooth e não inicia scan pelo `qs_manager.sh` ou pelo `NetworkPopup`.
 
 ## 6. Tema adaptativo
 
@@ -86,7 +86,7 @@ image under WALLPAPER_DIR
     -> Hyprland colors.conf
     -> GTK3/GTK4 CSS
     -> Qt palettes and QSS
-    -> WezTerm colors (Kitty compatibility template)
+    -> WezTerm colors (native Lua template)
     -> Neovim Lua palette
     -> Firefox/Zen userChrome.css
     -> ZenNotes custom theme

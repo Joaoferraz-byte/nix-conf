@@ -51,8 +51,22 @@
 
         services.pipewire = {
           enable = true;
+          alsa.enable = true;
+          alsa.support32Bit = true;
           pulse.enable = true;
-          wireplumber.enable = true;
+          wireplumber = {
+            enable = true;
+            extraConfig."10-bluez-profiles" = {
+              "monitor.bluez.properties" = {
+                "bluez5.auto-connect" = [ "a2dp_sink" "hfp_hf" ];
+              };
+            };
+            extraConfig."11-bluetooth-policy" = {
+              "wireplumber.settings" = {
+                "bluetooth.autoswitch-to-headset-profile" = false;
+              };
+            };
+          };
         };
 
         security.rtkit.enable = true;
