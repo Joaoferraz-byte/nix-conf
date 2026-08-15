@@ -41,7 +41,7 @@ A composição comum recebe `userName` e `hostName` por `extraSpecialArgs`. Os d
 | `home-manager` | módulo HM NixOS | ambiente de usuário |
 | `zen-browser-flake` | módulo e pacote Zen | navegador |
 
-O flake do `nix-conf` importa `shell-conf` e não contém inputs operacionais de DMS, Niri ou end-4. O repositório `shell-conf` mantém uma cópia revisada do source Serpantinum necessário porque o upstream não oferece flake NixOS estável.
+O flake do `nix-conf` importa `shell-conf` e não contém inputs operacionais de shells legados. O repositório `shell-conf` mantém uma cópia revisada do source Serpantinum necessário porque o upstream não oferece flake NixOS estável.
 
 ## 4. Hyprland, UWSM e Serpantinum
 
@@ -166,7 +166,7 @@ nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
 Também é obrigatório procurar resíduos no caminho ativo:
 
 ```bash
-git grep -n -I -E 'DMS|dms|Niri|niri|end-4|end4|illogical-impulse|DankMaterialShell|sodiboo|AvengeMedia|Caelestia|Ambxst' -- ':!docs/archive/**' ':!ARCHITECTURE.md'
+git grep -n -I -E 'legacy-shell|deprecated-shell|old-shell' -- ':!docs/archive/**' ':!ARCHITECTURE.md'
 ```
 
 A avaliação local usa o backend Nix disponível no sandbox; os checks de build e a troca final ainda devem ser executados no NixOS real antes de `nixos-rebuild test` e `switch`.
