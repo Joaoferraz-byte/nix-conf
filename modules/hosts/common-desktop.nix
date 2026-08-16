@@ -17,7 +17,12 @@
       };
 
       config = {
-        environment.sessionVariables.HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
+        environment.sessionVariables = {
+          HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
+          XKB_DEFAULT_LAYOUT = "br";
+          XKB_DEFAULT_VARIANT = "abnt2";
+          XKB_DEFAULT_OPTIONS = "";
+        };
 
         services.xserver.xkb = {
           layout = "br";

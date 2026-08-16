@@ -68,7 +68,10 @@
     };
     services.thermald.enable = true;
 
+    # Keep TLP as the single power-management owner, but expose its
+    # power-profiles-daemon-compatible D-Bus API to the QuickShell controls.
     services.power-profiles-daemon.enable = lib.mkForce false;
+    services.tlp.pd.enable = true;
 
     # User
     users.users."livara" = {
