@@ -7,8 +7,18 @@ if [[ "${1:-}" == "--pull" || "${1:-}" == "--push" ]]; then
   shift
 fi
 
-local_dir="${XOURNALPP_LOCAL_CONFIG:-$HOME/.config/nixos/xournalpp}"
+local_dir="${XOURNALPP_LOCAL_CONFIG:-$HOME/.config/xournalpp}"
+legacy_dir="${XOURNALPP_LEGACY_CONFIG:-$HOME/.config/nixos/xournalpp}"
 repo_dir="${1:-${XOURNALPP_REPO:-$HOME/Projects/xournal-conf}}"
+
+if [[ -z "${XOURNALPP_LOCAL_CONFIG:-}" && "$local_dir" == "$HOME/.config/xournalpp" && -d "$legacy_dir" ]]; then
+  mkdir -p "$local_dir"
+  for file in settings.xml toolbar.ini; do
+    if [[ ! -e "$local_dir/$file" && -f "$legacy_dir/$file" ]]; then
+      cp -L "$legacy_dir/$file" "$local_dir/$file"
+    fi
+  done
+fi
 
 if [[ ! -d "$repo_dir/.git" ]]; then
   printf 'xournal-conf Git checkout not found: %s\n' "$repo_dir" >&2

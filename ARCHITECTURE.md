@@ -95,7 +95,7 @@ image under WALLPAPER_DIR
     -> Freesm/Qt applications through qt5ct/qt6ct
 ```
 
-A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: dconf `prefer-dark`, GTK `adw-gtk3-dark`, Qt via qt6ct e ZenNotes `theme_mode = "dark"`. Cada consumidor recebe somente o formato que seu ecossistema entende. Xournal++ mantém `settings.xml` e `toolbar.ini` editáveis, mas o adapter atualiza idempotentemente apenas `colorPalette` no owner real em `~/.config/nixos/xournalpp`; a paleta `.gpl` é regenerada pelo Matugen. Vesktop/Vencord recebe um tema CSS local em `themes/` e seu nome é mantido em `settings.json.enabledThemes`; o plugin `ClientTheme` não é usado como substituto para uma paleta multi-token.
+A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: dconf `prefer-dark`, GTK `adw-gtk3-dark`, Qt via qt6ct e ZenNotes `theme_mode = "dark"`; o contrato do tema ZenNotes declara `modes = "both"` e recebe tokens light/dark no mesmo CSS. Cada consumidor recebe somente o formato que seu ecossistema entende. Xournal++ mantém `settings.xml` e `toolbar.ini` editáveis no owner nativo `~/.config/xournalpp`; o adapter atualiza idempotentemente apenas `colorPalette` e a paleta `.gpl` é regenerada pelo Matugen. Vesktop/Vencord recebe um tema CSS local em `themes/` e seu nome é mantido em `settings.json.enabledThemes`; o plugin `ClientTheme` não é usado como substituto para uma paleta multi-token.
 
 ### Consumidores
 
@@ -141,7 +141,7 @@ Isso produz eventos de seta antes de o compositor e o aplicativo consumirem o in
 
 `vim-conf` continua separado. Ele publica o módulo NixVim, plugins, linguagens e keymaps. A paleta Matugen é opcional em runtime: a avaliação do flake não depende de Matugen ou QuickShell, e o editor mantém fallback quando o arquivo de cores não existe.
 
-`xournal-conf` é tratado como dados de aplicação. O staging local é semeado apenas quando ausente; links out-of-store preservam as edições da GUI. Uma paleta desktop não deve reescrever `settings.xml` ou `toolbar.ini` em cada activation.
+`xournal-conf` é tratado como dados de aplicação. O perfil editável ativo é `~/.config/xournalpp`; a ativação migra uma cópia anterior de `~/.config/nixos/xournalpp` somente quando o path nativo ainda não possui o arquivo. Uma paleta desktop não deve reescrever `settings.xml` ou `toolbar.ini` em cada activation, exceto a propriedade dinâmica `colorPalette` controlada pelo adapter.
 
 ## 10. Segurança e estado
 

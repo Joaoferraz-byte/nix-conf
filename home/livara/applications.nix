@@ -1,6 +1,7 @@
 { config, pkgs, lib, inputs, self, ... }:
 let
-  xournalppLocalConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
+  xournalppLocalConfig = "${config.home.homeDirectory}/.config/xournalpp";
+  xournalppLegacyConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
   xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (builtins.replaceStrings
     [ "/home/livara/.config/xournalpp" ]
     [ "${config.home.homeDirectory}/.config/xournalpp" ]
@@ -82,6 +83,16 @@ in
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"
+    for file in settings.xml toolbar.ini; do
+      native="${xournalppLocalConfig}/$file"
+      legacy="${xournalppLegacyConfig}/$file"
+      if [ -L "$native" ] && [ -e "$legacy" ]; then
+        $DRY_RUN_CMD cp -L "$legacy" "$native.migrate"
+        $DRY_RUN_CMD mv -f "$native.migrate" "$native"
+      elif [ ! -e "$native" ] && [ -e "$legacy" ]; then
+        $DRY_RUN_CMD cp -L "$legacy" "$native"
+      fi
+    done
     if [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
       $DRY_RUN_CMD cp "${xournalppSettings}" "${xournalppLocalConfig}/settings.xml"
     fi
@@ -89,11 +100,6 @@ in
       $DRY_RUN_CMD cp "${xournalppToolbar}" "${xournalppLocalConfig}/toolbar.ini"
     fi
   '';
-
-  xdg.configFile."xournalpp/settings.xml".source = config.lib.file.mkOutOfStoreSymlink
-    "${xournalppLocalConfig}/settings.xml";
-  xdg.configFile."xournalpp/toolbar.ini".source = config.lib.file.mkOutOfStoreSymlink
-    "${xournalppLocalConfig}/toolbar.ini";
   xdg.configFile."xournalpp/default_template.tex".source = "${inputs.xournal-conf}/xournalpp/default_template.tex";
   xdg.configFile."xournalpp/palettes/tokyo-night.gpl".source = "${inputs.xournal-conf}/xournalpp/palettes/tokyo-night.gpl";
 
