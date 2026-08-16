@@ -29,6 +29,9 @@
         { appId = "org.freesmlauncher.FreesmLauncher"; origin = "freesmlauncher"; }
       ];
 
+      # Keep declarative installs convergent without deleting unrelated apps
+      # that the user installed manually (for example additional Flatpaks).
+      uninstallUnmanaged = false;
       update.onActivation = false;
       update.auto.enable = false;
 
