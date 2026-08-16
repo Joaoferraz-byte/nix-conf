@@ -55,7 +55,8 @@
     };
     services.xserver.xkb = {
       layout = "br";
-      variant = "abnt2";
+      # `br` is the standard Brazilian ABNT2 XKB layout.
+      variant = "";
     };
     console.keyMap = "br-abnt2";
     # User
