@@ -8,7 +8,6 @@
       vesktop
       kdePackages.okular
       foliate
-      obsidian
       hydralauncher
       heroic
       jdk21

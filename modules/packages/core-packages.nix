@@ -15,7 +15,6 @@
       vesktop
       kdePackages.okular
       foliate
-      obsidian
       tauon
       telegram-desktop
 
