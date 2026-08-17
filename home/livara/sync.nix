@@ -19,7 +19,7 @@ let
         rm -rf "$tmp"
         if ! ${git} clone --depth 1 "$repository" "$tmp"; then
           rm -rf "$tmp"
-          exit 0
+          exit 75
         fi
         mv "$tmp" "$directory"
         exit 0
@@ -27,8 +27,8 @@ let
 
       # Keep the last valid checkout if the network is unavailable or the
       # remote history cannot be fast-forwarded. The shell remains usable.
-      ${git} -C "$directory" fetch --prune origin || exit 0
-      ${git} -C "$directory" merge --ff-only "origin/HEAD" || exit 0
+      ${git} -C "$directory" fetch --prune origin || exit 75
+      ${git} -C "$directory" merge --ff-only "origin/HEAD" || exit 75
     '';
 
   syncWallpapers = syncRepository {

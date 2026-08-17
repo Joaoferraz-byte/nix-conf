@@ -22,6 +22,7 @@ in
   home.homeDirectory = "/home/${userName}";
   home.stateVersion = "26.11";
   programs.home-manager.enable = true;
+  services.easyeffects.enable = true;
   home.file.".face.icon".source = profileIcon;
   home.file."Fire/.keep".text = "";
 

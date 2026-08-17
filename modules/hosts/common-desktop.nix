@@ -7,6 +7,7 @@
     {
       imports = [
         self.nixosModules.hyprland
+        inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
       ];
 
@@ -21,14 +22,18 @@
 
         environment.sessionVariables = {
           HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
+          XKB_DEFAULT_MODEL = "pc105";
+          XKB_DEFAULT_RULES = "base";
           XKB_DEFAULT_LAYOUT = "br";
-          XKB_DEFAULT_VARIANT = "abnt2";
+          XKB_DEFAULT_VARIANT = "";
           XKB_DEFAULT_OPTIONS = "";
         };
 
         services.xserver.xkb = {
+          model = "pc105";
           layout = "br";
-          variant = "abnt2";
+          # `br` is the standard Brazilian ABNT2 XKB layout.
+          variant = "";
           options = "";
         };
 
@@ -42,6 +47,7 @@
             hostName = config.networking.hostName;
           };
           sharedModules = [
+            inputs.stylix.homeModules.stylix
             inputs.shell-conf.homeManagerModules.default
             inputs.nixvim.homeModules.nixvim
           ];
