@@ -17,6 +17,8 @@
       };
 
       config = {
+        programs.dconf.enable = true;
+
         environment.sessionVariables = {
           HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
           XKB_DEFAULT_LAYOUT = "br";

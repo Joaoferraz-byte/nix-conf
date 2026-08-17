@@ -11,6 +11,8 @@
 
   programs.home-manager.enable = true;
 
+  services.easyeffects.enable = true;
+
   home.packages = with pkgs; [
     llvmPackages.clang-unwrapped
     pyright

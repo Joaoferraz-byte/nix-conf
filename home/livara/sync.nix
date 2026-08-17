@@ -75,7 +75,7 @@ in
       Type = "oneshot";
       ExecStart = syncWallpapers;
     };
-    Install.WantedBy = [ "graphical-session.target" ];
+    Install.WantedBy = [ "default.target" ];
   };
   systemd.user.timers.wallpapers-sync = mkSyncTimer "wallpapers-sync";
 

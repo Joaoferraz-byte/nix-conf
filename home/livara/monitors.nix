@@ -10,18 +10,6 @@ let
         output = "eDP-1";
         scale = 1.25;
       }
-      {
-        output = "desc:Samsung Electric Company S24D332 0x59325956";
-        scale = 1.0;
-      }
-      {
-        output = "HDMI-A-1";
-        scale = 1.0;
-      }
-      {
-        output = "DP-1";
-        scale = 1.0;
-      }
     ];
     myMachine = [ ];
   };
