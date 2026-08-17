@@ -37,6 +37,9 @@
           options = "";
         };
 
+        # The console keymap is a separate layer from Hyprland/XKB.
+        console.keyMap = "br-abnt2";
+
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;

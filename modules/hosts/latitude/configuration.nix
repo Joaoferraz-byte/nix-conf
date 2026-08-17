@@ -48,13 +48,6 @@
       LC_TELEPHONE = "pt_BR.UTF-8";
       LC_TIME = "pt_BR.UTF-8";
     };
-    services.xserver.xkb = {
-      layout = "br";
-      # The `br` layout is the standard Brazilian ABNT2 XKB map.
-      variant = "";
-    };
-    console.keyMap = "br-abnt2";
-
     services.tlp = {
       enable = true;
       settings = {
