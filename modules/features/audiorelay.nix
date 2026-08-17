@@ -24,29 +24,55 @@
 
       config = lib.mkIf cfg.enable {
 
-        services.pipewire.extraConfig.pipewire."99-audiorelay" = {
-          "context.objects" = [
-            {
-              factory = "adapter";
-              args = {
-                "factory.name" = "support.null-audio-sink";
-                "node.name" = "audiorelay_sink";
-                "node.description" = "AudioRelay (saída para o telefone)";
-                "media.class" = "Audio/Sink";
-                "audio.position" = "FL,FR";
-              };
-            }
-            {
-              factory = "adapter";
-              args = {
-                "factory.name" = "support.null-audio-sink";
-                "node.name" = "audiorelay_source";
-                "node.description" = "AudioRelay (microfone do telefone)";
-                "media.class" = "Audio/Source";
-                "audio.position" = "FL,FR";
-              };
-            }
-          ];
+        systemd.user.services.audiorelay-virtual-audio = {
+          Unit = {
+            Description = "Create AudioRelay virtual sink, monitor microphone and speaker sink";
+            After = [ "pipewire-pulse.service" "wireplumber.service" ];
+            Wants = [ "pipewire-pulse.service" "wireplumber.service" ];
+          };
+          Service = {
+            Type = "simple";
+            ExecStart = pkgs.writeShellScript "audiorelay-virtual-audio" ''
+              # AudioRelay's Linux integration consumes PulseAudio-compatible
+              # devices. PipeWire-pulse exposes these pactl modules reliably.
+              set -u
+              pactl="${pkgs.pulseaudio}/bin/pactl"
+              wait_for_pulse() {
+                for _ in $(seq 1 30); do
+                  "$pactl" info >/dev/null 2>&1 && return 0
+                  sleep 1
+                done
+                return 1
+              }
+              module_id() {
+                "$pactl" list short modules | awk -v needle="$1" '$0 ~ needle {print $1; exit}'
+              }
+              ensure_module() {
+                local needle="$1"
+                shift
+                if [[ -z "$(module_id "$needle")" ]]; then
+                  "$pactl" load-module "$@" >/dev/null 2>&1 || true
+                fi
+              }
+              while wait_for_pulse; do
+                ensure_module 'sink_name=audiorelay-virtual-mic-sink' \
+                  module-null-sink sink_name=audiorelay-virtual-mic-sink \
+                  sink_properties=device.description=Virtual-Mic-Sink
+                ensure_module 'source_name=audiorelay-virtual-mic' \
+                  module-remap-source master=audiorelay-virtual-mic-sink.monitor \
+                  source_name=audiorelay-virtual-mic \
+                  source_properties=device.description=Virtual-Mic
+                ensure_module 'sink_name=audiorelay-speakers' \
+                  module-null-sink sink_name=audiorelay-speakers \
+                  sink_properties=device.description=AudioRelay-Speakers
+                sleep 5
+              done
+              exit 75
+            '';
+            Restart = "always";
+            RestartSec = 3;
+          };
+          Install.WantedBy = [ "default.target" ];
         };
 
         services.pipewire = {
