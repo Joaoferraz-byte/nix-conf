@@ -25,12 +25,11 @@
       config = lib.mkIf cfg.enable {
 
         systemd.user.services.audiorelay-virtual-audio = {
-          Unit = {
-            Description = "Create AudioRelay virtual sink, monitor microphone and speaker sink";
-            After = [ "pipewire-pulse.service" "wireplumber.service" ];
-            Wants = [ "pipewire-pulse.service" "wireplumber.service" ];
-          };
-          Service = {
+          enable = true;
+          description = "Create AudioRelay virtual sink, monitor microphone and speaker sink";
+          after = [ "pipewire-pulse.service" "wireplumber.service" ];
+          wants = [ "pipewire-pulse.service" "wireplumber.service" ];
+          serviceConfig = {
             Type = "simple";
             ExecStart = pkgs.writeShellScript "audiorelay-virtual-audio" ''
               # AudioRelay's Linux integration consumes PulseAudio-compatible
@@ -72,7 +71,7 @@
             Restart = "always";
             RestartSec = 3;
           };
-          Install.WantedBy = [ "default.target" ];
+          wantedBy = [ "default.target" ];
         };
 
         services.pipewire = {
