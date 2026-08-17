@@ -23,7 +23,7 @@
         environment.sessionVariables = {
           HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
           XKB_DEFAULT_MODEL = "pc105";
-          XKB_DEFAULT_RULES = "base";
+          XKB_DEFAULT_RULES = "evdev";
           XKB_DEFAULT_LAYOUT = "br";
           XKB_DEFAULT_VARIANT = "abnt2";
           XKB_DEFAULT_OPTIONS = "";
