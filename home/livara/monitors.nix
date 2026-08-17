@@ -1,13 +1,12 @@
 { hostName, ... }:
 let
   monitorRules = {
+    # The BOE description is the stable identity of the built-in panel.
+    # Do not also declare eDP-1: that is the same physical output and the
+    # duplicate rule made hotplug diagnostics look like a second display.
     latitude = [
       {
         output = "desc:BOE 0x07BB";
-        scale = 1.25;
-      }
-      {
-        output = "eDP-1";
         scale = 1.25;
       }
     ];
