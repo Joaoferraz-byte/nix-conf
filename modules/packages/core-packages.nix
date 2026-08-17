@@ -34,9 +34,6 @@
       cliphist
       xwayland-satellite
       adw-gtk3
-      catppuccin-gtk
-      catppuccin-kvantum
-      catppuccin-cursors
       wezterm
       inotify-tools
       fastfetch
