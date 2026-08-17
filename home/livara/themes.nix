@@ -39,37 +39,14 @@
     };
 
     targets = {
-      gtk = {
-        enable = true;
-        flatpakSupport.enable = true;
-      };
-      qt = {
-        enable = true;
-        platform = "qtct";
-        standardDialogs = "default";
-      };
-      wezterm.enable = true;
-      neovim = {
-        enable = true;
-        transparentBackground = {
-          main = true;
-          signColumn = true;
-          numberLine = true;
-        };
-      };
-      nixvim = {
-        enable = true;
-        transparentBackground = {
-          main = true;
-          signColumn = true;
-          numberLine = true;
-        };
-      };
-      zen-browser = {
-        enable = true;
-        profileNames = [ "default" ];
-        enableCss = true;
-      };
+      # Matugen owns these targets because their palette is regenerated from
+      # the selected wallpaper. Stylix remains the shared font/opacity layer.
+      gtk.enable = false;
+      qt.enable = false;
+      wezterm.enable = false;
+      neovim.enable = false;
+      nixvim.enable = false;
+      zen-browser.enable = false;
     };
   };
 }
