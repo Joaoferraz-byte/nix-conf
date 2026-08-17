@@ -3,8 +3,8 @@ let
   xournalppLocalConfig = "${config.home.homeDirectory}/.config/xournalpp";
   xournalppLegacyConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
   xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (builtins.replaceStrings
-    [ "/home/livara/.config/xournalpp" ]
-    [ "${config.home.homeDirectory}/.config/xournalpp" ]
+    [ "/home/livara/.config/xournalpp" "tokyo-night.gpl" ]
+    [ "${config.home.homeDirectory}/.config/xournalpp" "serpantinum.gpl" ]
     (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml"));
   xournalppToolbar = pkgs.writeText "xournalpp-toolbar.ini" (builtins.replaceStrings
     [ "toolbarTop1=PEN,ERASER,HIGHLIGHTER" ]
@@ -110,7 +110,9 @@ in
         $DRY_RUN_CMD cp -L "$legacy" "$native"
       fi
     done
-    if [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
+    if [ -f "${xournalppLocalConfig}/settings.xml" ]; then
+      $DRY_RUN_CMD sed -i 's/tokyo-night\.gpl/serpantinum.gpl/g' "${xournalppLocalConfig}/settings.xml"
+    elif [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
       $DRY_RUN_CMD cp "${xournalppSettings}" "${xournalppLocalConfig}/settings.xml"
     fi
     if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then
@@ -118,7 +120,6 @@ in
     fi
   '';
   xdg.configFile."xournalpp/default_template.tex".source = "${inputs.xournal-conf}/xournalpp/default_template.tex";
-  xdg.configFile."xournalpp/palettes/tokyo-night.gpl".source = "${inputs.xournal-conf}/xournalpp/palettes/tokyo-night.gpl";
 
   xdg.desktopEntries.nvim = {
     name = "Neovim (NixVim)";

@@ -25,15 +25,16 @@
           XKB_DEFAULT_MODEL = "pc105";
           XKB_DEFAULT_RULES = "base";
           XKB_DEFAULT_LAYOUT = "br";
-          XKB_DEFAULT_VARIANT = "";
+          XKB_DEFAULT_VARIANT = "abnt2";
           XKB_DEFAULT_OPTIONS = "";
         };
 
         services.xserver.xkb = {
           model = "pc105";
           layout = "br";
-          # `br` is the standard Brazilian ABNT2 XKB layout.
-          variant = "";
+          # Explicitly select the `br(abnt2)` symbols instead of relying on
+          # the layout's implicit default; this keeps every layer identical.
+          variant = "abnt2";
           options = "";
         };
 

@@ -81,15 +81,27 @@
           pulse.enable = true;
           wireplumber = {
             enable = true;
-            extraConfig."10-bluez-profiles" = {
-              "monitor.bluez.properties" = {
-                "bluez5.auto-connect" = [ "a2dp_sink" "hfp_hf" ];
-              };
-            };
             extraConfig."11-bluetooth-policy" = {
               "wireplumber.settings" = {
-                "bluetooth.autoswitch-to-headset-profile" = false;
+                # Keep high-fidelity A2DP until an application actually needs
+                # the headset microphone; this is the documented WirePlumber
+                # policy setting, not an Easy Effects workaround.
+                "bluetooth.autoswitch-to-headset-profile" = true;
               };
+            };
+            extraConfig."12-bluetooth-autoconnect" = {
+              "monitor.bluez.rules" = [
+                {
+                  matches = [
+                    { "device.name" = "~bluez_card.*"; }
+                  ];
+                  actions = {
+                    "update-props" = {
+                      "bluez5.auto-connect" = [ "a2dp_sink" "hfp_hf" "hsp_hs" ];
+                    };
+                  };
+                }
+              ];
             };
           };
         };

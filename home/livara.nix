@@ -69,7 +69,11 @@
       vim.g.mapleader = " "
       vim.g.maplocalleader = " "
 
-      vim.cmd("colorscheme github_dark")
+      -- The actual palette is applied by applications.nix after Matugen
+      -- materializes ~/.config/nvim/matugen_colors.lua. Keep Neovim's built-in
+      -- dark baseline during the first launch instead of selecting a static
+      -- external theme that can override the wallpaper-derived colors.
+      vim.cmd("colorscheme default")
       vim.api.nvim_set_hl(0, "Normal", { bg = "NONE", ctermbg = "NONE" })
       vim.api.nvim_set_hl(0, "NonText", { bg = "NONE", ctermbg = "NONE" })
       vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
@@ -190,7 +194,7 @@
 
       require('lualine').setup({
         options = {
-          theme = 'github-dark',
+          theme = 'auto',
           globalstatus = true,
         },
         sections = {

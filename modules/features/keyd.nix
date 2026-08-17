@@ -10,10 +10,14 @@
         ids = [ "*" ];
 
         settings = {
-          main = {
-            # Preserve the existing modifier normalization.
-            leftmeta = "meta";
-          };
+          # Keep an explicit default layer in the generated keyd config. The
+          # control layer below is additive and must not replace main.
+          main = { };
+
+          # Do not remap Meta here. keyd already exposes the physical
+          # left-meta key as the `meta` modifier; an explicit
+          # `leftmeta = meta` mapping is redundant, is not part of upstream
+          # Serpantinum, and can prevent Hyprland from seeing Super binds.
 
           # keyd's modifier layer preserves Ctrl for every other key and
           # emits a genuine arrow event for the four navigation chords.
