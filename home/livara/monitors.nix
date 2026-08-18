@@ -1,4 +1,4 @@
-{ hostName, ... }:
+{ monitorProfile ? "myMachine", ... }:
 let
   monitorRules = {
     # The BOE description is the stable identity of the built-in panel.
@@ -13,7 +13,7 @@ let
     myMachine = [ ];
   };
 
-  rules = monitorRules.${hostName} or [ ];
+  rules = monitorRules.${monitorProfile} or [ ];
   renderRule = rule:
     let
       scale = if builtins.isString rule.scale then rule.scale else toString rule.scale;

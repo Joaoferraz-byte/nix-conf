@@ -1,4 +1,4 @@
-{ config, inputs, hostName ? "unknown", userName ? "livara", compositor ? "hyprland", ... }:
+{ config, inputs, desktopProfile ? { }, userName ? "livara", compositor ? "hyprland", ... }:
 let
   iconsPath = builtins.path {
     path = ../../Icons;
@@ -12,7 +12,7 @@ in
     ./appimage.nix
     ./applications.nix
     ./session.nix
-    (import ./monitors.nix { inherit hostName; })
+    (import ./monitors.nix { monitorProfile = desktopProfile.monitorProfile or "myMachine"; })
     ./themes.nix
     ./sync.nix
   ];
@@ -30,20 +30,16 @@ in
   programs.serpantinum = {
     enable = true;
     inherit compositor;
-    hostProfile = if hostName == "latitude" then "laptop" else "desktop";
-    networkWidgets = true;
-    bluetoothWidgets = hostName == "latitude";
+    hostProfile = desktopProfile.shellProfile or "desktop";
+    networkWidgets = desktopProfile.networkWidgets or true;
+    bluetoothWidgets = desktopProfile.bluetoothWidgets or false;
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
-    keyboardLayout = if hostName == "latitude" then "ie" else "br";
-    keyboardVariant = if hostName == "latitude" then "" else "abnt2";
-    internalKeyboardDevice = if hostName == "latitude" then "at-translated-set-2-keyboard" else "";
-    externalKeyboardDevices = if hostName == "latitude" then [
-      "jp-usb-keyboard"
-      "jp-usb-keyboard-1"
-      "keyd-virtual-keyboard"
-    ] else [ ];
-    externalKeyboardLayout = "br";
-    externalKeyboardVariant = "abnt2";
+    keyboardLayout = desktopProfile.keyboardLayout or "br";
+    keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
+    internalKeyboardDevice = desktopProfile.internalKeyboardDevice or "";
+    externalKeyboardDevices = desktopProfile.externalKeyboardDevices or [ ];
+    externalKeyboardLayout = desktopProfile.externalKeyboardLayout or "br";
+    externalKeyboardVariant = desktopProfile.externalKeyboardVariant or "abnt2";
   };
 
   home.sessionVariables = {

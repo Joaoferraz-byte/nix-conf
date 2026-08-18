@@ -10,6 +10,15 @@
     specialArgs = { inherit inputs self; };
     modules = [
       {
+        # This host is named `limine` at the network layer, but its desktop
+        # profile is explicitly `myMachine`; consumers must not infer this
+        # identity from networking.hostName.
+        desktop.profile.compositor = "hyprland";
+        desktop.profile.shellProfile = "desktop";
+        desktop.profile.monitorProfile = "myMachine";
+        desktop.profile.networkWidgets = true;
+        desktop.profile.bluetoothWidgets = false;
+
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [
           inputs.affinity-nix.overlays.default

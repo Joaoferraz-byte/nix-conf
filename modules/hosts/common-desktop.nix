@@ -24,6 +24,30 @@
         description = "Home Manager user that owns the desktop profile.";
       };
 
+      options.desktop.profile.shellProfile = lib.mkOption {
+        type = lib.types.enum [ "laptop" "desktop" ];
+        default = "desktop";
+        description = "Serpantinum capability profile; independent of networking.hostName.";
+      };
+
+      options.desktop.profile.monitorProfile = lib.mkOption {
+        type = lib.types.enum [ "latitude" "myMachine" ];
+        default = "myMachine";
+        description = "Named monitor policy consumed by the Home Manager adapter.";
+      };
+
+      options.desktop.profile.networkWidgets = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Expose network widgets in the Serpantinum profile.";
+      };
+
+      options.desktop.profile.bluetoothWidgets = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Expose Bluetooth widgets in the Serpantinum profile.";
+      };
+
       options.desktop.profile.keyboardLayout = lib.mkOption {
         type = lib.types.str;
         default = "br";
@@ -40,6 +64,30 @@
         type = lib.types.str;
         default = "br-abnt2";
         description = "Linux console keymap matching the built-in keyboard.";
+      };
+
+      options.desktop.profile.internalKeyboardDevice = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = "Stable libinput/keyd name for the built-in keyboard.";
+      };
+
+      options.desktop.profile.externalKeyboardDevices = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Stable device names receiving the external keyboard layout.";
+      };
+
+      options.desktop.profile.externalKeyboardLayout = lib.mkOption {
+        type = lib.types.str;
+        default = "br";
+        description = "XKB layout for configured external keyboards.";
+      };
+
+      options.desktop.profile.externalKeyboardVariant = lib.mkOption {
+        type = lib.types.str;
+        default = "abnt2";
+        description = "XKB variant for configured external keyboards.";
       };
 
       config = {
@@ -76,7 +124,7 @@
           extraSpecialArgs = {
             inherit inputs self;
             userName = cfg.userName;
-            hostName = config.networking.hostName;
+            desktopProfile = cfg;
             compositor = cfg.compositor;
           };
           sharedModules = [

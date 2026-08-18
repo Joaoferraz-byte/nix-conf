@@ -1,20 +1,22 @@
 { ... }:
 {
-  flake.nixosModules.niri = { pkgs, ... }:
+  flake.nixosModules.niri = { config, lib, pkgs, ... }:
     {
-      programs.niri = {
-        enable = true;
-        useNautilus = true;
-      };
+      config = lib.mkIf (config.desktop.profile.compositor == "niri") {
+        programs.niri = {
+          enable = true;
+          useNautilus = true;
+        };
 
-      environment.systemPackages = with pkgs; [
-        xwayland-satellite
-        wev
-        wl-clipboard
-        wl-clip-persist
-        grim
-        slurp
-        satty
-      ];
+        environment.systemPackages = with pkgs; [
+          xwayland-satellite
+          wev
+          wl-clipboard
+          wl-clip-persist
+          grim
+          slurp
+          satty
+        ];
+      };
     };
 }
