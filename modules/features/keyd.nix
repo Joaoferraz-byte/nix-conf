@@ -45,6 +45,13 @@
             # so Ctrl+Shift+semicolon emits question mark without firmware Fn.
             "semicolon" = "slash";
           };
+
+          # Make the shifted chord explicit. keyd's modifier-layer rules
+          # preserve Shift, but this composite layer removes ambiguity when
+          # the external device is translated through the br XKB map.
+          "control+shift" = {
+            "semicolon" = "S-slash";
+          };
         };
       };
     };

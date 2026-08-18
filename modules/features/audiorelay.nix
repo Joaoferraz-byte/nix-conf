@@ -53,18 +53,49 @@
                   "$pactl" load-module "$@" >/dev/null 2>&1 || true
                 fi
               }
+              remove_legacy_mic_source() {
+                "$pactl" list short modules | awk '$0 ~ /source_name=audiorelay-virtual-mic([[:space:]]|$)/ {print $1}' | while read -r id; do
+                  [[ -n "$id" ]] && "$pactl" unload-module "$id" >/dev/null 2>&1 || true
+                done
+              }
               while wait_for_pulse; do
+                remove_legacy_mic_source
                 ensure_module 'sink_name=audiorelay-virtual-mic-sink' \
                   module-null-sink sink_name=audiorelay-virtual-mic-sink \
                   sink_properties=device.description=Virtual-Mic-Sink
-                ensure_module 'source_name=audiorelay-virtual-mic' \
+                # AudioRelay's documented remap source uses the monitor sink
+                # name as source_name; the description is the user-facing
+                # Virtual-Mic device selected by communication applications.
+                ensure_module 'source_name=audiorelay-virtual-mic-sink' \
                   module-remap-source master=audiorelay-virtual-mic-sink.monitor \
-                  source_name=audiorelay-virtual-mic \
+                  source_name=audiorelay-virtual-mic-sink \
                   source_properties=device.description=Virtual-Mic
                 ensure_module 'sink_name=audiorelay-speakers' \
                   module-null-sink sink_name=audiorelay-speakers \
                   sink_properties=device.description=AudioRelay-Speakers
-                sleep 5
+
+                # pactl subscribe keeps one PulseAudio-compat connection open
+                # and wakes only when the server/modules change. It avoids
+                # re-enumerating all virtual modules every five seconds.
+                "$pactl" subscribe | while read -r event; do
+                  case "$event" in
+                    *"Event 'new' on server"*|*"Event 'new' on module"*|*"Event 'remove' on module"*)
+                      ensure_module 'sink_name=audiorelay-virtual-mic-sink' \
+                        module-null-sink sink_name=audiorelay-virtual-mic-sink \
+                        sink_properties=device.description=Virtual-Mic-Sink
+                      ensure_module 'source_name=audiorelay-virtual-mic-sink' \
+                        module-remap-source master=audiorelay-virtual-mic-sink.monitor \
+                        source_name=audiorelay-virtual-mic-sink \
+                        source_properties=device.description=Virtual-Mic
+                      ensure_module 'sink_name=audiorelay-speakers' \
+                        module-null-sink sink_name=audiorelay-speakers \
+                        sink_properties=device.description=AudioRelay-Speakers
+                      ;;
+                  esac
+                done
+                # Includes a backoff when the PulseAudio compatibility server
+                # closes the subscription or is restarted.
+                sleep 3
               done
               exit 75
             '';
