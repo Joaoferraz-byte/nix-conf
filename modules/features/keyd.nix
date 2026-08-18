@@ -36,6 +36,10 @@
             "8" = "f8";
             "9" = "f9";
             "0" = "f10";
+            # The 60% TM6101 exposes slash punctuation awkwardly under br(abnt2).
+            # Ctrl+semicolon emits an unmodified slash; Shift remains stacked,
+            # so Ctrl+Shift+semicolon emits question mark without firmware Fn.
+            "semicolon" = "slash";
           };
         };
       };
