@@ -16,23 +16,6 @@ in
   programs.nixvim = {
     enable = true;
     imports = [ inputs.vim-conf.lib.nixvimModule ];
-    extraConfigLua = ''
-      local ok, theme = pcall(dofile, vim.fn.expand("~/.config/nvim/matugen_colors.lua"))
-      if ok and type(theme) == "table" then
-        vim.g.colors_name = "serpantinum-matugen"
-        vim.opt.background = "dark"
-        vim.api.nvim_set_hl(0, "Normal", { fg = theme.text, bg = theme.base })
-        vim.api.nvim_set_hl(0, "NormalFloat", { fg = theme.text, bg = theme.surface0 })
-        vim.api.nvim_set_hl(0, "SignColumn", { bg = theme.base })
-        vim.api.nvim_set_hl(0, "LineNr", { fg = theme.overlay1, bg = theme.base })
-        vim.api.nvim_set_hl(0, "CursorLineNr", { fg = theme.blue, bg = theme.base, bold = true })
-        vim.api.nvim_set_hl(0, "String", { fg = theme.green })
-        vim.api.nvim_set_hl(0, "Function", { fg = theme.blue })
-        vim.api.nvim_set_hl(0, "Keyword", { fg = theme.mauve })
-        vim.api.nvim_set_hl(0, "Type", { fg = theme.yellow })
-        vim.api.nvim_set_hl(0, "Error", { fg = theme.red })
-      end
-    '';
   };
 
   programs.zen-browser = {
