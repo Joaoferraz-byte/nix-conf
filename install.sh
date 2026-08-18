@@ -5,10 +5,29 @@ trap 'printf "Installation aborted at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 cd -- "$SCRIPT_DIR"
 
+INSTALL_LOG="${NIX_CONF_LOG_FILE:-${XDG_STATE_HOME:-${HOME}/.local/state}/nix-conf/install.log}"
+
+init_log() {
+  mkdir -p "$(dirname -- "$INSTALL_LOG")" || {
+    printf '%s\n' "Error: cannot create log directory: $(dirname -- "$INSTALL_LOG")" >&2
+    exit 1
+  }
+  : > "$INSTALL_LOG" || {
+    printf '%s\n' "Error: cannot write installer log: $INSTALL_LOG" >&2
+    exit 1
+  }
+  # Keep exactly one current log per run while still showing the same output
+  # interactively. No temporary metadata/rebuild log is created elsewhere.
+  exec > >(tee -a "$INSTALL_LOG") 2>&1
+  printf '%s\n' "Installer log: $INSTALL_LOG"
+}
+
 if [ "$(id -u)" -eq 0 ]; then
   printf '%s\n' 'Error: run ./install.sh as the checkout owner, not as root. The installer uses sudo only for privileged system operations.' >&2
-  exit 1
+    exit 1
 fi
+
+init_log
 
 preflight_git_worktree() {
   local git_root git_dir git_objects git_index
@@ -50,25 +69,15 @@ preflight_git_worktree() {
 preflight_git_worktree
 
 verify_locked_flake() {
-  local metadata_log status
-
   [ "${NIX_CONF_UPDATE_FLAKE:-0}" = "1" ] && return 0
-  metadata_log="${TMPDIR:-/tmp}/nix-conf-flake-metadata.$$.log"
-  set +e
-  nix flake metadata --no-update-lock-file "$SCRIPT_DIR" >"$metadata_log" 2>&1
-  status=$?
-  set -e
-  if [ "$status" -eq 0 ]; then
-    rm -f "$metadata_log"
+  printf '%s\n' 'Checking locked flake metadata...'
+  if nix flake metadata --no-update-lock-file "$SCRIPT_DIR" >/dev/null; then
     return 0
   fi
   printf '%s\n' 'Error: flake.nix and flake.lock are not synchronized, or a locked input cannot be resolved.' >&2
   printf '%s\n' 'If the input revision was intentionally changed, run:' >&2
   printf '%s\n' '  NIX_CONF_UPDATE_FLAKE=1 NIX_CONF_UPDATE_INPUTS="shell-conf vim-conf" ./install.sh' >&2
-  printf '%s\n' 'Metadata diagnostic:' >&2
-  cat "$metadata_log" >&2 || true
-  rm -f "$metadata_log"
-  exit "$status"
+  exit 1
 }
 
 update_flake_inputs_if_requested() {
@@ -127,28 +136,10 @@ NC='\033[0m'
 FLAKE_TARGET=""
 REBOOT=""
 REBUILD_MODE="${NIX_CONF_REBUILD_MODE:-switch}"
-REBUILD_LOG="${NIX_CONF_REBUILD_LOG:-${TMPDIR:-/tmp}/nixos-rebuild.log}"
 
 fail() {
   printf '%b\n' "${RED}$*${NC}" >&2
   exit 1
-}
-
-run_logged() {
-  local status
-  set +e
-  "$@" 2>&1 | tee -a "$REBUILD_LOG"
-  status=${PIPESTATUS[0]}
-  set -e
-  return "$status"
-}
-
-report_gate_failure() {
-  local status="$1"
-  printf '%b\n' "${RED}Pre-rebuild validation failed with exit code $status.${NC}" >&2
-  printf 'Full log: %s\n' "$REBUILD_LOG" >&2
-  tail -n 100 "$REBUILD_LOG" >&2 || true
-  exit "$status"
 }
 
 case "$REBUILD_MODE" in
@@ -269,38 +260,15 @@ else
   printf '%b\n' "${GREEN}Flake inputs were updated before entering the devShell.${NC}"
 fi
 
-mkdir -p "$(dirname -- "$REBUILD_LOG")" \
-  || fail "Cannot create the rebuild log directory: $(dirname -- "$REBUILD_LOG")"
-: > "$REBUILD_LOG" \
-  || fail "Cannot write the rebuild log: $REBUILD_LOG"
-
-printf '%b\n' "${YELLOW}Checking flake evaluation and output types...${NC}"
-if run_logged nix flake check --no-build --no-update-lock-file --show-trace; then
-  :
-else
-  status=$?
-  report_gate_failure "$status"
-fi
-
-printf '%b\n' "${YELLOW}Evaluating selected system derivation...${NC}"
-if run_logged nix eval --raw --no-update-lock-file \
-  "$SCRIPT_DIR#nixosConfigurations.$FLAKE_TARGET.config.system.build.toplevel.drvPath"; then
-  printf '\n'
-else
-  status=$?
-  report_gate_failure "$status"
-fi
-
 printf '%b\n' "${YELLOW}Running nixos-rebuild $REBUILD_MODE for $FLAKE_TARGET...${NC}"
 REBUILD_CMD=(sudo nixos-rebuild "$REBUILD_MODE" --flake "$SCRIPT_DIR#$FLAKE_TARGET" --show-trace)
 set +e
-"${REBUILD_CMD[@]}" 2>&1 | tee -a "$REBUILD_LOG"
-REBUILD_STATUS="${PIPESTATUS[0]}"
+"${REBUILD_CMD[@]}"
+REBUILD_STATUS=$?
 set -e
 if [ "$REBUILD_STATUS" -ne 0 ]; then
   printf '%b\n' "${RED}nixos-rebuild failed with exit code $REBUILD_STATUS.${NC}" >&2
-  printf 'Full log: %s\n' "$REBUILD_LOG" >&2
-  tail -n 100 "$REBUILD_LOG" >&2
+  printf 'Latest log: %s\n' "$INSTALL_LOG" >&2
   printf '%s\n' 'The previous generation remains available. Inspect it with:' >&2
   printf '%s\n' '  sudo nixos-rebuild list-generations' >&2
   printf '%s\n' 'If the current system is unusable, recover with:' >&2
