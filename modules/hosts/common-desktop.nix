@@ -7,9 +7,16 @@
     {
       imports = [
         self.nixosModules.hyprland
+        self.nixosModules.niri
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
       ];
+
+      options.desktop.profile.compositor = lib.mkOption {
+        type = lib.types.enum [ "hyprland" "niri" ];
+        default = "hyprland";
+        description = "Wayland compositor/session used by the desktop profile.";
+      };
 
       options.desktop.profile.userName = lib.mkOption {
         type = lib.types.str;
@@ -39,6 +46,7 @@
         programs.dconf.enable = true;
 
         environment.sessionVariables = {
+          SERPANTINUM_COMPOSITOR = cfg.compositor;
           HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
           XKB_DEFAULT_MODEL = "pc105";
           XKB_DEFAULT_RULES = "evdev";
@@ -57,6 +65,10 @@
         # The console keymap is a separate layer from Hyprland/XKB.
         console.keyMap = cfg.consoleKeyMap;
 
+        services.displayManager.defaultSession = lib.mkForce (
+          if cfg.compositor == "niri" then "niri" else "hyprland-uwsm"
+        );
+
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
@@ -65,6 +77,7 @@
             inherit inputs self;
             userName = cfg.userName;
             hostName = config.networking.hostName;
+            compositor = cfg.compositor;
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix

@@ -60,6 +60,7 @@
         ./modules/features/flatpak.nix
         ./modules/features/greeter.nix
         ./modules/features/hyprland.nix
+        ./modules/features/niri.nix
         ./modules/features/keyd.nix
         ./modules/features/nvidia.nix
         ./modules/features/system-hardening.nix

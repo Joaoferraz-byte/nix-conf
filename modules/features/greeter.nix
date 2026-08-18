@@ -28,8 +28,6 @@
           };
         };
       };
-      services.displayManager.defaultSession = lib.mkForce "hyprland-uwsm";
-
       environment.systemPackages = [
         clockworkTheme
         pkgs.bibata-cursors

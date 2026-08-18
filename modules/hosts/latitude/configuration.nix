@@ -21,6 +21,9 @@
     networking.hostName = "latitude";
     networking.networkmanager.enable = true;
 
+    # Serpantinum supports both backends; this host selects the niri session.
+    desktop.profile.compositor = "niri";
+
     # Bluetooth is a laptop-only capability in the shared Serpantinum setup.
     hardware.bluetooth = {
       enable = true;

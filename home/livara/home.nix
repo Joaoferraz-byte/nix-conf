@@ -1,4 +1,4 @@
-{ config, inputs, hostName ? "unknown", userName ? "livara", ... }:
+{ config, inputs, hostName ? "unknown", userName ? "livara", compositor ? "hyprland", ... }:
 let
   iconsPath = builtins.path {
     path = ../../Icons;
@@ -29,6 +29,7 @@ in
   # Environment
   programs.serpantinum = {
     enable = true;
+    inherit compositor;
     hostProfile = if hostName == "latitude" then "laptop" else "desktop";
     networkWidgets = true;
     bluetoothWidgets = hostName == "latitude";
