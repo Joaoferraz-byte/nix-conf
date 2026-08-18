@@ -4,10 +4,14 @@
       enable = true;
 
       keyboards.default = {
-        # Keep this wildcard by default so the mapping works on both hosts.
-        # The attribute can later be narrowed to the physical keyboard IDs
-        # discovered with `keyd monitor` if a second keyboard needs isolation.
-        ids = [ "*" ];
+        # Restrict the custom layer to the two keyboard input interfaces
+        # exposed by the Aitek Delta TM6101 (0603:9800). The consumer-control
+        # interface is intentionally excluded; the Latitude's internal
+        # keyboard is not matched and therefore keeps its normal behavior.
+        ids = [
+          "0603:9800:1458f7e7"
+          "0603:9800:b87f5e17"
+        ];
 
         settings = {
           # Keep an explicit default layer in the generated keyd config. The
