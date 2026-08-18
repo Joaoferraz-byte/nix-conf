@@ -29,6 +29,10 @@
     networking.hostName = "limine";
     networking.networkmanager.enable = true;
 
+    # myMachine has no laptop TLP policy; expose the standard PPD D-Bus
+    # provider used by the desktop performance widget.
+    services.power-profiles-daemon.enable = true;
+
     # Bluetooth is intentionally absent from the desktop system and UI.
     hardware.bluetooth = {
       enable = false;

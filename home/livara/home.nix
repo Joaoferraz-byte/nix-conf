@@ -31,6 +31,8 @@ in
     enable = true;
     inherit compositor;
     hostProfile = desktopProfile.shellProfile or "desktop";
+    powerWidgetVariant = desktopProfile.powerWidgetVariant or "battery";
+    tabletWidget = desktopProfile.tabletWidget or false;
     networkWidgets = desktopProfile.networkWidgets or true;
     bluetoothWidgets = desktopProfile.bluetoothWidgets or false;
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";

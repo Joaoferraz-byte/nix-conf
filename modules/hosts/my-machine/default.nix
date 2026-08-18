@@ -18,6 +18,8 @@
         desktop.profile.monitorProfile = "myMachine";
         desktop.profile.networkWidgets = true;
         desktop.profile.bluetoothWidgets = false;
+        desktop.profile.powerWidgetVariant = "performance";
+        desktop.profile.tabletWidget = true;
 
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [

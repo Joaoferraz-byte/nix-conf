@@ -30,6 +30,18 @@
         description = "Serpantinum capability profile; independent of networking.hostName.";
       };
 
+      options.desktop.profile.powerWidgetVariant = lib.mkOption {
+        type = lib.types.enum [ "battery" "performance" ];
+        default = "battery";
+        description = "Power popup contract selected by the host profile.";
+      };
+
+      options.desktop.profile.tabletWidget = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Expose the drawing-tablet status tile in Serpantinum.";
+      };
+
       options.desktop.profile.monitorProfile = lib.mkOption {
         type = lib.types.enum [ "latitude" "myMachine" ];
         default = "myMachine";
@@ -126,6 +138,8 @@
             userName = cfg.userName;
             desktopProfile = cfg;
             compositor = cfg.compositor;
+            powerWidgetVariant = cfg.powerWidgetVariant;
+            tabletWidget = cfg.tabletWidget;
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix
