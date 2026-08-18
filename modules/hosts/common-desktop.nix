@@ -17,6 +17,24 @@
         description = "Home Manager user that owns the desktop profile.";
       };
 
+      options.desktop.profile.keyboardLayout = lib.mkOption {
+        type = lib.types.str;
+        default = "br";
+        description = "Global fallback XKB layout for the built-in keyboard.";
+      };
+
+      options.desktop.profile.keyboardVariant = lib.mkOption {
+        type = lib.types.str;
+        default = "abnt2";
+        description = "Global fallback XKB variant for the built-in keyboard.";
+      };
+
+      options.desktop.profile.consoleKeyMap = lib.mkOption {
+        type = lib.types.str;
+        default = "br-abnt2";
+        description = "Linux console keymap matching the built-in keyboard.";
+      };
+
       config = {
         programs.dconf.enable = true;
 
@@ -24,22 +42,20 @@
           HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
           XKB_DEFAULT_MODEL = "pc105";
           XKB_DEFAULT_RULES = "evdev";
-          XKB_DEFAULT_LAYOUT = "br";
-          XKB_DEFAULT_VARIANT = "abnt2";
+          XKB_DEFAULT_LAYOUT = cfg.keyboardLayout;
+          XKB_DEFAULT_VARIANT = cfg.keyboardVariant;
           XKB_DEFAULT_OPTIONS = "";
         };
 
         services.xserver.xkb = {
           model = "pc105";
-          layout = "br";
-          # Explicitly select the `br(abnt2)` symbols instead of relying on
-          # the layout's implicit default; this keeps every layer identical.
-          variant = "abnt2";
+          layout = cfg.keyboardLayout;
+          variant = cfg.keyboardVariant;
           options = "";
         };
 
         # The console keymap is a separate layer from Hyprland/XKB.
-        console.keyMap = "br-abnt2";
+        console.keyMap = cfg.consoleKeyMap;
 
         home-manager = {
           useGlobalPkgs = true;

@@ -33,6 +33,16 @@ in
     networkWidgets = true;
     bluetoothWidgets = hostName == "latitude";
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
+    keyboardLayout = if hostName == "latitude" then "ie" else "br";
+    keyboardVariant = if hostName == "latitude" then "" else "abnt2";
+    internalKeyboardDevice = if hostName == "latitude" then "at-translated-set-2-keyboard" else "";
+    externalKeyboardDevices = if hostName == "latitude" then [
+      "jp-usb-keyboard"
+      "jp-usb-keyboard-1"
+      "keyd-virtual-keyboard"
+    ] else [ ];
+    externalKeyboardLayout = "br";
+    externalKeyboardVariant = "abnt2";
   };
 
   home.sessionVariables = {

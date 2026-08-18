@@ -10,6 +10,12 @@
     specialArgs = { inherit inputs self; };
     modules = [
       {
+        # The built-in Latitude keyboard is Irish; the external Aitek
+        # receives its own br(abnt2) Hyprland override from Home Manager.
+        desktop.profile.keyboardLayout = "ie";
+        desktop.profile.keyboardVariant = "";
+        desktop.profile.consoleKeyMap = "ie";
+
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [
           inputs.affinity-nix.overlays.default
