@@ -20,8 +20,8 @@
 
           # Do not remap Meta here. keyd already exposes the physical
           # left-meta key as the `meta` modifier; an explicit
-          # `leftmeta = meta` mapping is redundant, is not part of upstream
-          # Serpantinum, and can prevent Hyprland from seeing Super binds.
+          # `leftmeta = meta` mapping is redundant and can interfere with
+          # compositor-level Super bindings.
 
           # keyd's modifier layer preserves Ctrl for every other key and
           # emits a genuine arrow event for the four navigation chords.

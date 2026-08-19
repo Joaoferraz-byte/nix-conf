@@ -4,7 +4,7 @@ let
   xournalppLegacyConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
   xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (builtins.replaceStrings
     [ "/home/livara/.config/xournalpp" "tokyo-night.gpl" ]
-    [ "${config.home.homeDirectory}/.config/xournalpp" "serpantinum.gpl" ]
+    [ "${config.home.homeDirectory}/.config/xournalpp" "livara.gpl" ]
     (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml"));
   xournalppToolbar = pkgs.writeText "xournalpp-toolbar.ini" (builtins.replaceStrings
     [ "toolbarTop1=PEN,ERASER,HIGHLIGHTER" ]
@@ -94,7 +94,7 @@ in
       fi
     done
     if [ -f "${xournalppLocalConfig}/settings.xml" ]; then
-      $DRY_RUN_CMD sed -i 's/tokyo-night\.gpl/serpantinum.gpl/g' "${xournalppLocalConfig}/settings.xml"
+      $DRY_RUN_CMD sed -i 's/tokyo-night\.gpl/livara.gpl/g' "${xournalppLocalConfig}/settings.xml"
     elif [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
       $DRY_RUN_CMD cp "${xournalppSettings}" "${xournalppLocalConfig}/settings.xml"
     fi

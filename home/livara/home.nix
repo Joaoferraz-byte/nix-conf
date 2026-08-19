@@ -1,49 +1,33 @@
-{ config, inputs, desktopProfile ? { }, userName ? "livara", compositor ? "hyprland", ... }:
-let
-  iconsPath = builtins.path {
-    path = ../../Icons;
-    name = "nix-conf-icons";
-  };
-  profileIcon = iconsPath + "/6afde16e1ef1cb3257b30e01890787dd.jpg";
-in
+{ config, inputs, desktopProfile ? { }, userName ? "livara", ... }:
 {
   imports = [
     inputs.zen-browser.homeModules.beta
     ./appimage.nix
     ./applications.nix
     ./session.nix
+    ./niri.nix
     (import ./monitors.nix { monitorProfile = desktopProfile.monitorProfile or "myMachine"; })
     ./themes.nix
     ./noctalia.nix
     ./sync.nix
   ];
 
-  # Identity
   home.username = userName;
   home.homeDirectory = "/home/${userName}";
   home.stateVersion = "26.11";
   programs.home-manager.enable = true;
   services.easyeffects.enable = true;
-  home.file.".face.icon".source = profileIcon;
+
+  home.file.".face.icon".source = builtins.path {
+    path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
+    name = "livara-profile-icon";
+  };
   home.file."Fire/.keep".text = "";
 
-  # Environment
-  programs.serpantinum = {
+  programs.livara.visual = {
     enable = true;
-    shellBackend = desktopProfile.shellBackend;
-    inherit compositor;
-    hostProfile = desktopProfile.shellProfile or "desktop";
-    powerWidgetVariant = desktopProfile.powerWidgetVariant or "battery";
-    tabletWidget = desktopProfile.tabletWidget or false;
-    networkWidgets = desktopProfile.networkWidgets or true;
-    bluetoothWidgets = desktopProfile.bluetoothWidgets or false;
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
-    keyboardLayout = desktopProfile.keyboardLayout or "br";
-    keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
-    internalKeyboardDevice = desktopProfile.internalKeyboardDevice or "";
-    externalKeyboardDevices = desktopProfile.externalKeyboardDevices or [ ];
-    externalKeyboardLayout = desktopProfile.externalKeyboardLayout or "br";
-    externalKeyboardVariant = desktopProfile.externalKeyboardVariant or "abnt2";
+    themeName = "Livara";
   };
 
   home.sessionVariables = {

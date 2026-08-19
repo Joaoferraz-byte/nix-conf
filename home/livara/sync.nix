@@ -7,7 +7,7 @@ let
   systemctl = "${pkgs.systemd}/bin/systemctl";
 
   syncRepository = { repository, directory, label }:
-    pkgs.writeShellScript "sync-${label}" ''
+    pkgs.writeShellScript "sync-livara-${label}" ''
       #!/usr/bin/env bash
       set -euo pipefail
       export GIT_TERMINAL_PROMPT=0
@@ -55,7 +55,7 @@ let
     set -u
     export GIT_TERMINAL_PROMPT=0
     directory="${vaultDirectory}"
-    log_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/serpantinum/logs"
+    log_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/livara/logs"
     log_file="$log_dir/vault-sync.log"
     mkdir -p "$log_dir"
     log() { printf '[%s] %s\n' "$(${date} --iso-8601=seconds)" "$*" >> "$log_file"; }
@@ -79,7 +79,7 @@ let
     fi
   '';
 
-  zennotesLauncher = pkgs.writeShellScriptBin "zennotes-serpantinum" ''
+  zennotesLauncher = pkgs.writeShellScriptBin "zennotes-livara" ''
     # Pull before opening the app. The save trap below handles normal app exit;
     # the session ExecStop unit covers logout and graceful shutdown.
     ${systemctl} --user start --no-block vault-sync.service >/dev/null 2>&1 || true
@@ -126,7 +126,7 @@ in
     Type=Application
     Name=ZenNotes
     Comment=ZenNotes with Vault synchronization
-    Exec=${zennotesLauncher}/bin/zennotes-serpantinum %U
+    Exec=${zennotesLauncher}/bin/zennotes-livara %U
     Icon=org.zennotes.ZenNotes
     Terminal=false
     Categories=Office;Utility;

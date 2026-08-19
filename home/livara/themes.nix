@@ -1,6 +1,16 @@
 { ... }:
 {
-  # O Serpantinum usa exclusivamente a paleta dinâmica gerada pelo Matugen a
-  # partir do wallpaper ativo. Não declarar uma paleta estática aqui: uma
-  # segunda fonte de cores poderia sobrescrever o resultado do Matugen.
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+      icon-theme = "Kora";
+    };
+  };
+
+  home.sessionVariables = {
+    GTK_THEME = "Adwaita:dark";
+    GTK_ICON_THEME = "Kora";
+    QT_ICON_THEME = "Kora";
+    QT_QPA_PLATFORMTHEME = "qt5ct";
+  };
 }

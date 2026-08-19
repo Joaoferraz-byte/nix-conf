@@ -6,15 +6,14 @@
     in
     {
       imports = [
-        self.nixosModules.hyprland
         self.nixosModules.niri
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
       ];
 
       options.desktop.profile.compositor = lib.mkOption {
-        type = lib.types.enum [ "hyprland" "niri" ];
-        default = "hyprland";
+        type = lib.types.enum [ "niri" ];
+        default = "niri";
         description = "Wayland compositor/session used by the desktop profile.";
       };
 
@@ -24,46 +23,10 @@
         description = "Home Manager user that owns the desktop profile.";
       };
 
-      options.desktop.profile.shellProfile = lib.mkOption {
-        type = lib.types.enum [ "laptop" "desktop" ];
-        default = "desktop";
-        description = "Legacy capability profile retained for application adapters.";
-      };
-
-      options.desktop.profile.shellBackend = lib.mkOption {
-        type = lib.types.enum [ "serpantinum" "noctalia" ];
-        default = "noctalia";
-        description = "Visible Wayland shell backend. Noctalia owns the UI; Serpantinum remains the Matugen adapter.";
-      };
-
-      options.desktop.profile.powerWidgetVariant = lib.mkOption {
-        type = lib.types.enum [ "battery" "performance" ];
-        default = "battery";
-        description = "Power popup contract selected by the host profile.";
-      };
-
-      options.desktop.profile.tabletWidget = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Expose the drawing-tablet status tile in Serpantinum.";
-      };
-
       options.desktop.profile.monitorProfile = lib.mkOption {
         type = lib.types.enum [ "latitude" "myMachine" ];
         default = "myMachine";
         description = "Named monitor policy consumed by the Home Manager adapter.";
-      };
-
-      options.desktop.profile.networkWidgets = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Expose network widgets in the Serpantinum profile.";
-      };
-
-      options.desktop.profile.bluetoothWidgets = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Expose Bluetooth widgets in the Serpantinum profile.";
       };
 
       options.desktop.profile.keyboardLayout = lib.mkOption {
@@ -112,8 +75,6 @@
         programs.dconf.enable = true;
 
         environment.sessionVariables = {
-          SERPANTINUM_COMPOSITOR = cfg.compositor;
-          HYPRLAND_CONFIG = "/home/${cfg.userName}/.config/hypr/hyprland.lua";
           XKB_DEFAULT_MODEL = "pc105";
           XKB_DEFAULT_RULES = "evdev";
           XKB_DEFAULT_LAYOUT = cfg.keyboardLayout;
@@ -130,12 +91,10 @@
           options = "";
         };
 
-        # The console keymap is a separate layer from Hyprland/XKB.
+        # The console keymap is separate from the niri/XKB session layer.
         console.keyMap = cfg.consoleKeyMap;
 
-        services.displayManager.defaultSession = lib.mkForce (
-          if cfg.compositor == "niri" then "niri" else "hyprland-uwsm"
-        );
+        services.displayManager.defaultSession = lib.mkForce "niri";
 
         home-manager = {
           useGlobalPkgs = true;
@@ -145,10 +104,6 @@
             inherit inputs self;
             userName = cfg.userName;
             desktopProfile = cfg;
-            compositor = cfg.compositor;
-            powerWidgetVariant = cfg.powerWidgetVariant;
-            tabletWidget = cfg.tabletWidget;
-            shellBackend = cfg.shellBackend;
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix

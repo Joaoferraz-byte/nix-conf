@@ -1,17 +1,18 @@
-{ config, lib, compositor ? "hyprland", ... }:
+{ config, lib, ... }:
+
 let
   home = config.home.homeDirectory;
 in
 {
-  # Hyprland is enabled by the NixOS module with UWSM. Home Manager only
-  # owns user services and files, avoiding a second compositor lifecycle.
+  # hypridle is used only as a compositor-independent idle/lock daemon. niri
+  # remains the sole compositor and owns monitor power actions.
   services.hypridle = {
     enable = true;
     settings = {
       general = {
         lock_cmd = "pidof hyprlock || hyprlock";
         before_sleep_cmd = "loginctl lock-session";
-        after_sleep_cmd = if compositor == "niri" then "niri msg action power-on-monitors" else "hyprctl dispatch dpms on";
+        after_sleep_cmd = "niri msg action power-on-monitors";
       };
       listener = [
         {
@@ -20,8 +21,8 @@ in
         }
         {
           timeout = 600;
-          on-timeout = if compositor == "niri" then "niri msg action power-off-monitors" else "hyprctl dispatch dpms off";
-          on-resume = if compositor == "niri" then "niri msg action power-on-monitors" else "hyprctl dispatch dpms on";
+          on-timeout = "niri msg action power-off-monitors";
+          on-resume = "niri msg action power-on-monitors";
         }
         {
           timeout = 900;
@@ -30,19 +31,6 @@ in
       ];
     };
   };
-
-  home.activation.migrateLegacyHyprlandConf = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
-    stale="$HOME/.config/hypr/hyprland.conf"
-    if [ -f "$stale" ] && [ ! -L "$stale" ]; then
-      backup="$HOME/.local/state/nix-conf/backups/hyprland.conf.legacy.$(date +%Y%m%d%H%M%S)"
-      $DRY_RUN_CMD mkdir -p "$(dirname "$backup")"
-      $DRY_RUN_CMD cp -a "$stale" "$backup"
-      $DRY_RUN_CMD rm -f "$stale"
-    fi
-    if [ -L "$stale" ]; then
-      $DRY_RUN_CMD rm -f "$stale"
-    fi
-  '';
 
   home.activation.setupScreenshots = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p "${home}/Pictures/Screenshots"

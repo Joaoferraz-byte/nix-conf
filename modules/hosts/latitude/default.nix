@@ -10,15 +10,12 @@
     specialArgs = { inherit inputs self; };
     modules = [
       {
-        # The built-in Latitude keyboard is Irish; the external Aitek
-        # receives its own br(abnt2) Hyprland override from Home Manager.
+        # The built-in Latitude keyboard is Irish; configured external
+        # devices receive the Brazilian ABNT2 layout at the niri input layer.
         desktop.profile.keyboardLayout = "ie";
         desktop.profile.keyboardVariant = "";
         desktop.profile.consoleKeyMap = "ie";
-        desktop.profile.shellProfile = "laptop";
         desktop.profile.monitorProfile = "latitude";
-        desktop.profile.networkWidgets = true;
-        desktop.profile.bluetoothWidgets = true;
         desktop.profile.internalKeyboardDevice = "at-translated-set-2-keyboard";
         desktop.profile.externalKeyboardDevices = [
           "jp-usb-keyboard"

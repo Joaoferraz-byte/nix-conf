@@ -13,14 +13,8 @@
         # This host is named `limine` at the network layer, but its desktop
         # profile is explicitly `myMachine`; consumers must not infer this
         # identity from networking.hostName.
-        desktop.profile.compositor = "hyprland";
-        desktop.profile.shellBackend = "noctalia";
-        desktop.profile.shellProfile = "desktop";
+        desktop.profile.compositor = "niri";
         desktop.profile.monitorProfile = "myMachine";
-        desktop.profile.networkWidgets = true;
-        desktop.profile.bluetoothWidgets = false;
-        desktop.profile.powerWidgetVariant = "performance";
-        desktop.profile.tabletWidget = true;
 
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [

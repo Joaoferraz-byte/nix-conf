@@ -1,191 +1,120 @@
 # Arquitetura do `nix-conf`
 
-## 1. Escopo e conclusão
+## Escopo
 
-`nix-conf` é a raiz de composição declarativa dos hosts NixOS. O flake-parts publica configurações NixOS, módulos system-side e uma composição Home Manager por usuário. A sessão gráfica usa Hyprland com UWSM; o shell visual é o Serpantinum, adaptado pelo repositório `shell-conf`; o editor é publicado por `vim-conf`; e os dados editáveis de Xournal++ vêm de `xournal-conf`.
+`nix-conf` é a raiz de composição declarativa dos hosts NixOS. O flake-parts publica configurações de sistema e features por domínio; Home Manager compõe o ambiente do usuário; inputs externos fornecem módulos especializados. A sessão gráfica possui um único compositor e um único shell visual.
 
-A arquitetura segue três regras:
+> **Um owner por concern, uma closure explícita por serviço e um contrato público entre repositórios.**
 
-> **Um owner por concern, uma camada de avaliação por tipo de estado e um contrato público entre repositórios.**
+NixOS é owner de niri, XKB do sistema, keyd, portais, drivers, rede, áudio e serviços privilegiados. Home Manager é owner de programas de usuário, arquivos XDG e serviços user-level. Noctalia é owner da superfície visual, launcher, painéis, notificações, wallpaper e IPC. `shell-conf` é owner dos templates Matugen e dos adapters de temas por aplicação. `vim-conf` é owner do NixVim; `xournal-conf` é owner dos arquivos editáveis de Xournal++; `Wallpapers` é owner do catálogo de imagens.
 
-NixOS owns compositor, UWSM, drivers, keyd, portais e serviços privilegiados. Home Manager owns programas de usuário, arquivos XDG e serviços de usuário. `shell-conf` owns Serpantinum, QuickShell, Matugen, wallpaper UI e adaptadores de tema. `vim-conf` owns NixVim. `xournal-conf` owns dados editáveis de Xournal++. `Wallpapers` owns imagens.
-
-## 2. Fluxo de composição
+## Fluxo de composição
 
 ```text
 flake inputs
-  -> flake-parts outputs
+  -> flake-parts feature modules
     -> host roots
-      -> NixOS system features
-        -> common desktop composition
-          -> Home Manager user profile
-            -> Serpantinum user services and application adapters
+      -> common desktop profile
+        -> Home Manager user profile
+          -> niri config + Noctalia module + Livara visual API
 ```
 
-A composição comum recebe `userName` e `hostName` por `extraSpecialArgs`. Os dois hosts usam a mesma base de shell; apenas `hostProfile` e capacidades de interface variam.
+A composição passa por `extraSpecialArgs` somente os dados de integração necessários (`inputs`, usuário e perfil tipado). O compositor não é encaminhado como flag para o shell: o perfil aceita apenas `niri`, e as ações da interface são expressas como ações nativas do niri ou IPC documentado do Noctalia.
 
-| Host | Perfil | Diferenças legítimas |
+| Host | Layout principal | Política de output |
 |---|---|---|
-| `latitude` | `laptop` | Intel, energia, ext4 e Wi-Fi/Bluetooth prioritários |
-| `myMachine` | `desktop` | GPU/monitores, Btrfs, virtualização e Bluetooth opcional na interface |
+| `latitude` | `ie` no teclado interno; Aitek externo tratado pelo keyd | Escala declarativa do painel `desc:BOE 0x07BB`. |
+| `myMachine` | `br(abnt2)` | Descoberta dinâmica; `outputs.kdl` vazio. |
 
-## 3. Fronteiras entre repositórios
+## Fronteiras de repositório
 
-| Repositório/input | Contrato | Owner |
+| Repositório/input | Contrato público | Owner |
 |---|---|---|
-| `nix-conf` | hosts, módulos NixOS, composição HM, scripts e documentação | sistema e integração |
-| `shell-conf` | `packages`, `nixosModules.default`, `homeManagerModules.default` | Serpantinum/QuickShell/Matugen |
-| `vim-conf` | módulo e pacote NixVim | editor |
-| `xournal-conf` | XML, INI, GPL e TeX | dados de Xournal++ |
-| `Wallpapers` | imagens | catálogo de assets |
-| `home-manager` | módulo HM NixOS | ambiente de usuário |
-| `zen-browser-flake` | módulo e pacote Zen | navegador |
+| `nix-conf` | Hosts, módulos NixOS, composição Home Manager e políticas de sessão | Sistema e integração |
+| `shell-conf` | `homeManagerModules.default`, `programs.livara.visual`, templates e adapters Matugen | Visual por aplicação |
+| `noctalia` | `inputs.noctalia.homeModules.default` e IPC `noctalia msg` | Shell visual |
+| `vim-conf` | Módulo NixVim, plugins e keymaps | Editor |
+| `xournal-conf` | XML, INI, TeX e defaults do Xournal++ | Aplicação de notas |
+| `Wallpapers` | Imagens | Catálogo de assets |
 
-O flake do `nix-conf` importa `shell-conf` e não contém inputs operacionais de shells legados. O repositório `shell-conf` mantém uma cópia revisada do source Serpantinum necessário porque o upstream não oferece flake NixOS estável.
+O flake do shell-conf não contém input de QuickShell, não publica módulo NixOS de shell, não instala daemon de wallpaper e não escreve configurações de compositor. O flake do nix-conf não importa módulo Hyprland.
 
-## 4. Hyprland, niri, Noctalia e Serpantinum
+## Sessão niri e Noctalia
 
-`modules/features/hyprland.nix` habilita `programs.hyprland.enable = true`, `withUWSM = true` e o portal Hyprland. `modules/features/niri.nix` habilita o niri para `latitude`; o display manager seleciona a sessão correta por `desktop.profile.compositor`. Home Manager não inicia um segundo lifecycle do compositor. `home/livara/session.nix` possui apenas `hypridle`, diretório de screenshots e limpeza segura de arquivos Lua legados.
+`modules/features/niri.nix` habilita niri e os pacotes mínimos do ambiente Wayland. `home/livara/niri.nix` é o owner único do `~/.config/niri/config.kdl`, da navegação, workspaces, fullscreen, screenshot, hardware keys e bind IPC do Noctalia. `home/livara/monitors.nix` materializa somente `outputs.kdl` e nunca declara um monitor fictício.
 
-O shell visível é selecionado por `desktop.profile.shellBackend`, atualmente `noctalia`. O módulo upstream do Noctalia é anexado ao target systemd Wayland da sessão. O `shell-conf` continua instalado como adaptador de Matugen, contratos de aplicativos, scripts canônicos e geração do KDL; quando Noctalia está ativo, `serpantinum-shell.service` e `serpantinum-wallpaper-daemon.service` não são criados.
+O workspace numérico é verificado por um pequeno helper baseado em `niri msg --json workspaces`; se o índice não existe, nenhuma ação é emitida. Isso preserva a semântica dinâmica do niri e evita que a interface crie workspaces vazios como uma lista fixa. A surface visual não consulta `hyprctl`, não possui QML de barra e não inicia um segundo lifecycle.
 
 | Concern | Owner |
 |---|---|
-| Login e compositor | NixOS niri ou Hyprland/UWSM |
-| Idle/lock policy | `home/livara/session.nix` + hypridle |
-| Shell surface, launcher e panels | Noctalia + IPC documentado |
-| Wallpaper selection and transitions | Noctalia |
-| Wallpaper catalog | `Wallpapers` + `sync.nix` |
-| Matugen and application adapters | `shell-conf` / `sync-serpantinum-themes` |
-| Privileged input remapping | `modules/features/keyd.nix` |
+| Login e compositor | NixOS niri + display manager |
+| Input/XKB e remapeamento específico | NixOS XKB + keyd |
+| Idle/lock/monitor power | `home/livara/session.nix` + hypridle independente |
+| Bar, panels, launcher e wallpaper picker | Noctalia |
+| Wallpaper catalog | `home/livara/sync.nix` + repositório Wallpapers |
+| Dynamic theme generation | Matugen executado pelo hook do Noctalia |
+| Application theme adapters | `shell-conf` / `sync-livara-themes` |
 
-## 5. Serpantinum como adaptador NixOS
+## API visual Livara
 
-A fonte Serpantinum é vendorizada em `shell-conf` como uma árvore local revisada e adaptada arquivo a arquivo. O `shell-conf` não executa um instalador da fonte original nem depende de um flake fornecido por ela: o flake local é somente a fronteira NixOS/Home Manager que publica a cópia adaptada, dependências, serviços e estado mutável.
+O módulo declara somente:
 
-O módulo Home Manager declara opções tipadas:
-
-```text
-programs.serpantinum.enable
-programs.serpantinum.shellBackend
-programs.serpantinum.wallpaperDirectory
-programs.serpantinum.hostProfile
-programs.serpantinum.networkWidgets
-programs.serpantinum.bluetoothWidgets
+```nix
+programs.livara.visual = {
+  enable = true;
+  wallpaperDirectory = "/home/livara/Wallpapers";
+  themeName = "Livara";
+};
 ```
 
-O shell recebe essas opções por `SERPANTINUM_*`. O QML detecta hardware de rede por capacidade e não pelo hostname; o perfil controla pequenas decisões de apresentação, especialmente Wi-Fi/Bluetooth no notebook. Bluetooth é habilitado no NixOS somente em `latitude`, com `hardware.bluetooth` e `powerOnBoot`; o applet Blueman permanece desabilitado porque o painel Serpantinum é o único owner da interface. `myMachine` recebe `hardware.bluetooth.enable=false` e `SERPANTINUM_BLUETOOTH_WIDGETS=0`, não cria o pill Bluetooth e não inicia scan pelo `qs_manager.sh` ou pelo `NetworkPopup`.
+A closure instala Matugen, jq e os adapters necessários. Templates imutáveis vivem no Nix store; resultados gerados vivem em `$XDG_STATE_HOME/livara/theme`. O hook do Noctalia recebe `NOCTALIA_WALLPAPER_PATH`, executa Matugen em modo dark, grava a paleta e chama o sincronizador. A atualização de todos os arquivos usa temporário e `mv` atômico onde o contrato da aplicação permite.
 
-## 6. Tema adaptativo
+Cada aplicação mantém seu próprio ecossistema:
 
-Matugen é executado uma vez por troca de wallpaper e gera outputs mutáveis. Templates estáticos vivem no Nix store; os arquivos resultantes não são links para o store. O fluxo é:
-
-```text
-image under WALLPAPER_DIR
-  -> Noctalia wallpaper_changed hook
-    -> matugen image
-      -> Matugen token JSON
-      -> Noctalia custom palette JSON
-      -> QuickShell JSON when Serpantinum backend is selected
-      -> Hyprland colors.conf when the Hyprland adapter is active
-    -> GTK3/GTK4 CSS
-    -> Qt palettes and QSS
-    -> WezTerm colors (native Lua template)
-    -> Neovim Lua palette
-    -> Firefox/Zen userChrome.css
-    -> ZenNotes custom theme
-    -> Xournal++ GPL palette + colorPalette setting
-    -> Vesktop/Vencord local CSS theme
-    -> Freesm/Qt applications through qt5ct/qt6ct
-```
-
-A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: dconf `prefer-dark`, GTK `adw-gtk3-dark`, Qt via qt6ct e ZenNotes `theme_mode = "dark"`; o contrato do tema ZenNotes declara `modes = "both"` e recebe tokens light/dark no mesmo CSS. Cada consumidor recebe somente o formato que seu ecossistema entende. Xournal++ mantém `settings.xml` e `toolbar.ini` editáveis no owner nativo `~/.config/xournalpp`; o adapter atualiza idempotentemente apenas `colorPalette` e a paleta `.gpl` é regenerada pelo Matugen. Vesktop/Vencord recebe um tema CSS local em `themes/` e seu nome é mantido em `settings.json.enabledThemes`; o plugin `ClientTheme` não é usado como substituto para uma paleta multi-token.
-
-### Consumidores
-
-| Consumer | Contrato |
+| Aplicação/ecossistema | Saída gerada |
 |---|---|
-| Noctalia | `~/.config/noctalia/palettes/Serpantinum.json`, generated from Matugen roles |
-| QuickShell | `SERPANTINUM_THEME_JSON` points to `qs_colors.json` when the Serpantinum backend is selected |
-| GTK/Nautilus | `gtk-3.0/gtk.css`, `gtk-4.0/gtk.css`, dconf e Flatpak read access |
-| Qt | qt5ct/qt6ct palette e QSS em paths do usuário |
-| WezTerm | Lua `dofile` de `~/.config/wezterm/matugen-colors.lua` e hook de reload |
-| Neovim | `~/.config/nvim/matugen_colors.lua`, carregado opcionalmente por NixVim |
-| Firefox/Zen | `chrome/userChrome.css`, backup e user.js com preferência habilitada |
-| ZenNotes | `themes/serpantinum/{manifest.json,theme.css}` e `theme_id = "custom-serpantinum"` |
-| Xournal++ | `palettes/serpantinum.gpl` em formato GIMP e `settings.xml` com `colorPalette` |
-| Vesktop/Vencord | `themes/serpantinum.theme.css` e `settings/settings.json.enabledThemes` |
-| Freesm Launcher | Flatpak override Qt6ct + QSS/palette; o launcher continua usando seus próprios ícones/recursos |
+| Noctalia | `~/.config/noctalia/palettes/Livara.json` |
+| GTK/Nautilus | CSS GTK3/GTK4 e prefer-dark via dconf |
+| Qt | qt5ct/qt6ct e QSS |
+| WezTerm/Kitty | Módulos Lua/conf nativos |
+| Neovim | Módulo Lua Matugen carregável pelo NixVim |
+| Firefox/Zen Browser | `userChrome.css`, `userContent.css` e `user.js` |
+| ZenNotes | `themes/livara/manifest.json` + `theme.css` |
+| Tauon/Freesm Launcher | Tema nativo/Qt específico |
+| Vesktop | CSS local e `settings.json.enabledThemes` |
+| Xournal++ | Paleta GIMP `.gpl` + `colorPalette` |
 
-Firefox e Zen dependem de CSS interno não estável; o adapter deve ser pequeno, versionável e sempre ter backup. ZenNotes documenta `theme_id` para o id resolvido `custom-<slug>`, por isso `custom-serpantinum` é usado explicitamente.
+Não se afirma compatibilidade Stylix quando a aplicação não possui contrato Stylix. Stylix pode cuidar de integrações que ele suporta; Matugen/adapters cuidam das demais. Não há fonte Catppuccin e a presença de tokens legados em algum formato não é uma dependência de pacote.
 
-## 7. Wallpapers e automação
+## Estado e segurança
 
-`home/livara/sync.nix` sincroniza o catálogo em `~/Wallpapers`. O clone inicial ocorre em diretório temporário e é movido atomicamente. Atualizações usam `fetch --prune` e `merge --ff-only`; erro de rede mantém o checkout atual. O timer não executa scripts do repositório.
+A avaliação constrói closures e referências ao store; a realização ocorre no Home Manager, systemd e nos programas de sessão. Dados mutáveis — paletas, CSS de perfil, checkouts do Vault e wallpapers — permanecem fora do store. A ativação não faz downloads nem `git pull`; timers e serviços independentes fazem sincronização depois que a sessão está disponível.
 
-O serviço de login espera o daemon `awww`, procura imagens recursivamente em `WALLPAPER_DIR`, escolhe uma imagem válida, aplica-a e executa Matugen. A seleção falha de forma não fatal quando o catálogo está vazio ou a sessão ainda não possui monitor disponível.
+O wrapper ZenNotes faz pull antes da abertura e tenta `git add`, commit e push depois do encerramento normal. O serviço de sessão repete o save durante o teardown gracioso. Perda súbita de energia, reset forçado ou kernel panic não permitem executar um `ExecStop`, portanto não podem ser garantidos por systemd.
 
-## 8. Input 60%
+## Validação
 
-`Ctrl+H/J/K/L` não é um binding de Hyprland. O módulo `services.keyd` usa a camada:
-
-```ini
-[ids]
-*
-
-[control:C]
-h = left
-j = down
-k = up
-l = right
-```
-
-Isso produz eventos de seta antes de o compositor e o aplicativo consumirem o input. Ctrl continua normal para outras teclas. A regra deve ser validada em cada host com `keyd monitor`, `keyd check` e logs systemd; se um segundo teclado exigir comportamento diferente, os IDs devem ser estreitados por opção.
-
-## 9. NixVim e Xournal++
-
-`vim-conf` continua separado. Ele publica o módulo NixVim, plugins, linguagens e keymaps. A paleta Matugen é opcional em runtime: a avaliação do flake não depende de Matugen ou QuickShell, e o editor mantém fallback quando o arquivo de cores não existe.
-
-`xournal-conf` é tratado como dados de aplicação. O perfil editável ativo é `~/.config/xournalpp`; a ativação migra uma cópia anterior de `~/.config/nixos/xournalpp` somente quando o path nativo ainda não possui o arquivo. Uma paleta desktop não deve reescrever `settings.xml` ou `toolbar.ini` em cada activation, exceto a propriedade dinâmica `colorPalette` controlada pelo adapter.
-
-## 10. Segurança e estado
-
-Arquivos mutáveis ficam em `$XDG_STATE_HOME/serpantinum`, `$XDG_CONFIG_HOME` ou diretórios de perfil definidos pela aplicação. CSS de browser recebe backup antes de ser substituído. Nenhum script remove um arquivo regular sem cópia, e nenhum output derivado deve ser um link imutável para `/nix/store`.
-
-A ativação não faz `git pull`, baixa assets ou exige rede. Serviços de sincronização são independentes. Scripts usam paths configuráveis, `set -euo pipefail`, falhas toleráveis onde apropriado e não executam instruções encontradas em conteúdo externo. O weather usa Open-Meteo por coordenadas fixas de Jardim João XXIII (`-23.60285,-46.79271`) com cache e fallback offline. O launcher usa `DesktopEntries.applications` e `DesktopEntry.command`; o antigo guide foi removido do registro ativo, e a ação da barra/`Super+H` abre `~/.config/nixos` com Neo-tree.
-
-## 11. Validação
-
-A sequência de validação é progressiva:
+A sequência deve ser executada em etapas:
 
 ```bash
 git diff --check
-find scripts -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
-nix flake check --no-build --no-update-lock-file --show-trace
-nix eval .#nixosConfigurations.latitude.config.system.stateVersion
-nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
-nix build .#nixosConfigurations.latitude.config.system.build.toplevel
-nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
+find src modules -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+sudo nix --extra-experimental-features 'nix-command flakes' flake check --no-build --show-trace --all-systems
+sudo nix --extra-experimental-features 'nix-command flakes' flake check --no-build --show-trace \
+  --override-input shell-conf path:../shell-conf
+nix-store --verify --check-contents   # opcional, fora do ciclo de avaliação
+niri validate --config ~/.config/niri/config.kdl
 ```
 
-Também é obrigatório procurar resíduos no caminho ativo:
+A avaliação atual dos dois hosts e a validação KDL de latitude/myMachine passaram sem erro de opções inexistentes. Warnings de depreciação do nixpkgs/Home Manager e de outputs customizados não são falhas de avaliação; devem ser tratados em uma atualização futura, separada da migração arquitetural.
 
-```bash
-git grep -n -I -E 'legacy-shell|deprecated-shell|old-shell' -- ':!docs/archive/**' ':!ARCHITECTURE.md'
-```
+## Referências
 
-A avaliação local usa o backend Nix disponível no sandbox; os checks de build e a troca final ainda devem ser executados no NixOS real antes de `nixos-rebuild test` e `switch`.
-
-## 12. Referências
-
-[1]: https://nix-community.github.io/home-manager/installation/nixos.html "Home Manager — NixOS module"
-[2]: https://wiki.nixos.org/wiki/Hyprland "NixOS Wiki — Hyprland"
-[3]: https://wiki.nixos.org/wiki/UWSM "NixOS Wiki — UWSM"
-[4]: https://github.com/Joaoferraz-byte/shell-conf "shell-conf"
-[6]: https://github.com/InioX/matugen "Matugen"
-[7]: https://github.com/rvaiya/keyd "keyd"
-[8]: https://raw.githubusercontent.com/rvaiya/keyd/master/docs/keyd.scdoc "keyd manual"
-[9]: https://github.com/nix-community/nixvim "NixVim"
-[10]: https://xournalpp.github.io/guide/file-locations/ "Xournal++ file locations"
-[11]: https://docs.zen-browser.app/guides/live-editing "Zen Browser live editing"
-[12]: https://zennotes.org/docs "ZenNotes documentation"
+[1]: https://mhwombat.codeberg.page/nix-book/ "Mhwombat Nix Book"
+[2]: https://edolstra.github.io/pubs/phd-thesis.pdf "The Purely Functional Software Deployment Model"
+[3]: https://ekala-project.github.io/nix-book/ "Ekala Nix Book"
+[4]: https://saylesss88.github.io/ "Saylesss88 Nix Book"
+[5]: https://wiki.nixos.org/wiki/Niri "NixOS Wiki — Niri"
+[6]: https://github.com/noctalia-dev/noctalia-shell "Noctalia Shell"
+[7]: https://github.com/InioX/matugen "Matugen"
+[8]: https://github.com/rvaiya/keyd "keyd"

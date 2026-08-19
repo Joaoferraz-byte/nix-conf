@@ -1,66 +1,45 @@
 # nix-conf
 
-Configuração declarativa de NixOS para dois hosts, com uma base compartilhada de niri/Hyprland-UWSM, Home Manager, Noctalia, NixVim, Serpantinum como backend Matugen e serviços de desktop. O objetivo é manter a experiência comum entre notebook e computador, deixando divergências limitadas a hardware e pequenas capacidades de interface.
+`nix-conf` é a raiz declarativa de dois hosts NixOS, com uma composição compartilhada de **niri**, Home Manager, Noctalia, NixVim e serviços de desktop. O objetivo é manter o mesmo contrato de sessão entre notebook e computador, deixando diferenças limitadas a hardware, layout de teclado e política de energia.
 
 ## Hosts
 
 | Host | Perfil | Diferenças intencionais |
 |---|---|---|
-| `latitude` | notebook | energia, Intel, ext4 e widgets de Wi-Fi/Bluetooth prioritários |
-| `myMachine` | desktop | GPU/monitores, Btrfs/virtualização e Bluetooth opcional na interface |
+| `latitude` | Notebook | Layout interno irlandês, teclado externo brasileiro via keyd, energia Intel, Wi-Fi/Bluetooth e escala do painel interno. |
+| `myMachine` | Desktop | GPU, Btrfs/virtualização e descoberta dinâmica de monitores; nenhum output fictício é declarado. |
 
-A composição está em `modules/hosts/common-desktop.nix`. Ela injeta o módulo Home Manager do [shell-conf](https://github.com/Joaoferraz-byte/shell-conf) como backend de temas/aplicativos, o módulo oficial do [Noctalia](https://github.com/noctalia-dev/noctalia), o NixVim e o perfil do usuário; hardware e política específica continuam nos módulos de cada host.
+A composição comum está em `modules/hosts/common-desktop.nix`. Ela importa o módulo oficial do [Noctalia](https://github.com/noctalia-dev/noctalia), a API Home Manager do [shell-conf](https://github.com/Joaoferraz-byte/shell-conf), NixVim e os módulos de host. NixOS é o owner do compositor, input, portais, drivers e serviços privilegiados; Home Manager é o owner dos arquivos e serviços da sessão do usuário.
 
-## Shell
+## Sessão visual
 
-O shell visual padrão é o Noctalia v5+, anexado ao target systemd Wayland da sessão. O Serpantinum continua presente como adaptador NixOS/Home Manager: fornece Matugen, contratos nativos para aplicativos, scripts, teclado e o KDL niri, mas seus serviços QuickShell/awww são desativados quando `desktop.profile.shellBackend = "noctalia"`.
+**niri é o único compositor ativo. Noctalia é o único shell visual.** O arquivo `home/livara/niri.nix` instala um `config.kdl` com XKB, navegação, workspaces, fullscreen, screenshot nativo e chamadas IPC documentadas do Noctalia. `home/livara/monitors.nix` instala apenas `outputs.kdl`: a latitude recebe a escala do painel conhecido e o myMachine usa descoberta dinâmica, portanto não reserva um segundo monitor.
 
-NixOS habilita niri em `latitude` e Hyprland com UWSM em `myMachine`; Home Manager inicia Noctalia pelo módulo upstream. Noctalia é o único owner do wallpaper e usa `wallpaper_changed` para passar o caminho ativo ao Matugen. O sincronizador gera a paleta customizada Noctalia e os temas GTK, Qt, WezTerm, Neovim, Firefox/Zen, ZenNotes, Xournal++ e Vesktop/Vencord.
+O launcher e os painéis são abertos por IPC do Noctalia. Em particular, `Super+Space` abre o launcher, `Super+Shift+W` abre o seletor de wallpaper, `Super+Shift+S` usa a ação nativa de screenshot e `Super+F` alterna fullscreen. Não existe um segundo bar, daemon de wallpaper ou processo de shell concorrente no perfil.
 
-## Tema adaptativo
+## Temas por ecossistema
 
-O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. O weather usa Open-Meteo por coordenadas de Jardim João XXIII, com cache e fallback offline. O launcher Noctalia usa seu provider nativo e os ícones do tema Kora; `Super+H` e o ícone correspondente da barra continuam abrindo `~/.config/nixos` com Neo-tree no Neovim. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para Noctalia, QuickShell opcional, Hyprland, GTK3/GTK4, Qt, WezTerm, Neovim, Firefox/Zen, ZenNotes, Xournal++ e Vesktop/Vencord. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
+O [shell-conf](https://github.com/Joaoferraz-byte/shell-conf) expõe `programs.livara.visual`. Ele não é um shell: fornece templates Matugen, uma paleta dark-only derivada do wallpaper e o comando `sync-livara-themes`. Noctalia seleciona o wallpaper em `~/Wallpapers`, entrega `NOCTALIA_WALLPAPER_PATH` ao hook, Matugen gera a paleta mutável em `$XDG_STATE_HOME/livara/theme` e cada adapter materializa o formato específico do aplicativo.
 
-Firefox e Zen usam `chrome/userChrome.css` e `toolkit.legacyUserProfileCustomizations.stylesheets`. ZenNotes usa o tema customizado `custom-serpantinum`, com `theme.css`, `manifest.json`, `theme_family = "custom"`, `theme_id = "custom-serpantinum"` e `theme_mode = "dark"`.
+ZenNotes recebe `themes/livara/manifest.json` e `theme.css`; Firefox e Zen Browser recebem `userChrome.css`/`userContent.css`; GTK, Qt, WezTerm, Neovim, Cava, Tauon, Freesm Launcher, Vesktop e Xournal++ recebem seus contratos próprios. A existência de um template não é contada como aplicação do tema: o manifesto `applied-applications.json` registra os caminhos realmente materializados. O modo é sempre dark e não há integração Catppuccin.
 
-## Atalhos, locale e teclado 60%
+## Teclado e aplicações
 
-A tradução global de `Ctrl+H/J/K/L` é feita em `modules/features/keyd.nix`, não no compositor. A camada keyd `[control:C]` emite `left`, `down`, `up` e `right`, de modo que os aplicativos recebam eventos de seta genuínos antes de interpretar H/J/K/L. O wildcard cobre os dois hosts; IDs específicos podem ser configurados depois de validar `keyd monitor` em cada teclado.
+O XKB do niri usa o layout definido pelo host. A latitude seleciona `ie` para o teclado interno; a camada keyd é restringida aos IDs do Aitek Delta TM6101 e fornece os atalhos de navegação/pontuação do teclado externo. O myMachine usa o padrão `br(abnt2)`. O console, XKB do sistema e XKB do niri são camadas distintas e precisam manter o mesmo objetivo sem duplicar keybinds.
 
-## Wallpaper e sincronização
+`home/livara/sync.nix` sincroniza `~/Wallpapers` e `~/Vault` com timers independentes. O wrapper `zennotes-livara` faz pull antes de abrir ZenNotes e executa `git add`, commit e push no encerramento normal; o serviço de sessão também tenta salvar no logout/desligamento gracioso. Uma perda abrupta de energia não pode executar código depois do corte e, portanto, não é prometida como garantia impossível.
 
-`home/livara/sync.nix` mantém timers independentes para Wallpapers e Vault. O clone inicial é atômico; atualizações usam fetch/fast-forward e falhas de rede mantêm o último checkout válido. O wallpaper service não depende de um `git pull` bem-sucedido para iniciar a sessão.
+## Validação
 
-## Repositórios relacionados
-
-`vim-conf` continua sendo o owner de NixVim, plugins, linguagens e keymaps. `xournal-conf` continua sendo o owner dos arquivos editáveis de Xournal++, como `settings.xml`, `toolbar.ini`, template LaTeX e paletas. `Wallpapers` é tratado como catálogo de assets, sem lógica de sessão.
-
-## Instalação e validação
-
-A instalação normal é realizada por `install.sh`, que deve ser executado como usuário comum. A configuração valida hardware, árvore Git, `nix flake check --no-build --no-update-lock-file` e avaliação do host antes de chamar `nixos-rebuild`. O módulo upstream do Noctalia também valida a configuração TOML quando `programs.noctalia.validateConfig = true`.
-
-```bash
-./install.sh
-```
-
-Para validar:
+A validação progressiva recomendada é:
 
 ```bash
 git diff --check
-nix flake check --no-build --no-update-lock-file --show-trace
-nix eval .#nixosConfigurations.latitude.config.system.stateVersion
-nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
-nix build .#nixosConfigurations.latitude.config.system.build.toplevel
-nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
+find src modules -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+sudo nix --extra-experimental-features 'nix-command flakes' flake check --no-build --show-trace --all-systems
+sudo nix --extra-experimental-features 'nix-command flakes' flake check --no-build --show-trace \
+  --override-input shell-conf path:../shell-conf
+niri validate --config ~/.config/niri/config.kdl
 ```
 
-Depois da ativação, confira:
-
-```bash
-systemctl --user status noctalia.service
-systemctl --user status serpantinum-theme-sync.service
-systemctl --user status wallpapers-sync.service
-keyd monitor
-```
-
-A auditoria usa Nix em modo local para avaliação; builds completos e `nixos-rebuild switch` devem ainda ser executados no NixOS real, com os drivers e hardware de cada host.
+O check local dos dois hosts foi executado sem build. A avaliação apresentou somente warnings existentes de Nixpkgs/Home Manager e de outputs customizados; não apresentou erro de opção inexistente. Builds completos e `nixos-rebuild test` ainda devem ser executados no hardware real antes de uma troca permanente.

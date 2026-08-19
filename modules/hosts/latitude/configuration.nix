@@ -21,17 +21,16 @@
     networking.hostName = "latitude";
     networking.networkmanager.enable = true;
 
-    # Serpantinum supports both backends; this host selects the niri session.
+    # niri is the sole compositor and Noctalia is the visual shell.
     desktop.profile.compositor = "niri";
-    desktop.profile.shellBackend = "noctalia";
 
-    # Bluetooth is a laptop-only capability in the shared Serpantinum setup.
+    # Bluetooth is a laptop-only capability in the shared desktop setup.
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = true;
       settings.General.Experimental = true;
     };
-    # Bluetooth is controlled by the Serpantinum network panel; do not start
+    # Bluetooth is controlled by Noctalia; do not start
     # Blueman's tray applet as a duplicate background application.
     services.blueman.enable = false;
 
@@ -66,15 +65,14 @@
         CPU_MAX_PERF_ON_AC = 100;
         CPU_MIN_PERF_ON_BAT = 0;
         CPU_MAX_PERF_ON_BAT = 60;
-        # TLP 1.10: keep the system and the QuickShell profile deterministic.
+        # TLP 1.10: keep the system profile deterministic.
         TLP_AUTO_SWITCH = 0;
         TLP_PROFILE_DEFAULT = "BAL";
       };
     };
     services.thermald.enable = true;
 
-    # Keep TLP as the single power-management owner, but expose its
-    # power-profiles-daemon-compatible D-Bus API to the QuickShell controls.
+    # Keep TLP as the single power-management owner on this laptop.
     services.power-profiles-daemon.enable = lib.mkForce false;
     services.tlp.pd.enable = true;
 
