@@ -87,12 +87,21 @@
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
               btrfs-progs
+              dmidecode
               git
+              kmod
+              lshw
               nix
               nixos-install-tools
               nixos-rebuild
+              pciutils
+              usbutils
               util-linux
             ];
+            shellHook = ''
+              export NIX_CONFIG="''${NIX_CONFIG:-}
+              experimental-features = nix-command flakes"
+            '';
           };
 
           devShells.python = pkgs.mkShell {

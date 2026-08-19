@@ -5,6 +5,12 @@ trap 'printf "Installation aborted at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 cd -- "$SCRIPT_DIR"
 
+# The installer must be able to enter the flake devShell even on a fresh
+# recovery/reset environment where the global Nix configuration lacks these
+# features. The last assignment wins if the user already configured them.
+export NIX_CONFIG="${NIX_CONFIG:-}
+experimental-features = nix-command flakes"
+
 INSTALL_LOG="${NIX_CONF_LOG_FILE:-${XDG_STATE_HOME:-${HOME}/.local/state}/nix-conf/install.log}"
 
 init_log() {

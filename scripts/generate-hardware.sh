@@ -448,6 +448,31 @@ validate_device_references() {
   done
 }
 
+hardware_config_matches_target() {
+  local stable_root mountpoint source fstype options relative subvol_option
+  stable_root="$(stable_device_path "$ROOT_SOURCE")"
+  [ -n "$stable_root" ] || return 1
+  grep -Fq "$stable_root" "$HARDWARE_FILE" || return 1
+
+  while IFS=$'\t' read -r mountpoint source fstype options; do
+    [ -n "$mountpoint" ] || continue
+    relative="$(relative_mountpoint "$mountpoint")"
+    source="${source%%[*}"
+    case "$fstype" in
+      btrfs)
+        grep -Fq "fileSystems.\"$relative\"" "$HARDWARE_FILE" || return 1
+        while IFS= read -r subvol_option; do
+          [ -n "$subvol_option" ] || continue
+          grep -Fq "$subvol_option" "$HARDWARE_FILE" || return 1
+        done < <(btrfs_subvolume_options "$options")
+        ;;
+      vfat)
+        grep -Fq 'fsType = "vfat"' "$HARDWARE_FILE" || return 1
+        ;;
+    esac
+  done < <(mount_records)
+}
+
 validate_generated_config() {
   [ -s "$TEMP_FILE" ] || fail "Detected hardware configuration is empty: $SOURCE_LABEL"
   grep -qE 'fileSystems\."/' "$TEMP_FILE" || fail "Detected hardware configuration contains no fileSystems entries: $SOURCE_LABEL"
@@ -488,13 +513,20 @@ print_detected_mounts
 if [ "${NIX_CONF_ALLOW_HARDWARE_REPLACE:-0}" != "1" ] \
   && { ! git -C "$REPO_ROOT" diff --quiet -- "$HARDWARE_FILE" \
     || ! git -C "$REPO_ROOT" diff --cached --quiet -- "$HARDWARE_FILE"; }; then
-  printf 'Tracked hardware file has local changes; validating and reusing it without replacement: %s\n' "$HARDWARE_FILE"
-  cp -- "$HARDWARE_FILE" "$TEMP_FILE"
-  SOURCE_LABEL="$HARDWARE_FILE (reused local configuration)"
-  validate_generated_config
-  printf 'Reused and validated: %s\n' "$HARDWARE_FILE"
-  printf 'Source: %s\n' "$SOURCE_LABEL"
-  exit 0
+  if hardware_config_matches_target; then
+    printf 'Tracked hardware file matches the mounted target; validating and reusing it: %s\n' "$HARDWARE_FILE"
+    cp -- "$HARDWARE_FILE" "$TEMP_FILE"
+    SOURCE_LABEL="$HARDWARE_FILE (reused compatible local configuration)"
+    validate_generated_config
+    printf 'Reused and validated: %s\n' "$HARDWARE_FILE"
+    printf 'Source: %s\n' "$SOURCE_LABEL"
+    exit 0
+  fi
+  if [ "${NIX_CONF_AUTO_HARDWARE:-1}" != "1" ]; then
+    fail 'Tracked hardware file does not match the mounted target. Automatic regeneration is disabled; set NIX_CONF_AUTO_HARDWARE=1 after mounting the intended target.'
+  fi
+  printf 'Tracked hardware file does not match the mounted target; automatic regeneration is enabled.\n' >&2
+  printf 'Set NIX_CONF_AUTO_HARDWARE=0 to require an explicit compatible hardware file.\n' >&2
 fi
 
 if [ -n "$SOURCE_OVERRIDE" ]; then
