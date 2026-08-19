@@ -171,6 +171,10 @@ in
       XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
     }
 
+    // Noctalia v5 documents compositor-owned startup under niri. Wait for
+    // the user wallpaper checkout first so random startup selection has a
+    // populated directory; Noctalia remains the only visual-shell process.
+    spawn-at-startup "sh" "-c" "systemctl --user start --wait wallpapers-sync.service || true; exec noctalia"
     spawn-at-startup "systemctl" "--user" "start" "--no-block" "livara-theme-sync.service"
   '';
 }

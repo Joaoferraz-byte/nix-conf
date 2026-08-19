@@ -92,7 +92,10 @@ in
     programs.noctalia = {
       enable = true;
       package = noctaliaPackage;
-      systemd.enable = true;
+      # niri owns the compositor session startup; start Noctalia from the
+      # compositor's documented spawn-at-startup entry instead of creating a
+      # competing graphical-session systemd launcher.
+      systemd.enable = false;
       validateConfig = true;
       customPalettes = {
         Livara = builtins.fromJSON (builtins.readFile ./noctalia-livara-bootstrap.json);
@@ -126,7 +129,15 @@ in
           directory = visual.wallpaperDirectory;
           directory_dark = visual.wallpaperDirectory;
           directory_light = visual.wallpaperDirectory;
-          automation.enabled = false;
+          # Pick a wallpaper at shell startup when no persisted default exists.
+          # The directory is synchronized by wallpapers-sync before the next
+          # periodic run, and Noctalia owns the actual wallpaper application.
+          automation = {
+            enabled = true;
+            interval_seconds = 86400;
+            order = "random";
+            recursive = true;
+          };
         };
         theme = {
           mode = "dark";
