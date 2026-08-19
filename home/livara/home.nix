@@ -1,4 +1,4 @@
-{ config, inputs, desktopProfile ? { }, userName ? "livara", ... }:
+{ config, inputs, pkgs, desktopProfile ? { }, userName ? "livara", ... }:
 {
   imports = [
     inputs.zen-browser.homeModules.beta
@@ -8,7 +8,6 @@
     ./niri.nix
     (import ./monitors.nix { monitorProfile = desktopProfile.monitorProfile or "myMachine"; })
     ./themes.nix
-    ./noctalia.nix
     ./sync.nix
   ];
 
@@ -28,6 +27,7 @@
     enable = true;
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
     themeName = "Livara";
+    noctaliaPackage = inputs.noctalia.packages.${pkgs.system}.default;
   };
 
   home.sessionVariables = {
