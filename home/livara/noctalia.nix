@@ -83,7 +83,8 @@ EOF
     "${pkgs.jq}/bin/jq" -e '(.dark and .light) and (.dark.mPrimary and .dark.mOnPrimary and .dark.terminal.normal and .dark.terminal.bright)' "$palette_tmp" >/dev/null
     mv -f "$palette_tmp" "${palettePath}"
     "${noctaliaBin}" msg color-scheme-set custom Livara >/dev/null 2>&1 || true
-    log "Noctalia custom palette refreshed"
+    "${syncThemes}" dark >> "$log_file" 2>&1
+    log "Noctalia custom palette and application adapters refreshed"
   '';
 
 in
