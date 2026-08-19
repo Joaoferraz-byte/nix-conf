@@ -359,8 +359,9 @@ btrfs_subvolume_options() {
 }
 
 write_mount_table_config() {
-  local mountpoint source fstype options relative stable subvol_option
+  local mountpoint source fstype options relative subvol_option
   local swap_source swap_stable
+  local -a subvol_options=()
   local -a seen_mountpoints=()
   collect_initrd_modules
   {
@@ -393,10 +394,15 @@ write_mount_table_config() {
     printf '  fileSystems."%s" = {\n' "$relative" >> "$TEMP_FILE"
     printf '    device = "%s";\n    fsType = "%s";\n' "$stable" "$fstype" >> "$TEMP_FILE"
     if [ "$fstype" = "btrfs" ]; then
-      while IFS= read -r subvol_option; do
-        [ -n "$subvol_option" ] || continue
-        printf '    options = [ "%s" ];\n' "$subvol_option" >> "$TEMP_FILE"
-      done < <(btrfs_subvolume_options "$options")
+      subvol_options=()
+      mapfile -t subvol_options < <(btrfs_subvolume_options "$options")
+      if [ "${#subvol_options[@]}" -gt 0 ]; then
+        printf '    options = [' >> "$TEMP_FILE"
+        for subvol_option in "${subvol_options[@]}"; do
+          printf ' "%s"' "$subvol_option" >> "$TEMP_FILE"
+        done
+        printf ' ];\n' >> "$TEMP_FILE"
+      fi
     fi
     printf '  };\n' >> "$TEMP_FILE"
   done < <(mount_records)
@@ -436,6 +442,34 @@ copy_hardware_source() {
   cp -- "$source" "$TEMP_FILE"
 }
 
+has_duplicate_declarations() {
+  local file="${1:-$TEMP_FILE}"
+  local pattern count
+  if ! awk '
+    /^[[:space:]]*fileSystems\."[^"]+"[[:space:]]*=/ {
+      if (++seen[$0] > 1) duplicate = 1
+    }
+    END { exit duplicate ? 1 : 0 }
+  ' "$file"; then
+    return 0
+  fi
+  while IFS= read -r pattern; do
+    [ -n "$pattern" ] || continue
+    count="$(grep -Ec "$pattern" "$file" || true)"
+    [ "$count" -le 1 ] || return 0
+  done <<'EOF'
+^[[:space:]]*imports[[:space:]]*=
+^[[:space:]]*boot\.initrd\.availableKernelModules[[:space:]]*=
+^[[:space:]]*boot\.initrd\.kernelModules[[:space:]]*=
+^[[:space:]]*boot\.kernelModules[[:space:]]*=
+^[[:space:]]*boot\.extraModulePackages[[:space:]]*=
+^[[:space:]]*boot\.supportedFilesystems[[:space:]]*=
+^[[:space:]]*swapDevices[[:space:]]*=
+^[[:space:]]*nixpkgs\.hostPlatform[[:space:]]*=
+EOF
+  return 1
+}
+
 validate_device_references() {
   local device
   local -a devices
@@ -450,6 +484,7 @@ validate_device_references() {
 
 hardware_config_matches_target() {
   local stable_root mountpoint source fstype options relative subvol_option
+  has_duplicate_declarations "$HARDWARE_FILE" && return 1
   stable_root="$(stable_device_path "$ROOT_SOURCE")"
   [ -n "$stable_root" ] || return 1
   grep -Fq "$stable_root" "$HARDWARE_FILE" || return 1
@@ -475,6 +510,9 @@ hardware_config_matches_target() {
 
 validate_generated_config() {
   [ -s "$TEMP_FILE" ] || fail "Detected hardware configuration is empty: $SOURCE_LABEL"
+  if has_duplicate_declarations "$TEMP_FILE"; then
+    fail "Detected hardware configuration contains duplicate declarations: $SOURCE_LABEL"
+  fi
   grep -qE 'fileSystems\."/' "$TEMP_FILE" || fail "Detected hardware configuration contains no fileSystems entries: $SOURCE_LABEL"
   grep -q 'fileSystems."/"' "$TEMP_FILE" || fail "Detected hardware configuration has no root filesystem entry: $SOURCE_LABEL"
   grep -qE 'BOOT-PARTUUID|CHANGE_ME|TODO|PLACEHOLDER|PARTUUID_HERE|UUID_HERE|ROOT-PARTUUID' "$TEMP_FILE" \
