@@ -1,40 +1,46 @@
+# Generated from the mounted target topology by generate-hardware.sh.
 { config, lib, pkgs, modulesPath, ... }:
-{
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-  ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
+{
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+
+  boot.initrd.availableKernelModules = [
+    "sd_mod"
+    "btrfs"
+    "vfat"
+    "usbhid"
+    "usb_storage"
+    "xhci_pci"
+  ];
+  boot.initrd.kernelModules = [ "btrfs" ];
   boot.extraModulePackages = [ ];
+  boot.supportedFilesystems = [ "btrfs" ];
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/6a06ee3c-b9bc-4446-bd0c-302a7c249385";
+    device = "/dev/disk/by-uuid/7dc93333-9e9a-4ed8-adc6-a9e021464687";
     fsType = "btrfs";
+    options = [ "subvolid=5" "subvol=/" ];
   };
-
-  fileSystems."/home" = {
-    device = "/dev/disk/by-uuid/6a06ee3c-b9bc-4446-bd0c-302a7c249385";
-    fsType = "btrfs";
-    options = [ "subvol=home" ];
-  };
-
   fileSystems."/nix" = {
-    device = "/dev/disk/by-uuid/6a06ee3c-b9bc-4446-bd0c-302a7c249385";
+    device = "/dev/disk/by-uuid/7dc93333-9e9a-4ed8-adc6-a9e021464687";
     fsType = "btrfs";
-    options = [ "subvol=nix" ];
+    options = [ "subvolid=257" "subvol=/nix" ];
   };
-
+  fileSystems."/home" = {
+    device = "/dev/disk/by-uuid/7dc93333-9e9a-4ed8-adc6-a9e021464687";
+    fsType = "btrfs";
+    options = [ "subvolid=256" "subvol=/home" ];
+  };
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/F5C4-40CC";
+    device = "/dev/disk/by-uuid/E21D-EFCE";
     fsType = "vfat";
-    options = [ "fmask=0077" "dmask=0077" ];
   };
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/9f8c4758-f9bf-4e78-9267-064f687dab50"; }
+    { device = "/dev/disk/by-uuid/79febc52-42dd-4d8e-ba13-eea976778dfb"; }
+    { device = "/dev/disk/by-uuid/73f0052c-6927-45c4-b3a2-8cdc4cbd0d8b"; }
   ];
 
+  networking.useDHCP = lib.mkDefault true;
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }
