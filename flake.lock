@@ -594,6 +594,26 @@
         "type": "github"
       }
     },
+    "noctalia": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787106894,
+        "narHash": "sha256-ZLsON94GGmg7cAC/9Oyz0P+mPhemdvQIKwLcFEe785k=",
+        "owner": "noctalia-dev",
+        "repo": "noctalia",
+        "rev": "b38bf2dde1195e459b4b2a436bde970001d5d5ce",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "repo": "noctalia",
+        "type": "github"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": [
@@ -683,6 +703,7 @@
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
+        "noctalia": "noctalia",
         "shell-conf": "shell-conf",
         "stylix": "stylix",
         "vim-conf": "vim-conf",
@@ -715,11 +736,11 @@
         "quickshell": "quickshell"
       },
       "locked": {
-        "lastModified": 1787125858,
-        "narHash": "sha256-LLrFbAYQF+dDYhlMLA6g4kcGMCYcA65RAhZBjfcqIWI=",
+        "lastModified": 1787129972,
+        "narHash": "sha256-2rBZXYQyAgv4BgsxRdxgTdA02rExLxzXp6lrtKX1ONE=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "532540b3e36a824497123b85fa63020eb21d3536",
+        "rev": "bea703b7f1041c0dad4c121ed6f2476c7eb468aa",
         "type": "github"
       },
       "original": {

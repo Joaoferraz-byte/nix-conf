@@ -43,21 +43,21 @@ A composição comum recebe `userName` e `hostName` por `extraSpecialArgs`. Os d
 
 O flake do `nix-conf` importa `shell-conf` e não contém inputs operacionais de shells legados. O repositório `shell-conf` mantém uma cópia revisada do source Serpantinum necessário porque o upstream não oferece flake NixOS estável.
 
-## 4. Hyprland, UWSM e Serpantinum
+## 4. Hyprland, niri, Noctalia e Serpantinum
 
-`modules/features/hyprland.nix` habilita `programs.hyprland.enable = true`, `withUWSM = true` e o portal Hyprland. Home Manager não inicia um segundo lifecycle do compositor. `home/livara/session.nix` owns apenas `hypridle`, diretório de screenshots e limpeza segura de arquivos Lua legados.
+`modules/features/hyprland.nix` habilita `programs.hyprland.enable = true`, `withUWSM = true` e o portal Hyprland. `modules/features/niri.nix` habilita o niri para `latitude`; o display manager seleciona a sessão correta por `desktop.profile.compositor`. Home Manager não inicia um segundo lifecycle do compositor. `home/livara/session.nix` possui apenas `hypridle`, diretório de screenshots e limpeza segura de arquivos Lua legados.
 
-O módulo Home Manager do `shell-conf` instala os assets estáticos em `~/.config/hypr`, inicia `serpantinum-shell.service` com QuickShell e inicia `serpantinum-wallpaper-daemon.service` com `awww`. O autostart upstream não inicia novamente esses processos.
+O shell visível é selecionado por `desktop.profile.shellBackend`, atualmente `noctalia`. O módulo upstream do Noctalia é anexado ao target systemd Wayland da sessão. O `shell-conf` continua instalado como adaptador de Matugen, contratos de aplicativos, scripts canônicos e geração do KDL; quando Noctalia está ativo, `serpantinum-shell.service` e `serpantinum-wallpaper-daemon.service` não são criados.
 
 | Concern | Owner |
 |---|---|
-| Login e compositor | NixOS Hyprland + UWSM |
+| Login e compositor | NixOS niri ou Hyprland/UWSM |
 | Idle/lock policy | `home/livara/session.nix` + hypridle |
-| Shell surface, widgets, launcher e settings UI | `shell-conf` / Serpantinum |
-| Wallpaper daemon | `shell-conf` / user systemd |
+| Shell surface, launcher e panels | Noctalia + IPC documentado |
+| Wallpaper selection and transitions | Noctalia |
 | Wallpaper catalog | `Wallpapers` + `sync.nix` |
+| Matugen and application adapters | `shell-conf` / `sync-serpantinum-themes` |
 | Privileged input remapping | `modules/features/keyd.nix` |
-| Runtime colors | `shell-conf` / Matugen |
 
 ## 5. Serpantinum como adaptador NixOS
 
@@ -67,6 +67,7 @@ O módulo Home Manager declara opções tipadas:
 
 ```text
 programs.serpantinum.enable
+programs.serpantinum.shellBackend
 programs.serpantinum.wallpaperDirectory
 programs.serpantinum.hostProfile
 programs.serpantinum.networkWidgets
@@ -81,9 +82,12 @@ Matugen é executado uma vez por troca de wallpaper e gera outputs mutáveis. Te
 
 ```text
 image under WALLPAPER_DIR
-  -> matugen image
-    -> QuickShell JSON
-    -> Hyprland colors.conf
+  -> Noctalia wallpaper_changed hook
+    -> matugen image
+      -> Matugen token JSON
+      -> Noctalia custom palette JSON
+      -> QuickShell JSON when Serpantinum backend is selected
+      -> Hyprland colors.conf when the Hyprland adapter is active
     -> GTK3/GTK4 CSS
     -> Qt palettes and QSS
     -> WezTerm colors (native Lua template)
@@ -101,7 +105,8 @@ A geração usa arquivos temporários e `mv` atômico. O modo inicial é dark: d
 
 | Consumer | Contrato |
 |---|---|
-| QuickShell | `SERPANTINUM_THEME_JSON` aponta para `qs_colors.json` |
+| Noctalia | `~/.config/noctalia/palettes/Serpantinum.json`, generated from Matugen roles |
+| QuickShell | `SERPANTINUM_THEME_JSON` points to `qs_colors.json` when the Serpantinum backend is selected |
 | GTK/Nautilus | `gtk-3.0/gtk.css`, `gtk-4.0/gtk.css`, dconf e Flatpak read access |
 | Qt | qt5ct/qt6ct palette e QSS em paths do usuário |
 | WezTerm | Lua `dofile` de `~/.config/wezterm/matugen-colors.lua` e hook de reload |

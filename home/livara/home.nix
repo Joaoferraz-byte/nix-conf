@@ -14,6 +14,7 @@ in
     ./session.nix
     (import ./monitors.nix { monitorProfile = desktopProfile.monitorProfile or "myMachine"; })
     ./themes.nix
+    ./noctalia.nix
     ./sync.nix
   ];
 
@@ -29,6 +30,7 @@ in
   # Environment
   programs.serpantinum = {
     enable = true;
+    shellBackend = desktopProfile.shellBackend;
     inherit compositor;
     hostProfile = desktopProfile.shellProfile or "desktop";
     powerWidgetVariant = desktopProfile.powerWidgetVariant or "battery";

@@ -135,9 +135,9 @@ in
 
   systemd.user.services.wallpapers-sync = {
     Unit = {
-      Description = "Sync the canonical wallpaper repository and apply its theme";
-      After = [ "network-online.target" "serpantinum-wallpaper-daemon.service" ];
-      Wants = [ "network-online.target" "serpantinum-wallpaper-daemon.service" ];
+      Description = "Sync the canonical wallpaper repository for Noctalia and Matugen";
+      After = [ "network-online.target" ];
+      Wants = [ "network-online.target" ];
     };
     Service = {
       Type = "oneshot";

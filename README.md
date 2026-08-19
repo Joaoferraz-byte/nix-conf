@@ -1,6 +1,6 @@
 # nix-conf
 
-Configuração declarativa de NixOS para dois hosts, com uma base compartilhada de Hyprland/UWSM, Home Manager, NixVim, Serpantinum e serviços de desktop. O objetivo é manter a experiência comum entre notebook e computador, deixando divergências limitadas a hardware e pequenas capacidades de interface.
+Configuração declarativa de NixOS para dois hosts, com uma base compartilhada de niri/Hyprland-UWSM, Home Manager, Noctalia, NixVim, Serpantinum como backend Matugen e serviços de desktop. O objetivo é manter a experiência comum entre notebook e computador, deixando divergências limitadas a hardware e pequenas capacidades de interface.
 
 ## Hosts
 
@@ -9,17 +9,17 @@ Configuração declarativa de NixOS para dois hosts, com uma base compartilhada 
 | `latitude` | notebook | energia, Intel, ext4 e widgets de Wi-Fi/Bluetooth prioritários |
 | `myMachine` | desktop | GPU/monitores, Btrfs/virtualização e Bluetooth opcional na interface |
 
-A composição está em `modules/hosts/common-desktop.nix`. Ela injeta o mesmo módulo Home Manager do `shell-conf`, o NixVim e o perfil do usuário; hardware e política específica continuam nos módulos de cada host.
+A composição está em `modules/hosts/common-desktop.nix`. Ela injeta o módulo Home Manager do [shell-conf](https://github.com/Joaoferraz-byte/shell-conf) como backend de temas/aplicativos, o módulo oficial do [Noctalia](https://github.com/noctalia-dev/noctalia), o NixVim e o perfil do usuário; hardware e política específica continuam nos módulos de cada host.
 
 ## Shell
 
-O shell visual ativo é o Serpantinum, adaptado e publicado pelo repositório [shell-conf](https://github.com/Joaoferraz-byte/shell-conf). A árvore local contém a cópia QuickShell/Hyprland revisada e expõe `homeManagerModules.default`; o flake local é um adaptador NixOS/Home Manager, não um flake fornecido pela fonte original.
+O shell visual padrão é o Noctalia v5+, anexado ao target systemd Wayland da sessão. O Serpantinum continua presente como adaptador NixOS/Home Manager: fornece Matugen, contratos nativos para aplicativos, scripts, teclado e o KDL niri, mas seus serviços QuickShell/awww são desativados quando `desktop.profile.shellBackend = "noctalia"`.
 
-NixOS habilita Hyprland com UWSM e fornece dependências system-side; Home Manager instala o shell e seus serviços de usuário; `serpantinum-shell` inicia QuickShell; `serpantinum-wallpaper-daemon` gerencia `awww`; e `serpantinum-wallpaper-random-on-login` seleciona a imagem inicial e executa Matugen.
+NixOS habilita niri em `latitude` e Hyprland com UWSM em `myMachine`; Home Manager inicia Noctalia pelo módulo upstream. Noctalia é o único owner do wallpaper e usa `wallpaper_changed` para passar o caminho ativo ao Matugen. O sincronizador gera a paleta customizada Noctalia e os temas GTK, Qt, WezTerm, Neovim, Firefox/Zen, ZenNotes, Xournal++ e Vesktop/Vencord.
 
 ## Tema adaptativo
 
-O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. O weather usa Open-Meteo por coordenadas de Jardim João XXIII, com cache e fallback offline. O launcher usa a API nativa `DesktopEntries` do QuickShell; `Super+H` e o ícone correspondente da barra abrem `~/.config/nixos` com Neo-tree no Neovim. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para QuickShell, Hyprland, GTK3/GTK4, Qt, WezTerm, Neovim, Firefox/Zen, ZenNotes, Xournal++ e Vesktop/Vencord. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
+O repositório de wallpapers é sincronizado para `~/Wallpapers`, caminho canônico exposto como `WALLPAPER_DIR`. O weather usa Open-Meteo por coordenadas de Jardim João XXIII, com cache e fallback offline. O launcher Noctalia usa seu provider nativo e os ícones do tema Kora; `Super+H` e o ícone correspondente da barra continuam abrindo `~/.config/nixos` com Neo-tree no Neovim. Uma troca de wallpaper gera uma paleta Matugen e arquivos mutáveis para Noctalia, QuickShell opcional, Hyprland, GTK3/GTK4, Qt, WezTerm, Neovim, Firefox/Zen, ZenNotes, Xournal++ e Vesktop/Vencord. O modo inicial é dark e o sincronizador preserva backups de CSS de perfil antes de substituir arquivos.
 
 Firefox e Zen usam `chrome/userChrome.css` e `toolkit.legacyUserProfileCustomizations.stylesheets`. ZenNotes usa o tema customizado `custom-serpantinum`, com `theme.css`, `manifest.json`, `theme_family = "custom"`, `theme_id = "custom-serpantinum"` e `theme_mode = "dark"`.
 
@@ -37,7 +37,7 @@ A tradução global de `Ctrl+H/J/K/L` é feita em `modules/features/keyd.nix`, n
 
 ## Instalação e validação
 
-A instalação normal é realizada por `install.sh`, que deve ser executado como usuário comum. A configuração valida hardware, árvore Git, `nix flake check --no-build --no-update-lock-file` e avaliação do host antes de chamar `nixos-rebuild`.
+A instalação normal é realizada por `install.sh`, que deve ser executado como usuário comum. A configuração valida hardware, árvore Git, `nix flake check --no-build --no-update-lock-file` e avaliação do host antes de chamar `nixos-rebuild`. O módulo upstream do Noctalia também valida a configuração TOML quando `programs.noctalia.validateConfig = true`.
 
 ```bash
 ./install.sh
@@ -57,9 +57,9 @@ nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
 Depois da ativação, confira:
 
 ```bash
-systemctl --user status serpantinum-shell.service
-systemctl --user status serpantinum-wallpaper-daemon.service
-systemctl --user status serpantinum-wallpaper-random-on-login.service
+systemctl --user status noctalia.service
+systemctl --user status serpantinum-theme-sync.service
+systemctl --user status wallpapers-sync.service
 keyd monitor
 ```
 

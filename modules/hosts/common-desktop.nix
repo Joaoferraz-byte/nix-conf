@@ -27,7 +27,13 @@
       options.desktop.profile.shellProfile = lib.mkOption {
         type = lib.types.enum [ "laptop" "desktop" ];
         default = "desktop";
-        description = "Serpantinum capability profile; independent of networking.hostName.";
+        description = "Legacy capability profile retained for application adapters.";
+      };
+
+      options.desktop.profile.shellBackend = lib.mkOption {
+        type = lib.types.enum [ "serpantinum" "noctalia" ];
+        default = "noctalia";
+        description = "Visible Wayland shell backend. Noctalia owns the UI; Serpantinum remains the Matugen adapter.";
       };
 
       options.desktop.profile.powerWidgetVariant = lib.mkOption {
@@ -113,6 +119,8 @@
           XKB_DEFAULT_LAYOUT = cfg.keyboardLayout;
           XKB_DEFAULT_VARIANT = cfg.keyboardVariant;
           XKB_DEFAULT_OPTIONS = "";
+          GTK_ICON_THEME = "Kora";
+          QT_ICON_THEME = "Kora";
         };
 
         services.xserver.xkb = {
@@ -140,10 +148,12 @@
             compositor = cfg.compositor;
             powerWidgetVariant = cfg.powerWidgetVariant;
             tabletWidget = cfg.tabletWidget;
+            shellBackend = cfg.shellBackend;
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix
             inputs.shell-conf.homeManagerModules.default
+            inputs.noctalia.homeModules.default
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

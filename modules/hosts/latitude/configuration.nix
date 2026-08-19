@@ -23,6 +23,7 @@
 
     # Serpantinum supports both backends; this host selects the niri session.
     desktop.profile.compositor = "niri";
+    desktop.profile.shellBackend = "noctalia";
 
     # Bluetooth is a laptop-only capability in the shared Serpantinum setup.
     hardware.bluetooth = {

@@ -14,6 +14,7 @@
         # profile is explicitly `myMachine`; consumers must not infer this
         # identity from networking.hostName.
         desktop.profile.compositor = "hyprland";
+        desktop.profile.shellBackend = "noctalia";
         desktop.profile.shellProfile = "desktop";
         desktop.profile.monitorProfile = "myMachine";
         desktop.profile.networkWidgets = true;

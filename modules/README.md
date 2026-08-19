@@ -23,7 +23,7 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
 ## Shared desktop profile
 
-`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the local Hyprland/UWSM system module, the Serpantinum Home Manager adapter, and the NixVim module. The `home/livara/` profile is split by ownership:
+`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the local Hyprland/UWSM and niri system modules, the Serpantinum Matugen/application adapter, the Noctalia Home Manager module, and the NixVim module. The `home/livara/` profile is split by ownership:
 
 | File | Owner |
 |---|---|
@@ -35,9 +35,9 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
 ## Serpantinum adapter
 
-The active shell is provided by `inputs.shell-conf.homeManagerModules.default`. It imports the reviewed Serpantinum source tree from `Joaoferraz-byte/shell-conf`, starts QuickShell and the wallpaper daemon as user services, and keeps generated Matugen outputs outside the Nix store. The source tree is shared by both hosts and receives only a small `hostProfile` plus Wi-Fi/Bluetooth capability flags.
+The visible shell backend is selected by `desktop.profile.shellBackend`, whose current default is `noctalia`. Noctalia is provided by the official `inputs.noctalia.homeModules.default` module and is attached to the Home Manager Wayland systemd target. The Serpantinum module remains enabled as a backend for Matugen, application-specific theme adapters, canonical scripts, keyboard contracts, and the niri KDL; when the backend is `noctalia`, its QuickShell and awww surface services are disabled declaratively.
 
-The wallpaper repository is synchronized to `~/Wallpapers`, exposed as `WALLPAPER_DIR`, and used by both the picker and the random-on-login service. The active theme is generated once per wallpaper and adapted for QuickShell, GTK, Qt, Kitty/WezTerm, Neovim, Firefox/Zen, and ZenNotes.
+The wallpaper repository is synchronized to `~/Wallpapers`. Noctalia owns wallpaper selection and transitions through its documented IPC; its `wallpaper_changed` hook passes the active path to Matugen, which regenerates the dark-only palette and application contracts atomically. The generated Noctalia palette uses the official custom-palette JSON contract, while GTK/Qt icon selection remains a separate Kora desktop-theme concern.
 
 The Ctrl+H/J/K/L translation is deliberately not a Hyprland or QuickShell binding. It is owned by `features/keyd.nix`, where keyd emits real arrow events in the `[control:C]` layer before applications consume the input.
 
