@@ -1,8 +1,29 @@
 { config, inputs, lib, pkgs, desktopProfile ? { }, userName ? "livara", ... }:
 let
   isMyMachine = (desktopProfile.monitorProfile or "myMachine") == "myMachine";
-  barRightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "notificationButton" "controlCenterButton" ]
-    ++ lib.optional (!isMyMachine) "battery";
+  barRightWidgets = if isMyMachine then [
+    { id = "livaraProductivity"; enabled = true; }
+    {
+      id = "diskUsage";
+      enabled = true;
+      mountPath = "/";
+      diskUsageMode = 0;
+      showMountPath = true;
+      minimumWidth = true;
+    }
+    "cpuUsage"
+    "memUsage"
+    "controlCenterButton"
+  ] else [
+    { id = "livaraProductivity"; enabled = true; }
+    "systemTray"
+    "clipboard"
+    "cpuUsage"
+    "memUsage"
+    "notificationButton"
+    "battery"
+    "controlCenterButton"
+  ];
   controlCenterWidgets = [
     { id = "volumeSlider"; enabled = true; width = 50; }
     { id = "brightnessSlider"; enabled = true; width = 50; }
@@ -101,7 +122,7 @@ in
       showBattery = !isMyMachine;
       showBatteryPercent = !isMyMachine;
       showOccupiedWorkspacesOnly = true;
-      showWorkspaceIndex = true;
+      showWorkspaceIndex = false;
       showWorkspaceName = false;
       showWorkspaceApps = true;
       controlCenterShowNetworkIcon = true;
@@ -122,20 +143,29 @@ in
           name = "Livara Bar";
           screenPreferences = [ "all" ];
           showOnLastDisplay = true;
-          leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
+          leftWidgets = [
+            "launcherButton"
+            "workspaceSwitcher"
+            {
+              id = "focusedWindow";
+              enabled = true;
+              focusedWindowCompactMode = true;
+              focusedWindowSize = 0;
+            }
+          ];
           centerWidgets = [ "music" "clock" "weather" ];
           rightWidgets = barRightWidgets;
           spacing = 4;
-          innerPadding = 4;
-          bottomGap = 0;
-          transparency = 0.90;
-          widgetTransparency = 0.90;
+          barInsetPadding = 8;
+          bottomGap = 1;
+          transparency = 0.75;
+          widgetTransparency = 0.75;
           squareCorners = false;
-          noBackground = false;
+          noBackground = true;
           maximizeWidgetIcons = false;
           maximizeWidgetText = false;
           removeWidgetPadding = false;
-          widgetPadding = 8;
+          widgetPadding = 10;
           gothCornersEnabled = false;
           gothCornerRadiusOverride = false;
           gothCornerRadiusValue = 12;
@@ -147,8 +177,8 @@ in
           widgetOutlineColor = "primary";
           widgetOutlineOpacity = 1.0;
           widgetOutlineThickness = 1;
-          fontScale = 1.0;
-          iconScale = 1.0;
+          fontScale = 1.01;
+          iconScale = 1.06;
           autoHide = false;
           autoHideStrict = false;
           autoHideDelay = 250;
@@ -167,8 +197,8 @@ in
           shadowColorMode = "default";
           shadowCustomColor = "#000000";
           clickThrough = false;
-          hoverPopouts = false;
-          hoverPopoutDelay = 150;
+          hoverPopouts = true;
+          hoverPopoutDelay = 415;
         }
       ];
     };
