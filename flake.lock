@@ -129,6 +129,28 @@
         "type": "github"
       }
     },
+    "dms": {
+      "inputs": {
+        "flake-compat": "flake-compat_3",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785111455,
+        "narHash": "sha256-aTNuC9NDBnYAeEtFsleeUwmGX3AZlKOutbl+LQRPkmQ=",
+        "owner": "AvengeMedia",
+        "repo": "DankMaterialShell",
+        "rev": "069ddab041c738236a8910e4c39b65d9628d3018",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "ref": "v1.5.3",
+        "repo": "DankMaterialShell",
+        "type": "github"
+      }
+    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -181,6 +203,22 @@
       }
     },
     "flake-compat_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "NixOS",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_3": {
       "flake": false,
       "locked": {
         "lastModified": 1767039857,
@@ -627,26 +665,6 @@
         "type": "github"
       }
     },
-    "noctalia": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787160176,
-        "narHash": "sha256-uqDHCNgaB0l0UYN5rXksMwkaFOYgkZv2nZ1imPtlK5I=",
-        "owner": "noctalia-dev",
-        "repo": "noctalia",
-        "rev": "a4575781d7e9c432a58832b04e0cda310bd22b71",
-        "type": "github"
-      },
-      "original": {
-        "owner": "noctalia-dev",
-        "repo": "noctalia",
-        "type": "github"
-      }
-    },
     "nur": {
       "inputs": {
         "flake-parts": [
@@ -708,13 +726,13 @@
     "root": {
       "inputs": {
         "affinity-nix": "affinity-nix",
+        "dms": "dms",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
-        "noctalia": "noctalia",
         "shell-conf": "shell-conf",
         "stylix": "stylix",
         "vim-conf": "vim-conf",
@@ -747,11 +765,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787185486,
-        "narHash": "sha256-raivQ2/Beixk4E3tPa4bdAJp52/1y03fTjoPrLhSHrk=",
+        "lastModified": 1787215016,
+        "narHash": "sha256-SfIc/QaIBG/n3RqoRVzLCZr9PGQviEj9Ik0Epx7v4KE=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "07404bac2f402e41d30cc82543773927b2159162",
+        "rev": "50c0d7472c546d5720fa27720a4b32fee56777d0",
         "type": "github"
       },
       "original": {

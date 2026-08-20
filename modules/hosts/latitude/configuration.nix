@@ -21,7 +21,7 @@
     networking.hostName = "latitude";
     networking.networkmanager.enable = true;
 
-    # niri is the sole compositor and Noctalia is the visual shell.
+    # niri is the sole compositor and DMS is the visual shell.
     desktop.profile.compositor = "niri";
 
     # Bluetooth is a laptop-only capability in the shared desktop setup.
@@ -30,7 +30,7 @@
       powerOnBoot = true;
       settings.General.Experimental = true;
     };
-    # Bluetooth is controlled by Noctalia; do not start
+    # Bluetooth is controlled by the DMS/BlueZ session integration; do not start
     # Blueman's tray applet as a duplicate background application.
     services.blueman.enable = false;
 

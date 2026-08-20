@@ -1,6 +1,6 @@
 # NixOS Module Layout
 
-This directory contains the evaluated NixOS and flake-parts modules for the repository. The root [README](../README.md) describes the user-facing workflow, while [ARCHITECTURE.md](../ARCHITECTURE.md) records the architectural decisions and validation model.
+This directory contains the evaluated NixOS and flake-parts modules for the repository. The root [README](../README.md) describes the user-facing workflow, while [ARCHITECTURE.md](../ARCHITECTURE.md) records broader architectural decisions and validation rules.
 
 | Path | Responsibility |
 |---|---|
@@ -11,77 +11,41 @@ This directory contains the evaluated NixOS and flake-parts modules for the repo
 
 The root `flake.nix` imports the evaluated module surface explicitly. Files under `archive/` are historical and remain outside the evaluated tree. A reusable feature must expose a stable `flake.nixosModules.<name>` or `flake.homeModules.<name>` contract at the layer where its options are evaluated.
 
-## Adding a host
-
-Create `modules/hosts/<host>/configuration.nix`, `default.nix`, and `hardware.nix`. The configuration module should select the features required by that machine. The host assembly should declare the corresponding `nixosConfiguration` and compose the shared desktop profile when appropriate. The hardware entrypoint should import the tracked `hardware-configuration.nix` and contain only machine-specific device, filesystem, kernel, boot, and microcode policy.
-
-Register the host through the explicit import list in `flake.nix`, then validate its complete system derivation:
-
-```bash
-nix build .#nixosConfigurations.<host>.config.system.build.toplevel
-```
-
 ## Shared desktop profile
 
-`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the niri system module, the `shell-conf` visual API, the Noctalia Home Manager module, and the NixVim module. The `home/livara/` profile is split by ownership:
+`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the niri system module, the `shell-conf` Home Manager module, the pinned DMS Home Manager module, and the NixVim module. The `home/livara/` profile is split by ownership:
 
 | File | Owner |
 |---|---|
-| `session.nix` | User-session behavior, screenshots, and session-file cleanup. |
-| `themes.nix` | Explicit boundary module for Kora icons, cursor, GTK/Qt preference and host-independent desktop appearance. |
-| `applications.nix` | Applications, XDG associations, NixVim, and Xournal++ data synchronization. |
-| `sync.nix` | Independent wallpaper and Vault synchronization services and timers. |
-| `home.nix` | Thin profile entrypoint, identity, environment, and imports. |
+| `home.nix` | Thin profile entrypoint, identity, imports, DMS settings/session/plugin options and host conditionals. |
+| `niri.nix` | niri input, navigation, workspace guards, compositor keybinds and DMS IPC actions. |
+| `monitors.nix` | Host-specific output rules; `myMachine` intentionally uses runtime monitor discovery. |
+| `session.nix` | User-session behavior, random DMS wallpaper selection and screenshot directory setup. |
+| `themes.nix` | Stylix cursor boundary, Kora icon policy and dark desktop appearance. |
+| `applications.nix` | Applications, XDG associations, NixVim and Xournal++ data synchronization. |
+| `sync.nix` | Independent wallpaper/Vault synchronization services and timers. |
 
-## Noctalia and visual API
+## DMS and visual API
 
-The visible shell is Noctalia v5, started by niri through its documented compositor-owned startup path. The visual API is provided by `inputs.shell-conf.homeManagerModules.default`; there is no Serpantinum backend and no login-time Livara theme service.
+The visible shell is DankMaterialShell v1.5.3, started by its official Home Manager systemd unit. niri is the sole compositor and does not embed a second shell startup command. The local `shell-conf` module exposes `programs.livara.visual` as a stable API: it installs the DMS package supplied by the host flake, writes declarative DMS settings/session JSON, installs QML plugins and registers the user Matugen hook.
 
-Noctalia owns wallpaper selection, transitions and its native wallpaper-derived palette. The official `wallpaper_changed` hook passes the active path to the external Matugen adapter pipeline. Matugen generates only application-specific contracts that Noctalia does not own, such as GTK/Qt files, ZenNotes CSS/manifest, browser chrome, WezTerm Lua, Vesktop CSS, Tauon and Xournal++ palettes. Kora icon selection and cursor selection remain separate desktop-theme concerns.
+DMS owns the shared wallpaper-derived theme and its native templates. The relevant DMS flags are enabled in `home/livara/home.nix` for GTK, Qt, Firefox, Zen Browser, Vesktop, Kitty, WezTerm and Neovim. The external `sync-livara-themes` adapter deliberately does not overwrite those consumer-owned files. It only materializes contracts not provided by DMS: ZenNotes, Tauon, Freesm Launcher and Xournal++.
 
-The `myMachine` profile hides the native Bluetooth/calendar tabs that do not represent its hardware/workflow and uses the native Network tab for Ethernet. Its six Control Center shortcuts are audio, system monitor, weather, keyboard layout, ZenNotes Tasks and tablet/Xournal. The plugin system is beta and is installed immutably by Home Manager under the local Noctalia plugin directory.
+The central flow is:
 
-The Ctrl+H/J/K/L translation is deliberately not a compositor or shell binding. It is owned by `features/keyd.nix`, where keyd emits real arrow events in the `[control:C]` layer before applications consume the input.
+> DMS wallpaper IPC → DMS Matugen → `~/.cache/DankMaterialShell/dms-colors.json` → `livara-matugen-sync` → application-specific adapters.
 
-## Hardware generation
+The DMS native calendar remains enabled. ZenNotes tasks are an additional feature: the Python indexer reads Markdown checkboxes from the Vault, writes a JSON cache, and the Livara QML plugin exposes a bar popout and launcher provider. The plugin is installed immutably under the DMS plugin directory by Home Manager and uses only documented DMS plugin surfaces (`widget` and `launcher`).
 
-For both hosts, `hardware.nix` is the tracked entrypoint and imports the tracked `hardware-configuration.nix` produced from the current machine. The common generator uses `nixos-generate-config` when possible, rejects empty or placeholder device identifiers, preserves a timestamped backup under `$XDG_STATE_HOME`, stages only the selected host hardware file, and never changes kernel ACPI parameters.
+`myMachine` hides battery and Bluetooth controls because they do not represent that hardware and keeps the Ethernet/network path. `latitude` enables battery and Bluetooth through host conditionals. The same module set is therefore reusable while the hardware-specific policy remains explicit and reviewable.
 
-The filesystem layer supports ext4 and Btrfs. Ext4 roots preserve their device or UUID references without Btrfs options. Btrfs roots preserve the actual `subvol=` or `subvolid=` mount option for each mounted subvolume. If the official generator cannot inspect a Btrfs subvolume, the fallback uses `findmnt --kernel` and the mounted topology. It never formats, partitions, unlocks storage, guesses among ambiguous installations, or changes firmware settings.
+`stylix` is intentionally narrow: it provides the Bibata-Modern-Classic cursor and session variables. It is not treated as a universal application theme engine. Where an application has no supported Stylix contract, DMS Matugen or a documented native adapter is used instead.
 
-Preview the result without modifying the repository:
+## Input and rebuild boundaries
 
-```bash
-cd ~/.config/nixos
-./scripts/generate-hardware.sh --host latitude --dry-run
-./scripts/generate-hardware.sh --host myMachine --dry-run
-```
+The XKB of niri, system locale, console keymap and keyd are separate layers. `features/keyd.nix` owns external Aitek Delta TM6101 remapping; niri owns compositor navigation and DMS actions. The modules must not redefine the same physical key in unrelated layers without an explicit host condition.
 
-Generate and stage a selected host file:
-
-```bash
-./scripts/generate-hardware.sh --host latitude
-git diff -- modules/hosts/latitude/hardware-configuration.nix
-./scripts/generate-hardware.sh --host myMachine
-git diff -- modules/hosts/my-machine/hardware-configuration.nix
-```
-
-From a Live ISO, mount the installed root at `/mnt`, its existing ESP at `/mnt/boot`, and use the checkout inside the installed home filesystem:
-
-```bash
-./scripts/generate-hardware.sh \
-  --host latitude \
-  --repo /mnt/home/livara/.config/nixos \
-  --target-root /mnt
-```
-
-The generator accepts only an existing EFI System Partition, reuses an existing `/boot` mount, validates root and boot entries, checks device references, creates a timestamped backup, and stages only the selected tracked file. Do not add `acpi=`, `acpi_osi=`, `acpi=noirq`, `noapic`, or `pci=biosirq` solely to silence firmware messages.
-
-The installer uses the existing flake lock by default. Set `NIX_CONF_UPDATE_FLAKE=1` only when an input update is intentional. A modified tracked hardware file is validated and reused instead of overwritten; set `NIX_CONF_ALLOW_HARDWARE_REPLACE=1` only for an intentional replacement. Latitude diagnostics are collected automatically only after hardware detection fails and are sanitized before upload.
-
-## Rebuild flow
-
-`install.sh` owns the normal workflow. It refuses to run as root, checks Git permissions and conflict state, validates or reuses hardware, runs `nix flake check --no-build --no-update-lock-file`, evaluates the selected system derivation, and invokes `nixos-rebuild` only after those gates pass. Use `NIX_CONF_REBUILD_MODE=dry-activate` or `test` before `switch` for a new shell or hardware change. On activation failure, inspect the saved log and recover with `sudo nixos-rebuild --rollback switch` if necessary.
+`install.sh` owns the normal workflow. It refuses to run as root, checks Git permissions and conflict state, validates or reuses hardware, runs `nix flake check --no-build --no-update-lock-file`, evaluates the selected system derivation, and invokes `nixos-rebuild` only after those gates pass. The hardware generator supports ext4 and Btrfs without formatting, repartitioning, guessing devices, or changing ACPI parameters.
 
 ## Validation
 
@@ -102,4 +66,4 @@ nix build .#nixosConfigurations.latitude.config.system.build.toplevel
 nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
 ```
 
-The sandbox used for repository analysis does not contain a Nix executable. The Nix evaluation gate must therefore be run on the target NixOS system or another normal Nix host before applying the generation.
+Declarative evaluation is necessary but not sufficient for a shell migration. On the real host, additionally validate `niri validate`, `dms doctor --json`, the DMS user service, the generated `dms-colors.json`, the random wallpaper service, cursor theme, host-specific widgets and the generated application contracts. A sandbox without a Nix executable cannot replace those hardware checks.

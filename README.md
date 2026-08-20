@@ -1,45 +1,57 @@
 # nix-conf
 
-`nix-conf` é a raiz declarativa de dois hosts NixOS, com uma composição compartilhada de **niri**, Home Manager, Noctalia, NixVim e serviços de desktop. O objetivo é manter o mesmo contrato de sessão entre notebook e computador, deixando diferenças limitadas a hardware, layout de teclado e política de energia.
+`nix-conf` é a raiz declarativa de dois hosts NixOS, com uma composição compartilhada de **niri**, Home Manager, **DankMaterialShell (DMS) v1.5.3**, NixVim e serviços de desktop. O objetivo é manter o mesmo contrato visual e de sessão entre notebook e computador, deixando diferenças limitadas a hardware, layout de teclado e política de energia.
 
 ## Hosts
 
 | Host | Perfil | Diferenças intencionais |
 |---|---|---|
-| `latitude` | Notebook | Layout interno irlandês, teclado externo brasileiro via keyd, energia Intel, Wi-Fi/Bluetooth e escala do painel interno. |
-| `myMachine` | Desktop | GPU, Btrfs/virtualização e descoberta dinâmica de monitores; nenhum output fictício é declarado. |
+| `latitude` | Notebook | Layout interno irlandês, teclado externo brasileiro via keyd, bateria/energia, Wi-Fi/Bluetooth e escala do painel interno. |
+| `myMachine` | Desktop | GPU, Btrfs/virtualização, mesa digitalizadora e descoberta dinâmica de monitores; não reserva output fictício nem exibe controles de bateria/Bluetooth. |
 
-A composição comum está em `modules/hosts/common-desktop.nix`. Ela importa o módulo oficial do [Noctalia](https://github.com/noctalia-dev/noctalia), a API Home Manager do [shell-conf](https://github.com/Joaoferraz-byte/shell-conf), NixVim e os módulos de host. NixOS é o owner do compositor, input, portais, drivers e serviços privilegiados; Home Manager é o owner dos arquivos e serviços da sessão do usuário.
+A composição comum está em `modules/hosts/common-desktop.nix`. NixOS é o owner do compositor, input, portais, drivers e serviços privilegiados; Home Manager é o owner dos arquivos e serviços da sessão do usuário. O módulo visual do `shell-conf` é injetado pelo Home Manager e configura o DMS pinado pelo flake host.
 
 ## Sessão visual
 
-**niri é o único compositor ativo. Noctalia é o único shell visual.** O arquivo `home/livara/niri.nix` instala um `config.kdl` com XKB, navegação, workspaces, fullscreen, screenshot nativo e chamadas IPC documentadas do Noctalia. `home/livara/monitors.nix` instala apenas `outputs.kdl`: a latitude recebe a escala do painel conhecido e o myMachine usa descoberta dinâmica, portanto não reserva um segundo monitor.
+**niri é o único compositor ativo e DMS v1.5.3 é o único shell visual.** `home/livara/niri.nix` instala o `config.kdl` com XKB por host, navegação de janelas, workspaces, fullscreen, screenshot nativo e chamadas IPC documentadas do DMS. `home/livara/monitors.nix` instala apenas `outputs.kdl`: a Latitude recebe a escala do painel conhecido e `myMachine` usa descoberta dinâmica, portanto não reserva um segundo monitor.
 
-O launcher e os painéis são abertos por IPC do Noctalia. Em particular, `Super+Space` abre o launcher, `Super+Shift+W` abre o seletor de wallpaper, `Super+Shift+S` usa a ação nativa de screenshot e `Super+F` alterna fullscreen. Não existe um segundo bar, daemon de wallpaper ou processo de shell concorrente no perfil.
+O serviço oficial `programs.dank-material-shell.systemd` inicia o shell; niri não inicia uma segunda instância. O launcher e os painéis são abertos por IPC do DMS. Em particular, `Super+Space` abre o launcher, `Super+W` abre o Zen Browser, `Super+E` abre o Nautilus, `Super+F` alterna fullscreen, `Super+Shift+W` abre o dashboard de wallpaper, `Super+Shift+S` usa a ação nativa de screenshot e `Super+S` alterna o Control Center. O serviço de login seleciona um wallpaper aleatório de `~/Wallpapers` chamando `dms ipc call wallpaper set`; o DMS é quem aplica o wallpaper e deriva a paleta.
 
 ## Temas por ecossistema
 
-O [shell-conf](https://github.com/Joaoferraz-byte/shell-conf) expõe `programs.livara.visual`. Ele não é um shell: fornece a configuração declarativa do Noctalia, templates Matugen, o comando `sync-livara-themes` e o plugin local de produtividade. Noctalia seleciona o wallpaper em `~/Wallpapers` e calcula internamente sua própria paleta wallpaper-derived; o hook oficial entrega `NOCTALIA_WALLPAPER_PATH` ao pipeline externo apenas para que cada adapter materialize o formato específico de um aplicativo.
+O `shell-conf` fornece o módulo Home Manager e os adapters que não são cobertos pelos templates nativos do DMS. O fluxo correto é:
 
-ZenNotes recebe `themes/livara/manifest.json` e `theme.css`; Firefox e Zen Browser recebem `userChrome.css`/`userContent.css`; GTK, Qt, WezTerm, Neovim, Cava, Tauon, Freesm Launcher, Vesktop e Xournal++ recebem seus contratos próprios. A existência de um template não é contada como aplicação do tema: o manifesto `applied-applications.json` registra os caminhos realmente materializados. O modo é sempre dark e não há integração Catppuccin. O calendário nativo do Noctalia não é usado para interpretar tasks; o plugin Livara fornece o tile/painel `Tasks` e o provider `/tasks`, baseado no parser Markdown do ZenNotes.
+> Wallpaper em `~/Wallpapers` → DMS/Matugen nativo → `~/.cache/DankMaterialShell/dms-colors.json` → `livara-matugen-sync` → contratos específicos de cada aplicativo.
 
-## Teclado e aplicações
+DMS v1.5.3 permanece owner de GTK, Qt, Firefox, Zen Browser, WezTerm, Vesktop, Kitty e NixVim quando os respectivos `matugenTemplate*` estão habilitados. O adapter externo não sobrescreve esses arquivos nem injeta CSS concorrente. Ele mantém apenas ZenNotes, Tauon, Freesm Launcher e Xournal++, cada um no formato documentado pelo próprio ecossistema.
 
-O XKB do niri usa o layout definido pelo host. A latitude seleciona `ie` para o teclado interno; a camada keyd é restringida aos IDs do Aitek Delta TM6101 e fornece os atalhos de navegação/pontuação do teclado externo. O myMachine usa o padrão `br(abnt2)`. O console, XKB do sistema e XKB do niri são camadas distintas e precisam manter o mesmo objetivo sem duplicar keybinds.
+Para ZenNotes, o adapter cria `themes/nix-conf-matugen/manifest.json` e `theme.css` em `~/.config/zennotes` e, quando a instalação Flatpak está presente, em `~/.var/app/org.zennotes.ZenNotes/config/zennotes`. O CSS usa tokens `--z-*` como triplets RGB separados por espaço e `config.toml` seleciona o tema em modo dark. O manifesto `applied-applications.json` diferencia templates nativos do DMS de adapters realmente materializados. Não há integração Catppuccin.
+
+O modo visual é sempre dark. `stylix` é usado para o cursor Bibata em toda a sessão; ele não substitui contratos que um aplicativo não suporta. Assim, a origem das cores é centralizada no DMS/Matugen, enquanto o formato final continua sendo responsabilidade de cada aplicativo.
+
+## Integrações de produtividade
+
+O calendário nativo do DMS permanece habilitado. Tasks complementares do Vault ZenNotes são indexadas por `livara_zennotes_tasks.py`, armazenadas em `~/.local/state/livara/zennotes-tasks.json` e exibidas pelo plugin QML Livara no widget da barra e no provider `/tasks` do launcher. A integração não substitui o calendário nem tenta tratar tasks como eventos de um backend de calendário.
+
+No `myMachine`, o plugin também expõe o estado da mesa digitalizadora e a abertura de uma nota diária Xournal++ em `~/Vault/02 - Xournal++`. No Latitude, bateria e Bluetooth permanecem habilitados; no desktop, esses controles são omitidos por host conditionals.
+
+## Teclado, Vault e sincronização
+
+O XKB do niri usa o layout declarado pelo host. A Latitude seleciona `ie` para o teclado interno; a camada keyd é restringida aos IDs do Aitek Delta TM6101 e fornece a camada de atalhos/pontuação do teclado externo. `myMachine` usa `br(abnt2)`. Console, XKB do sistema, XKB do niri e keyd são camadas distintas e devem manter objetivos coerentes sem duplicar keybinds.
 
 `home/livara/sync.nix` sincroniza `~/Wallpapers` e `~/Vault` com timers independentes. O wrapper `zennotes-livara` faz pull antes de abrir ZenNotes e executa `git add`, commit e push no encerramento normal; o serviço de sessão também tenta salvar no logout/desligamento gracioso. Uma perda abrupta de energia não pode executar código depois do corte e, portanto, não é prometida como garantia impossível.
 
-## Validação
+## Validação progressiva
 
-A validação progressiva recomendada é:
+Antes de um rebuild completo, use as seguintes gates:
 
 ```bash
 git diff --check
-find src modules -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+find ../shell-conf/src ../shell-conf/modules -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
 sudo nix --extra-experimental-features 'nix-command flakes' flake check --no-build --show-trace --all-systems
 sudo nix --extra-experimental-features 'nix-command flakes' flake check --no-build --show-trace \
   --override-input shell-conf path:../shell-conf
 niri validate --config ~/.config/niri/config.kdl
 ```
 
-O check local dos dois hosts foi executado sem build. A avaliação apresentou somente warnings existentes de Nixpkgs/Home Manager e de outputs customizados; não apresentou erro de opção inexistente. Builds completos e `nixos-rebuild test` ainda devem ser executados no hardware real antes de uma troca permanente.
+A avaliação declarativa dos hosts `myMachine` e `latitude` foi executada com o `shell-conf` local e passou sem erro de opção. Ela não prova que o DMS, o compositor, áudio, cursor ou widgets estão visualmente funcionais no hardware; depois da publicação, o gate de hardware deve ser `sudo nixos-rebuild test --flake .#<host>`, seguido por checagens de `dms doctor`, unidades systemd do usuário, wallpaper, cursor e contratos gerados.

@@ -135,7 +135,7 @@ in
 
   systemd.user.services.wallpapers-sync = {
     Unit = {
-      Description = "Sync the canonical wallpaper repository for Noctalia and Matugen";
+      Description = "Sync the canonical wallpaper repository for DMS and Matugen";
       After = [ "network-online.target" ];
       Wants = [ "network-online.target" ];
     };

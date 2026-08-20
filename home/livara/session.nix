@@ -1,7 +1,26 @@
-{ config, lib, ... }:
-
+{ config, inputs, lib, pkgs, ... }:
 let
   home = config.home.homeDirectory;
+  randomDmsWallpaper = pkgs.writeShellApplication {
+    name = "livara-dms-wallpaper-random-on-login";
+    runtimeInputs = [ inputs.dms.packages.${pkgs.system}.default pkgs.coreutils pkgs.findutils ];
+    text = ''
+      set -Eeuo pipefail
+      wallpapers_dir="${home}/Wallpapers"
+      wallpaper="$(find "$wallpapers_dir" -type f \\
+        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \\
+        -print 2>/dev/null | shuf -n 1)"
+      [[ -n "$wallpaper" ]] || exit 0
+      for _ in $(seq 1 30); do
+        if dms ipc call wallpaper set "$wallpaper"; then
+          exit 0
+        fi
+        sleep 1
+      done
+      exit 1
+    '';
+  };
+
 in
 {
   # hypridle is used only as a compositor-independent idle/lock daemon. niri
@@ -30,6 +49,19 @@ in
         }
       ];
     };
+  };
+
+  systemd.user.services.livara-dms-wallpaper-random-on-login = {
+    Unit = {
+      Description = "Select a random Livara wallpaper through the DMS IPC after login";
+      After = [ "dms.service" "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${randomDmsWallpaper}/bin/livara-dms-wallpaper-random-on-login";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   home.activation.setupScreenshots = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

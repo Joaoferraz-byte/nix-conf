@@ -4,8 +4,8 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.7.0";
 
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell?ref=v1.5.3";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

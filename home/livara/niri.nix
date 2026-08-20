@@ -21,8 +21,7 @@ in
   home.packages = [ workspaceFocus ];
 
   home.file.".config/niri/config.kdl".text = ''
-    // niri is the sole compositor owner. No visual shell or wallpaper daemon
-    // is started here; Noctalia owns the shell and its documented IPC.
+    // niri is the sole compositor owner. DMS owns the shell and its documented IPC.
     include "outputs.kdl"
 
     input {
@@ -60,7 +59,7 @@ in
 
     binds {
       Mod+Return repeat=false { spawn "wezterm" "start" "--cwd" "${home}"; }
-      Mod+Space repeat=false { spawn-sh "noctalia msg panel-toggle launcher"; }
+      Mod+Space repeat=false { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
       Mod+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+Alt+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+E repeat=false { spawn "nautilus" "--new-window"; }
@@ -68,14 +67,14 @@ in
       Mod+F11 repeat=false { fullscreen-window; }
       Mod+Q repeat=false { close-window; }
       Mod+Shift+Q repeat=false { close-window; }
-      Mod+Shift+W repeat=false { spawn-sh "noctalia msg panel-toggle wallpaper"; }
+      Mod+Shift+W repeat=false { spawn "dms" "ipc" "call" "dankdash" "wallpaper"; }
       Mod+Shift+S repeat=false { screenshot; }
       Mod+Shift+Slash repeat=false { show-hotkey-overlay; }
-      Mod+S repeat=false { spawn-sh "noctalia msg panel-toggle control-center"; }
-      Mod+C repeat=false { spawn-sh "noctalia msg panel-toggle clipboard"; }
-      Mod+N repeat=false { spawn-sh "noctalia msg panel-toggle control-center network"; }
-      Mod+V repeat=false { spawn-sh "noctalia msg panel-toggle control-center volume"; }
-      Mod+Alt+M repeat=false { spawn-sh "noctalia msg panel-toggle control-center media"; }
+      Mod+S repeat=false { spawn "dms" "ipc" "call" "control-center" "toggle"; }
+      Mod+C repeat=false { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
+      Mod+N repeat=false { spawn "dms" "ipc" "call" "notifications" "toggle"; }
+      Mod+V repeat=false { spawn "dms" "ipc" "call" "control-center" "toggle"; }
+      Mod+Alt+M repeat=false { spawn "dms" "ipc" "call" "dash" "toggle" "media"; }
       Mod+Alt+H repeat=false { spawn "${home}/.local/share/livara/scripts/open-nixos-nvim.sh"; }
 
       Mod+Left { focus-column-left; }
@@ -171,10 +170,6 @@ in
       XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
     }
 
-    // Noctalia v5 documents compositor-owned startup under niri. The
-    // wallpaper repository sync is explicit infrastructure; Noctalia remains
-    // the only visual-shell process and its native wallpaper palette is not
-    // replaced by a login-time theme service.
-    spawn-at-startup "sh" "-c" "systemctl --user start --wait wallpapers-sync.service || true; exec noctalia"
+    // DMS is started by its official Home Manager systemd unit and niri module.
   '';
 }
