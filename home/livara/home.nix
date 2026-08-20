@@ -1,8 +1,7 @@
 { config, inputs, lib, pkgs, desktopProfile ? { }, userName ? "livara", ... }:
 let
   isMyMachine = (desktopProfile.monitorProfile or "myMachine") == "myMachine";
-  nixHost = if isMyMachine then "myMachine" else "latitude";
-  barRightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "nixMonitor" "notificationButton" "controlCenterButton" ]
+  barRightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "notificationButton" "controlCenterButton" ]
     ++ lib.optional (!isMyMachine) "battery";
   controlCenterWidgets = [
     { id = "volumeSlider"; enabled = true; width = 50; }
@@ -29,20 +28,6 @@ in
   home.stateVersion = "26.11";
   programs.home-manager.enable = true;
   services.easyeffects.enable = true;
-
-  # Nix Monitor owns its plugin files and config.json through its official
-  # Home Manager module; the command remains explicit and host-aware.
-  programs.nix-monitor = {
-    enable = true;
-    rebuildCommand = [
-      "bash"
-      "-lc"
-      "cd ${config.home.homeDirectory}/Projetos/nix-conf && sudo nixos-rebuild switch --flake .#${nixHost} 2>&1"
-    ];
-    gcCommand = [ "bash" "-lc" "sudo nix-collect-garbage -d 2>&1" ];
-    updateInterval = 300;
-    nixpkgsChannel = "nixos-unstable";
-  };
 
   home.file.".face.icon".source = builtins.path {
     path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
@@ -96,7 +81,7 @@ in
       useAutoLocation = false;
       weatherEnabled = true;
       firstDayOfWeek = 1;
-      calendarBackend = "khal";
+      calendarBackend = "dankcal";
       iconThemeDark = "Kora";
       iconThemeLight = "Kora";
       iconThemePerMode = false;
@@ -189,6 +174,7 @@ in
     };
 
     dmsSession = {
+      wallpaperPath = "${config.home.homeDirectory}/Wallpapers/purple5.png";
       perMonitorWallpaper = false;
       perModeWallpaper = false;
       wallpaperCyclingEnabled = false;
@@ -204,7 +190,7 @@ in
       locale = "pt_BR";
       timeLocale = "pt_BR";
       # SessionData owns the launcher hidden-app list (not settings.json).
-      hiddenApps = [ "ikhal" ];
+      hiddenApps = [ ];
       searchAppActions = true;
     };
 

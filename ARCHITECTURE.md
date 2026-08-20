@@ -6,7 +6,7 @@
 
 > **Um owner por concern, uma closure explícita por serviço e um contrato público entre repositórios.**
 
-NixOS é owner de niri, XKB do sistema, keyd, portais, drivers, rede, áudio e serviços privilegiados. Home Manager é owner de programas de usuário, arquivos XDG e serviços user-level. Noctalia é owner da superfície visual, launcher, painéis, notificações, wallpaper e IPC. `shell-conf` é owner dos templates Matugen e dos adapters de temas por aplicação. `vim-conf` é owner do NixVim; `xournal-conf` é owner dos arquivos editáveis de Xournal++; `Wallpapers` é owner do catálogo de imagens.
+NixOS é owner de niri, XKB do sistema, keyd, portais, drivers, rede, áudio e serviços privilegiados. Home Manager é owner de programas de usuário, arquivos XDG e serviços user-level. DMS v1.5.3 é owner da superfície visual, launcher, painéis, notificações, wallpaper, Matugen e IPC. `shell-conf` é owner da API visual Livara, dos adapters que não são cobertos pelo DMS e do plugin de produtividade. `vim-conf` é owner do NixVim; `xournal-conf` é owner dos arquivos editáveis de Xournal++; `Wallpapers` é owner do catálogo de imagens.
 
 ## Fluxo de composição
 
@@ -16,10 +16,10 @@ flake inputs
     -> host roots
       -> common desktop profile
         -> Home Manager user profile
-          -> niri config + Noctalia module + Livara visual API
+          -> niri config + DMS module + Livara visual API
 ```
 
-A composição passa por `extraSpecialArgs` somente os dados de integração necessários (`inputs`, usuário e perfil tipado). O compositor não é encaminhado como flag para o shell: o perfil aceita apenas `niri`, e as ações da interface são expressas como ações nativas do niri ou IPC documentado do Noctalia.
+A composição passa por `extraSpecialArgs` somente os dados de integração necessários (`inputs`, usuário e perfil tipado). O compositor não é encaminhado como flag para o shell: o perfil aceita apenas `niri`, e as ações da interface são expressas como ações nativas do niri ou IPC documentado do DMS.
 
 | Host | Layout principal | Política de output |
 |---|---|---|
@@ -31,28 +31,28 @@ A composição passa por `extraSpecialArgs` somente os dados de integração nec
 | Repositório/input | Contrato público | Owner |
 |---|---|---|
 | `nix-conf` | Hosts, módulos NixOS, composição Home Manager e políticas de sessão | Sistema e integração |
-| `shell-conf` | `homeManagerModules.default`, `programs.livara.visual`, templates e adapters Matugen | Visual por aplicação |
-| `noctalia` | `inputs.noctalia.homeModules.default` e IPC `noctalia msg` | Shell visual |
+| `shell-conf` | `homeModules.default`, `programs.livara.visual`, templates e adapters Matugen | Visual por aplicação |
+| `dms` | `inputs.dms.homeModules.dank-material-shell` e IPC `dms ipc` | Shell visual |
 | `vim-conf` | Módulo NixVim, plugins e keymaps | Editor |
 | `xournal-conf` | XML, INI, TeX e defaults do Xournal++ | Aplicação de notas |
 | `Wallpapers` | Imagens | Catálogo de assets |
 
 O flake do shell-conf não contém input de QuickShell, não publica módulo NixOS de shell, não instala daemon de wallpaper e não escreve configurações de compositor. O flake do nix-conf não importa módulo Hyprland.
 
-## Sessão niri e Noctalia
+## Sessão niri e DMS
 
-`modules/features/niri.nix` habilita niri e os pacotes mínimos do ambiente Wayland. `home/livara/niri.nix` é o owner único do `~/.config/niri/config.kdl`, da navegação, workspaces, fullscreen, screenshot, hardware keys e bind IPC do Noctalia. `home/livara/monitors.nix` materializa somente `outputs.kdl` e nunca declara um monitor fictício.
+`modules/features/niri.nix` habilita niri e os pacotes mínimos do ambiente Wayland. `home/livara/niri.nix` é o owner único do `~/.config/niri/config.kdl`, da navegação, workspaces, fullscreen, screenshot, hardware keys e bind IPC do DMS. `home/livara/monitors.nix` materializa somente `outputs.kdl` e nunca declara um monitor fictício.
 
-O workspace numérico é verificado por um pequeno helper baseado em `niri msg --json workspaces`; se o índice não existe, nenhuma ação é emitida. Isso preserva a semântica dinâmica do niri e evita que a interface crie workspaces vazios como uma lista fixa. A surface visual não consulta `hyprctl`, não possui QML de barra e não inicia um segundo lifecycle.
+O workspace numérico é verificado por um pequeno helper baseado em `niri msg --json workspaces`; ele filtra o output focado e aceita índices ocupados por uma janela, além do primeiro workspace corrente. Assim, o atalho não cria workspaces vazios numerados artificialmente. A superfície visual não consulta `hyprctl`, não possui QML de barra e não inicia um segundo lifecycle.
 
 | Concern | Owner |
 |---|---|
 | Login e compositor | NixOS niri + display manager |
 | Input/XKB e remapeamento específico | NixOS XKB + keyd |
 | Idle/lock/monitor power | `home/livara/session.nix` + hypridle independente |
-| Bar, panels, launcher e wallpaper picker | Noctalia |
+| Bar, panels, launcher e wallpaper picker | DMS v1.5.3 |
 | Wallpaper catalog | `home/livara/sync.nix` + repositório Wallpapers |
-| Dynamic theme generation | Matugen executado pelo hook do Noctalia |
+| Dynamic theme generation | Matugen nativo do DMS + watcher Livara |
 | Application theme adapters | `shell-conf` / `sync-livara-themes` |
 
 ## API visual Livara
@@ -67,13 +67,13 @@ programs.livara.visual = {
 };
 ```
 
-A closure instala Matugen, jq e os adapters necessários. Templates imutáveis vivem no Nix store; resultados gerados vivem em `$XDG_STATE_HOME/livara/theme`. O hook do Noctalia recebe `NOCTALIA_WALLPAPER_PATH`, executa Matugen em modo dark, grava a paleta e chama o sincronizador. A atualização de todos os arquivos usa temporário e `mv` atômico onde o contrato da aplicação permite.
+A closure instala Matugen, jq e os adapters necessários. Templates imutáveis vivem no Nix store; resultados gerados vivem em `$XDG_STATE_HOME/livara/theme`. O hook do DMS observa a publicação assíncrona de `dms-colors.json`, grava a paleta dark derivada pelo Matugen nativo e chama o sincronizador. A atualização de todos os arquivos usa temporário e `mv` atômico onde o contrato da aplicação permite.
 
 Cada aplicação mantém seu próprio ecossistema:
 
 | Aplicação/ecossistema | Saída gerada |
 |---|---|
-| Noctalia | `~/.config/noctalia/palettes/Livara.json` |
+| DMS | `~/.cache/DankMaterialShell/dms-colors.json` e templates nativos |
 | GTK/Nautilus | CSS GTK3/GTK4 e prefer-dark via dconf |
 | Qt | qt5ct/qt6ct e QSS |
 | WezTerm/Kitty | Módulos Lua/conf nativos |

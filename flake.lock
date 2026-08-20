@@ -484,21 +484,6 @@
         "type": "github"
       }
     },
-    "nixMonitor": {
-      "locked": {
-        "lastModified": 1771568669,
-        "narHash": "sha256-lTbQ13lQ3ZPNkdnFmxAMGf1Gjx//80lDDlcJR8msREI=",
-        "owner": "antonjah",
-        "repo": "nix-monitor",
-        "rev": "ef3db9d5a525ddf41355e8c456b40d56480a6626",
-        "type": "github"
-      },
-      "original": {
-        "owner": "antonjah",
-        "repo": "nix-monitor",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1782918843,
@@ -746,7 +731,6 @@
         "home-manager": "home-manager",
         "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
-        "nixMonitor": "nixMonitor",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
         "shell-conf": "shell-conf",
@@ -782,11 +766,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787224401,
-        "narHash": "sha256-Vx9k5BhCXi7ajO5IKDIOW6XYBvJ9VLAbp3KC7fGl9AU=",
+        "lastModified": 1787232254,
+        "narHash": "sha256-zh7VOyVWSeJ7O2WyKD3OqO7khAGdhgp/DPWFYf2gz4Q=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "e5e05af5e46a2950dde6e4762f81ffcb9b3c6f0d",
+        "rev": "1befa1d73a58a486114e7c10275ad3b48b7e432d",
         "type": "github"
       },
       "original": {
@@ -967,11 +951,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1787180299,
-        "narHash": "sha256-afgjdjovUuYuD80Rsti6i6gjG2pxe6sCSgG9THitMfE=",
+        "lastModified": 1787232260,
+        "narHash": "sha256-VVqRsNHjkPBKSYCmmM6fmrUOYrdE0hzK2kjl3rZ6AV8=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "61402cb59ba8964669a3295fd926ec9718c730f3",
+        "rev": "db84d6e2a300b7a8156da70938a2ba1cf7f074d8",
         "type": "github"
       },
       "original": {

@@ -32,13 +32,13 @@
       options.desktop.profile.keyboardLayout = lib.mkOption {
         type = lib.types.str;
         default = "br";
-        description = "Global fallback XKB layout for the built-in keyboard.";
+        description = "Global XKB layout applied by niri to every keyboard device.";
       };
 
       options.desktop.profile.keyboardVariant = lib.mkOption {
         type = lib.types.str;
         default = "abnt2";
-        description = "Global fallback XKB variant for the built-in keyboard.";
+        description = "Global XKB variant applied by niri to every keyboard device.";
       };
 
       options.desktop.profile.consoleKeyMap = lib.mkOption {
@@ -47,29 +47,6 @@
         description = "Linux console keymap matching the built-in keyboard.";
       };
 
-      options.desktop.profile.internalKeyboardDevice = lib.mkOption {
-        type = lib.types.str;
-        default = "";
-        description = "Stable libinput/keyd name for the built-in keyboard.";
-      };
-
-      options.desktop.profile.externalKeyboardDevices = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Stable device names receiving the external keyboard layout.";
-      };
-
-      options.desktop.profile.externalKeyboardLayout = lib.mkOption {
-        type = lib.types.str;
-        default = "br";
-        description = "XKB layout for configured external keyboards.";
-      };
-
-      options.desktop.profile.externalKeyboardVariant = lib.mkOption {
-        type = lib.types.str;
-        default = "abnt2";
-        description = "XKB variant for configured external keyboards.";
-      };
 
       config = {
         programs.dconf.enable = true;
@@ -108,8 +85,7 @@
           sharedModules = [
             inputs.stylix.homeModules.stylix
             inputs.dms.homeModules.dank-material-shell
-            inputs.shell-conf.homeManagerModules.default
-            inputs.nixMonitor.homeManagerModules.default
+            inputs.shell-conf.homeModules.default
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

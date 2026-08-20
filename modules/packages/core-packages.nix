@@ -33,11 +33,14 @@
       wl-clipboard
       cliphist
       xwayland-satellite
+      gtk3
+      gtk4
       adw-gtk3
       libsForQt5.qt5ct
       qt6Packages.qt6ct
       wezterm
       inotify-tools
+      keyd
       fastfetch
     ];
   };

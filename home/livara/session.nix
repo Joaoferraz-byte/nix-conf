@@ -1,25 +1,6 @@
 { config, inputs, lib, pkgs, ... }:
 let
   home = config.home.homeDirectory;
-  randomDmsWallpaper = pkgs.writeShellApplication {
-    name = "livara-dms-wallpaper-random-on-login";
-    runtimeInputs = [ inputs.dms.packages.${pkgs.system}.default pkgs.coreutils pkgs.findutils ];
-    text = ''
-      set -Eeuo pipefail
-      wallpapers_dir="${home}/Wallpapers"
-      wallpaper="$(find "$wallpapers_dir" -type f \
-        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \
-        -print 2>/dev/null | shuf -n 1)"
-      [[ -n "$wallpaper" ]] || exit 0
-      for _ in $(seq 1 30); do
-        if dms ipc call wallpaper set "$wallpaper"; then
-          exit 0
-        fi
-        sleep 1
-      done
-      exit 1
-    '';
-  };
 
 in
 {
@@ -51,18 +32,17 @@ in
     };
   };
 
-  systemd.user.services.livara-dms-wallpaper-random-on-login = {
+  systemd.user.services.dankcalendar = {
     Unit = {
-      Description = "Select a random Livara wallpaper through the DMS IPC after login";
-      After = [ "graphical-session.target" "dms.service" ];
-      Wants = [ "dms.service" ];
+      Description = "DankCalendar daemon for the DMS native calendar backend";
+      After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
-      ConditionPathIsDirectory = "${home}/Wallpapers";
     };
     Service = {
-      Type = "oneshot";
-      TimeoutStartSec = 45;
-      ExecStart = "${randomDmsWallpaper}/bin/livara-dms-wallpaper-random-on-login";
+      Type = "simple";
+      ExecStart = "${pkgs.flatpak}/bin/flatpak run com.danklinux.dankcalendar run --session --hidden";
+      Restart = "on-failure";
+      RestartSec = 3;
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };

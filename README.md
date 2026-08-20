@@ -15,7 +15,7 @@ A composição comum está em `modules/hosts/common-desktop.nix`. NixOS é o own
 
 **niri é o único compositor ativo e DMS v1.5.3 é o único shell visual.** `home/livara/niri.nix` instala o `config.kdl` com XKB por host, navegação de janelas, workspaces, fullscreen, screenshot nativo e chamadas IPC documentadas do DMS. `home/livara/monitors.nix` instala apenas `outputs.kdl`: a Latitude recebe a escala do painel conhecido e `myMachine` usa descoberta dinâmica, portanto não reserva um segundo monitor.
 
-O serviço oficial `programs.dank-material-shell.systemd` inicia o shell; niri não inicia uma segunda instância. O launcher e os painéis são abertos por IPC do DMS. Em particular, `Super+Space` abre o launcher, `Super+W` abre o Zen Browser, `Super+E` abre o Nautilus, `Super+F` alterna fullscreen, `Super+Shift+W` chama `dms ipc call wallpaperCarousel toggle`, `Super+Shift+S` usa a ação nativa de screenshot e `Super+S` alterna o Control Center. O plugin `wallpaperCarousel` é pinado como input do flake e recebe declarativamente `~/Wallpapers`; o serviço de login continua selecionando um wallpaper aleatório via `dms ipc call wallpaper set`, depois do qual DMS/Matugen deriva a paleta.
+O serviço oficial `programs.dank-material-shell.systemd` inicia o shell; niri não inicia uma segunda instância. O launcher e os painéis são abertos por IPC do DMS. Em particular, `Super+Space` abre o launcher, `Super+W` abre o Zen Browser, `Super+E` abre o Nautilus, `Super+F` alterna fullscreen, `Super+Shift+W` chama `dms ipc call wallpaperCarousel toggle`, `Super+Shift+S` usa a ação nativa de screenshot e `Super+S` alterna o Control Center. O plugin `wallpaperCarousel` é pinado como input do flake e recebe declarativamente `~/Wallpapers`; o wallpaper inicial permanece `purple5.png` e a seleção posterior é feita pelo próprio DMS/carousel, sem serviço concorrente de login.
 
 ## Temas por ecossistema
 
@@ -31,7 +31,7 @@ O modo visual é sempre dark. `stylix` é usado para o cursor Bibata em toda a s
 
 ## Plugins declarativos
 
-`wallpaperCarousel` é instalado pelo módulo DMS a partir do input pinado `motor-dev/wallpaperCarousel`, com modo wrap, cache limitado, expansão da imagem em foco e `~/Wallpapers` como diretório. `nix-monitor` é instalado pelo seu módulo Home Manager oficial, com `config.json`, contador de gerações, tamanho do store e widget `nixMonitor` na barra; o comando de rebuild é host-aware. O calendário continua usando o backend nativo `khal`, mas `ikhal` é colocado na lista de aplicativos ocultos do `SessionData` do DMS.
+`wallpaperCarousel` é instalado pelo módulo DMS a partir do input pinado `motor-dev/wallpaperCarousel`, com modo wrap, cache limitado, expansão da imagem em foco e `~/Wallpapers` como diretório. A extensão nix-monitor foi removida do flake, do Home Manager e da barra. O calendário visual usa o backend nativo `dankcal`, provido pelo Flatpak DankCalendar e por um serviço de usuário; `khal`/`ikhal` não são puxados pela opção de eventos do DMS.
 
 ## Integrações de produtividade
 
@@ -41,7 +41,7 @@ No `myMachine`, o plugin também expõe o estado da mesa digitalizadora e a aber
 
 ## Teclado, Vault e sincronização
 
-O XKB do niri usa o layout declarado pelo host. A Latitude seleciona `ie` para o teclado interno; a camada keyd é restringida aos IDs do Aitek Delta TM6101 e fornece a camada de atalhos/pontuação do teclado externo. `myMachine` usa `br(abnt2)`. Console, XKB do sistema, XKB do niri e keyd são camadas distintas e devem manter objetivos coerentes sem duplicar keybinds.
+O XKB do niri usa um layout global para todos os teclados porque a versão atual ainda não suporta configuração por dispositivo. A Latitude seleciona `ie` e o `myMachine` usa `br(abnt2)`. A camada keyd é restringida aos IDs USB do Aitek Delta TM6101 e fornece somente atalhos/pontuação do teclado externo, incluindo `Ctrl+;` para `/` e `Ctrl+Shift+;` para `?`. Console, XKB do sistema, XKB do niri e keyd são camadas distintas e devem manter objetivos coerentes sem duplicar keybinds.
 
 `home/livara/sync.nix` sincroniza `~/Wallpapers` e `~/Vault` com timers independentes. O wrapper `zennotes-livara` faz pull antes de abrir ZenNotes e executa `git add`, commit e push no encerramento normal; o serviço de sessão também tenta salvar no logout/desligamento gracioso. Uma perda abrupta de energia não pode executar código depois do corte e, portanto, não é prometida como garantia impossível.
 
@@ -58,4 +58,4 @@ sudo nix --extra-experimental-features 'nix-command flakes' flake check --no-bui
 niri validate --config ~/.config/niri/config.kdl
 ```
 
-A avaliação declarativa dos hosts `myMachine` e `latitude` foi executada com os inputs dos novos plugins e passou sem erro de opção; `flake check --no-build` também passou. No `myMachine`, o hardware-configuration mantém somente o swap real `73f0052c-6927-45c4-b3a2-8cdc4cbd0d8b`; o UUID inexistente `79febc52-42dd-4d8e-ba13-eea976778dfb` foi removido, eliminando o timeout de boot de 90 segundos após a aplicação da nova geração. A validação declarativa não prova que DMS, compositor, áudio, cursor ou widgets estão visualmente funcionais no hardware; o gate final deve ser `sudo nixos-rebuild test --flake .#<host>`, seguido por checagens de `dms doctor`, unidades systemd do usuário, wallpaper, cursor e contratos gerados.
+No `myMachine`, o hardware-configuration mantém somente o swap real `73f0052c-6927-45c4-b3a2-8cdc4cbd0d8b`; o UUID inexistente `79febc52-42dd-4d8e-ba13-eea976778dfb` foi removido, eliminando o timeout de boot de 90 segundos após a aplicação da nova geração. A validação declarativa não prova que DMS, compositor, áudio, cursor ou widgets estão visualmente funcionais no hardware; o gate final deve ser `sudo nixos-rebuild test --flake .#<host>`, seguido por checagens de `dms doctor`, unidades systemd do usuário, wallpaper, cursor e contratos gerados.

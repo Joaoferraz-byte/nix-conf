@@ -26,6 +26,7 @@
         { appId = "org.zennotes.ZenNotes"; origin = "flatpark"; }
         { appId = "org.vinegarhq.Sober"; origin = "flathub"; }
         { appId = "net.audiorelay.AudioRelay"; origin = "flathub"; }
+        { appId = "com.danklinux.dankcalendar"; origin = "flathub"; }
         { appId = "org.freesmlauncher.FreesmLauncher"; origin = "freesmlauncher"; }
       ];
 

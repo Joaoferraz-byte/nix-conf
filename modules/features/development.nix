@@ -6,8 +6,6 @@
       ruff
       pyright
       python3Packages.jupyterlab
-      manim
-      texlive.combined.scheme-full
 
       clang
       clang-tools

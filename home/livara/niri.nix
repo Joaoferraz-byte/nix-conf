@@ -13,7 +13,15 @@ let
       set -Eeuo pipefail
       target="''${1:?workspace index is required}"
       [[ "$target" =~ ^[1-9][0-9]*$ ]] || exit 2
-      if niri msg --json workspaces | jq -e --argjson target "$target" 'any(.[]; .idx == $target)' >/dev/null; then
+      workspaces="$(niri msg --json workspaces)"
+      focused_output="$(jq -r '.[] | select(.is_focused) | .output // empty' <<< "$workspaces")"
+      if jq -e --argjson target "$target" --arg output "$focused_output" '
+        any(.[];
+          (.output // "") == $output
+          and .idx == $target
+          and ($target == 1 or .active_window_id != null)
+        )
+      ' <<< "$workspaces" >/dev/null; then
         niri msg action focus-workspace "$target"
       fi
     '';
@@ -34,6 +42,9 @@ in
     include optional=true "dms/wpblur.kdl"
 
     input {
+      # Keep every `Mod+...` bind on the physical Super key, including if
+      # niri is ever launched nested for diagnostics.
+      mod-key "Super"
       keyboard {
         xkb {
           layout "${keyboardLayout}"
@@ -122,6 +133,13 @@ in
       Mod+J { focus-window-down; }
       Mod+K { focus-window-up; }
       Mod+L { focus-column-right; }
+      # Mouse wheel navigation mirrors the directional focus binds. Niri
+      # consumes the wheel while Mod is held; cooldown avoids rapid overshoot.
+      Mod+WheelScrollDown cooldown-ms=150 { focus-window-down; }
+      Mod+WheelScrollUp cooldown-ms=150 { focus-window-up; }
+      Mod+WheelScrollRight cooldown-ms=150 { focus-column-right; }
+      Mod+WheelScrollLeft cooldown-ms=150 { focus-column-left; }
+
       Mod+Home { focus-column-first; }
       Mod+End { focus-column-last; }
 

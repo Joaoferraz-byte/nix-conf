@@ -14,8 +14,6 @@
       flake = false;
     };
 
-    nixMonitor.url = "github:antonjah/nix-monitor";
-
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -118,9 +116,109 @@
               ruff
               pyright
               python3Packages.jupyterlab
-              manim
-              texlive.combined.scheme-full
             ];
+            shellHook = ''
+              export VIRTUAL_ENV="''${VIRTUAL_ENV:-$PWD/.venv}"
+              if [ ! -d "$VIRTUAL_ENV" ]; then
+                uv venv "$VIRTUAL_ENV" --python ${pkgs.python3}/bin/python3
+              fi
+              export PATH="$VIRTUAL_ENV/bin:$PATH"
+              export PYTHONDONTWRITEBYTECODE=1
+              export UV_LINK_MODE=copy
+            '';
+          };
+
+          devShells.science = pkgs.mkShell {
+            packages = with pkgs; [
+              python3
+              python3Packages.manim
+              texliveSmall
+              imagemagick
+            ];
+            shellHook = ''
+              export MPLBACKEND="''${MPLBACKEND:-Agg}"
+              export TEXMFHOME="''${TEXMFHOME:-$PWD/.texmf}"
+            '';
+          };
+
+          devShells.java = pkgs.mkShell {
+            packages = with pkgs; [
+              jdk21
+              jdt-language-server
+              maven
+              gradle
+              spring-boot-cli
+              lombok
+            ];
+            shellHook = ''
+              export JAVA_HOME="${pkgs.jdk21}"
+              export MAVEN_OPTS="''${MAVEN_OPTS:--Xmx1g -Dfile.encoding=UTF-8}"
+              export GRADLE_USER_HOME="''${GRADLE_USER_HOME:-$PWD/.gradle}"
+            '';
+          };
+
+          devShells.node = pkgs.mkShell {
+            packages = with pkgs; [
+              nodejs
+              pnpm
+              yarn
+              typescript
+              typescript-language-server
+            ];
+            shellHook = ''
+              export COREPACK_HOME="''${COREPACK_HOME:-$PWD/.corepack}"
+              export npm_config_cache="''${npm_config_cache:-$PWD/.npm-cache}"
+              export PNPM_HOME="''${PNPM_HOME:-$PWD/.pnpm}"
+              export PATH="$PNPM_HOME:$PATH"
+            '';
+          };
+
+          devShells.rust = pkgs.mkShell {
+            packages = with pkgs; [
+              rustc
+              cargo
+              rust-analyzer
+              rustfmt
+              clippy
+              pkg-config
+              openssl
+            ];
+            shellHook = ''
+              export CARGO_HOME="''${CARGO_HOME:-$PWD/.cargo}"
+              export RUSTUP_HOME="''${RUSTUP_HOME:-$PWD/.rustup}"
+              export CARGO_TARGET_DIR="''${CARGO_TARGET_DIR:-$PWD/target}"
+            '';
+          };
+
+          devShells.go = pkgs.mkShell {
+            packages = with pkgs; [
+              go
+              gopls
+              delve
+              gotools
+              golangci-lint
+            ];
+            shellHook = ''
+              export GOPATH="''${GOPATH:-$PWD/.go}"
+              export GOMODCACHE="''${GOMODCACHE:-$PWD/.gomodcache}"
+              export GOCACHE="''${GOCACHE:-$PWD/.gocache}"
+              export PATH="$GOPATH/bin:$PATH"
+            '';
+          };
+
+          devShells.docker = pkgs.mkShell {
+            packages = with pkgs; [
+              docker
+              docker-compose
+              docker-buildx
+              lazydocker
+            ];
+            shellHook = ''
+              if [ -z "''${DOCKER_HOST:-}" ] && [ -S "$XDG_RUNTIME_DIR/docker.sock" ]; then
+                export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/docker.sock"
+              fi
+              docker context ls >/dev/null 2>&1 || true
+            '';
           };
 
           devShells.embedded = pkgs.mkShell {
