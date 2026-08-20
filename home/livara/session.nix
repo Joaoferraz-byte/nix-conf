@@ -7,8 +7,8 @@ let
     text = ''
       set -Eeuo pipefail
       wallpapers_dir="${home}/Wallpapers"
-      wallpaper="$(find "$wallpapers_dir" -type f \\
-        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \\
+      wallpaper="$(find "$wallpapers_dir" -type f \
+        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \
         -print 2>/dev/null | shuf -n 1)"
       [[ -n "$wallpaper" ]] || exit 0
       for _ in $(seq 1 30); do
