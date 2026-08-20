@@ -6,30 +6,9 @@ let
 
   keyboardLayout = desktopProfile.keyboardLayout or "br";
   keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
-  workspaceFocus = pkgs.writeShellApplication {
-    name = "niri-focus-workspace";
-    runtimeInputs = [ pkgs.jq pkgs.niri ];
-    text = ''
-      set -Eeuo pipefail
-      target="''${1:?workspace index is required}"
-      [[ "$target" =~ ^[1-9][0-9]*$ ]] || exit 2
-      workspaces="$(niri msg --json workspaces)"
-      focused_output="$(jq -r '.[] | select(.is_focused) | .output // empty' <<< "$workspaces")"
-      if jq -e --argjson target "$target" --arg output "$focused_output" '
-        any(.[];
-          (.output // "") == $output
-          and .idx == $target
-          and ($target == 1 or .active_window_id != null)
-        )
-      ' <<< "$workspaces" >/dev/null; then
-        niri msg action focus-workspace "$target"
-      fi
-    '';
-  };
+
 in
 {
-  home.packages = [ workspaceFocus ];
-
   home.file.".config/niri/config.kdl".text = ''
     // niri is the sole compositor owner. DMS owns the shell and its documented IPC.
     include "outputs.kdl"
@@ -76,7 +55,7 @@ in
     hotkey-overlay { skip-at-startup; }
 
     environment {
-      GTK_THEME "Adwaita:dark"
+      // DMS owns GTK_THEME/gtk.css dynamically from the active Matugen palette.
       GTK_ICON_THEME "Kora"
       QT_QPA_PLATFORMTHEME "qt5ct"
       QT_QPA_PLATFORMTHEME_QT6 "qt6ct"
@@ -169,15 +148,17 @@ in
       Mod+Ctrl+Shift+Up { move-column-to-monitor-up; }
       Mod+Ctrl+Shift+Right { move-column-to-monitor-right; }
 
-      Mod+1 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "1"; }
-      Mod+2 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "2"; }
-      Mod+3 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "3"; }
-      Mod+4 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "4"; }
-      Mod+5 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "5"; }
-      Mod+6 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "6"; }
-      Mod+7 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "7"; }
-      Mod+8 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "8"; }
-      Mod+9 { spawn "${workspaceFocus}/bin/niri-focus-workspace" "9"; }
+      // Native niri actions avoid a subprocess on every workspace change.
+      // DMS filters the bar to occupied workspaces; niri owns the focus state.
+      Mod+1 { focus-workspace 1; }
+      Mod+2 { focus-workspace 2; }
+      Mod+3 { focus-workspace 3; }
+      Mod+4 { focus-workspace 4; }
+      Mod+5 { focus-workspace 5; }
+      Mod+6 { focus-workspace 6; }
+      Mod+7 { focus-workspace 7; }
+      Mod+8 { focus-workspace 8; }
+      Mod+9 { focus-workspace 9; }
       Mod+Page_Down { focus-workspace-down; }
       Mod+Page_Up { focus-workspace-up; }
       Mod+U { focus-workspace-down; }

@@ -15,12 +15,20 @@ let
     "memUsage"
     "controlCenterButton"
   ] else [
-    { id = "livaraProductivity"; enabled = true; }
+    # The Latitude has no tablet integration in its bar. Keep the productivity
+    # plugin available to the launcher, but do not place its tablet widget
+    # before the clock/calendar area.
     "systemTray"
-    "clipboard"
+    {
+      id = "diskUsage";
+      enabled = true;
+      mountPath = "/";
+      diskUsageMode = 0;
+      showMountPath = true;
+      minimumWidth = true;
+    }
     "cpuUsage"
     "memUsage"
-    "notificationButton"
     "battery"
     "controlCenterButton"
   ];
@@ -48,11 +56,38 @@ in
   home.homeDirectory = "/home/${userName}";
   home.stateVersion = "26.11";
   programs.home-manager.enable = true;
+
+  # DMS v1.5.3 persists SessionData in XDG_STATE_HOME, not in
+  # ~/.config/DankMaterialShell/settings.json. Keep only the launcher contract
+  # declarative so stale `os`/negative-size values cannot hide the Livara logo
+  # after a rebuild; other UI preferences remain user-editable.
+  home.activation.livaraDmsLauncherLogoDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    settings="${config.xdg.stateHome}/DankMaterialShell/session.json"
+    if [ -f "$settings" ]; then
+      tmp="$settings.tmp.$$"
+      ${pkgs.jq}/bin/jq \
+        --arg logo "$HOME/.local/share/livara/icons/livara-launcher-logo.svg" \
+        '.launcherLogoMode = "custom"
+         | .launcherLogoCustomPath = $logo
+         | .launcherLogoColorOverride = "#ffffff"
+         | .launcherLogoColorInvertOnMode = false
+         | .launcherLogoBrightness = 0.5
+         | .launcherLogoContrast = 1
+         | .launcherLogoSizeOffset = 0' \
+        "$settings" > "$tmp"
+      chmod 0644 "$tmp"
+      mv -f "$tmp" "$settings"
+    fi
+  '';
+
   services.easyeffects.enable = true;
 
-  home.file.".face.icon".source = builtins.path {
-    path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
-    name = "livara-profile-icon";
+  home.file.".face.icon" = {
+    source = builtins.path {
+      path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
+      name = "livara-profile-icon";
+    };
+    force = true;
   };
   home.file."Fire/.keep".text = "";
 
@@ -106,8 +141,10 @@ in
       launcherLogoMode = "custom";
       launcherLogoCustomPath = "${config.home.homeDirectory}/.local/share/livara/icons/livara-launcher-logo.svg";
       launcherLogoColorOverride = "#ffffff";
-      launcherLogoSizeOffset = 8;
-      launcherLogoBrightness = 1.0;
+      # Upstream DMS v1.5.3 defaults: neutral size offset, 50% brightness,
+      # standard contrast. The custom SVG remains explicitly white.
+      launcherLogoSizeOffset = 0;
+      launcherLogoBrightness = 0.5;
       launcherLogoContrast = 1.0;
       launcherLogoColorInvertOnMode = false;
       cursorSettings = {
@@ -123,8 +160,10 @@ in
       showGpuTemp = false;
       showBattery = !isMyMachine;
       showBatteryPercent = !isMyMachine;
+      # Niri supplies positional indices per output; show them in the bar
+      # while retaining DMS's occupied-workspace filter.
       showOccupiedWorkspacesOnly = true;
-      showWorkspaceIndex = false;
+      showWorkspaceIndex = true;
       showWorkspaceName = false;
       showWorkspaceApps = true;
       controlCenterShowNetworkIcon = true;
@@ -231,7 +270,9 @@ in
         src = inputs.shell-conf + "/src/livara/dms-plugins/livara";
       };
       wallpaperCarousel = {
-        src = inputs.wallpaperCarousel;
+        # Vendored in shell-conf so the HD-capped hold preview is reproducible
+        # instead of relying on an unmodified upstream source tree.
+        src = inputs.shell-conf + "/src/livara/dms-plugins/wallpaperCarousel";
         settings = {
           wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
           carouselMode = "wrap";

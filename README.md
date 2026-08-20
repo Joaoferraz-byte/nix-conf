@@ -15,7 +15,7 @@ A composição comum está em `modules/hosts/common-desktop.nix`. NixOS é o own
 
 **niri é o único compositor ativo e DMS v1.5.3 é o único shell visual.** `home/livara/niri.nix` instala o `config.kdl` com XKB por host, navegação de janelas, workspaces, fullscreen, screenshot nativo e chamadas IPC documentadas do DMS. `home/livara/monitors.nix` instala apenas `outputs.kdl`: a Latitude recebe a escala do painel conhecido e `myMachine` usa descoberta dinâmica, portanto não reserva um segundo monitor.
 
-O serviço oficial `programs.dank-material-shell.systemd` inicia o shell; niri não inicia uma segunda instância. O launcher e os painéis são abertos por IPC do DMS. Em particular, `Super+Space` abre o launcher, `Super+W` abre o Zen Browser, `Super+E` abre o Nautilus, `Super+F` alterna fullscreen, `Super+Shift+W` chama `dms ipc call wallpaperCarousel toggle`, `Super+Shift+S` usa a ação nativa de screenshot e `Super+S` alterna o Control Center. O plugin `wallpaperCarousel` é pinado como input do flake e recebe declarativamente `~/Wallpapers`; o wallpaper inicial permanece `purple5.png` e a seleção posterior é feita pelo próprio DMS/carousel, sem serviço concorrente de login.
+O serviço oficial `programs.dank-material-shell.systemd` inicia o shell; niri não inicia uma segunda instância. O launcher e os painéis são abertos por IPC do DMS. Em particular, `Super+Space` abre o launcher, `Super+W` abre o Zen Browser, `Super+E` abre o Nautilus, `Super+F` alterna fullscreen, `Super+Shift+W` chama `dms ipc call wallpaperCarousel toggle`, `Super+Shift+S` usa a ação nativa de screenshot e `Super+S` alterna o Control Center. O plugin `wallpaperCarousel` recebe declarativamente `~/Wallpapers` a partir do source vendorizado no `shell-conf`; o wallpaper inicial permanece `purple5.png` e a seleção posterior é feita pelo próprio DMS/carousel, sem serviço concorrente de login.
 
 ## Temas por ecossistema
 
@@ -23,7 +23,7 @@ O `shell-conf` fornece o módulo Home Manager e os adapters que não são cobert
 
 > Wallpaper em `~/Wallpapers` → DMS/Matugen nativo → `~/.cache/DankMaterialShell/dms-colors.json` → `livara-matugen-sync` → contratos específicos de cada aplicativo.
 
-DMS v1.5.3 permanece owner de GTK, Qt, Firefox, Zen Browser, WezTerm, Vesktop, Kitty e NixVim quando os respectivos `matugenTemplate*` estão habilitados. O shell-conf apenas liga os CSS de browser aos perfis reais e não substitui os arquivos gerados pelo DMS. Ele mantém apenas ZenNotes, Tauon, Freesm Launcher e Xournal++, cada um no formato documentado pelo próprio ecossistema. Foliate recebe o tema GTK; Heroic não possui um contrato Matugen nativo equivalente e não recebe CSS especulativo.
+DMS v1.5.3 permanece owner de GTK, Qt, Firefox, Zen Browser, WezTerm, Vesktop, Kitty e NixVim quando os respectivos `matugenTemplate*` estão habilitados. O shell-conf liga os CSS de browser aos perfis reais e não substitui os templates DMS. Para os aplicativos com contrato próprio, ele materializa ZenNotes (`--z-*`), Foliate (`themes/livara.json`), Tauon (`.ttheme` + `theme-name`), Freesm Launcher (`theme.json` + QSS + `ApplicationTheme`) e Xournal++ (GPL + `settings.xml`). Vesktop usa o CSS DMS e agora também verifica a seleção Vencord em `settings/settings.json`; Heroic não possui um contrato Matugen nativo equivalente e não recebe CSS especulativo.
 
 Para ZenNotes, o adapter cria `themes/nix-conf-matugen/manifest.json` e `theme.css` em `~/.config/zennotes` e, quando a instalação Flatpak está presente, em `~/.var/app/org.zennotes.ZenNotes/config/zennotes`. O CSS usa tokens `--z-*` como triplets RGB separados por espaço e `config.toml` seleciona o tema em modo dark. O manifesto `applied-applications.json` diferencia templates nativos do DMS de adapters realmente materializados. Não há integração Catppuccin.
 
@@ -31,7 +31,7 @@ O modo visual é sempre dark. `stylix` é usado para o cursor Bibata em toda a s
 
 ## Plugins declarativos
 
-`wallpaperCarousel` é instalado pelo módulo DMS a partir do input pinado `motor-dev/wallpaperCarousel`, com modo wrap, cache limitado, expansão da imagem em foco e `~/Wallpapers` como diretório. A extensão nix-monitor foi removida do flake, do Home Manager e da barra. O calendário visual usa o backend nativo `dankcal`, provido pelo Flatpak DankCalendar e por um serviço de usuário; `khal`/`ikhal` não são puxados pela opção de eventos do DMS.
+`wallpaperCarousel` é instalado pelo módulo DMS a partir da cópia versionada em `shell-conf/src/livara/dms-plugins/wallpaperCarousel`, com modo wrap, thumbnails limitadas ao tamanho do card e preview em foco decodificado com no máximo 1280×720, preservando o wallpaper original. A extensão nix-monitor foi removida do flake, do Home Manager e da barra. O calendário visual usa o backend nativo `dankcal`, provido pelo Flatpak DankCalendar e por um serviço de usuário; `khal`/`ikhal` não são puxados pela opção de eventos do DMS.
 
 ## Integrações de produtividade
 

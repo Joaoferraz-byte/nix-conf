@@ -736,7 +736,6 @@
         "shell-conf": "shell-conf",
         "stylix": "stylix",
         "vim-conf": "vim-conf",
-        "wallpaperCarousel": "wallpaperCarousel",
         "xournal-conf": "xournal-conf",
         "zen-browser": "zen-browser"
       }
@@ -766,11 +765,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787237954,
-        "narHash": "sha256-UHyse1RZaqMAWOd6eN/MYsXEXhwWy7wNp1kMz/GIRvI=",
+        "lastModified": 1787241535,
+        "narHash": "sha256-YkMmKoY+bzaQoyz1VDP39qhmWQE/YYWigC/lVqNPHqo=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "31aeeca75740c2ba7a7d2230aa2158137cc58601",
+        "rev": "7b16e4d985fa21b63effb82c5816f9b0c07bd418",
         "type": "github"
       },
       "original": {
@@ -961,22 +960,6 @@
       "original": {
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "type": "github"
-      }
-    },
-    "wallpaperCarousel": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1787207834,
-        "narHash": "sha256-/LoehTfSeeqkgIXw46Ll/PrxeEDhg4RZI5BXib6yEnI=",
-        "owner": "motor-dev",
-        "repo": "wallpaperCarousel",
-        "rev": "761ecd1b7f347beee9f17909f8334d987c935a1a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "motor-dev",
-        "repo": "wallpaperCarousel",
         "type": "github"
       }
     },

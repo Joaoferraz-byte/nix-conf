@@ -19,7 +19,7 @@
   };
 
   home.sessionVariables = {
-    GTK_THEME = "Adwaita:dark";
+    # DMS owns GTK_THEME/gtk.css dynamically from the active Matugen palette.
     GTK_ICON_THEME = "Kora";
     QT_ICON_THEME = "Kora";
     QT_QPA_PLATFORMTHEME = "qt5ct";
