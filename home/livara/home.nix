@@ -105,6 +105,11 @@ in
       iconThemePerMode = false;
       launcherLogoMode = "custom";
       launcherLogoCustomPath = "${config.home.homeDirectory}/.local/share/livara/icons/livara-launcher-logo.svg";
+      launcherLogoColorOverride = "#ffffff";
+      launcherLogoSizeOffset = 8;
+      launcherLogoBrightness = 1.0;
+      launcherLogoContrast = 1.0;
+      launcherLogoColorInvertOnMode = false;
       cursorSettings = {
         theme = "Bibata-Modern-Classic";
         size = 24;
