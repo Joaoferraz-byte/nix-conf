@@ -42,8 +42,8 @@ in
     include optional=true "dms/wpblur.kdl"
 
     input {
-      # Keep every `Mod+...` bind on the physical Super key, including if
-      # niri is ever launched nested for diagnostics.
+      // Keep every `Mod+...` bind on the physical Super key, including if
+      // niri is ever launched nested for diagnostics.
       mod-key "Super"
       keyboard {
         xkb {
@@ -71,6 +71,9 @@ in
     }
 
     prefer-no-csd
+
+    // Do not show niri's hardcoded Important Hotkeys dialog at login.
+    hotkey-overlay { skip-at-startup }
 
     environment {
       GTK_THEME "Adwaita:dark"
@@ -117,7 +120,6 @@ in
       Mod+Shift+Q repeat=false { close-window; }
       Mod+Shift+W repeat=false { spawn "dms" "ipc" "call" "wallpaperCarousel" "toggle"; }
       Mod+Shift+S repeat=false { screenshot; }
-      Mod+Shift+Slash repeat=false { show-hotkey-overlay; }
       Mod+S repeat=false { spawn "dms" "ipc" "call" "control-center" "toggle"; }
       Mod+C repeat=false { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
       Mod+N repeat=false { spawn "dms" "ipc" "call" "notifications" "toggle"; }
@@ -133,8 +135,8 @@ in
       Mod+J { focus-window-down; }
       Mod+K { focus-window-up; }
       Mod+L { focus-column-right; }
-      # Mouse wheel navigation mirrors the directional focus binds. Niri
-      # consumes the wheel while Mod is held; cooldown avoids rapid overshoot.
+      // Mouse wheel navigation mirrors the directional focus binds. Niri
+      // consumes the wheel while Mod is held; cooldown avoids rapid overshoot.
       Mod+WheelScrollDown cooldown-ms=150 { focus-window-down; }
       Mod+WheelScrollUp cooldown-ms=150 { focus-window-up; }
       Mod+WheelScrollRight cooldown-ms=150 { focus-column-right; }

@@ -54,10 +54,7 @@ in
     path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
     name = "livara-profile-icon";
   };
-  home.file.".local/share/livara/icons/livara.jpg".source = builtins.path {
-    path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
-    name = "livara-shell-icon";
-  };
+  home.file.".local/share/livara/icons/livara-launcher-logo.svg".source = inputs.shell-conf + "/src/livara/assets/livara-launcher-logo.svg";
   home.file."Fire/.keep".text = "";
 
   programs.livara.visual = {
@@ -107,7 +104,7 @@ in
       iconThemeLight = "Kora";
       iconThemePerMode = false;
       launcherLogoMode = "custom";
-      launcherLogoCustomPath = "${config.home.homeDirectory}/.local/share/livara/icons/livara.jpg";
+      launcherLogoCustomPath = "${config.home.homeDirectory}/.local/share/livara/icons/livara-launcher-logo.svg";
       cursorSettings = {
         theme = "Bibata-Modern-Classic";
         size = 24;
