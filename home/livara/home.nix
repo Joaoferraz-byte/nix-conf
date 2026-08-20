@@ -1,7 +1,8 @@
 { config, inputs, lib, pkgs, desktopProfile ? { }, userName ? "livara", ... }:
 let
   isMyMachine = (desktopProfile.monitorProfile or "myMachine") == "myMachine";
-  barRightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "notificationButton" "controlCenterButton" ]
+  nixHost = if isMyMachine then "myMachine" else "latitude";
+  barRightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "nixMonitor" "notificationButton" "controlCenterButton" ]
     ++ lib.optional (!isMyMachine) "battery";
   controlCenterWidgets = [
     { id = "volumeSlider"; enabled = true; width = 50; }
@@ -29,9 +30,27 @@ in
   programs.home-manager.enable = true;
   services.easyeffects.enable = true;
 
+  # Nix Monitor owns its plugin files and config.json through its official
+  # Home Manager module; the command remains explicit and host-aware.
+  programs.nix-monitor = {
+    enable = true;
+    rebuildCommand = [
+      "bash"
+      "-lc"
+      "cd ${config.home.homeDirectory}/Projetos/nix-conf && sudo nixos-rebuild switch --flake .#${nixHost} 2>&1"
+    ];
+    gcCommand = [ "bash" "-lc" "sudo nix-collect-garbage -d 2>&1" ];
+    updateInterval = 300;
+    nixpkgsChannel = "nixos-unstable";
+  };
+
   home.file.".face.icon".source = builtins.path {
     path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
     name = "livara-profile-icon";
+  };
+  home.file.".local/share/livara/icons/livara.jpg".source = builtins.path {
+    path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
+    name = "livara-shell-icon";
   };
   home.file."Fire/.keep".text = "";
 
@@ -81,6 +100,8 @@ in
       iconThemeDark = "Kora";
       iconThemeLight = "Kora";
       iconThemePerMode = false;
+      launcherLogoMode = "custom";
+      launcherLogoCustomPath = "${config.home.homeDirectory}/.local/share/livara/icons/livara.jpg";
       cursorSettings = {
         theme = "Bibata-Modern-Classic";
         size = 24;
@@ -182,12 +203,33 @@ in
       weatherHourlyDetailed = true;
       locale = "pt_BR";
       timeLocale = "pt_BR";
+      # SessionData owns the launcher hidden-app list (not settings.json).
+      hiddenApps = [ "ikhal" ];
       searchAppActions = true;
     };
 
     dmsPlugins = {
       livaraProductivity = {
         src = inputs.shell-conf + "/src/livara/dms-plugins/livara";
+      };
+      wallpaperCarousel = {
+        src = inputs.wallpaperCarousel;
+        settings = {
+          wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
+          carouselMode = "wrap";
+          overlayOpacity = 80;
+          borderWidth = 3;
+          cornerRadius = 12;
+          itemWidth = 280;
+          itemHeight = 420;
+          selectedScale = 108;
+          expandSelected = "true";
+          expandMultiplier = 135;
+          enableHoldExpand = "true";
+          holdExpandRatio = 65;
+          holdDelay = 900;
+          cacheSize = 30;
+        };
       };
       wallpaperWatcherDaemon = {
         src = inputs.dms + "/quickshell/PLUGINS/WallpaperWatcherDaemon";

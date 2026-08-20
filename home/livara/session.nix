@@ -54,11 +54,14 @@ in
   systemd.user.services.livara-dms-wallpaper-random-on-login = {
     Unit = {
       Description = "Select a random Livara wallpaper through the DMS IPC after login";
-      After = [ "dms.service" "graphical-session.target" ];
+      After = [ "graphical-session.target" "dms.service" ];
+      Wants = [ "dms.service" ];
       PartOf = [ "graphical-session.target" ];
+      ConditionPathIsDirectory = "${home}/Wallpapers";
     };
     Service = {
       Type = "oneshot";
+      TimeoutStartSec = 45;
       ExecStart = "${randomDmsWallpaper}/bin/livara-dms-wallpaper-random-on-login";
     };
     Install.WantedBy = [ "graphical-session.target" ];

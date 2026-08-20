@@ -1,5 +1,10 @@
 { pkgs, ... }:
 {
+  home.packages = [
+    pkgs.kora-icon-theme
+    pkgs.bibata-cursors
+  ];
+
   stylix.cursor = {
     package = pkgs.bibata-cursors;
     name = "Bibata-Modern-Classic";
@@ -18,6 +23,7 @@
     GTK_ICON_THEME = "Kora";
     QT_ICON_THEME = "Kora";
     QT_QPA_PLATFORMTHEME = "qt5ct";
+    QT_QPA_PLATFORMTHEME_QT6 = "qt6ct";
     XCURSOR_THEME = "Bibata-Modern-Classic";
     XCURSOR_SIZE = "24";
     XCURSOR_PATH = "${pkgs.bibata-cursors}/share/icons";

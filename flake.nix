@@ -9,6 +9,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    wallpaperCarousel = {
+      url = "github:motor-dev/wallpaperCarousel";
+      flake = false;
+    };
+
+    nixMonitor.url = "github:antonjah/nix-monitor";
+
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";

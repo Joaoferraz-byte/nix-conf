@@ -36,8 +36,9 @@
     fsType = "vfat";
   };
 
+  # The former 79febc52 UUID is absent from this machine and caused a
+  # 90-second systemd device timeout on every boot. Keep the detected swap.
   swapDevices = [
-    { device = "/dev/disk/by-uuid/79febc52-42dd-4d8e-ba13-eea976778dfb"; }
     { device = "/dev/disk/by-uuid/73f0052c-6927-45c4-b3a2-8cdc4cbd0d8b"; }
   ];
 

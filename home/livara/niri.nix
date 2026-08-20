@@ -61,6 +61,13 @@ in
 
     prefer-no-csd
 
+    environment {
+      GTK_THEME "Adwaita:dark"
+      GTK_ICON_THEME "Kora"
+      QT_QPA_PLATFORMTHEME "qt5ct"
+      QT_QPA_PLATFORMTHEME_QT6 "qt6ct"
+    }
+
     window-rule {
       geometry-corner-radius 12
       clip-to-geometry true
@@ -97,7 +104,7 @@ in
       Mod+F11 repeat=false { fullscreen-window; }
       Mod+Q repeat=false { close-window; }
       Mod+Shift+Q repeat=false { close-window; }
-      Mod+Shift+W repeat=false { spawn "dms" "ipc" "call" "dankdash" "wallpaper"; }
+      Mod+Shift+W repeat=false { spawn "dms" "ipc" "call" "wallpaperCarousel" "toggle"; }
       Mod+Shift+S repeat=false { screenshot; }
       Mod+Shift+Slash repeat=false { show-hotkey-overlay; }
       Mod+S repeat=false { spawn "dms" "ipc" "call" "control-center" "toggle"; }

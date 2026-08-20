@@ -484,6 +484,21 @@
         "type": "github"
       }
     },
+    "nixMonitor": {
+      "locked": {
+        "lastModified": 1771568669,
+        "narHash": "sha256-lTbQ13lQ3ZPNkdnFmxAMGf1Gjx//80lDDlcJR8msREI=",
+        "owner": "antonjah",
+        "repo": "nix-monitor",
+        "rev": "ef3db9d5a525ddf41355e8c456b40d56480a6626",
+        "type": "github"
+      },
+      "original": {
+        "owner": "antonjah",
+        "repo": "nix-monitor",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1782918843,
@@ -731,11 +746,13 @@
         "home-manager": "home-manager",
         "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
+        "nixMonitor": "nixMonitor",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
         "shell-conf": "shell-conf",
         "stylix": "stylix",
         "vim-conf": "vim-conf",
+        "wallpaperCarousel": "wallpaperCarousel",
         "xournal-conf": "xournal-conf",
         "zen-browser": "zen-browser"
       }
@@ -765,11 +782,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787218064,
-        "narHash": "sha256-M8/Y4XQUiu3AU4ySOicEOgbsslgyl5yKT1cRmPf7vgA=",
+        "lastModified": 1787224401,
+        "narHash": "sha256-Vx9k5BhCXi7ajO5IKDIOW6XYBvJ9VLAbp3KC7fGl9AU=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "b8ea767890293b2bd168fc3b444f38a327b318af",
+        "rev": "e5e05af5e46a2950dde6e4762f81ffcb9b3c6f0d",
         "type": "github"
       },
       "original": {
@@ -960,6 +977,22 @@
       "original": {
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
+        "type": "github"
+      }
+    },
+    "wallpaperCarousel": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787207834,
+        "narHash": "sha256-/LoehTfSeeqkgIXw46Ll/PrxeEDhg4RZI5BXib6yEnI=",
+        "owner": "motor-dev",
+        "repo": "wallpaperCarousel",
+        "rev": "761ecd1b7f347beee9f17909f8334d987c935a1a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "motor-dev",
+        "repo": "wallpaperCarousel",
         "type": "github"
       }
     },

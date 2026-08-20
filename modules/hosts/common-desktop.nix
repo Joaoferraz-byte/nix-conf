@@ -109,6 +109,7 @@
             inputs.stylix.homeModules.stylix
             inputs.dms.homeModules.dank-material-shell
             inputs.shell-conf.homeManagerModules.default
+            inputs.nixMonitor.homeManagerModules.default
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;
