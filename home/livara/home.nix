@@ -54,11 +54,11 @@ in
     path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
     name = "livara-profile-icon";
   };
-  home.file.".local/share/livara/icons/livara-launcher-logo.svg".source = inputs.shell-conf + "/src/livara/assets/livara-launcher-logo.svg";
   home.file."Fire/.keep".text = "";
 
   programs.livara.visual = {
     enable = true;
+    launcherLogoAsset = ../../icons/livara-launcher-logo.svg;
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
     themeName = "Livara";
     dmsPackage = inputs.dms.packages.${pkgs.system}.default;
