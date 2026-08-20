@@ -28,6 +28,22 @@
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
     themeName = "Livara";
     noctaliaPackage = inputs.noctalia.packages.${pkgs.system}.default;
+    wallpaperAutomationEnabled = false;
+    weatherEnabled = true;
+    weatherAddress = "Rua João da Cunha, Jardim João XXIII, São Paulo, SP, Brasil";
+    systemMonitorEnabled = true;
+    controlCenterHiddenTabs = [ "bluetooth" "calendar" ];
+    controlCenterShortcuts = [
+      "audio"
+      "system"
+      "weather"
+      "keyboard_layout"
+      "livara/productivity:tasks"
+      "livara/productivity:tablet"
+    ];
+    barMainStartWidgets = [ "launcher" "wallpaper" "workspaces" ];
+    barMainCenterWidgets = [ "clock" "weather" ];
+    barMainEndWidgets = [ "media" "tray" "notifications" "clipboard" "network" "volume" "brightness" "livara/productivity:tablet" "control-center" "session" ];
   };
 
   home.sessionVariables = {
