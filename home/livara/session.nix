@@ -19,10 +19,10 @@ let
         printf '%s\n' "No wallpaper found in $wallpapers_dir" >&2
         exit 1
       }
-      for attempt in $(seq 1 30); do
+      for attempt in {1..30}; do
         if dms ipc call version >/dev/null 2>&1 \
           && dms ipc call wallpaper set "$wallpaper" >/dev/null 2>&1; then
-          printf '%s\n' "Selected random wallpaper: $wallpaper"
+          printf '%s\n' "Selected random wallpaper after $attempt attempt(s): $wallpaper"
           exit 0
         fi
         sleep 1
