@@ -4,7 +4,7 @@ This directory contains the evaluated NixOS and flake-parts modules for the repo
 
 | Path | Responsibility |
 |---|---|
-| `features/` | Reusable system capabilities such as Hyprland/UWSM, portals, audio, drivers, hardening, Flatpak, containers, virtualization, and development tools. |
+| `features/` | Reusable system capabilities such as niri, portals, audio, drivers, hardening, Flatpak, containers, virtualization, and development tools. |
 | `packages/` | Shared package sets and compatibility definitions. |
 | `hosts/` | Machine composition roots, hardware declarations, locale, identity, and host-specific policy. |
 | `parts.nix` | flake-parts definitions for public module exports and shared flake metadata. |
@@ -23,23 +23,25 @@ nix build .#nixosConfigurations.<host>.config.system.build.toplevel
 
 ## Shared desktop profile
 
-`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the local Hyprland/UWSM and niri system modules, the Serpantinum Matugen/application adapter, the Noctalia Home Manager module, and the NixVim module. The `home/livara/` profile is split by ownership:
+`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the niri system module, the `shell-conf` visual API, the Noctalia Home Manager module, and the NixVim module. The `home/livara/` profile is split by ownership:
 
 | File | Owner |
 |---|---|
-| `session.nix` | Hypridle, UWSM-compatible user behavior, screenshots, and legacy session-file cleanup. |
-| `themes.nix` | Explicit boundary module; theme generation and application adapters are owned by Serpantinum. |
+| `session.nix` | User-session behavior, screenshots, and session-file cleanup. |
+| `themes.nix` | Explicit boundary module for Kora icons, cursor, GTK/Qt preference and host-independent desktop appearance. |
 | `applications.nix` | Applications, XDG associations, NixVim, and Xournal++ data synchronization. |
 | `sync.nix` | Independent wallpaper and Vault synchronization services and timers. |
 | `home.nix` | Thin profile entrypoint, identity, environment, and imports. |
 
-## Serpantinum adapter
+## Noctalia and visual API
 
-The visible shell backend is selected by `desktop.profile.shellBackend`, whose current default is `noctalia`. Noctalia is provided by the official `inputs.noctalia.homeModules.default` module and is attached to the Home Manager Wayland systemd target. The Serpantinum module remains enabled as a backend for Matugen, application-specific theme adapters, canonical scripts, keyboard contracts, and the niri KDL; when the backend is `noctalia`, its QuickShell and awww surface services are disabled declaratively.
+The visible shell is Noctalia v5, started by niri through its documented compositor-owned startup path. The visual API is provided by `inputs.shell-conf.homeManagerModules.default`; there is no Serpantinum backend and no login-time Livara theme service.
 
-The wallpaper repository is synchronized to `~/Wallpapers`. Noctalia owns wallpaper selection and transitions through its documented IPC; its `wallpaper_changed` hook passes the active path to Matugen, which regenerates the dark-only palette and application contracts atomically. The generated Noctalia palette uses the official custom-palette JSON contract, while GTK/Qt icon selection remains a separate Kora desktop-theme concern.
+Noctalia owns wallpaper selection, transitions and its native wallpaper-derived palette. The official `wallpaper_changed` hook passes the active path to the external Matugen adapter pipeline. Matugen generates only application-specific contracts that Noctalia does not own, such as GTK/Qt files, ZenNotes CSS/manifest, browser chrome, WezTerm Lua, Vesktop CSS, Tauon and Xournal++ palettes. Kora icon selection and cursor selection remain separate desktop-theme concerns.
 
-The Ctrl+H/J/K/L translation is deliberately not a Hyprland or QuickShell binding. It is owned by `features/keyd.nix`, where keyd emits real arrow events in the `[control:C]` layer before applications consume the input.
+The `myMachine` profile hides the native Bluetooth/calendar tabs that do not represent its hardware/workflow and uses the native Network tab for Ethernet. Its six Control Center shortcuts are audio, system monitor, weather, keyboard layout, ZenNotes Tasks and tablet/Xournal. The plugin system is beta and is installed immutably by Home Manager under the local Noctalia plugin directory.
+
+The Ctrl+H/J/K/L translation is deliberately not a compositor or shell binding. It is owned by `features/keyd.nix`, where keyd emits real arrow events in the `[control:C]` layer before applications consume the input.
 
 ## Hardware generation
 

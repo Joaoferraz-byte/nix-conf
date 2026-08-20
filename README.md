@@ -19,9 +19,9 @@ O launcher e os painéis são abertos por IPC do Noctalia. Em particular, `Super
 
 ## Temas por ecossistema
 
-O [shell-conf](https://github.com/Joaoferraz-byte/shell-conf) expõe `programs.livara.visual`. Ele não é um shell: fornece templates Matugen, uma paleta dark-only derivada do wallpaper e o comando `sync-livara-themes`. Noctalia seleciona o wallpaper em `~/Wallpapers`, entrega `NOCTALIA_WALLPAPER_PATH` ao hook, Matugen gera a paleta mutável em `$XDG_STATE_HOME/livara/theme` e cada adapter materializa o formato específico do aplicativo.
+O [shell-conf](https://github.com/Joaoferraz-byte/shell-conf) expõe `programs.livara.visual`. Ele não é um shell: fornece a configuração declarativa do Noctalia, templates Matugen, o comando `sync-livara-themes` e o plugin local de produtividade. Noctalia seleciona o wallpaper em `~/Wallpapers` e calcula internamente sua própria paleta wallpaper-derived; o hook oficial entrega `NOCTALIA_WALLPAPER_PATH` ao pipeline externo apenas para que cada adapter materialize o formato específico de um aplicativo.
 
-ZenNotes recebe `themes/livara/manifest.json` e `theme.css`; Firefox e Zen Browser recebem `userChrome.css`/`userContent.css`; GTK, Qt, WezTerm, Neovim, Cava, Tauon, Freesm Launcher, Vesktop e Xournal++ recebem seus contratos próprios. A existência de um template não é contada como aplicação do tema: o manifesto `applied-applications.json` registra os caminhos realmente materializados. O modo é sempre dark e não há integração Catppuccin.
+ZenNotes recebe `themes/livara/manifest.json` e `theme.css`; Firefox e Zen Browser recebem `userChrome.css`/`userContent.css`; GTK, Qt, WezTerm, Neovim, Cava, Tauon, Freesm Launcher, Vesktop e Xournal++ recebem seus contratos próprios. A existência de um template não é contada como aplicação do tema: o manifesto `applied-applications.json` registra os caminhos realmente materializados. O modo é sempre dark e não há integração Catppuccin. O calendário nativo do Noctalia não é usado para interpretar tasks; o plugin Livara fornece o tile/painel `Tasks` e o provider `/tasks`, baseado no parser Markdown do ZenNotes.
 
 ## Teclado e aplicações
 
