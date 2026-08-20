@@ -73,7 +73,7 @@ in
     prefer-no-csd
 
     // Do not show niri's hardcoded Important Hotkeys dialog at login.
-    hotkey-overlay { skip-at-startup }
+    hotkey-overlay { skip-at-startup; }
 
     environment {
       GTK_THEME "Adwaita:dark"
