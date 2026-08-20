@@ -67,9 +67,11 @@ in
       gtkThemingEnabled = true;
       qtThemingEnabled = true;
       terminalsAlwaysDark = true;
-      popupTransparency = 0.92;
-      dockTransparency = 0.92;
-      blurEnabled = false;
+      # DMS surface alpha is separate from niri window opacity. Keep the
+      # shell surfaces consistent with the compositor policy.
+      popupTransparency = 0.90;
+      dockTransparency = 0.90;
+      blurEnabled = true;
       blurForegroundLayers = true;
       notificationForegroundLayers = true;
       useAutoLocation = false;
@@ -110,6 +112,7 @@ in
       barConfigs = [
         {
           id = "default";
+          enabled = true;
           name = "Livara Bar";
           screenPreferences = [ "all" ];
           showOnLastDisplay = true;
@@ -119,8 +122,8 @@ in
           spacing = 4;
           innerPadding = 4;
           bottomGap = 0;
-          transparency = 1.0;
-          widgetTransparency = 0.88;
+          transparency = 0.90;
+          widgetTransparency = 0.90;
           squareCorners = false;
           noBackground = false;
           maximizeWidgetIcons = false;

@@ -2,6 +2,8 @@
 
 let
   home = config.home.homeDirectory;
+  windowOpacity = "0.90";
+
   keyboardLayout = desktopProfile.keyboardLayout or "br";
   keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
   workspaceFocus = pkgs.writeShellApplication {
@@ -23,6 +25,13 @@ in
   home.file.".config/niri/config.kdl".text = ''
     // niri is the sole compositor owner. DMS owns the shell and its documented IPC.
     include "outputs.kdl"
+    // DMS writes these files at runtime. Optional includes keep a clean
+    // first login valid; niri watches them and reloads when DMS creates them.
+    include optional=true "dms/layout.kdl"
+    include optional=true "dms/alttab.kdl"
+    include optional=true "dms/binds.kdl"
+    include optional=true "dms/cursor.kdl"
+    include optional=true "dms/wpblur.kdl"
 
     input {
       keyboard {
@@ -55,6 +64,27 @@ in
     window-rule {
       geometry-corner-radius 12
       clip-to-geometry true
+    }
+
+    // Matugen owns the dynamic palette and app templates. niri owns the
+    // cross-application compositor policy for alpha and focus-dependent blur.
+    window-rule {
+      opacity ${windowOpacity}
+    }
+    window-rule {
+      match is-focused=true
+      background-effect {
+        xray true
+        blur true
+        noise 0.03
+        saturation 1.0
+      }
+    }
+    window-rule {
+      match is-focused=false
+      background-effect {
+        blur false
+      }
     }
 
     binds {
