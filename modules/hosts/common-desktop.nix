@@ -76,7 +76,11 @@
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
+          # DMS mutates its persistent session.json at runtime. Keep one
+          # rolling Home Manager backup and replace that backup atomically on
+          # later activations instead of aborting when .backup already exists.
           backupFileExtension = "backup";
+          overwriteBackup = true;
           extraSpecialArgs = {
             inherit inputs self;
             userName = cfg.userName;
