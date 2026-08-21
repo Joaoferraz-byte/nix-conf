@@ -1,6 +1,9 @@
 { ... }: {
   flake.nixosModules.desktop-portals = { pkgs, ... }: {
     services.udisks2.enable = true;
+    # Nautilus uses GVFS backends for removable volumes, mounts and remote
+    # locations; UDisks2 alone does not provide the GTK/GIO integration.
+    services.gvfs.enable = true;
     security.polkit.enable = true;
     security.polkit.extraConfig = ''
       polkit.addRule(function(action, subject) {

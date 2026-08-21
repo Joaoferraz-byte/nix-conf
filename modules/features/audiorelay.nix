@@ -142,7 +142,11 @@
 
         services.flatpak.overrides."net.audiorelay.AudioRelay" = {
           Context = {
-            sockets = [ "x11" ];
+            # AudioRelay's Linux client uses the PulseAudio compatibility API;
+            # with PipeWire this is provided by pipewire-pulse. The previous
+            # x11-only override removed the audio socket from the sandbox.
+            sockets = [ "pulseaudio" "wayland" "fallback-x11" ];
+            shares = [ "network" ];
           };
           Environment = {
             _JAVA_AWT_WM_NONREPARENTING = "1";

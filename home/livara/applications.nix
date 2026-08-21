@@ -79,6 +79,7 @@ in
     git
     xournalpp
     affinity-v3
+    easyeffects
   ];
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

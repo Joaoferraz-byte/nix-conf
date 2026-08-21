@@ -116,7 +116,11 @@ in
     mv -f "$tmp" "$plugin_settings"
   '';
 
-  services.easyeffects.enable = true;
+  # EasyEffects is a GUI effect processor, not the audio device manager.
+  # Keep it available as an application but do not start its hidden service at
+  # every login; DMS/PipeWire own device selection and AudioRelay owns the
+  # Virtual-Mic source contract.
+  services.easyeffects.enable = false;
 
   # DMS checks the conventional `.face` path before `.face.icon` for both
   # greeter users and the profile card. Keep both links declarative so an old
@@ -345,6 +349,11 @@ in
       };
     };
   };
+
+  # niri provides native systemd session integration. Bind DMS to niri.service
+  # so logout/login starts the shell with the compositor session instead of
+  # relying on a generic graphical-session.target activation.
+  programs.dank-material-shell.systemd.target = "niri.service";
 
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projetos";

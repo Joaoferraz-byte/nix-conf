@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   home.packages = [
     pkgs.kora-icon-theme
@@ -11,10 +11,36 @@
     size = 24;
   };
 
+  # GTK3/GIO owns the Nautilus bookmark contract. Do not set gtk-theme here:
+  # DMS writes the wallpaper-derived gtk.css dynamically.
+  gtk = {
+    enable = true;
+    iconTheme = {
+      package = pkgs.kora-icon-theme;
+      name = "Kora";
+    };
+    gtk3 = {
+      enable = true;
+      bookmarks = [
+        "file://${config.xdg.userDirs.desktop} Desktop"
+        "file://${config.xdg.userDirs.documents} Documents"
+        "file://${config.xdg.userDirs.download} Downloads"
+        "file://${config.xdg.userDirs.pictures} Pictures"
+        "file://${config.home.homeDirectory}/Projetos Projects"
+        "file://${config.home.homeDirectory}/Vault Vault"
+      ];
+    };
+    gtk4.enable = true;
+  };
+
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
       icon-theme = "Kora";
+    };
+    "org/gnome/desktop/media-handling" = {
+      automount = true;
+      automount-open = true;
     };
   };
 
