@@ -10,6 +10,12 @@ let
     [ "toolbarTop1=PEN,ERASER,HIGHLIGHTER" ]
     [ "toolbarTop1=HIGHLIGHTER,ERASER,PEN" ]
     (builtins.readFile "${inputs.xournal-conf}/xournalpp/toolbar.ini"));
+  # Keep the expressive icon choice local to Nautilus. GTK's global session
+  # remains Kora for DMS and other applications; this wrapper only overrides
+  # the environment of the Files process.
+  nautilusLivara = pkgs.writeShellScriptBin "nautilus-livara" ''
+    exec env GTK_ICON_THEME=Papirus-Dark ${pkgs.nautilus}/bin/nautilus "$@"
+  '';
 in
 {
   # Applications
@@ -80,6 +86,8 @@ in
     xournalpp
     affinity-v3
     easyeffects
+    nautilusLivara
+    papirus-icon-theme
   ];
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -104,6 +112,23 @@ in
     fi
   '';
   xdg.configFile."xournalpp/default_template.tex".source = "${inputs.xournal-conf}/xournalpp/default_template.tex";
+
+  # Override the packaged Nautilus desktop entry at the user-priority XDG
+  # location. DBusActivatable=false is intentional: otherwise a desktop
+  # environment may bypass the wrapper and start the unmodified process.
+  home.file.".local/share/applications/org.gnome.Nautilus.desktop".text = ''
+    [Desktop Entry]
+    Name=Files
+    Comment=Access and organize files
+    Exec=${nautilusLivara}/bin/nautilus-livara --new-window %U
+    Icon=org.gnome.Nautilus
+    Terminal=false
+    Type=Application
+    StartupNotify=true
+    DBusActivatable=false
+    Categories=GNOME;GTK;Utility;Core;FileManager;
+    MimeType=inode/directory;application/x-7z-compressed;application/zip;application/gzip;
+  '';
 
   xdg.desktopEntries.nvim = {
     name = "Neovim (NixVim)";
@@ -136,6 +161,7 @@ in
       "application/zip" = [ "org.gnome.FileRoller.desktop" ];
       "application/x-7z-compressed" = [ "org.gnome.FileRoller.desktop" ];
       "application/gzip" = [ "org.gnome.FileRoller.desktop" ];
+      "inode/directory" = [ "org.gnome.Nautilus.desktop" ];
     };
   };
 

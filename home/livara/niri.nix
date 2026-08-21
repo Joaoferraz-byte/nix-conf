@@ -14,6 +14,10 @@ in
     include "outputs.kdl"
     // DMS writes these files at runtime. Optional includes keep a clean
     // first login valid; niri watches them and reloads when DMS creates them.
+    // DMS owns wallpaper-derived focus-ring, border and insert-hint colors.
+    // Keep this optional so the first activation remains valid before DMS has
+    // published its generated file.
+    include optional=true "dms/colors.kdl"
     include optional=true "dms/layout.kdl"
     include optional=true "dms/alttab.kdl"
     include optional=true "dms/binds.kdl"
@@ -92,7 +96,7 @@ in
       Mod+Space repeat=false { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
       Mod+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+Alt+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
-      Mod+E repeat=false { spawn "nautilus" "--new-window"; }
+      Mod+E repeat=false { spawn "nautilus-livara" "--new-window"; }
       Mod+F repeat=false { fullscreen-window; }
       Mod+F11 repeat=false { fullscreen-window; }
       Mod+Q repeat=false { close-window; }
