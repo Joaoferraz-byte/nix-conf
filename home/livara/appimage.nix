@@ -26,22 +26,25 @@ let
       fi
     fi
 
-    # Keep the selected AppImage as the final command argument. `--appimage`
-    # selects Firejail's AppImage path; `--` terminates Firejail options.
+    # On NixOS, Firejail's native `--appimage` path mounts the image but
+    # launches its generic /bin/bash and dynamic linker directly. Generic
+    # AppImages then fail because NixOS does not provide the traditional FHS.
+    # Use the official NixOS appimage-run/bwrap compatibility layer as the
+    # inner runner, and keep Firejail as the outer network/capability sandbox.
+    # Do not enable Firejail seccomp here: appimage-run needs bwrap namespace
+    # operations (mount/pivot_root) to construct the FHS environment.
     exec ${pkgs.firejail}/bin/firejail \
       --quiet \
       --noprofile \
       --net=none \
       --caps.drop=all \
-      --seccomp \
-      --appimage \
-      -- "$appimage" "$@"
+      -- ${pkgs.appimage-run}/bin/appimage-run "$appimage" "$@"
   '';
 in
 {
   xdg.desktopEntries.firejail-appimage = {
     name = "Firejail AppImage";
-    comment = "Run a selected AppImage in a Firejail sandbox";
+    comment = "Run a selected AppImage with NixOS appimage-run inside Firejail";
     exec = "${firejailAppimage} %f";
     terminal = false;
     type = "Application";

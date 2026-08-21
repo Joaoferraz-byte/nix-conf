@@ -20,17 +20,21 @@ let
         printf '%s\n' "No wallpaper found in $wallpapers_dir" >&2
         exit 1
       }
-      for attempt in {1..30}; do
+      for attempt in {1..120}; do
         # `version` is not a DMS IPC target in v1.5.3. The documented
         # wallpaper call itself is the readiness probe and the only owner of
-        # wallpaper/Matugen state.
+        # wallpaper/Matugen state. DMS starts asynchronously after niri, so
+        # keep the one-shot alive long enough for Quickshell to publish IPC.
         if dms ipc call wallpaper set "$wallpaper" >/dev/null 2>&1; then
           printf '%s\n' "Selected random wallpaper after $attempt attempt(s): $wallpaper"
           exit 0
         fi
+        if (( attempt % 15 == 0 )); then
+          printf '%s\n' "Waiting for DMS wallpaper IPC (attempt $attempt/120)" >&2
+        fi
         sleep 1
       done
-      printf '%s\n' "DMS IPC was not ready after 30 attempts" >&2
+      printf '%s\n' "DMS IPC was not ready after 120 attempts" >&2
       exit 1
     '';
   };
@@ -70,13 +74,18 @@ in
       Description = "Select one random DMS wallpaper at graphical session start";
       After = [ "dms.service" ];
       Wants = [ "dms.service" ];
-      PartOf = [ "graphical-session.target" ];
+      PartOf = [ "niri.service" ];
     };
     Service = {
       Type = "oneshot";
       ExecStart = "${randomDmsWallpaper}/bin/dms-wallpaper-random-on-login";
+      Restart = "on-failure";
+      RestartSec = 5;
+      TimeoutStartSec = 180;
     };
-    Install.WantedBy = [ "graphical-session.target" ];
+    # niri does not activate graphical-session.target; bind the one-shot to
+    # the compositor session just like the DMS service itself.
+    Install.WantedBy = [ "niri.service" ];
   };
 
   systemd.user.services.dankcalendar = {

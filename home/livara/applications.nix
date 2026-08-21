@@ -18,7 +18,20 @@ let
     umask 077
     original_config="''${XDG_CONFIG_HOME:-$HOME/.config}"
     runtime_root="''${XDG_RUNTIME_DIR:-/tmp}/livara-nautilus-''${UID:-$(id -u)}"
-    mkdir -p "$runtime_root/gtk-3.0" "$runtime_root/gtk-4.0"
+    mkdir -p "$runtime_root/gtk-3.0" "$runtime_root/gtk-4.0" "$runtime_root/dconf/keyfiles"
+
+    # GTK4/libadwaita reads the GNOME icon-theme GSettings key. Build a
+    # throw-away dconf user database for this process instead of mutating the
+    # user's global Kora setting. DCONF_PROFILE is an official dconf mechanism
+    # for selecting the databases visible to a process.
+    cat > "$runtime_root/dconf/keyfiles/livara-nautilus" <<'EOF'
+[org/gnome/desktop/interface]
+icon-theme='Papirus-Dark'
+EOF
+    ${pkgs.dconf}/bin/dconf compile "$runtime_root/dconf/user" "$runtime_root/dconf/keyfiles"
+    cat > "$runtime_root/dconf/profile" <<EOF
+user-db:user
+EOF
 
     for gtk_version in 3.0 4.0; do
       original_gtk="$original_config/gtk-$gtk_version"
@@ -48,6 +61,8 @@ EOF
 
     exec env XDG_CONFIG_HOME="$runtime_root" \
       XDG_CONFIG_DIRS="$original_config:''${XDG_CONFIG_DIRS:-/etc/xdg}" \
+      DCONF_PROFILE="$runtime_root/dconf/profile" \
+      GSETTINGS_BACKEND=dconf \
       ${pkgs.nautilus}/bin/nautilus "$@"
   '';
 in

@@ -6,6 +6,8 @@
     in
     {
       imports = [
+        self.nixosModules.appimage
+        self.nixosModules.firejail
         self.nixosModules.niri
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager

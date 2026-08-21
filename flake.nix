@@ -57,6 +57,7 @@
       imports = [
         inputs.home-manager.flakeModules.home-manager
         ./modules/parts.nix
+        ./modules/features/appimage.nix
         ./modules/features/audiorelay.nix
         ./modules/features/desktop-portals.nix
         ./modules/features/development.nix
