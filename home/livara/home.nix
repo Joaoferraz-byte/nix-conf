@@ -57,31 +57,76 @@ in
   home.stateVersion = "26.11";
   programs.home-manager.enable = true;
 
-  # DMS v1.5.3 persists SessionData in XDG_STATE_HOME, not in
-  # ~/.config/DankMaterialShell/settings.json. Keep only the launcher contract
-  # declarative so stale `os`/negative-size values cannot hide the Livara logo
-  # after a rebuild; other UI preferences remain user-editable.
-  home.activation.livaraDmsLauncherLogoDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    settings="${config.xdg.stateHome}/DankMaterialShell/session.json"
+  # DMS v1.5.3 stores launcher options and GTK/Qt theming flags in
+  # SettingsData at ~/.config/DankMaterialShell/settings.json. SessionData
+  # (session.json) is reserved for wallpaper, locale, weather and runtime state.
+  # Keep the settings contract declarative and write it atomically after HM has
+  # materialized the DMS settings file, so stale runtime values cannot shadow it.
+  home.activation.livaraDmsSettingsDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    settings="${config.xdg.configHome}/DankMaterialShell/settings.json"
     if [ -f "$settings" ]; then
       tmp="$settings.tmp.$$"
       ${pkgs.jq}/bin/jq \
         --arg logo "$HOME/.local/share/livara/icons/livara-launcher-logo.svg" \
         '.launcherLogoMode = "custom"
          | .launcherLogoCustomPath = $logo
-         | .launcherLogoColorOverride = "#ffffff"
+         | .launcherLogoColorOverride = ""
          | .launcherLogoColorInvertOnMode = false
          | .launcherLogoBrightness = 0.5
          | .launcherLogoContrast = 1
-         | .launcherLogoSizeOffset = 0' \
+         | .launcherLogoSizeOffset = -2
+         | .gtkThemingEnabled = true
+         | .qtThemingEnabled = true
+         | .runDmsMatugenTemplates = true
+         | .matugenTemplateGtk = true
+         | .matugenTemplateQt5ct = true
+         | .matugenTemplateQt6ct = true
+         | .matugenTemplateKcolorscheme = true
+         | .matugenTemplateFirefox = true
+         | .matugenTemplateZenBrowser = true
+         | .matugenTemplateVesktop = true
+         | .matugenTemplateWezterm = true
+         | .matugenTemplateNeovim = true
+         | .matugenTemplateNeovimSetBackground = true' \
         "$settings" > "$tmp"
       chmod 0644 "$tmp"
       mv -f "$tmp" "$settings"
     fi
   '';
 
+  # PluginService stores plugin settings in its own JSON file. The vendored
+  # carousel uses the manifest ID `wallpaper-carousel`, not the Nix attribute
+  # name, so enforce both expansion flags at the runtime contract boundary.
+  home.activation.livaraWallpaperCarouselDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    plugin_settings="${config.xdg.configHome}/DankMaterialShell/plugin_settings.json"
+    mkdir -p "$(dirname "$plugin_settings")"
+    tmp="$plugin_settings.tmp.$$"
+    if [ -f "$plugin_settings" ]; then
+      ${pkgs.jq}/bin/jq \
+        '."wallpaper-carousel".expandSelected = "false"
+         | ."wallpaper-carousel".enableHoldExpand = "false"' \
+        "$plugin_settings" > "$tmp"
+    else
+      ${pkgs.jq}/bin/jq -n \
+        '{"wallpaper-carousel": {"expandSelected": "false", "enableHoldExpand": "false"}}' \
+        > "$tmp"
+    fi
+    chmod 0644 "$tmp"
+    mv -f "$tmp" "$plugin_settings"
+  '';
+
   services.easyeffects.enable = true;
 
+  # DMS checks the conventional `.face` path before `.face.icon` for both
+  # greeter users and the profile card. Keep both links declarative so an old
+  # manually-created file cannot shadow the selected avatar.
+  home.file.".face" = {
+    source = builtins.path {
+      path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
+      name = "livara-profile-icon";
+    };
+    force = true;
+  };
   home.file.".face.icon" = {
     source = builtins.path {
       path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
@@ -140,10 +185,10 @@ in
       iconThemePerMode = false;
       launcherLogoMode = "custom";
       launcherLogoCustomPath = "${config.home.homeDirectory}/.local/share/livara/icons/livara-launcher-logo.svg";
-      launcherLogoColorOverride = "#ffffff";
-      # Upstream DMS v1.5.3 defaults: neutral size offset, 50% brightness,
-      # standard contrast. The custom SVG remains explicitly white.
-      launcherLogoSizeOffset = 0;
+      # Empty override delegates the SVG color to DMS's current primary theme
+      # color; -2 is the requested small reduction from the upstream size.
+      launcherLogoColorOverride = "";
+      launcherLogoSizeOffset = -2;
       launcherLogoBrightness = 0.5;
       launcherLogoContrast = 1.0;
       launcherLogoColorInvertOnMode = false;
@@ -282,9 +327,9 @@ in
           itemWidth = 280;
           itemHeight = 420;
           selectedScale = 108;
-          expandSelected = "true";
+          expandSelected = "false";
           expandMultiplier = 135;
-          enableHoldExpand = "true";
+          enableHoldExpand = "false";
           holdExpandRatio = 65;
           holdDelay = 900;
           cacheSize = 30;
