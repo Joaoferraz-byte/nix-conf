@@ -10,11 +10,43 @@ let
     [ "toolbarTop1=PEN,ERASER,HIGHLIGHTER" ]
     [ "toolbarTop1=HIGHLIGHTER,ERASER,PEN" ]
     (builtins.readFile "${inputs.xournal-conf}/xournalpp/toolbar.ini"));
-  # Keep the expressive icon choice local to Nautilus. GTK's global session
-  # remains Kora for DMS and other applications; this wrapper only overrides
-  # the environment of the Files process.
+  # GTK does not define a GTK_ICON_THEME environment variable. Use its
+  # documented settings.ini contract in a per-process XDG config root instead.
+  # The global session remains Kora; only Nautilus receives Papirus-Dark.
   nautilusLivara = pkgs.writeShellScriptBin "nautilus-livara" ''
-    exec env GTK_ICON_THEME=Papirus-Dark ${pkgs.nautilus}/bin/nautilus "$@"
+    set -Eeuo pipefail
+    umask 077
+    original_config="''${XDG_CONFIG_HOME:-$HOME/.config}"
+    runtime_root="''${XDG_RUNTIME_DIR:-/tmp}/livara-nautilus-''${UID:-$(id -u)}"
+    mkdir -p "$runtime_root/gtk-3.0" "$runtime_root/gtk-4.0"
+
+    for gtk_version in 3.0 4.0; do
+      original_gtk="$original_config/gtk-$gtk_version"
+      runtime_gtk="$runtime_root/gtk-$gtk_version"
+      cat > "$runtime_gtk/settings.ini" <<EOF
+[Settings]
+      gtk-icon-theme-name=Papirus-Dark
+      gtk-application-prefer-dark-theme=true
+      gtk-enable-animations=true
+EOF
+      for shared_file in gtk.css gtk-dark.css bookmarks; do
+        if [[ -e "$original_gtk/$shared_file" ]]; then
+          ln -sfn "$original_gtk/$shared_file" "$runtime_gtk/$shared_file"
+        else
+          rm -f "$runtime_gtk/$shared_file"
+        fi
+      done
+    done
+
+    # Nautilus keeps additional per-user state below this directory. Reuse it
+    # when it already exists instead of creating a second application profile.
+    if [[ -e "$original_config/nautilus" ]]; then
+      ln -sfn "$original_config/nautilus" "$runtime_root/nautilus"
+    fi
+
+    exec env XDG_CONFIG_HOME="$runtime_root" \
+      XDG_CONFIG_DIRS="$original_config:''${XDG_CONFIG_DIRS:-/etc/xdg}" \
+      ${pkgs.nautilus}/bin/nautilus "$@"
   '';
 in
 {
