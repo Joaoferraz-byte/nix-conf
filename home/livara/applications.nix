@@ -29,7 +29,9 @@ let
       gtk-application-prefer-dark-theme=true
       gtk-enable-animations=true
 EOF
-      for shared_file in gtk.css gtk-dark.css bookmarks; do
+      # GTK4's gtk.css imports dank-colors.css with a relative URL; keep the
+      # generated DMS file visible inside the isolated XDG root as well.
+      for shared_file in gtk.css dank-colors.css gtk-dark.css bookmarks; do
         if [[ -e "$original_gtk/$shared_file" ]]; then
           ln -sfn "$original_gtk/$shared_file" "$runtime_gtk/$shared_file"
         else
