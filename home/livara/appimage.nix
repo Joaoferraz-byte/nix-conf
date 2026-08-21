@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  firejailAppimage = pkgs.writeShellScript "livara-firejail-appimage" ''
+  firejailAppimage = pkgs.writeShellScriptBin "livara-firejail-appimage" ''
     set -Eeuo pipefail
 
     appimage="''${1:-}"
@@ -42,10 +42,12 @@ let
   '';
 in
 {
+  home.packages = [ firejailAppimage ];
+
   xdg.desktopEntries.firejail-appimage = {
     name = "Firejail AppImage";
     comment = "Run a selected AppImage with NixOS appimage-run inside Firejail";
-    exec = "${firejailAppimage} %f";
+    exec = "${firejailAppimage}/bin/livara-firejail-appimage %f";
     terminal = false;
     type = "Application";
     categories = [ "Utility" ];
