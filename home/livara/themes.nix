@@ -10,7 +10,7 @@ let
 [Icon Theme]
 Name=Livara Kora
 Comment=Kora with Nautilus symbolic compatibility aliases
-Inherits=Kora
+Inherits=kora
 Directories=places/symbolic
 
 [places/symbolic]
@@ -20,11 +20,11 @@ MinSize=8
 MaxSize=512
 Type=Scalable
 EOF
-    ln -s "${pkgs.kora-icon-theme}/share/icons/Kora/emblems/symbolic/emblem-favorite-symbolic.svg" \
+    ln -s "${pkgs.kora-icon-theme}/share/icons/kora/emblems/symbolic/emblem-favorite-symbolic.svg" \
       "$theme/places/symbolic/starred-symbolic.svg"
-    ln -s "${pkgs.kora-icon-theme}/share/icons/Kora/places/symbolic/user-trash-symbolic.svg" \
+    ln -s "${pkgs.kora-icon-theme}/share/icons/kora/places/symbolic/user-trash-symbolic.svg" \
       "$theme/places/symbolic/user-trash-symbolic.svg"
-    ln -s "${pkgs.kora-icon-theme}/share/icons/Kora/places/symbolic/user-trash-symbolic.svg" \
+    ln -s "${pkgs.kora-icon-theme}/share/icons/kora/places/symbolic/user-trash-symbolic.svg" \
       "$theme/places/symbolic/user-trash-full-symbolic.svg"
   '';
 in
