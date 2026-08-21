@@ -72,8 +72,11 @@ in
   systemd.user.services.dms-wallpaper-random-on-login = lib.mkIf visualCfg.wallpaperAutomationEnabled {
     Unit = {
       Description = "Select one random DMS wallpaper at graphical session start";
-      After = [ "dms.service" ];
-      Wants = [ "dms.service" ];
+      # Do not order this unit after dms.service: older DMS units may still
+      # carry graphical-session.target ordering, which creates a cycle when
+      # both services are wanted by niri.service. The IPC retry below is the
+      # readiness mechanism and safely handles parallel DMS startup.
+      After = [ "niri.service" ];
       PartOf = [ "niri.service" ];
     };
     Service = {

@@ -26,6 +26,12 @@ let
       fi
     fi
 
+    firejail_bin=/run/wrappers/bin/firejail
+    [[ -x "$firejail_bin" ]] || {
+      printf '%s\n' 'Firejail wrapper is unavailable: rebuild with programs.firejail.enable = true' >&2
+      exit 69
+    }
+
     # On NixOS, Firejail's native `--appimage` path mounts the image but
     # launches its generic /bin/bash and dynamic linker directly. Generic
     # AppImages then fail because NixOS does not provide the traditional FHS.
@@ -33,7 +39,7 @@ let
     # inner runner, and keep Firejail as the outer network/capability sandbox.
     # Do not enable Firejail seccomp here: appimage-run needs bwrap namespace
     # operations (mount/pivot_root) to construct the FHS environment.
-    exec ${pkgs.firejail}/bin/firejail \
+    exec "$firejail_bin" \
       --quiet \
       --noprofile \
       --net=none \
