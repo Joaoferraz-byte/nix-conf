@@ -62,6 +62,13 @@ in
   # (session.json) is reserved for wallpaper, locale, weather and runtime state.
   # Keep the settings contract declarative and write it atomically after HM has
   # materialized the DMS settings file, so stale runtime values cannot shadow it.
+  # DMS runs under the user systemd manager, so niri's environment block
+  # is not sufficient for the opt-in GTK4 live refresh. Persist the official
+  # DMS variable in environment.d and apply it after the next login.
+  home.file.".config/environment.d/90-livara-dms.conf".text = ''
+    DMS_ENABLE_GTK4_REFRESH=1
+  '';
+
   home.activation.livaraDmsSettingsDefaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="${config.xdg.configHome}/DankMaterialShell/settings.json"
     if [ -f "$settings" ]; then
