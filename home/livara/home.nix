@@ -79,6 +79,7 @@ in
          | .qtThemingEnabled = true
          | .runDmsMatugenTemplates = true
          | .matugenTemplateGtk = true
+         | .matugenTemplateNiri = true
          | .matugenTemplateQt5ct = true
          | .matugenTemplateQt6ct = true
          | .matugenTemplateKcolorscheme = true
@@ -142,7 +143,9 @@ in
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
     themeName = "Livara";
     dmsPackage = inputs.dms.packages.${pkgs.system}.default;
-    wallpaperAutomationEnabled = false;
+    # The login service selects one image from ~/Wallpapers through DMS IPC;
+    # DMS remains the sole wallpaper/Matugen owner.
+    wallpaperAutomationEnabled = true;
     weatherEnabled = true;
     weatherAddress = "Jardim João XXIII, São Paulo, SP, Brasil";
     systemMonitorEnabled = true;
@@ -157,6 +160,7 @@ in
       runUserMatugenTemplates = true;
       runDmsMatugenTemplates = true;
       matugenTemplateGtk = true;
+      matugenTemplateNiri = true;
       matugenTemplateQt5ct = true;
       matugenTemplateQt6ct = true;
       matugenTemplateFirefox = true;
@@ -205,10 +209,10 @@ in
       showGpuTemp = false;
       showBattery = !isMyMachine;
       showBatteryPercent = !isMyMachine;
-      # Niri supplies positional indices per output; show them in the bar
-      # while retaining DMS's occupied-workspace filter.
+      # Niri supplies the occupied workspace model. Do not render numeric
+      # labels in the bar; users navigate with native niri workspace actions.
       showOccupiedWorkspacesOnly = true;
-      showWorkspaceIndex = true;
+      showWorkspaceIndex = false;
       showWorkspaceName = false;
       showWorkspaceApps = true;
       controlCenterShowNetworkIcon = true;

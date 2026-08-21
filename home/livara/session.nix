@@ -1,6 +1,7 @@
 { config, inputs, lib, pkgs, ... }:
 let
   home = config.home.homeDirectory;
+  visualCfg = config.programs.livara.visual;
   randomDmsWallpaper = pkgs.writeShellApplication {
     name = "dms-wallpaper-random-on-login";
     runtimeInputs = [
@@ -20,8 +21,10 @@ let
         exit 1
       }
       for attempt in {1..30}; do
-        if dms ipc call version >/dev/null 2>&1 \
-          && dms ipc call wallpaper set "$wallpaper" >/dev/null 2>&1; then
+        # `version` is not a DMS IPC target in v1.5.3. The documented
+        # wallpaper call itself is the readiness probe and the only owner of
+        # wallpaper/Matugen state.
+        if dms ipc call wallpaper set "$wallpaper" >/dev/null 2>&1; then
           printf '%s\n' "Selected random wallpaper after $attempt attempt(s): $wallpaper"
           exit 0
         fi
@@ -62,11 +65,12 @@ in
     };
   };
 
-  systemd.user.services.dms-wallpaper-random-on-login = {
+  systemd.user.services.dms-wallpaper-random-on-login = lib.mkIf visualCfg.wallpaperAutomationEnabled {
     Unit = {
       Description = "Select one random DMS wallpaper at graphical session start";
-      After = [ "graphical-session.target" "dms.service" ];
+      After = [ "dms.service" ];
       Wants = [ "dms.service" ];
+      PartOf = [ "graphical-session.target" ];
     };
     Service = {
       Type = "oneshot";
