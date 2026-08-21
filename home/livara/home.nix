@@ -95,7 +95,9 @@ in
          | .matugenTemplateVesktop = true
          | .matugenTemplateWezterm = true
          | .matugenTemplateNeovim = false
-         | .matugenTemplateNeovimSetBackground = false' \
+         | .matugenTemplateNeovimSetBackground = false
+         | .runningAppsGroupByApp = false
+         | .dockGroupByApp = false' \
         "$settings" > "$tmp"
       chmod 0644 "$tmp"
       mv -f "$tmp" "$settings"
@@ -199,8 +201,8 @@ in
       weatherEnabled = true;
       firstDayOfWeek = 1;
       calendarBackend = "dankcal";
-      iconThemeDark = "Kora";
-      iconThemeLight = "Kora";
+      iconThemeDark = "Livara-Kora";
+      iconThemeLight = "Livara-Kora";
       iconThemePerMode = false;
       launcherLogoMode = "custom";
       launcherLogoCustomPath = "${config.home.homeDirectory}/.local/share/livara/icons/livara-launcher-logo.svg";

@@ -59,8 +59,8 @@
           XKB_DEFAULT_LAYOUT = cfg.keyboardLayout;
           XKB_DEFAULT_VARIANT = cfg.keyboardVariant;
           XKB_DEFAULT_OPTIONS = "";
-          GTK_ICON_THEME = "Kora";
-          QT_ICON_THEME = "Kora";
+          GTK_ICON_THEME = "Livara-Kora";
+          QT_ICON_THEME = "Livara-Kora";
         };
 
         services.xserver.xkb = {

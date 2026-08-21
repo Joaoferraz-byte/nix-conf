@@ -60,7 +60,7 @@ in
 
     environment {
       // DMS owns GTK_THEME/gtk.css dynamically from the active Matugen palette.
-      GTK_ICON_THEME "Kora"
+      GTK_ICON_THEME "Livara-Kora"
       QT_QPA_PLATFORMTHEME "qt5ct"
       QT_QPA_PLATFORMTHEME_QT6 "qt6ct"
     }
@@ -96,7 +96,7 @@ in
       Mod+Space repeat=false { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
       Mod+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+Alt+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
-      Mod+E repeat=false { spawn "nautilus-livara" "--new-window"; }
+      Mod+E repeat=false { spawn "nautilus" "--new-window"; }
       Mod+F repeat=false { fullscreen-window; }
       Mod+F11 repeat=false { fullscreen-window; }
       Mod+Q repeat=false { close-window; }
