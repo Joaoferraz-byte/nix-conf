@@ -37,6 +37,10 @@ let
     { id = "brightnessSlider"; enabled = true; width = 50; }
     { id = "audioOutput"; enabled = true; width = 50; }
     { id = "audioInput"; enabled = true; width = 50; }
+    { id = "inputVolumeSlider"; enabled = true; width = 50; }
+    { id = "diskUsage"; enabled = true; width = 50; mountPath = "/"; showMountPath = true; }
+    { id = "idleInhibitor"; enabled = true; width = 50; }
+    { id = "builtin_vpn"; enabled = true; width = 50; }
     { id = "nightMode"; enabled = true; width = 50; }
   ] ++ lib.optional (!isMyMachine) { id = "bluetooth"; enabled = true; width = 50; };
 in
@@ -327,7 +331,9 @@ in
       locale = "pt_BR";
       timeLocale = "pt_BR";
       # SessionData owns the launcher hidden-app list (not settings.json).
-      hiddenApps = [ ];
+      # DMS compares this list exactly against desktopEntry.id; do not use a
+      # substring or process-name rule because AppSearchService is identifier based.
+      hiddenApps = [ "com.github.wwmm.easyeffects.desktop" ];
       searchAppActions = true;
     };
 
