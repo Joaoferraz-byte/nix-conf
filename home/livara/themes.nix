@@ -41,8 +41,8 @@ EOF
     for spec in \
       "${home}/Fire|folder-applications" \
       "${home}/Vault|folder-private" \
-      "${home}/Projetos|folder-projects" \
-      "${home}/Wallpapers|folder-pictures"; do
+      "${home}/Projects|folder-projects" \
+      "${home}/Wallpapers|folder-images"; do
       path="''${spec%|*}"
       icon="''${spec##*|}"
       [ -d "$path" ] || continue
@@ -98,7 +98,7 @@ in
         "file://${config.xdg.userDirs.documents} Documents"
         "file://${config.xdg.userDirs.download} Downloads"
         "file://${config.xdg.userDirs.pictures} Pictures"
-        "file://${config.home.homeDirectory}/Projetos Projects"
+        "file://${config.home.homeDirectory}/Projects Projects"
         "file://${config.home.homeDirectory}/Vault Vault"
         "file://${config.home.homeDirectory}/Fire Fire"
         "file://${config.home.homeDirectory}/Wallpapers Wallpapers"

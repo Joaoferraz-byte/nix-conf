@@ -1,8 +1,66 @@
-{ ... }: {
+{
   flake.nixosModules.audiorelay = { config, lib, pkgs, ... }:
     let
       cfg = config.services.audiorelay;
       audiorelayPort = 59100;
+      audiorelayVirtualAudio = pkgs.writeShellApplication {
+        name = "audiorelay-virtual-audio";
+        runtimeInputs = with pkgs; [ coreutils gawk pulseaudio ];
+        text = ''
+          # AudioRelay's Linux integration consumes PulseAudio-compatible
+          # devices. PipeWire-pulse exposes these pactl modules reliably.
+          set -Eeuo pipefail
+          pactl="${pkgs.pulseaudio}/bin/pactl"
+          timeout_bin="${pkgs.coreutils}/bin/timeout"
+
+          wait_for_pulse() {
+            for _ in $(${pkgs.coreutils}/bin/seq 1 30); do
+              if "$timeout_bin" 2s "$pactl" info >/dev/null 2>&1; then
+                return 0
+              fi
+              ${pkgs.coreutils}/bin/sleep 1
+            done
+            return 1
+          }
+
+          module_id() {
+            "$timeout_bin" 5s "$pactl" list short modules \
+              | ${pkgs.gawk}/bin/awk -v needle="$1" '$0 ~ needle {print $1; exit}'
+          }
+
+          remove_legacy_mic_source() {
+            "$timeout_bin" 5s "$pactl" list short modules \
+              | ${pkgs.gawk}/bin/awk '$0 ~ /source_name=audiorelay-virtual-mic([[:space:]]|$)/ {print $1}' \
+              | while read -r id; do
+                  [[ -n "$id" ]] && "$timeout_bin" 5s "$pactl" unload-module "$id" >/dev/null 2>&1 || true
+                done
+          }
+
+          ensure_module() {
+            local needle="$1"
+            shift
+            if [[ -z "$(module_id "$needle")" ]]; then
+              "$timeout_bin" 5s "$pactl" load-module "$@" >/dev/null
+            fi
+          }
+
+          wait_for_pulse
+          remove_legacy_mic_source
+          ensure_module 'sink_name=audiorelay-virtual-mic-sink' \
+            module-null-sink sink_name=audiorelay-virtual-mic-sink \
+            sink_properties=device.description=Virtual-Mic-Sink
+          # AudioRelay's documented remap source uses the monitor sink
+          # name as source_name; the description is the user-facing
+          # Virtual-Mic device selected by communication applications.
+          ensure_module 'source_name=audiorelay-virtual-mic-sink' \
+            module-remap-source master=audiorelay-virtual-mic-sink.monitor \
+            source_name=audiorelay-virtual-mic-sink \
+            source_properties=device.description=Virtual-Mic
+          ensure_module 'sink_name=audiorelay-speakers' \
+            module-null-sink sink_name=audiorelay-speakers \
+            sink_properties=device.description=AudioRelay-Speakers
+        '';
+      };
     in {
       options.services.audiorelay = {
         enable = lib.mkOption {
@@ -37,60 +95,7 @@
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
-            ExecStart = pkgs.writeShellScript "audiorelay-virtual-audio" ''
-              # AudioRelay's Linux integration consumes PulseAudio-compatible
-              # devices. PipeWire-pulse exposes these pactl modules reliably.
-              set -Eeuo pipefail
-              pactl="${pkgs.pulseaudio}/bin/pactl"
-              timeout_bin="${pkgs.coreutils}/bin/timeout"
-
-              wait_for_pulse() {
-                for _ in $(seq 1 30); do
-                  if "$timeout_bin" 2s "$pactl" info >/dev/null 2>&1; then
-                    return 0
-                  fi
-                  sleep 1
-                done
-                return 1
-              }
-
-              module_id() {
-                "$timeout_bin" 5s "$pactl" list short modules \
-                  | awk -v needle="$1" '$0 ~ needle {print $1; exit}'
-              }
-
-              ensure_module() {
-                local needle="$1"
-                shift
-                if [[ -z "$(module_id "$needle")" ]]; then
-                  "$timeout_bin" 5s "$pactl" load-module "$@" >/dev/null
-                fi
-              }
-
-              remove_legacy_mic_source() {
-                "$timeout_bin" 5s "$pactl" list short modules \
-                  | awk '$0 ~ /source_name=audiorelay-virtual-mic([[:space:]]|$)/ {print $1}' \
-                  | while read -r id; do
-                      [[ -n "$id" ]] && "$timeout_bin" 5s "$pactl" unload-module "$id" >/dev/null 2>&1 || true
-                    done
-              }
-
-              wait_for_pulse
-              remove_legacy_mic_source
-              ensure_module 'sink_name=audiorelay-virtual-mic-sink' \
-                module-null-sink sink_name=audiorelay-virtual-mic-sink \
-                sink_properties=device.description=Virtual-Mic-Sink
-              # AudioRelay's documented remap source uses the monitor sink
-              # name as source_name; the description is the user-facing
-              # Virtual-Mic device selected by communication applications.
-              ensure_module 'source_name=audiorelay-virtual-mic-sink' \
-                module-remap-source master=audiorelay-virtual-mic-sink.monitor \
-                source_name=audiorelay-virtual-mic-sink \
-                source_properties=device.description=Virtual-Mic
-              ensure_module 'sink_name=audiorelay-speakers' \
-                module-null-sink sink_name=audiorelay-speakers \
-                sink_properties=device.description=AudioRelay-Speakers
-            '';
+            ExecStart = "${audiorelayVirtualAudio}/bin/audiorelay-virtual-audio";
             Restart = "on-failure";
             RestartSec = 5;
             LimitNOFILE = 65536;

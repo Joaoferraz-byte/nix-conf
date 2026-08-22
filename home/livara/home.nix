@@ -369,7 +369,7 @@ in
   programs.dank-material-shell.systemd.target = "niri.service";
 
   home.sessionVariables = {
-    PROJECTS_DIR = "${config.home.homeDirectory}/Projetos";
+    PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
     TERMINAL = "wezterm";
     EDITOR = "nvim";
   };
