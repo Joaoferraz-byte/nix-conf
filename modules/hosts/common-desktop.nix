@@ -90,7 +90,7 @@
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix
-            inputs.dms.homeModules.dank-material-shell
+            inputs.dms-conf.homeModules.dank-material-shell
             inputs.shell-conf.homeModules.default
             inputs.nixvim.homeModules.nixvim
           ];

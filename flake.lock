@@ -151,6 +151,29 @@
         "type": "github"
       }
     },
+    "dms-conf": {
+      "inputs": {
+        "dms": [
+          "dms"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787414568,
+        "narHash": "sha256-ohQbeg/fqhxN2ZR70GuhmtD5VaR6lPbVKhLhI4EEei4=",
+        "owner": "Joaoferraz-byte",
+        "repo": "dms-conf",
+        "rev": "fb6956c9d0ba7777870bd6cde02fdf6c8a2c9ae8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Joaoferraz-byte",
+        "repo": "dms-conf",
+        "type": "github"
+      }
+    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -727,6 +750,7 @@
       "inputs": {
         "affinity-nix": "affinity-nix",
         "dms": "dms",
+        "dms-conf": "dms-conf",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "mesa-tomate-driver": "mesa-tomate-driver",

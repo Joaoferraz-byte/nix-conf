@@ -9,6 +9,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    dms-conf = {
+      url = "github:Joaoferraz-byte/dms-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.dms.follows = "dms";
+    };
+
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";

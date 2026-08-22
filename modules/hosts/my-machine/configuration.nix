@@ -33,6 +33,19 @@
     # provider used by the desktop performance widget.
     services.power-profiles-daemon.enable = true;
 
+    # GameMode is an on-demand client/daemon integration used by the DMS
+    # Game tile. It is intentionally scoped to myMachine; the Latitude keeps
+    # only the native power-profiles-daemon contract.
+    programs.gamemode = {
+      enable = true;
+      enableRenice = false;
+      settings.general = {
+        desiredgov = "performance";
+        desiredprof = "performance";
+        inhibit_screensaver = 1;
+      };
+    };
+
     # Bluetooth is intentionally absent from the desktop system and UI.
     hardware.bluetooth = {
       enable = false;

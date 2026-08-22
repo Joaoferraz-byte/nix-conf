@@ -1,6 +1,43 @@
 { config, inputs, lib, pkgs, desktopProfile ? { }, userName ? "livara", ... }:
 let
   isMyMachine = (desktopProfile.monitorProfile or "myMachine") == "myMachine";
+  gamemodeControl = pkgs.writeShellApplication {
+    name = "livara-dms-gamemode";
+    runtimeInputs = [ pkgs.coreutils pkgs.systemd pkgs.power-profiles-daemon ];
+    text = ''
+      set -Eeuo pipefail
+      service="livara-dms-gamemode.service"
+      action="''${1:-status}"
+      case "$action" in
+        status)
+          if systemctl --user is-active --quiet "$service"; then
+            printf '%s\n' active
+          else
+            printf '%s\n' inactive
+            exit 3
+          fi
+          ;;
+        start)
+          exec systemctl --user start "$service"
+          ;;
+        stop)
+          systemctl --user stop "$service"
+          exec powerprofilesctl set balanced
+          ;;
+        toggle)
+          if systemctl --user is-active --quiet "$service"; then
+            systemctl --user stop "$service"
+            exec powerprofilesctl set balanced
+          fi
+          exec systemctl --user start "$service"
+          ;;
+        *)
+          printf 'usage: %s {status|start|stop|toggle}\n' "$0" >&2
+          exit 2
+          ;;
+      esac
+    '';
+  };
   barRightWidgets = if isMyMachine then [
     { id = "livaraProductivity"; enabled = true; }
     {
@@ -33,11 +70,10 @@ let
     "controlCenterButton"
   ];
   controlCenterWidgets = [
-    { id = "volumeSlider"; enabled = true; width = 50; }
+    { id = "wifi"; enabled = true; width = 50; }
     { id = "brightnessSlider"; enabled = true; width = 50; }
     { id = "audioOutput"; enabled = true; width = 50; }
     { id = "audioInput"; enabled = true; width = 50; }
-    { id = "inputVolumeSlider"; enabled = true; width = 50; }
     { id = "diskUsage"; enabled = true; width = 50; mountPath = "/"; showMountPath = true; }
     { id = "idleInhibitor"; enabled = true; width = 50; }
     { id = "builtin_vpn"; enabled = true; width = 50; }
@@ -159,7 +195,7 @@ in
     launcherLogoAsset = ../../icons/livara-launcher-logo.svg;
     wallpaperDirectory = "${config.home.homeDirectory}/Wallpapers";
     themeName = "Livara";
-    dmsPackage = inputs.dms.packages.${pkgs.system}.default;
+    dmsPackage = inputs.dms-conf.packages.${pkgs.system}.default;
     # The login service selects one image from ~/Wallpapers through DMS IPC;
     # DMS remains the sole wallpaper/Matugen owner.
     wallpaperAutomationEnabled = true;
@@ -241,6 +277,11 @@ in
       controlCenterShowBatteryIcon = !isMyMachine;
       controlCenterShowAudioIcon = true;
       controlCenterWidgets = controlCenterWidgets;
+      # dms-conf adds a host-gated Game/Normal action to the real power modal;
+      # it is intentionally present only on myMachine through the environment
+      # contract below and is not a PowerProfiles profile.
+      powerMenuActions = [ "reboot" "logout" "poweroff" "lock" "suspend" "restart" ]
+        ++ lib.optional isMyMachine "gamemode";
       dashTabs = [
         { id = "overview"; enabled = true; }
         { id = "media"; enabled = true; }
@@ -373,6 +414,29 @@ in
   # so logout/login starts the shell with the compositor session instead of
   # relying on a generic graphical-session.target activation.
   programs.dank-material-shell.systemd.target = "niri.service";
+
+  # The patched DMS process discovers this only on myMachine. It keeps the
+  # first-layer patch generic while host policy and the executable remain
+  # declarative in nix-conf.
+  systemd.user.services.dms.Service.Environment = lib.mkIf isMyMachine [
+    "LIVARA_DMS_GAME_MODE=1"
+    "LIVARA_DMS_GAMEMODE_CONTROL=${gamemodeControl}/bin/livara-dms-gamemode"
+  ];
+
+  systemd.user.services.livara-dms-gamemode = lib.mkIf isMyMachine {
+    Unit = {
+      Description = "Livara GameMode request for the myMachine power menu";
+      After = [ "niri.service" ];
+      PartOf = [ "niri.service" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.gamemode}/bin/gamemoded -r";
+      KillSignal = "SIGINT";
+      TimeoutStopSec = 5;
+      Restart = "no";
+    };
+  };
 
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
