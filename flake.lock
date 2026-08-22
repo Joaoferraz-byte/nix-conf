@@ -789,11 +789,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787410533,
-        "narHash": "sha256-HsBeJYS/BB0+o/Actog6x7LqHvHre7eFjBP7eCmQ90I=",
+        "lastModified": 1787414693,
+        "narHash": "sha256-pZGCtU4YRcOCG+B3BMlfFaF3kreX4EOmhgkGfX6HmV8=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "6172aa229306a951ecab3c36b54a2a67cebd7559",
+        "rev": "2aee6dae63bc37bc1dac8ca980ef90191da119a5",
         "type": "github"
       },
       "original": {
