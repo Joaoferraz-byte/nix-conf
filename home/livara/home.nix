@@ -131,9 +131,9 @@ in
   # Virtual-Mic source contract.
   services.easyeffects.enable = false;
 
-  # DMS checks the conventional `.face` path before `.face.icon` for both
-  # greeter users and the profile card. Keep both links declarative so an old
-  # manually-created file cannot shadow the selected avatar.
+  # DMS resolves the profile card through AccountsService IconFile. Keep both
+  # conventional avatar files for greeters and legacy consumers; they are
+  # compatibility copies, not two independent profile images.
   home.file.".face" = {
     source = builtins.path {
       path = ../../Icons/6afde16e1ef1cb3257b30e01890787dd.jpg;
