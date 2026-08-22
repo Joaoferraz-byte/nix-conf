@@ -57,6 +57,7 @@ EOF
 in
 {
   home.packages = [
+    pkgs.glib
     pkgs.kora-icon-theme
     livaraKoraIconTheme
     pkgs.bibata-cursors
@@ -70,6 +71,7 @@ in
     };
     Service = {
       Type = "oneshot";
+      RemainAfterExit = true;
       ExecStart = "${specialFolderIcons}";
       Restart = "on-failure";
       RestartSec = 5;

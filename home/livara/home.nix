@@ -231,7 +231,7 @@ in
       showOccupiedWorkspacesOnly = true;
       showWorkspaceIndex = false;
       showWorkspaceName = false;
-      showWorkspaceApps = true;
+      showWorkspaceApps = false;
       controlCenterShowNetworkIcon = true;
       controlCenterShowBluetoothIcon = !isMyMachine;
       controlCenterShowBatteryIcon = !isMyMachine;
