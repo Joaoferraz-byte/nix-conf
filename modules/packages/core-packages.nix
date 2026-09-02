@@ -11,6 +11,7 @@
       spring-boot-cli
       lombok
       androidStudioPackages.dev
+      jetbrains.idea-oss
 
       bitwarden-desktop
       bitwarden-cli
