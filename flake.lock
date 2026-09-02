@@ -100,22 +100,6 @@
     "community-templates": {
       "flake": false,
       "locked": {
-        "lastModified": 1786973326,
-        "narHash": "sha256-rkeSofqOrwZxvrNKfejXMDuS87zcwWME6C4bVqGNjJ0=",
-        "owner": "noctalia-dev",
-        "repo": "community-templates",
-        "rev": "54eb937240fad66b8aa62a9155316ba9bf2b6874",
-        "type": "github"
-      },
-      "original": {
-        "owner": "noctalia-dev",
-        "repo": "community-templates",
-        "type": "github"
-      }
-    },
-    "community-templates_2": {
-      "flake": false,
-      "locked": {
         "lastModified": 1788274189,
         "narHash": "sha256-PCqZpFLLm4kMZBa20rVYk7ReNZhaXrQ+uu4uYSeiBJU=",
         "owner": "noctalia-dev",
@@ -639,6 +623,7 @@
     "noctalia": {
       "inputs": {
         "nixpkgs": [
+          "shell-conf",
           "noctalia-conf",
           "nixpkgs"
         ]
@@ -659,33 +644,11 @@
     },
     "noctalia-conf": {
       "inputs": {
-        "community-templates": "community-templates",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "noctalia": "noctalia"
-      },
-      "locked": {
-        "lastModified": 1788339450,
-        "narHash": "sha256-IL5vWGZc3aNMXU25n5Y+2MUzhVORKloMyDFLiJAt3TY=",
-        "owner": "Joaoferraz-byte",
-        "repo": "noctalia-conf",
-        "rev": "687283c6789d81fe1b8f9c5ee29e3cc3829532d4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Joaoferraz-byte",
-        "repo": "noctalia-conf",
-        "type": "github"
-      }
-    },
-    "noctalia-conf_2": {
-      "inputs": {
         "nixpkgs": [
           "shell-conf",
           "nixpkgs"
         ],
-        "noctalia": "noctalia_2"
+        "noctalia": "noctalia"
       },
       "locked": {
         "lastModified": 1788350843,
@@ -698,28 +661,6 @@
       "original": {
         "owner": "Joaoferraz-byte",
         "repo": "noctalia-conf",
-        "type": "github"
-      }
-    },
-    "noctalia_2": {
-      "inputs": {
-        "nixpkgs": [
-          "shell-conf",
-          "noctalia-conf",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787624990,
-        "narHash": "sha256-GYiCoMAaTD9TiprDbrNcuxeHNeiX5HVFyRf6iESl13A=",
-        "owner": "noctalia-dev",
-        "repo": "noctalia",
-        "rev": "e6846db9ab4e6e4c107c4c5072cde9223d6a58c5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "noctalia-dev",
-        "repo": "noctalia",
         "type": "github"
       }
     },
@@ -790,7 +731,6 @@
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
-        "noctalia-conf": "noctalia-conf",
         "shell-conf": "shell-conf",
         "study-planner": "study-planner",
         "stylix": "stylix",
@@ -801,12 +741,12 @@
     },
     "shell-conf": {
       "inputs": {
-        "community-templates": "community-templates_2",
+        "community-templates": "community-templates",
         "flake-parts": "flake-parts_4",
         "nixpkgs": [
           "nixpkgs"
         ],
-        "noctalia-conf": "noctalia-conf_2"
+        "noctalia-conf": "noctalia-conf"
       },
       "locked": {
         "lastModified": 1788350895,
