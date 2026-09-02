@@ -212,11 +212,11 @@
         "nixpkgs-lib": "nixpkgs-lib_2"
       },
       "locked": {
-        "lastModified": 1787559586,
-        "narHash": "sha256-onL0VLf9vPllmT0H/OlURIU5r5t5WIEl7t4tVNKT0Nw=",
+        "lastModified": 1788306937,
+        "narHash": "sha256-lbrI1UYVpFgKSsyrU9oeF7FHfnu8nLD9ja0ou9f2rxk=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "9d0d87172c374f89da73c1cfe6d81ae62feac1f1",
+        "rev": "f16b25b8c3d2809b87925d0b76652d7821a75c68",
         "type": "github"
       },
       "original": {
@@ -368,11 +368,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788229478,
-        "narHash": "sha256-G0F2rFORVcFkEvVdE/qWQTnYekIc77YP5/vRF9nZlxU=",
+        "lastModified": 1788317453,
+        "narHash": "sha256-BTVJDWIuGa5ffxQEG5WujOOm3eXPw3gZX42Wvm32gb8=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "1dc2d1f720ab17fc7981e087346bf54b26d284b1",
+        "rev": "b8350fcdf54ccf553e46408053b1ac5b7038c18b",
         "type": "github"
       },
       "original": {
@@ -410,11 +410,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787930266,
-        "narHash": "sha256-irI5lr1gI1ThNHddKlXW60nnGsoenehAy+6hpQuxc7Y=",
+        "lastModified": 1788337724,
+        "narHash": "sha256-7dtVPzP3GXiy6lcwQinauTekkhvdqlr90QpHCQMZLxw=",
         "owner": "Joaoferraz-byte",
         "repo": "mesa-tomate-driver",
-        "rev": "052bc855e6e584167708fee06cfc98a534d64356",
+        "rev": "fae8f8e792522a196af2520ae303818c58aa3054",
         "type": "github"
       },
       "original": {
@@ -472,11 +472,11 @@
     },
     "nixpkgs-lib_2": {
       "locked": {
-        "lastModified": 1785031560,
-        "narHash": "sha256-OmshNvn2vupOFpYinLUu+1Dnpu4n7Q5N3ggGVNHpkUI=",
+        "lastModified": 1788057806,
+        "narHash": "sha256-DTQSMxzDWmT0zhguthvegnVkn7CFqGCv4IHCzk5ZUpM=",
         "owner": "nix-community",
         "repo": "nixpkgs.lib",
-        "rev": "0e79af5e3d4dcfcd676ab5ba3f95d2e3352e078c",
+        "rev": "596e2e3940e09b2abbeb03f75fa1828c57fcd72c",
         "type": "github"
       },
       "original": {
@@ -767,11 +767,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788180314,
-        "narHash": "sha256-S0LdSQsM1l9kHwgpldyUYoPa+UUMvZSP46kmW3fSrDU=",
+        "lastModified": 1788337721,
+        "narHash": "sha256-CJ+7Vt91JKMvn35fONera7zgsvbBRdihVD/j8n/0tSM=",
         "owner": "Joaoferraz-byte",
         "repo": "livara-study-planner",
-        "rev": "bf8551176e1a85ae1cbc95a1619424e519b4165e",
+        "rev": "f90de204fe06994b23f7edbc603b973dc449901a",
         "type": "github"
       },
       "original": {
@@ -968,11 +968,11 @@
     "xournal-conf": {
       "flake": false,
       "locked": {
-        "lastModified": 1788251920,
-        "narHash": "sha256-zULZM+CXTMJB+fEDFtedHXbyxozKqmOE796WV1lckLE=",
+        "lastModified": 1788337726,
+        "narHash": "sha256-buKQn/5fXnwb9tOG2O13rTzdy/BUGi7UQcqThvAPTz4=",
         "owner": "Joaoferraz-byte",
         "repo": "xournal-conf",
-        "rev": "5dea6e554737f9351efd10bdb2380b8f2223f79b",
+        "rev": "b991a88e3c8f0b3f9b1d7f5046baee1515a2d963",
         "type": "github"
       },
       "original": {
@@ -989,11 +989,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788254223,
-        "narHash": "sha256-27Q1HjIybCEOHqGrP/LOtSnIb4Rmek3Ochi7Trl90Y4=",
+        "lastModified": 1788318849,
+        "narHash": "sha256-G8wXupuhL5+oJ3q380M0GS6vL2/KLeRx0jld+cwmboc=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "82589d1716b7d4de8e17e77b92b67952b7e3da96",
+        "rev": "6e3d95d89dcf984e0f2b1489ee6d301e7a90f964",
         "type": "github"
       },
       "original": {
