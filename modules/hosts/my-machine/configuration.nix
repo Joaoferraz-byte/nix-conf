@@ -1,0 +1,95 @@
+{ self, ... }: {
+  flake.nixosModules.myMachineConfiguration = { pkgs, lib, ... }: {
+    imports = [
+      self.nixosModules.myMachineHardware
+      self.nixosModules.corePackages
+      self.nixosModules.nvidia
+      self.nixosModules.greeter
+      self.nixosModules.desktop-portals
+      self.nixosModules.flatpak
+      self.nixosModules.audiorelay
+      self.nixosModules.keyd
+      self.nixosModules.system-hardening
+    ];
+
+
+    # Boot
+    boot.loader.systemd-boot.enable = true;
+    boot.kernelParams = [ "acpi=force" "acpi=noirq" "reboot=force" "reboot=pci" "reboot=k" ];
+    services.logind.settings.Login = lib.mkForce {
+      HandlePowerKey = "poweroff";
+      HandlePowerKeyLongPress = "poweroff";
+      HandleLidSwitch = "ignore";
+    };
+    boot.loader.efi.canTouchEfiVariables = true;
+    boot.loader.systemd-boot.configurationLimit = 10;
+    boot.kernelPackages = pkgs.linuxPackages_zen;
+    # Network
+    networking.hostName = "limine";
+    networking.networkmanager.enable = true;
+
+    # myMachine has no laptop TLP policy; expose the standard PPD D-Bus
+    # provider used by the desktop performance widget.
+    services.power-profiles-daemon.enable = true;
+
+    # GameMode is an on-demand client/daemon integration exposed by the
+    # Noctalia session. It is intentionally scoped to myMachine; the Latitude keeps
+    # only the native power-profiles-daemon contract.
+    programs.gamemode = {
+      enable = true;
+      enableRenice = false;
+      settings.general = {
+        desiredgov = "performance";
+        desiredprof = "performance";
+        inhibit_screensaver = 1;
+      };
+    };
+
+    # Bluetooth is intentionally absent from the desktop system and UI.
+    hardware.bluetooth = {
+      enable = false;
+      powerOnBoot = false;
+    };
+    services.blueman.enable = false;
+
+    # Locale
+    time.timeZone = "America/Sao_Paulo";
+    i18n.defaultLocale = "en_US.UTF-8";
+    i18n.extraLocaleSettings = {
+      LC_ADDRESS = "en_US.UTF-8";
+      LC_COLLATE = "en_US.UTF-8";
+      LC_CTYPE = "en_US.UTF-8";
+      LC_IDENTIFICATION = "en_US.UTF-8";
+      LC_MEASUREMENT = "en_US.UTF-8";
+      LC_MESSAGES = "en_US.UTF-8";
+      LC_MONETARY = "en_US.UTF-8";
+      LC_NAME = "en_US.UTF-8";
+      LC_NUMERIC = "en_US.UTF-8";
+      LC_PAPER = "en_US.UTF-8";
+      LC_TELEPHONE = "en_US.UTF-8";
+      LC_TIME = "en_US.UTF-8";
+    };
+    # User
+    users.users."livara" = {
+      isNormalUser = true;
+      description = "Livara";
+      extraGroups = [
+        "networkmanager"
+        "wheel"
+      ];
+      shell = pkgs.zsh;
+    };
+    programs.zsh.enable = true;
+
+    services."mtm1106-mode" = {
+      enable = true;
+      mode = "daemon";
+      profile = "digimend";
+      autoStart = true;
+      environment.MTM1106_CONTACT_THRESHOLD = "500";
+    };
+
+    # Nix
+    system.stateVersion = "26.11";
+  };
+}

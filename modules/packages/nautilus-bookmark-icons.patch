@@ -1,0 +1,65 @@
+--- a/src/nautilus-bookmark.c
++++ b/src/nautilus-bookmark.c
+@@ -182,9 +182,62 @@
+ }
+ 
+ static GIcon *
++get_custom_symbolic_icon (NautilusBookmark *bookmark)
++{
++    g_autofree char *contents = NULL;
++    g_autofree char *bookmark_uri = NULL;
++    g_autofree char *config_path = NULL;
++    g_auto (GStrv) lines = NULL;
++
++    config_path = g_build_filename (g_get_user_config_dir (),
++                                    "nautilus",
++                                    "bookmark-icons",
++                                    NULL);
++    if (!g_file_get_contents (config_path, &contents, NULL, NULL))
++    {
++        return NULL;
++    }
++
++    bookmark_uri = g_file_get_uri (bookmark->location);
++    lines = g_strsplit (contents, "\n", -1);
++    for (guint i = 0; lines[i] != NULL; i++)
++    {
++        g_auto (GStrv) fields = g_strsplit (lines[i], "\t", 2);
++        char *uri;
++        char *icon_name;
++
++        if (fields[0] == NULL || fields[1] == NULL)
++        {
++            continue;
++        }
++
++        uri = g_strstrip (fields[0]);
++        icon_name = g_strstrip (fields[1]);
++        if (*uri == '\0' || *icon_name == '\0' || *uri == '#')
++        {
++            continue;
++        }
++        if (g_strcmp0 (uri, bookmark_uri) == 0)
++        {
++            return g_themed_icon_new_with_default_fallbacks (icon_name);
++        }
++    }
++
++    return NULL;
++}
++
++static GIcon *
+ get_native_icon (NautilusBookmark *bookmark,
+                  gboolean          symbolic)
+ {
++    if (symbolic)
++    {
++        GIcon *custom_icon = get_custom_symbolic_icon (bookmark);
++        if (custom_icon != NULL)
++        {
++            return custom_icon;
++        }
++    }
+     if (!bookmark->exists)
+     {
+         g_debug ("%s: file does not exist, set warning icon", nautilus_bookmark_get_name (bookmark));
