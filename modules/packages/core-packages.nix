@@ -1,5 +1,9 @@
 { inputs, ... }: {
   flake.nixosModules.corePackages = { pkgs, ... }: {
+    nixpkgs.config.permittedInsecurePackages = [
+      "idea-oss-2025.3.4"
+    ];
+
     environment.systemPackages = with pkgs; [
       git
       gh
