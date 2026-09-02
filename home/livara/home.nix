@@ -79,6 +79,12 @@ in
 
   # EasyEffects: keep as application but don't auto-start the service.
   services.easyeffects.enable = false;
+  services.udiskie = {
+    enable = true;
+    automount = true;
+    notify = true;
+    tray = "never";
+  };
 
   # NoDisplay .desktop override ensures EasyEffects never appears in the launcher
   # even if an application launcher ignores user-state filters.

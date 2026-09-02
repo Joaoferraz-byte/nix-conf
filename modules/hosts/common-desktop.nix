@@ -58,6 +58,8 @@
           "2606:4700:4700::1001"
         ];
         programs.dconf.enable = true;
+        services.gvfs.enable = true;
+        services.udisks2.enable = true;
 
         # Shared overlays applied to every host importing commonDesktop.
         nixpkgs.overlays = [

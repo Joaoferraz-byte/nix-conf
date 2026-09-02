@@ -8,6 +8,21 @@
 }:
 let
   studyPlanner = inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  materialFox = pkgs.fetchFromGitHub {
+    owner = "edelvarden";
+    repo = "material-fox-updated";
+    rev = "523cac082012baaaabc4ddbb62f63769c0cb4e32";
+    hash = "sha256-2gU/9xFWXQ8OBKylv8j87TGgO5CwKkeQ5G5Y1epQl3s=";
+  };
+  noctaliaFirefoxCss = "${config.xdg.stateHome}/livara/theme/browser/firefox.css";
+  materialFoxUserChrome = pkgs.writeText "livara-firefox-userChrome.css" ''
+    @import url("file://${materialFox}/chrome/userChrome.css");
+    @import url("file://${noctaliaFirefoxCss}");
+  '';
+  materialFoxUserContent = pkgs.writeText "livara-firefox-userContent.css" ''
+    @import url("file://${materialFox}/chrome/userContent.css");
+    @import url("file://${noctaliaFirefoxCss}");
+  '';
 
   # One Zen profile owns four Spaces, each with its own container and Essentials.
 
@@ -551,20 +566,18 @@ in
     };
   };
 
-  # Noctalia generates the Firefox CSS in XDG state. Material Fox's chrome/
-  # folder includes theme-material-blue.css; re-establish its symlink on every
-  # activation so the dynamic Firefox palette survives profile rebuilds.
+  # Firefox profiles are created by Firefox, so link managed chrome files after
+  # profile creation instead of placing a second theme in the Nix store.
   home.activation.livaraFirefoxNoctaliaLink = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    noctalia_css="${config.xdg.stateHome}/livara/theme/browser/firefox.css"
     ff_dir="${config.home.homeDirectory}/.mozilla/firefox"
-    if [ -f "$noctalia_css" ] && [ -d "$ff_dir" ]; then
-      for profile in "$ff_dir"/*.default-release; do
+    if [ -d "$ff_dir" ]; then
+      while IFS= read -r -d "" profile; do
         [ -d "$profile" ] || continue
         chrome_dir="$profile/chrome"
-        mkdir -p "$chrome_dir"
-        target="$chrome_dir/theme-material-blue.css"
-        $DRY_RUN_CMD ln -sf "$noctalia_css" "$target"
-      done
+        $DRY_RUN_CMD mkdir -p "$chrome_dir"
+        $DRY_RUN_CMD ln -sfn "${materialFoxUserChrome}" "$chrome_dir/userChrome.css"
+        $DRY_RUN_CMD ln -sfn "${materialFoxUserContent}" "$chrome_dir/userContent.css"
+      done < <(find "$ff_dir" -mindepth 1 -maxdepth 1 -type d -name '*.default*' -print0)
     fi
   '';
 
