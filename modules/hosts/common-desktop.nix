@@ -114,7 +114,6 @@
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix
-            inputs.noctalia-conf.homeModules.default
             inputs.shell-conf.homeModules.support
             inputs.nixvim.homeModules.nixvim
           ];

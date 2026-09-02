@@ -13,7 +13,7 @@ The root `flake.nix` imports the evaluated module surface explicitly. A reusable
 
 ## Shared desktop profile
 
-`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the Niri system module, the Noctalia integration, shell-independent application support, Stylix and NixVim. The `home/livara/` profile is split by ownership:
+`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the Niri system module, the shell-conf integration (which consumes the local Noctalia runtime), Stylix and NixVim. The `home/livara/` profile is split by ownership:
 
 | File | Owner |
 |---|---|
@@ -27,15 +27,15 @@ The root `flake.nix` imports the evaluated module surface explicitly. A reusable
 
 ## Noctalia and visual API
 
-Noctalia v5 is the sole user-facing shell, started exactly once by Niri through `spawn-at-startup`. Its Home Manager module supplies the bar, launcher, panels, notifications, wallpaper, widgets, plugin registry and documented IPC. The `noctalia-conf` flake pins the shell and plugin revisions and installs stable user templates from the store.
+Noctalia v5 is the sole user-facing shell, started exactly once by Niri through `spawn-at-startup`. The `noctalia-conf` flake owns the pinned runtime package and lifecycle contract; `shell-conf` imports that module and supplies the bar, launcher, panels, notifications, wallpaper, widgets, plugin registry and documented IPC policy.
 
 The central theme flow is:
 
 > Local wallpaper in `~/Wallpapers` → Noctalia v5 `m3-fruit-salad` palette/templates → `$XDG_STATE_HOME/livara/theme/palette.dark.json` → shell-conf application adapters.
 
-Noctalia owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts. `shell-conf` materializes only formats not covered by those templates, including Freesm Launcher, Heroic, Foliate, Xournal++ and Vesktop. The Livara Home Manager profile provides Nautilus, cmus and local Books/Games/Musics directories. Generated state is mutable runtime data and is never copied into the source tree.
+`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts, plus formats not covered by those templates, including Freesm Launcher, Heroic, Foliate, Xournal++ and Vesktop. The Livara Home Manager profile provides Nautilus, cmus and local Books/Games/Musics directories. Generated state is mutable runtime data and is never copied into the source tree.
 
-The selected plugin set is vendored and pinned by `noctalia-conf`: `cat`, `timer`, `screen_recorder`, `screen_toolkit`, `gamer_mode`, the FreeSM-adapted `prismlauncher_instances` provider and `bitwarden`. The screen recorder consumes the system-provided `gpu-screen-recorder` capability, while Screen Toolkit receives its Wayland/OCR/annotation tools from `features/niri.nix`. Plugin source is immutable; plugin settings and runtime state remain user data.
+The selected plugin set is vendored in and pinned by `shell-conf`: `cat`, `timer`, `screen_recorder`, `screen_toolkit`, `gamer_mode`, the FreeSM-adapted `prismlauncher_instances` provider and `bitwarden`. The screen recorder consumes the system-provided `gpu-screen-recorder` capability, while Screen Toolkit receives its Wayland/OCR/annotation tools from `features/niri.nix`. Plugin source is immutable; plugin settings and runtime state remain user data.
 
 `vim-conf` owns the Nixvim editor, Markdown rendering, Mermaid/LaTeX workflow and keymaps; Nautilus owns native desktop file browsing. The `Vault` repository owns plain Markdown and Xournal++ notes; `nix-conf` owns its generic Git synchronization, while `shell-conf` supplies shared palette and application adapters without writing editor state into the Vault. Tablet presence is reported from the physical USB identity and remains separate from the driver/udev module. Battery, Bluetooth, NVIDIA, audio, portals, keyd and power profiles remain host/system responsibilities.
 

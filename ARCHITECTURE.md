@@ -4,7 +4,7 @@
 
 > **One owner per concern, one explicit closure per service, and a public contract between repositories.**
 
-NixOS owns Niri, system XKB, keyd, portals, drivers, networking, audio and privileged services. Home Manager owns user programs, XDG files and user-level services. `noctalia-conf` owns the visual surface, launcher, panels, notifications, local wallpaper selection, palette templates, plugins and IPC. `shell-conf` owns application adapters and shell-independent user support. `vim-conf` owns NixVim; `xournal-conf` owns Xournal++ editable files; `Wallpapers` remains a local image catalog rather than a synchronized runtime repository.
+NixOS owns Niri, system XKB, keyd, portals, drivers, networking, audio and privileged services. Home Manager owns user programs, XDG files and user-level services. `noctalia-conf` owns the pinned Noctalia runtime and its local lifecycle policy. `shell-conf` owns the visual shell policy, launcher, panels, notifications, local wallpaper selection, palette templates, reviewed plugins, IPC adapters and shell-independent user support. `vim-conf` owns NixVim; `xournal-conf` owns Xournal++ editable files; `Wallpapers` remains a local image catalog rather than a synchronized runtime repository.
 
 ## Composition flow
 
@@ -29,13 +29,13 @@ Composition passes only the necessary integration data through `extraSpecialArgs
 | Repository/input | Public contract | Owner |
 |---|---|---|
 | `nix-conf` | Hosts, NixOS modules, Home Manager composition, session policy | System and integration |
-| `noctalia-conf` | `homeModules.default`, Noctalia v5 TOML, reviewed plugins and user templates | Visual shell |
-| `shell-conf` | `homeModules.default`/`support`, application adapters and user support scripts | Per-application support |
+| `noctalia-conf` | `packages.default`, `overlays.default`, `homeModules.default` and pinned upstream runtime | Noctalia runtime |
+| `shell-conf` | `homeModules.default`/`support`, Noctalia TOML, templates, plugins, adapters and user support | Visual shell and user integration |
 | `vim-conf` | NixVim module, plugins and keymaps | Editor |
 | `xournal-conf` | Xournal++ XML, INI, TeX and defaults | Notes application |
 | `Wallpapers` | Images | Asset catalog |
 
-`noctalia-conf` pins the Noctalia and official-plugin inputs. `shell-conf` contains no shell input and writes no compositor configuration. The `nix-conf` flake does not import a Hyprland module.
+`noctalia-conf` pins the upstream Noctalia runtime and exposes the local lifecycle contract. `shell-conf` pins the community templates and owns the curated Noctalia integration without writing compositor configuration. The `nix-conf` flake does not import a Hyprland module.
 
 ## Niri and Noctalia session
 
@@ -51,17 +51,17 @@ Niri starts exactly one Noctalia process through `spawn-at-startup`; the Home Ma
 | Bar, panels, launcher and wallpaper picker | Noctalia v5 |
 | Wallpaper catalog | Local `~/Wallpapers` + Noctalia wallpaper automation |
 | Dynamic theme generation | Noctalia v5 palette and user templates |
-| Niri focus-ring and border colors | `noctalia-conf` Niri user template + optional `~/.config/niri/noctalia.kdl` include |
+| Niri focus-ring and border colors | `shell-conf` Niri user template + optional `~/.config/niri/noctalia.kdl` include |
 | Noctalia bar blur/transparency | Noctalia `transparency_mode` + Niri `background-effect`/`blur` |
 | Application theme adapters | `shell-conf` / `sync-livara-themes` |
 
 ## Noctalia visual contract
 
-The integration installs stable intent through `config/noctalia/config.toml`. Template source and plugin source are immutable store inputs; generated outputs live under `$XDG_STATE_HOME/livara/theme` and application profiles. The central flow is:
+The integration installs stable intent through `shell-conf/config/noctalia/config.toml`. The runtime package comes from `noctalia-conf`; template source and plugin source are immutable store inputs; generated outputs live under `$XDG_STATE_HOME/livara/theme` and application profiles. The central flow is:
 
 > Local wallpaper in `~/Wallpapers` → Noctalia v5 palette/templates (`m3-fruit-salad`) → `palette.dark.json` → Niri focus-ring include and application-specific adapters.
 
-Noctalia owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts. Local templates additionally generate the shared application palette, NixVim Lua colors, Firefox CSS, Zen Browser CSS and the Niri color include. The Niri template writes the regenerable `$XDG_CONFIG_HOME/niri/noctalia.kdl` file; the Home Manager-owned `config.kdl` includes it optionally and retains only compositor policy. `shell-conf` materializes Freesm Launcher, Heroic, Foliate, Xournal++ and Vesktop contracts where the applications provide a documented customization path. The Livara Home Manager profile owns Nautilus, cmus and the Books/Games/Musics directory contract.
+`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts. Local templates additionally generate the shared application palette, NixVim Lua colors, Firefox CSS, Zen Browser CSS and the Niri color include. The Niri template writes the regenerable `$XDG_CONFIG_HOME/niri/noctalia.kdl` file; the Home Manager-owned `config.kdl` includes it optionally and retains only compositor policy. `shell-conf` also materializes Freesm Launcher, Heroic, Foliate, Xournal++ and Vesktop contracts where the applications provide a documented customization path. The Livara Home Manager profile owns Nautilus, cmus and the Books/Games/Musics directory contract.
 
 | Application/ecosystem | Generated output |
 |---|---|
