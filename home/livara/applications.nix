@@ -8,19 +8,35 @@
 }:
 let
   studyPlanner = inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  materialFox = pkgs.fetchFromGitHub {
+  materialFoxSource = pkgs.fetchFromGitHub {
     owner = "edelvarden";
     repo = "material-fox-updated";
     rev = "523cac082012baaaabc4ddbb62f63769c0cb4e32";
     hash = "sha256-2gU/9xFWXQ8OBKylv8j87TGgO5CwKkeQ5G5Y1epQl3s=";
   };
+  materialFox = pkgs.stdenvNoCC.mkDerivation {
+    pname = "material-fox-updated";
+    version = "2026-09-02";
+    src = materialFoxSource;
+    nativeBuildInputs = [ pkgs.dart-sass ];
+    dontConfigure = true;
+    installPhase = ''
+      mkdir -p "$out/chrome"
+      sass --quiet --no-source-map --style compressed src/user-chrome.scss "$out/chrome/user-chrome.css"
+      sass --quiet --no-source-map --style compressed src/user-content.scss "$out/chrome/user-content.css"
+      cp chrome/theme-material-blue.css "$out/chrome/"
+      cp -r chrome/fonts chrome/icons "$out/chrome/"
+    '';
+  };
   noctaliaFirefoxCss = "${config.xdg.stateHome}/livara/theme/browser/firefox.css";
   materialFoxUserChrome = pkgs.writeText "livara-firefox-userChrome.css" ''
-    @import url("file://${materialFox}/chrome/userChrome.css");
+    @import url("file://${materialFox}/chrome/user-chrome.css");
+    @import url("file://${materialFox}/chrome/theme-material-blue.css");
     @import url("file://${noctaliaFirefoxCss}");
   '';
   materialFoxUserContent = pkgs.writeText "livara-firefox-userContent.css" ''
-    @import url("file://${materialFox}/chrome/userContent.css");
+    @import url("file://${materialFox}/chrome/user-content.css");
+    @import url("file://${materialFox}/chrome/theme-material-blue.css");
     @import url("file://${noctaliaFirefoxCss}");
   '';
 
