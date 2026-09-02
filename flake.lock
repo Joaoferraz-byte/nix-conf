@@ -749,11 +749,11 @@
         "noctalia-conf": "noctalia-conf"
       },
       "locked": {
-        "lastModified": 1788350895,
-        "narHash": "sha256-bK648sWrZH2jgVDCYcntlY5C9NM/iagx9+zO66agSw0=",
+        "lastModified": 1788354048,
+        "narHash": "sha256-CJBexEMylLM2Yoe1kRpfxxqFiwziRbagBRVL2vX4tv8=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "c04543b90fbe0721f776fb5deaebd51dedac1d6f",
+        "rev": "8933f1e07e400b2774ad744b0a7e6fe748260972",
         "type": "github"
       },
       "original": {

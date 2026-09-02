@@ -230,10 +230,10 @@
           };
 
           checks.border-contract = pkgs.runCommand "niri-noctalia-border-contract" { } ''
-            test "$(grep -c 'width 1.6' ${self}/home/livara/niri.nix)" -eq 2
-            test "$(grep -c 'width 1.6' ${inputs.shell-conf}/config/noctalia/templates/niri.kdl)" -eq 2
-            ! grep -q 'width 1.4' ${self}/home/livara/niri.nix
-            ! grep -q 'width 1.4' ${inputs.shell-conf}/config/noctalia/templates/niri.kdl
+            test "$(grep -c 'width 1.4' ${self}/home/livara/niri.nix)" -eq 2
+            test "$(grep -c 'width 1.4' ${inputs.shell-conf}/config/noctalia/templates/niri.kdl)" -eq 2
+            ! grep -q 'width 1.6' ${self}/home/livara/niri.nix
+            ! grep -q 'width 1.6' ${inputs.shell-conf}/config/noctalia/templates/niri.kdl
             touch "$out"
           '';
         };

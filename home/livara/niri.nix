@@ -55,11 +55,11 @@ in
       default-column-width { proportion 0.50; }
       focus-ring {
         on
-        width 1.6
+        width 1.4
       }
       border {
         on
-        width 1.6
+        width 1.4
       }
       preset-column-widths {
         proportion 0.33333
