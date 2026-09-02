@@ -7,7 +7,7 @@
       jdk8
       maven
       jdt-language-server
-      inputs.study-planner.packages.${pkgs.system}.default
+      inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default
       spring-boot-cli
       lombok
       androidStudioPackages.dev

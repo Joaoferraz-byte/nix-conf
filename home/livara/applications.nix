@@ -7,7 +7,7 @@
   ...
 }:
 let
-  studyPlanner = inputs.study-planner.packages.${pkgs.system}.default;
+  studyPlanner = inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # One Zen profile owns four Spaces, each with its own container and Essentials.
 
