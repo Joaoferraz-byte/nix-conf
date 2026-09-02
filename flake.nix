@@ -140,7 +140,6 @@
           devShells.java = pkgs.mkShell {
             packages = with pkgs; [
               jdk21
-              jdt-language-server
               maven
               gradle
               spring-boot-cli
