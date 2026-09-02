@@ -241,6 +241,16 @@ let
   );
   xournalppPalette = "${inputs.xournal-conf}/xournalpp/palettes/livara.gpl";
 
+  matugenConfig = pkgs.writeText "livara-matugen-config.toml" ''
+    [config]
+    fallback_color = "#7bb7ff"
+    caching = false
+
+    [templates.intellij-dark]
+    input_path = "${./intellij-matugen.icls}"
+    output_path = "${config.xdg.stateHome}/livara/theme/intellij/Matugen-Dark.icls"
+  '';
+
 in
 {
   # Applications
@@ -248,6 +258,8 @@ in
     enable = true;
     imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
+
+  xdg.configFile."matugen/config.toml".source = matugenConfig;
 
   programs.zen-browser = {
     enable = true;

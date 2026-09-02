@@ -1,8 +1,13 @@
 { inputs, ... }: {
-  flake.nixosModules.corePackages = { pkgs, ... }: {
-    nixpkgs.config.permittedInsecurePackages = [
-      "idea-oss-2025.3.4"
+  flake.nixosModules.corePackages = { pkgs, ... }:
+  let
+    intellijIdea = inputs.nix-jetbrains-plugins.lib.buildIdeWithPlugins pkgs pkgs.jetbrains.idea [
+      "IdeaVIM"
+      "nix-idea"
+      "com.explyt.spring"
     ];
+  in {
+    nixpkgs.config.allowUnfree = true;
 
     environment.systemPackages = with pkgs; [
       git
@@ -14,7 +19,8 @@
       spring-boot-cli
       lombok
       androidStudioPackages.dev
-      jetbrains.idea-oss
+      intellijIdea
+      matugen
 
       bitwarden-desktop
       bitwarden-cli
