@@ -1008,11 +1008,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1788378079,
-        "narHash": "sha256-MFiqkdQAP+oN+/mVySdAt6gSSbH0/fT1cc853M9iDFI=",
+        "lastModified": 1788436196,
+        "narHash": "sha256-KEkScaRdj5JYCEt26Bc9Su1vpCKSRyznTVXvmO4UDZ8=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "c2e8e3c24d96a8de78e2a22c20af9ef0044fa84d",
+        "rev": "a94f649796619660ccb3eb8d941bcd693af1e48a",
         "type": "github"
       },
       "original": {
