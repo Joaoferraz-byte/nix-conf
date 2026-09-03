@@ -53,7 +53,6 @@ in
       gaps 8
       center-focused-column "never"
       default-column-width { proportion 0.50; }
-      default-window-height { proportion 1.0; }
       focus-ring {
         on
         width 1.4
@@ -114,6 +113,10 @@ in
     window-rule {
       geometry-corner-radius 12
       clip-to-geometry true
+    }
+
+    window-rule {
+      default-window-height { proportion 1.0; }
     }
 
     // Xournal++ is used as a full working column. Open it in the same
