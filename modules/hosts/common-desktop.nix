@@ -118,6 +118,7 @@
             inputs.stylix.homeModules.stylix
             inputs.shell-conf.homeModules.support
             inputs.nixvim.homeModules.nixvim
+            inputs.spicetify-nix.homeManagerModules.default
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;
         };

@@ -642,7 +642,7 @@
       "inputs": {
         "flake-parts": "flake-parts_6",
         "nixpkgs": "nixpkgs_5",
-        "systems": "systems_4"
+        "systems": "systems_5"
       },
       "locked": {
         "lastModified": 1785001306,
@@ -661,7 +661,6 @@
     "noctalia": {
       "inputs": {
         "nixpkgs": [
-          "shell-conf",
           "noctalia-conf",
           "nixpkgs"
         ]
@@ -683,7 +682,6 @@
     "noctalia-conf": {
       "inputs": {
         "nixpkgs": [
-          "shell-conf",
           "nixpkgs"
         ],
         "noctalia": "noctalia"
@@ -770,7 +768,9 @@
         "nix-jetbrains-plugins": "nix-jetbrains-plugins",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
+        "noctalia-conf": "noctalia-conf",
         "shell-conf": "shell-conf",
+        "spicetify-nix": "spicetify-nix",
         "study-planner": "study-planner",
         "stylix": "stylix",
         "vim-conf": "vim-conf",
@@ -785,7 +785,9 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "noctalia-conf": "noctalia-conf"
+        "noctalia-conf": [
+          "noctalia-conf"
+        ]
       },
       "locked": {
         "lastModified": 1788376883,
@@ -798,6 +800,27 @@
       "original": {
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
+        "type": "github"
+      }
+    },
+    "spicetify-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": "systems_3"
+      },
+      "locked": {
+        "lastModified": 1788263070,
+        "narHash": "sha256-Mw163zYcjr59hB2JMC1iKU1Y69SNKZ2r/haXZ07UWQY=",
+        "owner": "Gerg-L",
+        "repo": "spicetify-nix",
+        "rev": "27ff19b00338052e8a504e1d1a34efad82c4bb26",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Gerg-L",
+        "repo": "spicetify-nix",
         "type": "github"
       }
     },
@@ -834,7 +857,7 @@
           "nixpkgs"
         ],
         "nur": "nur",
-        "systems": "systems_3",
+        "systems": "systems_4",
         "tinted-kitty": "tinted-kitty",
         "tinted-schemes": "tinted-schemes",
         "tinted-tmux": "tinted-tmux",
@@ -888,6 +911,21 @@
     },
     "systems_3": {
       "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_4": {
+      "locked": {
         "lastModified": 1774449309,
         "narHash": "sha256-brhZ8DmuGtzkCYHJg4HEd602amKm89Y9ytsFZ5uWD1w=",
         "owner": "nix-systems",
@@ -902,7 +940,7 @@
         "type": "github"
       }
     },
-    "systems_4": {
+    "systems_5": {
       "locked": {
         "lastModified": 1774449309,
         "narHash": "sha256-brhZ8DmuGtzkCYHJg4HEd602amKm89Y9ytsFZ5uWD1w=",
@@ -1008,11 +1046,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1788442152,
-        "narHash": "sha256-ruEYOUXPI3QdSAxKG3ur40Irm0k/6FAtBTbC+W3S6TI=",
+        "lastModified": 1788442627,
+        "narHash": "sha256-7Ina4ehSKrCKLvImU/4zVLVlS+E7YEoNgzN14qyNhDo=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "aac77b5e0f0130b57291f5783f51f0b78653bfe4",
+        "rev": "735d8ae99cac56f4e17f7c071b9c063187efc74d",
         "type": "github"
       },
       "original": {

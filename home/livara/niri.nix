@@ -75,7 +75,6 @@ in
       saturation 1.0
     }
 
-    prefer-no-csd
     hotkey-overlay { skip-at-startup; }
 
     environment {
@@ -115,10 +114,6 @@ in
       clip-to-geometry true
     }
 
-    window-rule {
-      default-window-height { proportion 1.0; }
-    }
-
     // Xournal++ is used as a full working column. Open it in the same
     // maximized-column state produced by Mod+Shift+F, so its native
     // forceZoomToFitOnLoad calculation sees the final viewport immediately.
@@ -145,15 +140,14 @@ in
       open-fullscreen false
     }
 
+    window-rule {
+      match app-id=r#"^org\.wezfurlong\.wezterm$"#
+      default-column-width {}
+    }
+
     // Keep Niri's native automatic floating for parented dialogs, password
     // prompts and fixed-size utility windows. Normal application windows,
     // including browser main windows, remain tiled by their normal geometry.
-
-    // WezTerm ignores niri's default-column-width on native Wayland (#7886).
-    window-rule {
-      match app-id=r#"^org\.wezfurlong\.wezterm$"#
-      default-column-width { proportion 0.50; }
-    }
 
     window-rule {
       // Keep inactive windows nearly opaque while leaving enough alpha for the

@@ -9,7 +9,7 @@ Declarative root for two NixOS hosts sharing a common composition of **Niri**, H
 | `latitude` | Laptop | Internal Irish layout, external Brazilian keyboard via keyd, battery/power, Wi-Fi/Bluetooth and internal panel scaling. |
 | `myMachine` | Desktop | GPU, Btrfs/virtualization, drawing tablet and dynamic monitor discovery; no fictitious output or battery/Bluetooth controls. |
 
-The shared composition lives in `modules/hosts/common-desktop.nix`. NixOS owns the compositor, input, portals, drivers and privileged services; Home Manager owns user files and session-level services. The `noctalia-conf` module provides the pinned local Noctalia runtime, while `shell-conf` owns the user-facing shell integration and application adapters.
+The shared composition lives in `modules/hosts/common-desktop.nix`. NixOS owns the compositor, input, portals, drivers and privileged services; Home Manager owns user files and session-level services. The `noctalia-conf` module provides the complete customized Noctalia shell, while `shell-conf` is the intermediary for session helpers and application adapters.
 
 ## Visual session
 
@@ -19,17 +19,17 @@ Niri starts exactly one Noctalia process through its `spawn-at-startup` wrapper;
 
 ## Theming
 
-`shell-conf` is the single wallpaper and palette owner, using the runtime supplied by `noctalia-conf`. The flow is:
+`noctalia-conf` is the single Noctalia wallpaper and palette owner, and `shell-conf` consumes its generated outputs for application adapters. The flow is:
 
 > Local wallpaper in `~/Wallpapers` → Noctalia v5 `m3-fruit-salad` palette/templates → shared palette and `~/.config/niri/noctalia.kdl` → `shell-conf` application adapters.
 
-`shell-conf` owns the built-in GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE template contracts. Its local Noctalia templates also generate the shared palette, Niri KDL colors, NixVim Lua colors, Firefox CSS and Zen Browser CSS, as well as application-specific formats for Foliate, Freesm Launcher, Heroic, Xournal++ and Vesktop. The Livara Home Manager profile provides Yazi, cmus and the Books/Games directories.
+`noctalia-conf` owns the built-in GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE template contracts, the shared palette, Niri KDL colors, NixVim Lua colors, Firefox CSS, Zen Browser CSS and reviewed plugins. `shell-conf` consumes these outputs and owns application-specific formats for Foliate, Freesm Launcher, Heroic, Xournal++ and Vesktop. The Livara Home Manager profile provides the music player and the Books/Games directories.
 
 The visual mode is always dark. Stylix and the system theme modules provide stable cursor and icon contracts, while Noctalia owns wallpaper-derived colors. Generated state is stored under XDG state directories and is never copied into the source repositories.
 
 ## Plugins and productivity
 
-The selected Noctalia v5 plugin set is vendored and pinned by `shell-conf`: the reviewed local `dotnetrob/cat` plugin, official `timer` and `screen_recorder`, and the supported utility/provider plugins. The recorder consumes the `gpu-screen-recorder` capability supplied by the system/package layer. Plugin source is immutable; plugin settings and runtime state remain user data.
+The selected Noctalia v5 plugin set is vendored and pinned by `noctalia-conf`: the reviewed local `dotnetrob/cat` plugin, official `timer` and `screen_recorder`, and the supported utility/provider plugins. The recorder consumes the `gpu-screen-recorder` capability supplied by the system/package layer. Plugin source is immutable; plugin settings and runtime state remain user data.
 
 `vim-conf` owns the Nixvim editor, Markdown rendering, Mermaid/LaTeX workflow, file explorers and keymaps. The `Vault` owns plain Markdown and Xournal++ documents, while `nix-conf` owns generic synchronization and desktop integration. On `myMachine`, the tablet helper reports the physical MTM-1106/T501 USB device and Xournal++ support remains available. Battery, Bluetooth, NVIDIA, audio, portals, keyd and power profiles remain host/system responsibilities.
 

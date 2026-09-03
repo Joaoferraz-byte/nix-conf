@@ -4,6 +4,11 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.7.0";
 
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,9 +24,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    noctalia-conf = {
+      url = "github:Joaoferraz-byte/noctalia-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     shell-conf = {
       url = "github:Joaoferraz-byte/shell-conf";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.noctalia-conf.follows = "noctalia-conf";
     };
 
     xournal-conf = {
@@ -232,14 +243,6 @@
               stlink
             ];
           };
-
-          checks.border-contract = pkgs.runCommand "niri-noctalia-border-contract" { } ''
-            test "$(grep -c 'width 1.4' ${self}/home/livara/niri.nix)" -eq 2
-            test "$(grep -c 'width 1.4' ${inputs.shell-conf}/config/noctalia/templates/niri.kdl)" -eq 2
-            ! grep -q 'width 1.6' ${self}/home/livara/niri.nix
-            ! grep -q 'width 1.6' ${inputs.shell-conf}/config/noctalia/templates/niri.kdl
-            touch "$out"
-          '';
         };
     };
 }
