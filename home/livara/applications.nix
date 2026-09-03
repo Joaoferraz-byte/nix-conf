@@ -12,7 +12,7 @@ let
     owner = "edelvarden";
     repo = "material-fox-updated";
     rev = "523cac082012baaaabc4ddbb62f63769c0cb4e32";
-    hash = "sha256-2gU/9xFWXQ8OBKylv8j87TGgO5CwKkeQ5G5Y1epQl3s=";
+    hash = "sha256-ZzigMIPHyfNxfJc2bYpvztz1FUbTOdEH+AZv+bivH/M=";
   };
   materialFox = pkgs.stdenvNoCC.mkDerivation {
     pname = "material-fox-updated";
