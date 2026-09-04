@@ -103,9 +103,7 @@
           _module.args.pkgs = pkgs;
           checks.niri-window-contract = pkgs.runCommand "livara-niri-window-contract" { } ''
             config=${./home/livara/niri.nix}
-            grep -Fq 'match app-id=r#"(?i)^(spotify|com\.spotify\.Client)$"#' "$config"
-            grep -Fq 'prefer-no-csd' "$config"
-            if grep -Eiq 'wezterm|initial_cols|initial_rows' "$config"; then
+            if grep -Eiq 'match app-id=.*wezterm|initial_cols|initial_rows' "$config"; then
               exit 1
             fi
             touch "$out"

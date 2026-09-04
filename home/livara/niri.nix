@@ -139,14 +139,6 @@ in
       open-fullscreen false
     }
 
-    // Spotify's native CSD adds a separate title strip and close button on
-    // Wayland/Xwayland. Keep this scoped to Spotify; do not change WezTerm or
-    // other clients globally.
-    window-rule {
-      match app-id=r#"(?i)^(spotify|com\.spotify\.Client)$"#
-      prefer-no-csd
-    }
-
     // Keep Niri's native automatic floating for parented dialogs, password
     // prompts and fixed-size utility windows. Normal application windows,
     // including browser main windows, remain tiled by their normal geometry.
