@@ -101,6 +101,15 @@
           };
         in {
           _module.args.pkgs = pkgs;
+          checks.niri-window-contract = pkgs.runCommand "livara-niri-window-contract" { } ''
+            config=${./home/livara/niri.nix}
+            grep -Fq 'match app-id=r#"^org\.wezfurlong\.wezterm$"#' "$config"
+            grep -Fq 'default-column-width {}' "$config"
+            if grep -Eq 'default-column-width \{ proportion|initial_cols|initial_rows' "$config"; then
+              exit 1
+            fi
+            touch "$out"
+          '';
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
               btrfs-progs

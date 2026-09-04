@@ -264,23 +264,6 @@ let
     hash = "sha256-gzmKE1wMPIBrtJ2NhkaFlx8Q8wCGjDjALhH8TewVMyQ=";
   };
   spicetifyThemeSource = pkgs.writeTextDir "user.css" ''
-    :root {
-      --spice-text: #eef2f7;
-      --spice-subtext: #b2bdca;
-      --spice-main: #111318;
-      --spice-sidebar: #0b0d12;
-      --spice-player: #111318;
-      --spice-card: #1a2029;
-      --spice-shadow: #07090d;
-      --spice-button: #7bb7ff;
-      --spice-button-active: #9bc9ff;
-      --spice-button-disabled: #596575;
-      --spice-tab-active: #263b55;
-      --spice-notification: #254634;
-      --spice-notification-error: #512d34;
-      --spice-misc: #c2a4f5;
-    }
-
     .Root__main-view,
     .main-rootlist-rootlist,
     .Root__now-playing-bar {
@@ -336,6 +319,7 @@ in
   # Applications
   programs.spicetify = {
     enable = true;
+    wayland = false;
     theme = {
       name = "Livara";
       src = spicetifyThemeSource;
@@ -729,6 +713,7 @@ in
     xournalpp
     affinity-v3
     easyeffects
+    spicetify-cli
   ];
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
