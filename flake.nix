@@ -104,8 +104,9 @@
           checks.niri-window-contract = pkgs.runCommand "livara-niri-window-contract" { } ''
             config=${./home/livara/niri.nix}
             grep -Fq 'match app-id=r#"^org\.wezfurlong\.wezterm$"#' "$config"
-            grep -Fq 'default-column-width {}' "$config"
-            if grep -Eq 'default-column-width \{ proportion|initial_cols|initial_rows' "$config"; then
+            grep -Fq 'default-column-width { proportion 1.0; }' "$config"
+            if grep -Fq 'default-column-width { proportion 0.50; }' "$config" ||
+               grep -Eq 'initial_cols|initial_rows' "$config"; then
               exit 1
             fi
             touch "$out"

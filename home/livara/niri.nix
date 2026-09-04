@@ -52,7 +52,6 @@ in
     layout {
       gaps 8
       center-focused-column "never"
-      default-column-width { proportion 0.50; }
       focus-ring {
         on
         width 1.4
@@ -142,7 +141,10 @@ in
 
     window-rule {
       match app-id=r#"^org\.wezfurlong\.wezterm$"#
-      default-column-width {}
+      # Do not let the global layout preset force the terminal to half width.
+      # WezTerm keeps control of its font metrics; Niri supplies the full
+      # column so font-size changes cannot be mistaken for window geometry.
+      default-column-width { proportion 1.0; }
     }
 
     // Keep Niri's native automatic floating for parented dialogs, password

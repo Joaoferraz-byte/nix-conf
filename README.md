@@ -66,6 +66,8 @@ niri validate --config ~/.config/niri/config.kdl
 
 The full `nixos-rebuild test` remains the final host gate and was not run in the constrained sandbox because it would download and compile a large closure. On hardware, verify one Noctalia process, a responsive read-only `noctalia msg status`, generated palette/templates, Nixvim startup and health, Markdown rendering, Xournal++ MIME opening, Niri IPC, keyd, NVIDIA/Wayland, PipeWire, portals, Bluetooth and lock/suspend behavior. Diagnostic scripts are retained only when a current runtime reference exists and are reviewed separately.
 
+Publishing a repository commit does not activate it in the running session. After pulling the final `nix-conf` revision, run `./install.sh` and complete `sudo nixos-rebuild switch --flake .#<host>`. Then verify `readlink -f ~/.config/niri/config.kdl`, run `niri validate --config ~/.config/niri/config.kdl`, restart Neovim, and inspect `:checkhealth vim.lsp`. A health report that still shows Spring Boot as an active client or the old Java settings belongs to a previous generation and is not evidence that the current flake evaluated incorrectly. The installer uses locked inputs by default; set `NIX_CONF_UPDATE_FLAKE=1` only when intentionally updating them.
+
 On `myMachine`, the hardware configuration retains only the real swap UUID `73f0052c-6927-45c4-b3a2-8cdc4cbd0d8b`; the nonexistent UUID `79febc52-42dd-4d8e-ba13-eea976778dfd` remains absent, eliminating the boot timeout.
 
 ## Repository structure
