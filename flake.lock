@@ -1046,11 +1046,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1788531065,
-        "narHash": "sha256-89I04JcSSX7a8IK5ag5VzQep5V61mKo/Rw6W2N/BhMo=",
+        "lastModified": 1788531159,
+        "narHash": "sha256-FZPbZd9H7mzRxKReL7nuUwzuxgnJ8BqgcJyoiGh+asg=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "1691c15dfe530ca7a1f887ece6f9e918926bd050",
+        "rev": "2ed678778173f8588e9e51a6d5d0c3d518ff154a",
         "type": "github"
       },
       "original": {
