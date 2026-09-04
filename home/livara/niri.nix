@@ -139,12 +139,6 @@ in
       open-fullscreen false
     }
 
-    window-rule {
-      match app-id=r#"^org\.wezfurlong\.wezterm$"#
-      default-column-width {}
-      open-maximized true
-    }
-
     // Spotify's native CSD adds a separate title strip and close button on
     // Wayland/Xwayland. Keep this scoped to Spotify; do not change WezTerm or
     // other clients globally.
