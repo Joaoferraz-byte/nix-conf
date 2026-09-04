@@ -118,11 +118,5 @@
       NoNewPrivileges = "yes";
     };
 
-    services.journald.extraConfig = ''
-      SystemMaxUse=200M
-      MaxRetentionSec=30day
-      Compress=yes
-      Seal=yes
-    '';
   };
 }
