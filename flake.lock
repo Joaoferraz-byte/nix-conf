@@ -100,11 +100,11 @@
     "community-templates": {
       "flake": false,
       "locked": {
-        "lastModified": 1788274189,
-        "narHash": "sha256-PCqZpFLLm4kMZBa20rVYk7ReNZhaXrQ+uu4uYSeiBJU=",
+        "lastModified": 1788391861,
+        "narHash": "sha256-phCZfurjqrOEy+1RssStJlSJM8szykkFteGpTDyad68=",
         "owner": "noctalia-dev",
         "repo": "community-templates",
-        "rev": "bc62c170cbf6f8a225f542005b44cf0e7421b2d7",
+        "rev": "83808b68b035146d974283042bca4774379bebcc",
         "type": "github"
       },
       "original": {
@@ -681,17 +681,18 @@
     },
     "noctalia-conf": {
       "inputs": {
+        "community-templates": "community-templates",
         "nixpkgs": [
           "nixpkgs"
         ],
         "noctalia": "noctalia"
       },
       "locked": {
-        "lastModified": 1788350843,
-        "narHash": "sha256-Wyd2MhWQ93wT0U2BcMhFroUU5vYnh9XZFqOXNTXSgeY=",
+        "lastModified": 1788528844,
+        "narHash": "sha256-Gmku1kvd9FCOxFxZDG7B5EZmJPgpf2gpRyV1eE/HbYY=",
         "owner": "Joaoferraz-byte",
         "repo": "noctalia-conf",
-        "rev": "6acc2fdb8c4bdc6694961a01c21e23c0d407d5a9",
+        "rev": "2848246114e91b36b06998025b2e3a32f3f46f7b",
         "type": "github"
       },
       "original": {
@@ -780,7 +781,6 @@
     },
     "shell-conf": {
       "inputs": {
-        "community-templates": "community-templates",
         "flake-parts": "flake-parts_4",
         "nixpkgs": [
           "nixpkgs"
@@ -790,11 +790,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788376883,
-        "narHash": "sha256-3FpGQsceN/5nb1cxsmTSNqX8CWzh6m0Oed8Wjl4ab+M=",
+        "lastModified": 1788528852,
+        "narHash": "sha256-SwS50j4JJ7no4o7LG561e02e8ssBqRrOvBnsLFCjgws=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "0eae40682e0a85eb5774f0808077894cf4e17cd5",
+        "rev": "fbce50fc094e2cb8f085756538aa331c4e2ac889",
         "type": "github"
       },
       "original": {
@@ -1046,11 +1046,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1788442627,
-        "narHash": "sha256-7Ina4ehSKrCKLvImU/4zVLVlS+E7YEoNgzN14qyNhDo=",
+        "lastModified": 1788528840,
+        "narHash": "sha256-tyeZ9gcPID//9PumXmvL56VOHNFl3N91oQFAPNhMHlw=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "735d8ae99cac56f4e17f7c071b9c063187efc74d",
+        "rev": "19458175504010a6cd0cf9ff2890e3364129b011",
         "type": "github"
       },
       "original": {
