@@ -141,10 +141,7 @@ in
 
     window-rule {
       match app-id=r#"^org\.wezfurlong\.wezterm$"#
-      # Do not let the global layout preset force the terminal to half width.
-      # WezTerm keeps control of its font metrics; Niri supplies the full
-      # column so font-size changes cannot be mistaken for window geometry.
-      default-column-width { proportion 1.0; }
+      default-column-width {}
     }
 
     // Keep Niri's native automatic floating for parented dialogs, password
