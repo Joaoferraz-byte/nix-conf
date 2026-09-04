@@ -40,6 +40,17 @@ let
     @import url("file://${noctaliaFirefoxCss}");
   '';
 
+  livaraJetBrainsTheme = pkgs.stdenvNoCC.mkDerivation {
+    pname = "livara-jetbrains-theme";
+    version = "1.0.0";
+    src = ./jetbrains-theme;
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p "$out"
+      cp -R ./* "$out/"
+    '';
+  };
+
   # One Zen profile owns four Spaces, each with its own container and Essentials.
 
   # Shared preferences and the Noctalia-generated userChrome import.
@@ -266,8 +277,17 @@ let
   spicetifyThemeSource = pkgs.writeTextDir "user.css" ''
     .Root__main-view,
     .main-rootlist-rootlist,
-    .Root__now-playing-bar {
+    .Root__now-playing-bar,
+    .Root__top-container,
+    .main-topBar-container,
+    .main-topBar-background {
       background: var(--spice-main) !important;
+    }
+
+    .main-topBar-background,
+    .main-topBar-overlay {
+      box-shadow: none !important;
+      border-bottom: 0 !important;
     }
 
     .main-card-card,
@@ -714,7 +734,10 @@ in
     affinity-v3
     easyeffects
     spicetify-cli
+    livaraJetBrainsTheme
   ];
+
+  home.sessionVariables.LIVARA_IDE_THEME_PLUGIN = "${livaraJetBrainsTheme}";
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"

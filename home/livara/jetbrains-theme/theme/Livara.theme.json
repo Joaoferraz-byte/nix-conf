@@ -1,0 +1,40 @@
+{
+  "name": "Livara Dark",
+  "dark": true,
+  "author": "Joaoferraz-byte",
+  "editorScheme": "Matugen-Dark",
+  "ui": {
+    "*": {
+      "Panel.background": "#111318",
+      "ToolWindow.background": "#0B0D12",
+      "EditorTabs.background": "#0B0D12",
+      "EditorTabs.selectedBackground": "#1A2029",
+      "TabbedPane.background": "#0B0D12",
+      "TabbedPane.selectedBackground": "#1A2029",
+      "Button.background": "#1A2029",
+      "Button.hoverBackground": "#263B55",
+      "Button.focusedBackground": "#263B55",
+      "Button.foreground": "#EEF2F7",
+      "Label.foreground": "#EEF2F7",
+      "TextField.background": "#1A2029",
+      "TextField.foreground": "#EEF2F7",
+      "TextArea.background": "#111318",
+      "TextArea.foreground": "#EEF2F7",
+      "List.background": "#111318",
+      "List.foreground": "#EEF2F7",
+      "Tree.background": "#111318",
+      "Tree.foreground": "#EEF2F7",
+      "Menu.background": "#111318",
+      "Menu.foreground": "#EEF2F7",
+      "PopupMenu.background": "#111318",
+      "PopupMenu.foreground": "#EEF2F7",
+      "Link.activeForeground": "#7BB7FF",
+      "ProgressBar.foreground": "#7BB7FF",
+      "ProgressBar.background": "#263B55",
+      "Component.focusColor": "#7BB7FF",
+      "Borders.color": "#263B55",
+      "ScrollBar.thumbColor": "#596575",
+      "ScrollBar.hoverThumbColor": "#7BB7FF"
+    }
+  }
+}

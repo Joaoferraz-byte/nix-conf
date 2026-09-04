@@ -105,6 +105,8 @@
             config=${./home/livara/niri.nix}
             grep -Fq 'match app-id=r#"^org\.wezfurlong\.wezterm$"#' "$config"
             grep -Fq 'default-column-width {}' "$config"
+            grep -Fq 'match app-id=r#"(?i)^(spotify|com\.spotify\.Client)$"#' "$config"
+            grep -Fq 'prefer-no-csd' "$config"
             if grep -Fq 'default-column-width { proportion 0.50; }' "$config" ||
                grep -Eq 'initial_cols|initial_rows' "$config"; then
               exit 1
