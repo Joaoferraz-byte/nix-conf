@@ -1,0 +1,11 @@
+<idea-plugin>
+  <id>com.joaoferraz.livara.theme</id>
+  <name>Livara Theme</name>
+  <vendor email="joaoferraz467@gmail.com">Joaoferraz-byte</vendor>
+  <version>1.0.0</version>
+  <description>Livara dark UI theme and editor color scheme for IntelliJ Platform IDEs.</description>
+  <depends>com.intellij.modules.platform</depends>
+  <extensions defaultExtensionNs="com.intellij">
+    <themeProvider id="Livara Dark" path="/theme/Livara.theme.json" />
+  </extensions>
+</idea-plugin>
