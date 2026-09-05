@@ -93,6 +93,7 @@ modules
   └── modules/parts.nix
 scripts
   └── scripts/generate-hardware.sh
+  └── scripts/sync-xournalpp-config.sh
 themes
   └── themes/clockwork
 ```

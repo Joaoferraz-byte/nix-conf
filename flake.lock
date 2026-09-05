@@ -243,27 +243,6 @@
     },
     "flake-parts_3": {
       "inputs": {
-        "nixpkgs-lib": [
-          "nixvim",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787559586,
-        "narHash": "sha256-onL0VLf9vPllmT0H/OlURIU5r5t5WIEl7t4tVNKT0Nw=",
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "rev": "9d0d87172c374f89da73c1cfe6d81ae62feac1f1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "type": "github"
-      }
-    },
-    "flake-parts_4": {
-      "inputs": {
         "nixpkgs-lib": "nixpkgs-lib_3"
       },
       "locked": {
@@ -280,7 +259,7 @@
         "type": "github"
       }
     },
-    "flake-parts_5": {
+    "flake-parts_4": {
       "inputs": {
         "nixpkgs-lib": [
           "stylix",
@@ -301,7 +280,7 @@
         "type": "github"
       }
     },
-    "flake-parts_6": {
+    "flake-parts_5": {
       "inputs": {
         "nixpkgs-lib": [
           "vim-conf",
@@ -586,63 +565,14 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
-      "locked": {
-        "lastModified": 1787631388,
-        "narHash": "sha256-vMiXptXarfSdJb1Gkc+FYVOAibuBRj7qxGa8z68q1Uw=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "ac6b2166e7a9375683b8e98f860f273222337b16",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_5": {
-      "locked": {
-        "lastModified": 1784555310,
-        "narHash": "sha256-/FCliTPgiuV1owejZFNx3Ch9irdvkOfOFl+HHZ+DrtM=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "421eebfd0ec7bccd4abe826ce62d7e6e83129493",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixvim": {
       "inputs": {
-        "flake-parts": "flake-parts_3",
-        "nixpkgs": "nixpkgs_4",
-        "systems": "systems_2"
-      },
-      "locked": {
-        "lastModified": 1788190018,
-        "narHash": "sha256-59BAfH0txPAZrPBF4QJqwvUWppD+ICrcjA1LZAmPnrQ=",
-        "owner": "nix-community",
-        "repo": "nixvim",
-        "rev": "41844750e55f17b1385d5b09ca7ade5f11f49506",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "nixvim",
-        "type": "github"
-      }
-    },
-    "nixvim_2": {
-      "inputs": {
-        "flake-parts": "flake-parts_6",
-        "nixpkgs": "nixpkgs_5",
-        "systems": "systems_5"
+        "flake-parts": "flake-parts_5",
+        "nixpkgs": [
+          "vim-conf",
+          "nixpkgs"
+        ],
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1785001306,
@@ -768,7 +698,10 @@
         "nix-flatpak": "nix-flatpak",
         "nix-jetbrains-plugins": "nix-jetbrains-plugins",
         "nixpkgs": "nixpkgs_3",
-        "nixvim": "nixvim",
+        "nixvim": [
+          "vim-conf",
+          "nixvim"
+        ],
         "noctalia-conf": "noctalia-conf",
         "shell-conf": "shell-conf",
         "spicetify-nix": "spicetify-nix",
@@ -781,7 +714,7 @@
     },
     "shell-conf": {
       "inputs": {
-        "flake-parts": "flake-parts_4",
+        "flake-parts": "flake-parts_3",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -808,7 +741,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "systems": "systems_3"
+        "systems": "systems_2"
       },
       "locked": {
         "lastModified": 1788263070,
@@ -851,13 +784,13 @@
         "base16-helix": "base16-helix",
         "base16-vim": "base16-vim",
         "firefox-gnome-theme": "firefox-gnome-theme",
-        "flake-parts": "flake-parts_5",
+        "flake-parts": "flake-parts_4",
         "gnome-shell": "gnome-shell",
         "nixpkgs": [
           "nixpkgs"
         ],
         "nur": "nur",
-        "systems": "systems_4",
+        "systems": "systems_3",
         "tinted-kitty": "tinted-kitty",
         "tinted-schemes": "tinted-schemes",
         "tinted-tmux": "tinted-tmux",
@@ -893,23 +826,6 @@
       }
     },
     "systems_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1774449309,
-        "narHash": "sha256-brhZ8DmuGtzkCYHJg4HEd602amKm89Y9ytsFZ5uWD1w=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "c29398b59d2048c4ab79345812849c9bd15e9150",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "ref": "future-26.11",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_3": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
@@ -924,7 +840,7 @@
         "type": "github"
       }
     },
-    "systems_4": {
+    "systems_3": {
       "locked": {
         "lastModified": 1774449309,
         "narHash": "sha256-brhZ8DmuGtzkCYHJg4HEd602amKm89Y9ytsFZ5uWD1w=",
@@ -940,7 +856,7 @@
         "type": "github"
       }
     },
-    "systems_5": {
+    "systems_4": {
       "locked": {
         "lastModified": 1774449309,
         "narHash": "sha256-brhZ8DmuGtzkCYHJg4HEd602amKm89Y9ytsFZ5uWD1w=",
@@ -1043,14 +959,14 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "nixvim": "nixvim_2"
+        "nixvim": "nixvim"
       },
       "locked": {
-        "lastModified": 1788536657,
-        "narHash": "sha256-WQ6zExoxOE6SQ3qw2MKkobv4Bu2i96Smc/q1cdegVMI=",
+        "lastModified": 1788574792,
+        "narHash": "sha256-8d49HBrbWS+T+LIIS6sddBefNHP7VtOQwI3bB6XadEs=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "b75fad573e3f0309c855ab1ef3b7e6186edf8fae",
+        "rev": "373a3337a0dca75c9b5e3045033e6ba0f9f41967",
         "type": "github"
       },
       "original": {
