@@ -52,6 +52,7 @@ in
     layout {
       gaps 8
       center-focused-column "never"
+      default-column-width { proportion 0.5; }
       focus-ring {
         on
         width 1.4
@@ -113,30 +114,14 @@ in
       clip-to-geometry true
     }
 
-    // Xournal++ is used as a full working column. Open it in the same
-    // maximized-column state produced by Mod+Shift+F, so its native
-    // forceZoomToFitOnLoad calculation sees the final viewport immediately.
     window-rule {
       match app-id=r#"^com\.github\.xournalpp\.xournalpp$"#
       default-column-width { proportion 1.0; }
       default-window-height { proportion 1.0; }
-      open-maximized true
+      open-maximized-to-edges true
       open-fullscreen false
-    }
-
-    window-rule {
-      match app-id=r#"(?i)affinity"#
-      default-column-width { proportion 1.0; }
-      default-window-height { proportion 1.0; }
-      open-maximized true
-      open-fullscreen false
-    }
-    window-rule {
-      match title=r#"(?i)^Affinity"#
-      default-column-width { proportion 1.0; }
-      default-window-height { proportion 1.0; }
-      open-maximized true
-      open-fullscreen false
+      geometry-corner-radius 0
+      clip-to-geometry false
     }
 
     // Keep Niri's native automatic floating for parented dialogs, password

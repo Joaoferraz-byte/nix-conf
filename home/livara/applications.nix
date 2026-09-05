@@ -361,6 +361,7 @@ in
 
   programs.nixvim = {
     enable = true;
+    nixpkgs.source = inputs.nixpkgs;
     imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
 
