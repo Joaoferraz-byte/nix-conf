@@ -27,6 +27,7 @@ in
   home.file.".config/niri/config.kdl".text = ''
     // Niri owns compositor policy; Noctalia owns only shell surfaces and IPC.
     include "outputs.kdl"
+    prefer-no-csd
     cursor {
       // Stylix owns the cursor package/name/size; Niri applies it to the compositor.
       xcursor-theme "${config.stylix.cursor.name}"
@@ -129,6 +130,14 @@ in
       open-fullscreen false
       geometry-corner-radius 0
       clip-to-geometry false
+    }
+
+    window-rule {
+      match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#
+      default-column-width { proportion 1.0; }
+      default-window-height { proportion 1.0; }
+      open-maximized-to-edges true
+      open-fullscreen false
     }
 
     // Keep Niri's native automatic floating for parented dialogs, password

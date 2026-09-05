@@ -103,6 +103,7 @@
           _module.args.pkgs = pkgs;
           checks.niri-window-contract = pkgs.runCommand "livara-niri-window-contract" { } ''
             config=${./home/livara/niri.nix}
+            grep -Fq 'prefer-no-csd' "$config"
             grep -Fq 'default-column-width { proportion 0.5; }' "$config"
             grep -Fq 'match app-id=r#"^com\.github\.xournalpp\.xournalpp$"#' "$config"
             grep -Fq 'open-maximized-to-edges true' "$config"
@@ -111,6 +112,7 @@
             grep -Fq 'clip-to-geometry false' "$config"
             grep -Fq 'match app-id=r#"^org\\.wezfurlong\\.wezterm$"#' "$config"
             grep -Fq 'default-window-height { proportion 1.0; }' "$config"
+            grep -Fq 'match app-id=r#"^(affinity-v3|org\\.vinegarhq\\.Sober)$"#' "$config"
             if grep -Fq 'open-maximized true' "$config" || grep -Eiq 'initial_cols|initial_rows' "$config"; then
               exit 1
             fi
