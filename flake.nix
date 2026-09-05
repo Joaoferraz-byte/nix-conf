@@ -108,8 +108,10 @@
             grep -Fq 'match app-id=r#"^com\.github\.xournalpp\.xournalpp$"#' "$config"
             grep -Fq 'open-maximized-to-edges true' "$config"
             grep -Fq 'open-fullscreen false' "$config"
-            grep -Fq 'geometry-corner-radius 0' "$config"
-            grep -Fq 'clip-to-geometry false' "$config"
+            grep -Fq 'geometry-corner-radius 12' "$config"
+            if grep -Fq 'geometry-corner-radius 0' "$config" || grep -Fq 'clip-to-geometry false' "$config"; then
+              exit 1
+            fi
             grep -Fq 'match app-id=r#"^org\\.wezfurlong\\.wezterm$"#' "$config"
             grep -Fq 'default-window-height { proportion 1.0; }' "$config"
             grep -Fq 'match app-id=r#"^(affinity-v3|org\\.vinegarhq\\.Sober)$"#' "$config"

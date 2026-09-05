@@ -85,6 +85,8 @@ in
       XCURSOR_PATH "${config.home.profileDirectory}/share/icons:${home}/.local/share/icons:${home}/.icons"
       // Noctalia's Qt template targets qt6ct; keep this single owner in Niri.
       QT_QPA_PLATFORMTHEME "qt6ct"
+      GTK_CSD "0"
+      QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
       MOZ_ENABLE_WAYLAND "1"
       NIXOS_OZONE_WL "1"
     }
@@ -128,8 +130,6 @@ in
       default-window-height { proportion 1.0; }
       open-maximized-to-edges true
       open-fullscreen false
-      geometry-corner-radius 0
-      clip-to-geometry false
     }
 
     window-rule {

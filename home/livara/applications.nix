@@ -257,7 +257,7 @@ let
   xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (
     builtins.replaceStrings
       [ "/home/livara/.config/xournalpp" "tokyo-night.gpl" ]
-      [ "${config.home.homeDirectory}/.config/xournalpp" "livara.gpl" ]
+      [ "${config.home.homeDirectory}/.config/xournalpp" "tokyonight.gpl" ]
       (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml")
   );
   xournalppToolbar = pkgs.writeText "xournalpp-toolbar.ini" (
@@ -266,7 +266,7 @@ let
       [ "toolbarTop1=HIGHLIGHTER,ERASER,PEN" ]
       (builtins.readFile "${inputs.xournal-conf}/xournalpp/toolbar.ini")
   );
-  xournalppPalette = "${inputs.xournal-conf}/xournalpp/palettes/livara.gpl";
+  xournalppPalette = "${inputs.xournal-conf}/xournalpp/palettes/tokyonight.gpl";
 
   spicetifyAdblockSource = pkgs.fetchFromGitHub {
     owner = "rxri";
@@ -761,7 +761,10 @@ in
     done
     if [ -f "${xournalppLocalConfig}/settings.xml" ]; then
       $DRY_RUN_CMD sed -i \
-        -e 's/tokyo-night\.gpl/livara.gpl/g' \
+        -e 's/tokyo-night\.gpl/tokyonight.gpl/g' \
+        -e 's|/palettes/livara\.gpl|/palettes/tokyonight.gpl|g' \
+        -e 's|<property name="backgroundColor" value="[^"]*"/>|<property name="backgroundColor" value="4279900966"/>|' \
+        -e 's|<property name="selectionBorderColor" value="[^"]*"/>|<property name="selectionBorderColor" value="4286227191"/>|' \
         -e 's|<property name="defaultSaveName" value="[^"]*"/>|<property name="defaultSaveName" value="%F"/>|' \
         "${xournalppLocalConfig}/settings.xml"
     elif [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
@@ -770,9 +773,9 @@ in
     if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then
       $DRY_RUN_CMD cp "${xournalppToolbar}" "${xournalppLocalConfig}/toolbar.ini"
     fi
-    if [ ! -e "${xournalppLocalConfig}/palettes/livara.gpl" ]; then
+    if [ ! -e "${xournalppLocalConfig}/palettes/tokyonight.gpl" ]; then
       $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}/palettes"
-      $DRY_RUN_CMD cp "${xournalppPalette}" "${xournalppLocalConfig}/palettes/livara.gpl"
+      $DRY_RUN_CMD cp "${xournalppPalette}" "${xournalppLocalConfig}/palettes/tokyonight.gpl"
     fi
   '';
   xdg.configFile."xournalpp/default_template.tex".source =
