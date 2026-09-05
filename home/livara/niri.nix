@@ -115,6 +115,13 @@ in
     }
 
     window-rule {
+      match app-id=r#"^org\.wezfurlong\.wezterm$"#
+      default-column-width { proportion 0.5; }
+      default-window-height { proportion 1.0; }
+      open-fullscreen false
+    }
+
+    window-rule {
       match app-id=r#"^com\.github\.xournalpp\.xournalpp$"#
       default-column-width { proportion 1.0; }
       default-window-height { proportion 1.0; }
