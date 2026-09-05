@@ -109,6 +109,8 @@
             grep -Fq 'open-fullscreen false' "$config"
             grep -Fq 'geometry-corner-radius 0' "$config"
             grep -Fq 'clip-to-geometry false' "$config"
+            grep -Fq 'match app-id=r#"^org\\.wezfurlong\\.wezterm$"#' "$config"
+            grep -Fq 'default-window-height { proportion 1.0; }' "$config"
             if grep -Fq 'open-maximized true' "$config" || grep -Eiq 'initial_cols|initial_rows' "$config"; then
               exit 1
             fi
