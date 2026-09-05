@@ -252,12 +252,12 @@ let
     '';
   };
 
-  xournalppLocalConfig = "${config.home.homeDirectory}/.config/xournalpp";
+  xournalppLocalConfig = "${config.xdg.configHome}/xournalpp";
   xournalppLegacyConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
   xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (
     builtins.replaceStrings
       [ "/home/livara/.config/xournalpp" "tokyo-night.gpl" ]
-      [ "${config.home.homeDirectory}/.config/xournalpp" "tokyonight.gpl" ]
+      [ "${config.xdg.configHome}/xournalpp" "tokyonight.gpl" ]
       (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml")
   );
   xournalppToolbar = pkgs.writeText "xournalpp-toolbar.ini" (
@@ -268,69 +268,6 @@ let
   );
   xournalppPalette = "${inputs.xournal-conf}/xournalpp/palettes/tokyonight.gpl";
 
-  spicetifyAdblockSource = pkgs.fetchFromGitHub {
-    owner = "rxri";
-    repo = "spicetify-extensions";
-    rev = "64cb2b8c235b13cf943e4c265c19199f69e5d170";
-    hash = "sha256-gzmKE1wMPIBrtJ2NhkaFlx8Q8wCGjDjALhH8TewVMyQ=";
-  };
-  spicetifyThemeSource = pkgs.writeTextDir "user.css" ''
-    body,
-    #main,
-    .Root__main-view,
-    .Root__main-view-container,
-    .main-rootlist-rootlist,
-    .Root__now-playing-bar,
-    .Root__top-container,
-    .main-topBar-container,
-    .main-topBar-background,
-    .main-topBar-overlay,
-    [data-testid="topbar"] {
-      background: var(--spice-main) !important;
-      color: var(--spice-text) !important;
-    }
-
-    .main-topBar-background,
-    .main-topBar-overlay,
-    .main-topBar-container {
-      box-shadow: none !important;
-      border-bottom: 0 !important;
-    }
-
-    .main-card-card,
-    .main-trackList-trackListRow:hover,
-    .main-rootlist-rootlistItem:hover {
-      background: var(--spice-card) !important;
-    }
-
-    .main-leaderboardComponent-container,
-    [data-testid="ad-slot"],
-    [data-testid="topbar-ad-container"] {
-      display: none !important;
-    }
-
-    .x-progressBar-fillColor,
-    .main-playButton-button {
-      background-color: var(--spice-button) !important;
-    }
-  '';
-  spicetifyColorScheme = {
-    text = "EEF2F7";
-    subtext = "B2BDCA";
-    main = "111318";
-    sidebar = "0B0D12";
-    player = "111318";
-    card = "1A2029";
-    shadow = "07090D";
-    selected-row = "263B55";
-    button = "7BB7FF";
-    button-active = "9BC9FF";
-    button-disabled = "596575";
-    tab-active = "263B55";
-    notification = "254634";
-    notification-error = "512D34";
-    misc = "C2A4F5";
-  };
   matugenConfig = pkgs.writeText "livara-matugen-config.toml" ''
     [config]
     fallback_color = "#7bb7ff"
@@ -343,29 +280,6 @@ let
 
 in
 {
-  # Applications
-  programs.spicetify = {
-    enable = true;
-    wayland = false;
-    theme = {
-      name = "Livara";
-      src = spicetifyThemeSource;
-      injectCss = true;
-      injectThemeJs = false;
-      replaceColors = true;
-      homeConfig = true;
-      overwriteAssets = false;
-    };
-    colorScheme = "custom";
-    customColorScheme = spicetifyColorScheme;
-    enabledExtensions = [
-      {
-        src = spicetifyAdblockSource + /adblock;
-        name = "adblock.js";
-      }
-    ];
-  };
-
   programs.nixvim = {
     enable = true;
     nixpkgs.source = inputs.nixpkgs;
@@ -741,7 +655,7 @@ in
     xournalpp
     affinity-v3
     easyeffects
-    spicetify-cli
+    nuclear
     livaraJetBrainsTheme
   ];
 
@@ -759,15 +673,7 @@ in
         $DRY_RUN_CMD cp -L "$legacy" "$native"
       fi
     done
-    if [ -f "${xournalppLocalConfig}/settings.xml" ]; then
-      $DRY_RUN_CMD sed -i \
-        -e 's/tokyo-night\.gpl/tokyonight.gpl/g' \
-        -e 's|/palettes/livara\.gpl|/palettes/tokyonight.gpl|g' \
-        -e 's|<property name="backgroundColor" value="[^"]*"/>|<property name="backgroundColor" value="4279900966"/>|' \
-        -e 's|<property name="selectionBorderColor" value="[^"]*"/>|<property name="selectionBorderColor" value="4286227191"/>|' \
-        -e 's|<property name="defaultSaveName" value="[^"]*"/>|<property name="defaultSaveName" value="%F"/>|' \
-        "${xournalppLocalConfig}/settings.xml"
-    elif [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
+    if [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
       $DRY_RUN_CMD cp "${xournalppSettings}" "${xournalppLocalConfig}/settings.xml"
     fi
     if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then

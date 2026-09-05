@@ -704,7 +704,6 @@
         ],
         "noctalia-conf": "noctalia-conf",
         "shell-conf": "shell-conf",
-        "spicetify-nix": "spicetify-nix",
         "study-planner": "study-planner",
         "stylix": "stylix",
         "vim-conf": "vim-conf",
@@ -733,27 +732,6 @@
       "original": {
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "type": "github"
-      }
-    },
-    "spicetify-nix": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "systems": "systems_2"
-      },
-      "locked": {
-        "lastModified": 1788263070,
-        "narHash": "sha256-Mw163zYcjr59hB2JMC1iKU1Y69SNKZ2r/haXZ07UWQY=",
-        "owner": "Gerg-L",
-        "repo": "spicetify-nix",
-        "rev": "27ff19b00338052e8a504e1d1a34efad82c4bb26",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Gerg-L",
-        "repo": "spicetify-nix",
         "type": "github"
       }
     },
