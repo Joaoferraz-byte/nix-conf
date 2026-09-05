@@ -962,11 +962,11 @@
         "nixvim": "nixvim"
       },
       "locked": {
-        "lastModified": 1788618666,
-        "narHash": "sha256-XWkkg7Su3RoLDO8TJX9ZJhCsssgUl4cawnX6XlYhRI0=",
+        "lastModified": 1788622207,
+        "narHash": "sha256-MQK467ROfawhzPuOmYg5nTu3DAfz/CPTBR/dvpwAZvE=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "7010b3ba667f1887905582a67f892e121766c4ad",
+        "rev": "c4ccb4d5c0472fd63a588243ec1114b8ded4b0ff",
         "type": "github"
       },
       "original": {
