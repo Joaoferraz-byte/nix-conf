@@ -33,7 +33,7 @@ The central theme flow is:
 
 > Local wallpaper in `~/Wallpapers` → Noctalia v5 `m3-fruit-salad` palette/templates → `$XDG_STATE_HOME/livara/theme/palette.dark.json` → shell-conf application adapters.
 
-`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts, plus formats not covered by those templates, including Freesm Launcher, Heroic, Foliate, Xournal++, Vesktop, IntelliJ/Android Studio editor color schemes and UI theme plugin installation, Telegram Desktop and the Hydra export staging tree. The Livara Home Manager profile provides Nautilus and Spotify through Spicetify-Nix; the Noctalia template additionally writes the runtime Spicetify `color.ini` when a writable installation is available. Generated state is mutable runtime data and is never copied into the source tree.
+`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts, plus formats not covered by those templates, including Freesm Launcher, Heroic, Foliate, Xournal++, Vesktop, IntelliJ/Android Studio editor color schemes and UI theme plugin installation, Nuclear and the Hydra export staging tree. Hydra's Appearance database remains application-owned and is not mutated by the adapter. The Livara Home Manager profile provides Nautilus and Spotify through Spicetify-Nix; the Noctalia template additionally writes the runtime Spicetify `color.ini` when a writable installation is available. Generated state is mutable runtime data and is never copied into the source tree.
 
 The selected plugin set is vendored in and pinned by `shell-conf`: `cat`, `timer`, `screen_recorder`, `screen_toolkit`, `gamer_mode`, the FreeSM-adapted `prismlauncher_instances` provider and `bitwarden`. The screen recorder consumes the system-provided `gpu-screen-recorder` capability, while Screen Toolkit receives its Wayland/OCR/annotation tools from `features/niri.nix`. Plugin source is immutable; plugin settings and runtime state remain user data.
 
@@ -45,7 +45,7 @@ The selected plugin set is vendored in and pinned by `shell-conf`: `cat`, `timer
 
 The XKB of Niri, system locale, console keymap and keyd are separate layers. `features/keyd.nix` owns external Aitek Delta TM6101 remapping; Niri owns compositor navigation and Noctalia actions. The modules must not redefine the same physical key in unrelated layers without an explicit host condition.
 
-`install.sh` owns the normal workflow. It refuses to run as root, checks Git permissions and conflict state, validates or reuses hardware, runs the low-cost flake checks, evaluates the selected system derivation and invokes `nixos-rebuild` only after those gates pass. The hardware generator supports ext4 and Btrfs without formatting, repartitioning, guessing devices or changing ACPI parameters.
+`install.sh` owns the normal workflow. It refuses to run as root, checks Git permissions and conflict state, validates or reuses hardware, and invokes `nixos-rebuild` with the locked flake. The low-cost flake, module-parse and Niri validation gates are documented operator checks and are not silently executed by the installer. The hardware generator supports ext4 and Btrfs without formatting, repartitioning, guessing devices or changing ACPI parameters.
 
 ## Validation
 

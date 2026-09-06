@@ -256,7 +256,7 @@ let
   xournalppLegacyConfig = "${config.home.homeDirectory}/.config/nixos/xournalpp";
   xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (
     builtins.replaceStrings
-      [ "/home/livara/.config/xournalpp" "tokyo-night.gpl" ]
+      [ "@XOURNALPP_CONFIG_HOME@" "tokyo-night.gpl" ]
       [ "${config.xdg.configHome}/xournalpp" "tokyonight.gpl" ]
       (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml")
   );
@@ -283,6 +283,7 @@ in
   programs.nixvim = {
     enable = true;
     nixpkgs.source = inputs.nixpkgs;
+    nixpkgs.config.allowUnfreePredicate = pkg: lib.elem (lib.getName pkg) [ "copilot-language-server" ];
     imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
 
@@ -682,6 +683,19 @@ in
     if [ ! -e "${xournalppLocalConfig}/palettes/tokyonight.gpl" ]; then
       $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}/palettes"
       $DRY_RUN_CMD cp "${xournalppPalette}" "${xournalppLocalConfig}/palettes/tokyonight.gpl"
+    fi
+    if [ -f "${xournalppLocalConfig}/settings.xml" ]; then
+      palette_settings_tmp="${xournalppLocalConfig}/settings.xml.livara.tmp"
+      awk -v palette="${xournalppLocalConfig}/palettes/tokyonight.gpl" '
+        BEGIN { inserted = 0 }
+        /<property[[:space:]]+name="colorPalette"/ { next }
+        /<\/settings>/ && !inserted {
+          printf "  <property name=\"colorPalette\" value=\"%s\"/>\n", palette
+          inserted = 1
+        }
+        { print }
+      ' "${xournalppLocalConfig}/settings.xml" > "$palette_settings_tmp"
+      $DRY_RUN_CMD mv -f "$palette_settings_tmp" "${xournalppLocalConfig}/settings.xml"
     fi
   '';
   xdg.configFile."xournalpp/default_template.tex".source =

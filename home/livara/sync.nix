@@ -128,7 +128,8 @@ let
       fi
 
       restore_local_changes || exit 1
-      ${git} -C "$directory" add -A
+      ${git} -C "$directory" reset --mixed HEAD -- >/dev/null 2>&1
+      ${git} -C "$directory" add -- ':(glob)**/*.md'
       staged_count="$(${git} -C "$directory" diff --cached --name-only | wc -l)"
       notify "Vault sincronizado" "$merge_mode concluído; $staged_count arquivo(s) preparado(s) no repositório do Vault."
     '';
@@ -207,7 +208,8 @@ let
       exit 0
     fi
 
-    if ! ${git} -C "$directory" add -A; then
+    if ! ${git} -C "$directory" reset --mixed HEAD -- >/dev/null 2>&1 ||
+       ! ${git} -C "$directory" add -- ':(glob)**/*.md'; then
       unstage
       log "git add failed; working tree retained"
       exit 0
@@ -271,6 +273,7 @@ in
     Unit = {
       Description = "Save and push the Markdown vault when the user session stops";
       After = [ "vault-sync.service" ];
+      Wants = [ "vault-sync.service" ];
       Before = [ "shutdown.target" "reboot.target" "poweroff.target" ];
       Conflicts = [ "shutdown.target" "reboot.target" "poweroff.target" ];
       PartOf = [ "graphical-session.target" ];

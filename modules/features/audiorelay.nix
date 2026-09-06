@@ -7,18 +7,13 @@
       options.services.audiorelay = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = true;
-          description = "Enable AudioRelay with persistent PipeWire virtual nodes and firewall rules.";
+          default = false;
+          description = "Enable AudioRelay with persistent PipeWire virtual nodes and scoped firewall rules.";
         };
         lanInterface = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = "enp6s0";
-          description = "LAN/Wi-Fi network interface for AudioRelay traffic.";
-        };
-        lanSubnet = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = "10.253.8.96/24";
-          description = "Local subnet CIDR for AudioRelay firewall rules.";
+          default = null;
+          description = "LAN/Wi-Fi interface for AudioRelay traffic; null keeps the service disabled from the firewall.";
         };
       };
 
@@ -94,7 +89,12 @@
         };
 
         fonts.fontDir.enable = true;
-        networking.firewall.allowedUDPPorts = [ audiorelayPort ];
+        networking.firewall.interfaces = lib.optionalAttrs (cfg.lanInterface != null) {
+          "${cfg.lanInterface}" = {
+            allowedTCPPorts = [ audiorelayPort ];
+            allowedUDPPorts = [ audiorelayPort ];
+          };
+        };
       };
     };
 }

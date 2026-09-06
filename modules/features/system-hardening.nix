@@ -5,7 +5,6 @@
     # Firewall
     networking.firewall = {
       enable = true;
-      allowedTCPPorts = [ 59100 ]; # AudioRelay
       allowedUDPPorts = [ 5353 ]; # mDNS
       allowPing = true;
       extraCommands = ''
@@ -55,19 +54,11 @@
       "page_alloc.shuffle=1"
     ];
 
-    # Sudo
     security.sudo = {
       execWheelOnly = true;
       extraConfig = ''
         Defaults pwfeedback
       '';
-
-      extraRules = [{
-        users = [ "livara" ];
-        commands = [
-          { command = "/run/current-system/sw/bin/nixos-rebuild"; options = [ "NOPASSWD" ]; }
-        ];
-      }];
     };
 
     services.geoclue2.enable = true; # Location service for night-light integrations
@@ -90,7 +81,7 @@
       settings = {
         auto-optimise-store = true;
         experimental-features = [ "nix-command" "flakes" ];
-        trusted-users = [ "root" "livara" ];
+        trusted-users = [ "root" ];
         allow-import-from-derivation = false;
         extra-trusted-public-keys = [
           "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="

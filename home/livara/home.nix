@@ -40,6 +40,7 @@
       export GIT_TERMINAL_PROMPT=0
       directory="${booksDirectory}"
       repository="https://github.com/Joaoferraz-byte/Books.git"
+      revision="c6003b42654dae65d5d3e2a7d68d7cab8b573dea"
       mkdir -p "$(dirname "$directory")"
       if [[ -d "$directory/.git" ]]; then
         printf 'Books repository already exists at %s\n' "$directory"
@@ -52,7 +53,11 @@
       tmp="''${directory}.tmp.$$"
       rm -rf "$tmp"
       trap 'rm -rf "$tmp"' EXIT
-      git clone "$repository" "$tmp"
+      git clone --depth 1 "$repository" "$tmp"
+      if ! git -C "$tmp" checkout --detach "$revision"; then
+        git -C "$tmp" fetch --depth 1 origin "$revision"
+        git -C "$tmp" checkout --detach "$revision"
+      fi
       mv -- "$tmp" "$directory"
       trap - EXIT
     '';
@@ -106,7 +111,7 @@ in
   };
 
   home.activation.livaraDataDirectories = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p "${booksDirectory}" "${gamesDirectory}" \
+    $DRY_RUN_CMD mkdir -p "${booksDirectory}" "${gamesDirectory}" \
       "${musicsDirectory}" "${templatesDirectory}" \
       "${config.home.homeDirectory}/Fire" \
       "${config.home.homeDirectory}/Projects"

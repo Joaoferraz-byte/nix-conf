@@ -97,7 +97,7 @@ Run the low-cost sequence first:
 ```bash
 git diff --check
 find src modules -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
-nix flake check --no-build --no-update-lock-file --all-systems
+nix flake check --no-update-lock-file --all-systems
 nix eval .#nixosConfigurations.latitude.config.system.stateVersion
 nix eval .#nixosConfigurations.myMachine.config.system.stateVersion
 niri validate --config ~/.config/niri/config.kdl

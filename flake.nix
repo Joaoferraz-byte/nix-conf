@@ -107,10 +107,31 @@
             if grep -Fq 'geometry-corner-radius 0' "$config" || grep -Fq 'clip-to-geometry false' "$config"; then
               exit 1
             fi
-            grep -Fq 'match app-id=r#"^org\\.wezfurlong\\.wezterm$"#' "$config"
+            grep -Fq 'match app-id=r#"^org\.wezfurlong\.wezterm$"#' "$config"
             grep -Fq 'default-window-height { proportion 1.0; }' "$config"
-            grep -Fq 'match app-id=r#"^(affinity-v3|org\\.vinegarhq\\.Sober)$"#' "$config"
+            grep -Fq 'match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#' "$config"
             if grep -Fq 'open-maximized true' "$config" || grep -Eiq 'initial_cols|initial_rows' "$config"; then
+              exit 1
+            fi
+            jetbrains_theme=${./home/livara/jetbrains-theme/theme/Livara.theme.json}
+            jetbrains_scheme=${./home/livara/jetbrains-theme/theme/Matugen-Dark.xml}
+            xournal_settings=${inputs.xournal-conf}/xournalpp/settings.xml
+            hardening=${./modules/features/system-hardening.nix}
+            audiorelay=${./modules/features/audiorelay.nix}
+            home_module=${./home/livara/home.nix}
+            xournal_sync=${./scripts/sync-xournalpp-config.sh}
+            grep -Fq '"editorScheme": "/theme/Matugen-Dark.xml"' "$jetbrains_theme"
+            grep -Fq '<scheme name="Matugen Dark"' "$jetbrains_scheme"
+            grep -Fq 'name="menubarVisible" value="false"' "$xournal_settings"
+            grep -Fq 'name="defaultViewModeAttributes" value="showToolbar,showSidebar"' "$xournal_settings"
+            ! grep -Fq '"livara"' "$hardening" || exit 1
+            ! grep -Fq 'NOPASSWD' "$hardening" || exit 1
+            grep -Fq 'default = false;' "$audiorelay"
+            grep -Fq '$DRY_RUN_CMD mkdir -p' "$home_module"
+            grep -Fq 'required_files=(settings.xml toolbar.ini)' "$xournal_sync"
+            grep -Fq 'optional_files=(palettes/tokyonight.gpl default_template.tex)' "$xournal_sync"
+            grep -Fq ':(glob)**/*.md' ${./home/livara/sync.nix}
+            if grep -Fq 'git} -C "$directory" add -A' ${./home/livara/sync.nix}; then
               exit 1
             fi
             bash -n ${./scripts/sync-xournalpp-config.sh}
