@@ -40,16 +40,46 @@ let
     @import url("file://${noctaliaFirefoxCss}");
   '';
 
-  livaraJetBrainsTheme = pkgs.stdenvNoCC.mkDerivation {
-    pname = "livara-jetbrains-theme";
-    version = "1.0.0";
-    src = ./jetbrains-theme;
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p "$out"
-      cp -R ./* "$out/"
-    '';
-  };
+  spotifyPlayerTheme = pkgs.writeText "livara-spotify-player-theme.toml" ''
+    [[themes]]
+    name = "Livara"
+
+    [themes.palette]
+    background = "#101114"
+    foreground = "#dfdfdf"
+    black = "#101114"
+    red = "#f7768e"
+    green = "#4caf50"
+    yellow = "#e0af68"
+    blue = "#4285f4"
+    magenta = "#bb9af7"
+    cyan = "#7dcfff"
+    white = "#dfdfdf"
+    bright_black = "#565f89"
+    bright_red = "#ff899d"
+    bright_green = "#73d216"
+    bright_yellow = "#e0c080"
+    bright_blue = "#7aa2f7"
+    bright_magenta = "#c0a0ff"
+    bright_cyan = "#8be9fd"
+    bright_white = "#ffffff"
+
+    [themes.component_style]
+    block_title = { fg = "#4285f4", modifiers = ["Bold"] }
+    selection = { bg = "#263b63", fg = "#ffffff" }
+    current_playing = { fg = "#7dcfff", modifiers = ["Bold"] }
+    playback_track = { fg = "#dfdfdf", modifiers = ["Bold"] }
+    playback_artists = { fg = "#7dcfff" }
+    playback_progress_bar = { fg = "#4285f4" }
+    like = { fg = "#f7768e" }
+  '';
+
+  spotifyPlayerApp = pkgs.writeText "livara-spotify-player-app.toml" ''
+    theme = "Livara"
+    enable_streaming = "Always"
+    enable_media_control = true
+    enable_notify = true
+  '';
 
   # One Zen profile owns four Spaces, each with its own container and Essentials.
 
@@ -272,10 +302,6 @@ let
     [config]
     fallback_color = "#7bb7ff"
     caching = false
-
-    [templates.intellij-dark]
-    input_path = "${./intellij-matugen.icls}"
-    output_path = "${config.xdg.stateHome}/livara/theme/intellij/Matugen-Dark.icls"
   '';
 
 in
@@ -288,6 +314,8 @@ in
   };
 
   xdg.configFile."matugen/config.toml".source = matugenConfig;
+  xdg.configFile."spotify-player/theme.toml".source = spotifyPlayerTheme;
+  xdg.configFile."spotify-player/app.toml".source = spotifyPlayerApp;
 
   programs.zen-browser = {
     enable = true;
@@ -656,11 +684,8 @@ in
     xournalpp
     affinity-v3
     easyeffects
-    nuclear
-    livaraJetBrainsTheme
+    spotify-player
   ];
-
-  home.sessionVariables.LIVARA_IDE_THEME_PLUGIN = "${livaraJetBrainsTheme}";
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"

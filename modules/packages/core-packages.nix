@@ -1,12 +1,6 @@
 { inputs, ... }: {
   flake.nixosModules.corePackages = { pkgs, ... }:
-  let
-    intellijIdea = inputs.nix-jetbrains-plugins.lib.buildIdeWithPlugins pkgs pkgs.jetbrains.idea [
-      "IdeaVIM"
-      "nix-idea"
-      "com.explyt.spring"
-    ];
-  in {
+  {
     nixpkgs.config.allowUnfree = true;
 
     environment.systemPackages = with pkgs; [
@@ -19,7 +13,6 @@
       spring-boot-cli
       lombok
       androidStudioPackages.dev
-      intellijIdea
       matugen
 
       bitwarden-desktop

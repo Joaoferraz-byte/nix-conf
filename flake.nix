@@ -42,11 +42,6 @@
 
     nixvim.follows = "vim-conf/nixvim";
 
-    nix-jetbrains-plugins = {
-      url = "github:nix-community/nix-jetbrains-plugins";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -113,15 +108,11 @@
             if grep -Fq 'open-maximized true' "$config" || grep -Eiq 'initial_cols|initial_rows' "$config"; then
               exit 1
             fi
-            jetbrains_theme=${./home/livara/jetbrains-theme/theme/Livara.theme.json}
-            jetbrains_scheme=${./home/livara/jetbrains-theme/theme/Matugen-Dark.xml}
             xournal_settings=${inputs.xournal-conf}/xournalpp/settings.xml
             hardening=${./modules/features/system-hardening.nix}
             audiorelay=${./modules/features/audiorelay.nix}
             home_module=${./home/livara/home.nix}
             xournal_sync=${./scripts/sync-xournalpp-config.sh}
-            grep -Fq '"editorScheme": "/theme/Matugen-Dark.xml"' "$jetbrains_theme"
-            grep -Fq '<scheme name="Matugen Dark"' "$jetbrains_scheme"
             grep -Fq 'name="menubarVisible" value="false"' "$xournal_settings"
             grep -Fq 'name="defaultViewModeAttributes" value="showToolbar,showSidebar"' "$xournal_settings"
             ! grep -Fq '"livara"' "$hardening" || exit 1
