@@ -901,11 +901,11 @@
         "nixvim": "nixvim"
       },
       "locked": {
-        "lastModified": 1788742623,
-        "narHash": "sha256-8b8gm8Po6uWn51U5l9vWPT6esjXQEdh4xIgqBT4B47k=",
+        "lastModified": 1788744760,
+        "narHash": "sha256-WHXxO/jJedJHo71UlOtL2OrtQK0Y568JKUyOLj+qQo4=",
         "owner": "Joaoferraz-byte",
         "repo": "vim-conf",
-        "rev": "0ff9de24830a4aa4d471f46f1bea8b66b726dd8d",
+        "rev": "c0798c5738aa915135174c74dbe02661bf3d64d3",
         "type": "github"
       },
       "original": {
