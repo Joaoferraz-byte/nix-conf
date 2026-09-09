@@ -1,54 +1,56 @@
 { inputs, ... }: {
-  flake.nixosModules.corePackages = { pkgs, ... }:
-  {
-    nixpkgs.config.allowUnfree = true;
+  flake.nixosModules.corePackages =
+    { pkgs, ... }:
+    {
+      nixpkgs.config.allowUnfree = true;
 
-    environment.systemPackages = with pkgs; [
-      git
-      gh
-      jdk21
-      jdk8
-      maven
-      inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default
-      spring-boot-cli
-      lombok
-      androidStudioPackages.dev
-      matugen
+      environment.systemPackages = with pkgs; [
+        git
+        gh
+        gcc
+        jdk21
+        jdk8
+        maven
+        inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default
+        spring-boot-cli
+        lombok
+        androidStudioPackages.dev
+        matugen
 
-      bitwarden-desktop
-      bitwarden-cli
-      nautilus
-      firefox
-      vesktop
-      kdePackages.okular
-      foliate
-      telegram-desktop
+        bitwarden-desktop
+        bitwarden-cli
+        nautilus
+        firefox
+        vesktop
+        kdePackages.okular
+        foliate
+        telegram-desktop
 
-      hydralauncher
-      heroic
+        hydralauncher
+        heroic
 
-      mpv
-      file-roller
-      tlp
-      btop
-      thermald
+        mpv
+        file-roller
+        tlp
+        btop
+        thermald
 
-      kora-icon-theme
-      bibata-cursors
-      wl-clipboard
-      cliphist
-      xwayland-satellite
-      zip
-      gnutar
-      gtk3
-      gtk4
-      adw-gtk3
-      libsForQt5.qt5ct
-      qt6Packages.qt6ct
-      wezterm
-      inotify-tools
-      keyd
-      fastfetch
-    ];
-  };
+        kora-icon-theme
+        bibata-cursors
+        wl-clipboard
+        cliphist
+        xwayland-satellite
+        zip
+        gnutar
+        gtk3
+        gtk4
+        adw-gtk3
+        libsForQt5.qt5ct
+        qt6Packages.qt6ct
+        wezterm
+        inotify-tools
+        keyd
+        fastfetch
+      ];
+    };
 }
