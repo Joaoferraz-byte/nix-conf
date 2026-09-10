@@ -14,6 +14,9 @@
         users.groups.plugdev = { };
 
         environment.systemPackages = with pkgs; [
+          # Expose arm-none-eabi-gcc and the companion binutils/GDB commands
+          # to the login shell for Cortex-M/R firmware work.
+          gcc-arm-embedded
           arduino-cli
           avrdude
           dfu-util

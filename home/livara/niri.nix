@@ -181,13 +181,15 @@ in
       Mod+F repeat=false { fullscreen-window; }
       Mod+F11 repeat=false { fullscreen-window; }
       Mod+Q repeat=false { close-window; }
-      Mod+Shift+Q repeat=false { close-window; }
       Mod+Shift+W repeat=false { spawn "noctalia" "msg" "panel-toggle" "wallpaper"; }
-      // Noctalia owns the modern wlr-screencopy flow: region selection, freeze,
-      // remembered region, clipboard and file output are configured in its shell policy.
-      Mod+Shift+S repeat=false { spawn "noctalia" "msg" "screenshot-region"; }
-      // Screen Toolkit is a separate on-demand panel for annotation, OCR, QR,
-      // palette extraction, measurement and recording; it is not a bar widget.
+      // Screen Toolkit owns region capture, annotation, OCR, QR, Lens and
+      // recording. All entry points use its headless service and shared paths.
+      Mod+Shift+S repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "annotate"; }
+      Mod+K repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "toggle"; }
+      Mod+Shift+L repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "lens"; }
+      Mod+Shift+Q repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "qr"; }
+      Mod+Shift+O repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "ocr"; }
+      // Backwards-compatible alias for the toolkit popup.
       Mod+Shift+P repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "toggle"; }
       // These panels remain shortcut-only, as requested, and do not occupy bar space.
       Mod+G repeat=false { spawn "noctalia" "msg" "panel-toggle" "nomadcxx/gamer-mode:main"; }
@@ -197,10 +199,9 @@ in
       Mod+Alt+M repeat=false { spawn "noctalia" "msg" "panel-toggle" "control-center" "media"; }
       Mod+Alt+H repeat=false { spawn "${home}/.local/share/livara/scripts/open-nixos-nvim.sh"; }
       Mod+Alt+L repeat=false { spawn "noctalia" "msg" "session" "lock"; }
-      // Direct GPU Screen Recorder adapters; the second press sends SIGINT
-      // and lets the same process finalize the video file.
-      Mod+Shift+R repeat=false { spawn "${home}/.local/share/livara/scripts/toggle-screen-recording.sh"; }
-      Mod+Ctrl+Shift+R repeat=false { spawn "${home}/.local/share/livara/scripts/toggle-screen-recording-silent.sh"; }
+      // Screen Toolkit owns recorder selection, audio, paths, conversion and
+      // stop state; recordToggle is intentionally idempotent.
+      Mod+Shift+R repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "recordToggle"; }
 
       Mod+Left { focus-column-left; }
       Mod+Down { focus-window-down; }
@@ -208,7 +209,7 @@ in
       Mod+Right { focus-column-right; }
       Mod+H { focus-column-left; }
       Mod+J { focus-window-down; }
-      Mod+K { focus-window-up; }
+      Mod+Alt+K { focus-window-up; }
       Mod+L { focus-column-right; }
       Mod+WheelScrollDown cooldown-ms=150 { focus-window-down; }
       Mod+WheelScrollUp cooldown-ms=150 { focus-window-up; }
@@ -236,7 +237,6 @@ in
       Mod+Shift+H { focus-monitor-left; }
       Mod+Shift+J { focus-monitor-down; }
       Mod+Shift+K { focus-monitor-up; }
-      Mod+Shift+L { focus-monitor-right; }
       Mod+Ctrl+Shift+Left { move-column-to-monitor-left; }
       Mod+Ctrl+Shift+Down { move-column-to-monitor-down; }
       Mod+Ctrl+Shift+Up { move-column-to-monitor-up; }
@@ -271,7 +271,6 @@ in
       Mod+Comma { consume-window-into-column; }
       Mod+Period { expel-window-from-column; }
       Mod+R { switch-preset-column-width; }
-      // Reassigned because Mod+Ctrl+Shift+R is the silent recorder toggle.
       Mod+Alt+Shift+R { switch-preset-window-height; }
       Mod+Ctrl+R { reset-window-height; }
       Mod+Shift+F { maximize-column; }

@@ -39,7 +39,7 @@ Composition passes only the necessary integration data through `extraSpecialArgs
 
 ## Niri and Noctalia session
 
-`modules/features/niri.nix` enables Niri and the minimal Wayland environment packages. `home/livara/niri.nix` is the sole owner of `~/.config/niri/config.kdl`, navigation, workspaces, fullscreen, screenshot, hardware keys and Noctalia IPC binds. `home/livara/monitors.nix` materializes only `outputs.kdl` and never declares a fictitious monitor.
+`modules/features/niri.nix` enables Niri and the minimal Wayland environment packages. `home/livara/niri.nix` is the sole owner of `~/.config/niri/config.kdl`, navigation, workspaces, fullscreen, hardware keys and Noctalia IPC binds. Screen Toolkit owns region screenshot/annotation, OCR, QR, Lens and recording through the Noctalia service; `home/livara/monitors.nix` materializes only `outputs.kdl` and never declares a fictitious monitor.
 
 Niri starts exactly one Noctalia process through `spawn-at-startup`; the Home Manager service is disabled to avoid a duplicate lifecycle. The visual surface does not consult `hyprctl`, does not embed bar QML and does not start a second shell. Niri includes an optional runtime color file generated from the Noctalia wallpaper palette; because included files are watched, a wallpaper change updates the focus-ring colors without editing the declarative compositor file.
 

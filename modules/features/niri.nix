@@ -25,6 +25,8 @@
           jq
           xdg-utils
           procps
+          bc
+          pulseaudio
           zbar
           ffmpeg
           bind

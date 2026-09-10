@@ -7,7 +7,6 @@
       environment.systemPackages = with pkgs; [
         git
         gh
-        gcc
         jdk21
         jdk8
         maven

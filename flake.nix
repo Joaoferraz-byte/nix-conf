@@ -105,6 +105,14 @@
             grep -Fq 'match app-id=r#"^org\.wezfurlong\.wezterm$"#' "$config"
             grep -Fq 'default-window-height { proportion 1.0; }' "$config"
             grep -Fq 'match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#' "$config"
+            grep -Fq 'recordToggle' "$config"
+            grep -Fq 'Mod+Shift+S repeat=false' "$config"
+            grep -Fq 'Mod+Shift+L repeat=false' "$config"
+            grep -Fq 'Mod+Shift+Q repeat=false' "$config"
+            grep -Fq 'Mod+Shift+O repeat=false' "$config"
+            grep -Fq 'Mod+K repeat=false' "$config"
+            ! grep -Fq 'screenshot-region' "$config"
+            ! grep -Fq 'toggle-screen-recording' "$config"
             if grep -Fq 'open-maximized true' "$config" || grep -Eiq 'initial_cols|initial_rows' "$config"; then
               exit 1
             fi
@@ -145,6 +153,31 @@
             shellHook = ''
               export NIX_CONFIG="''${NIX_CONFIG:-}
               experimental-features = nix-command flakes"
+            '';
+          };
+
+          devShells.c-cpp = pkgs.mkShell {
+            packages = with pkgs; [
+              gcc
+              binutils
+              clang
+              clang-tools
+              cmake
+              meson
+              ninja
+              gnumake
+              pkg-config
+              gdb
+              lldb
+              cppcheck
+              bear
+              valgrind
+              strace
+            ];
+            shellHook = ''
+              export CC="''${CC:-gcc}"
+              export CXX="''${CXX:-g++}"
+              export CMAKE_GENERATOR="''${CMAKE_GENERATOR:-Ninja}"
             '';
           };
 
@@ -261,6 +294,10 @@
 
           devShells.embedded = pkgs.mkShell {
             packages = with pkgs; [
+              gcc-arm-embedded
+              cmake
+              ninja
+              gdb
               arduino-cli
               avrdude
               dfu-util
