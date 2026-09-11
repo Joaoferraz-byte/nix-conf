@@ -1,6 +1,6 @@
-{ config, inputs, lib, ... }: {
+{ inputs, ... }: {
   flake.nixosModules.corePackages =
-    { pkgs, ... }:
+    { config, lib, pkgs, ... }:
     {
       nixpkgs.config.allowUnfree = true;
 
