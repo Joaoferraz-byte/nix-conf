@@ -1,4 +1,4 @@
-{ inputs, ... }: {
+{ config, inputs, lib, ... }: {
   flake.nixosModules.corePackages =
     { pkgs, ... }:
     {
@@ -10,7 +10,6 @@
         jdk21
         jdk8
         maven
-        inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default
         spring-boot-cli
         lombok
         androidStudioPackages.dev
@@ -50,6 +49,8 @@
         inotify-tools
         keyd
         fastfetch
+      ] ++ lib.optionals config.desktop.profile.studyPlanner [
+        inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
     };
 }

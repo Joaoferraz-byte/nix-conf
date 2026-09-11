@@ -31,6 +31,12 @@
         description = "Named monitor policy consumed by the Home Manager adapter.";
       };
 
+      options.desktop.profile.studyPlanner = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether the Livara Study Planner is installed for this host.";
+      };
+
       options.desktop.profile.keyboardLayout = lib.mkOption {
         type = lib.types.str;
         default = "br";

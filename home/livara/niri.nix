@@ -3,6 +3,7 @@ let
   home = config.home.homeDirectory;
   keyboardLayout = desktopProfile.keyboardLayout or "br";
   keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
+  studyPlannerEnabled = desktopProfile.studyPlanner or false;
   startNoctalia = pkgs.writeShellApplication {
     name = "livara-start-noctalia";
     runtimeInputs = with pkgs; [ bash coreutils ];
@@ -176,7 +177,7 @@ in
       Mod+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+Alt+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+E repeat=false { spawn "nautilus" "--new-window"; }
-      Mod+D repeat=false { spawn "livara-study-planner" "gui"; }
+      ${lib.optionalString studyPlannerEnabled ''Mod+D repeat=false { spawn "livara-study-planner" "gui"; }''}
       Mod+N repeat=false { spawn "${home}/.local/share/livara/scripts/open-nixos-nvim.sh"; }
       Mod+F repeat=false { fullscreen-window; }
       Mod+F11 repeat=false { fullscreen-window; }

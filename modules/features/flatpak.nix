@@ -26,7 +26,6 @@
         packages = [
           { appId = "org.vinegarhq.Sober"; origin = "flathub"; }
           { appId = "net.audiorelay.AudioRelay"; origin = "flathub"; }
-          { appId = "org.gnome.Snapshot"; origin = "flathub"; }
           { appId = "org.freesmlauncher.FreesmLauncher"; origin = "freesmlauncher"; }
         ];
 

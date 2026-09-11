@@ -4,10 +4,12 @@
   lib,
   inputs,
   self,
+  desktopProfile ? { },
   ...
 }:
 let
   studyPlanner = inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  studyPlannerEnabled = desktopProfile.studyPlanner or false;
   materialFoxSource = pkgs.fetchFromGitHub {
     owner = "edelvarden";
     repo = "material-fox-updated";
@@ -635,13 +637,12 @@ in
   };
 
   home.packages = with pkgs; [
-    studyPlanner
     nerd-fonts.jetbrains-mono
     git
     xournalpp
     affinity-v3
     easyeffects
-  ];
+  ] ++ lib.optionals studyPlannerEnabled [ studyPlanner ];
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"
@@ -711,7 +712,7 @@ in
     MimeType=inode/directory;application/x-7z-compressed;application/zip;application/gzip;
   '';
 
-  xdg.desktopEntries.livara-study-planner = {
+  xdg.desktopEntries.livara-study-planner = lib.mkIf studyPlannerEnabled {
     name = "Livara Study Planner";
     genericName = "Study Schedule Planner";
     comment = "Plan reusable study blocks and alternating cycles";

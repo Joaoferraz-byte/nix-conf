@@ -16,6 +16,7 @@
         desktop.profile.keyboardVariant = "";
         desktop.profile.consoleKeyMap = "ie";
         desktop.profile.monitorProfile = "latitude";
+        desktop.profile.studyPlanner = true;
 
         nixpkgs.config.allowUnfree = true;
       }
