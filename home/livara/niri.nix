@@ -64,7 +64,7 @@ in
       }
       border {
         on
-        width 1.6
+        width 2.2
       }
       preset-column-widths {
         proportion 0.33333
@@ -247,6 +247,10 @@ in
       Mod+Shift+Equal { set-window-height "+10%"; }
       Mod+Ctrl+W { toggle-column-tabbed-display; }
       Mod+O repeat=false { toggle-overview; }
+      Mod+Shift+W repeat=false { spawn "ambxst" "run" "wallpapers"; }
+      Mod+Shift+O repeat=false { spawn "ambxst" "run" "ocr"; }
+      Mod+Shift+L repeat=false { spawn "ambxst" "run" "lens"; }
+      Mod+Shift+Q repeat=false { spawn "ambxst" "run" "qr"; }
       Mod+Escape repeat=false { toggle-keyboard-shortcuts-inhibit; }
 
       XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }

@@ -63,7 +63,7 @@ let
   };
 
   zenProfileUserChrome = ''
-    @import url("${config.xdg.stateHome}/livara/theme/browser/zen.css");
+    @import url("${config.xdg.stateHome}/livara/theme/browser/firefox.css");
   '';
 
   # One profile-local container per Space keeps each Essentials strip isolated.
