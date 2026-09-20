@@ -245,7 +245,7 @@ in
   # GTK3 owns the bookmark URI list; the patched Nautilus owner supplies the
   # independent symbolic icons from the map above.
   # Do not set gtk-theme here:
-  # Noctalia writes the wallpaper-derived GTK CSS dynamically.
+  # The active shell writes the wallpaper-derived GTK CSS dynamically.
   gtk = {
     enable = true;
     iconTheme = {
@@ -280,7 +280,7 @@ in
   };
 
   home.sessionVariables = {
-    # Noctalia owns the wallpaper-derived GTK palette; keep only stable session
+    # The active shell owns the wallpaper-derived GTK palette; keep only stable session
     # variables here.
     GTK_ICON_THEME = "Livara-Kora";
     QT_ICON_THEME = "Livara-Kora";

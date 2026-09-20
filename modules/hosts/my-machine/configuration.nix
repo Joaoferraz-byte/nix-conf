@@ -33,7 +33,7 @@
     services.power-profiles-daemon.enable = true;
 
     # GameMode is an on-demand client/daemon integration exposed by the
-    # Noctalia session. It is intentionally scoped to myMachine; the Latitude keeps
+    # Ambxst session. It is intentionally scoped to myMachine; the Latitude keeps
     # only the native power-profiles-daemon contract.
     programs.gamemode = {
       enable = true;

@@ -4,18 +4,16 @@ let
   keyboardLayout = desktopProfile.keyboardLayout or "br";
   keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
   studyPlannerEnabled = desktopProfile.studyPlanner or false;
-  startNoctalia = pkgs.writeShellApplication {
-    name = "livara-start-noctalia";
-    runtimeInputs = with pkgs; [ bash coreutils ];
+  startAmbxst = pkgs.writeShellApplication {
+    name = "livara-start-ambxst";
+    runtimeInputs = with pkgs; [ bash ];
     text = ''
-      set -u
-      noctalia &
-      wait "$!"
+      exec ambxst
     '';
   };
 in
 {
-  home.packages = [ startNoctalia ];
+  home.packages = [ startAmbxst ];
 
   # Home Manager may replace the store-backed config symlink atomically; ask the
   # running compositor to load the new file without requiring a new login.
@@ -26,7 +24,7 @@ in
   '';
 
   home.file.".config/niri/config.kdl".text = ''
-    // Niri owns compositor policy; Noctalia owns only shell surfaces and IPC.
+    // Niri owns compositor policy; Ambxst owns shell surfaces and IPC.
     include "outputs.kdl"
     prefer-no-csd
     cursor {
@@ -84,33 +82,11 @@ in
       QT_ICON_THEME "Livara-Kora"
       // Make the Home Manager cursor package discoverable to Niri and clients.
       XCURSOR_PATH "${config.home.profileDirectory}/share/icons:${home}/.local/share/icons:${home}/.icons"
-      // Noctalia's Qt template targets qt6ct; keep this single owner in Niri.
       QT_QPA_PLATFORMTHEME "qt6ct"
       GTK_CSD "0"
       QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
       MOZ_ENABLE_WAYLAND "1"
       NIXOS_OZONE_WL "1"
-    }
-
-    // Noctalia layer surfaces use their own moderate blur and do not inherit
-    // the application opacity policy below.
-    layer-rule {
-      match namespace="^noctalia-backdrop*"
-      place-within-backdrop false
-    }
-    layer-rule {
-      match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
-      background-effect {
-        xray false
-        blur true
-      }
-    }
-    layer-rule {
-      match namespace="^noctalia-window-switcher$"
-      background-effect {
-        xray false
-        blur true
-      }
     }
 
     window-rule {
@@ -171,9 +147,7 @@ in
     }
 
     binds {
-      // Noctalia v5 surfaces and shell actions.
       Mod+Return repeat=false { spawn "wezterm" "start" "--always-new-process" "--cwd" "${home}"; }
-      Mod+Space repeat=false { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
       Mod+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+Alt+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+E repeat=false { spawn "nautilus" "--new-window"; }
@@ -182,27 +156,7 @@ in
       Mod+F repeat=false { fullscreen-window; }
       Mod+F11 repeat=false { fullscreen-window; }
       Mod+Q repeat=false { close-window; }
-      Mod+Shift+W repeat=false { spawn "noctalia" "msg" "panel-toggle" "wallpaper"; }
-      // Screen Toolkit owns region capture, annotation, OCR, QR, Lens and
-      // recording. All entry points use its headless service and shared paths.
-      Mod+Shift+S repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "annotate"; }
-      Mod+K repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "toggle"; }
-      Mod+Shift+L repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "lens"; }
-      Mod+Shift+Q repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "qr"; }
-      Mod+Shift+O repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "ocr"; }
-      // Backwards-compatible alias for the toolkit popup.
-      Mod+Shift+P repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "toggle"; }
-      // These panels remain shortcut-only, as requested, and do not occupy bar space.
-      Mod+G repeat=false { spawn "noctalia" "msg" "panel-toggle" "nomadcxx/gamer-mode:main"; }
-      Mod+S repeat=false { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
-      Mod+C repeat=false { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
-      Mod+V repeat=false { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
-      Mod+Alt+M repeat=false { spawn "noctalia" "msg" "panel-toggle" "control-center" "media"; }
       Mod+Alt+H repeat=false { spawn "${home}/.local/share/livara/scripts/open-nixos-nvim.sh"; }
-      Mod+Alt+L repeat=false { spawn "noctalia" "msg" "session" "lock"; }
-      // Screen Toolkit owns recorder selection, audio, paths, conversion and
-      // stop state; recordToggle is intentionally idempotent.
-      Mod+Shift+R repeat=false { spawn "noctalia" "msg" "plugin" "alexander/screen-toolkit:service" "all" "recordToggle"; }
 
       Mod+Left { focus-column-left; }
       Mod+Down { focus-window-down; }
@@ -300,11 +254,9 @@ in
     }
 
     // Exactly one shell instance, inheriting the niri Wayland/D-Bus session.
-    // The short delay avoids the documented Niri startup race where the bar
-    // renders but Noctalia's IPC/event loop is not yet responsive. The
-    spawn-at-startup "${startNoctalia}/bin/livara-start-noctalia"
+    spawn-at-startup "${startAmbxst}/bin/livara-start-ambxst"
 
-    // Noctalia renders wallpaper-derived colors and Niri watches this include.
-    include optional=true "noctalia.kdl"
+    // Ambxst generates this file through axctl; user overrides remain here.
+    include optional=true "${home}/.local/share/ambxst/niri.kdl"
   '';
 }

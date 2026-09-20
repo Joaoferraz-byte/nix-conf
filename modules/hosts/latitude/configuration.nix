@@ -27,7 +27,7 @@
       wifi.powersave = false;
     };
 
-    # niri is the sole compositor and Noctalia is the visual shell.
+    # niri is the sole compositor and Ambxst is the visual shell.
     desktop.profile.compositor = "niri";
 
     # Bluetooth is a laptop-only capability in the shared desktop setup.
@@ -82,7 +82,7 @@
     };
     services.thermald.enable = true;
 
-    # Noctalia's battery widget reads the laptop battery through UPower.
+    # Ambxst reads the laptop battery through UPower.
     # This is intentionally laptop-only; myMachine is a desktop.
     services.upower.enable = true;
 
@@ -91,7 +91,7 @@
     services.tlp.pd.enable = true;
 
     # GameMode is an on-demand client/daemon integration exposed by the
-    # Noctalia session. On the Latitude, TLP remains the sole
+    # Ambxst session. On the Latitude, TLP remains the sole
     # power-management owner; GameMode switches the CPU governor to
     # `performance` directly via sysfs/cpupower (desiredgov) when a game
     # requests it, and TLP restores `powersave` once the request is

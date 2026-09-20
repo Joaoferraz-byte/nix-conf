@@ -30,21 +30,21 @@ let
       cp -r chrome/fonts chrome/icons "$out/chrome/"
     '';
   };
-  noctaliaFirefoxCss = "${config.xdg.stateHome}/livara/theme/browser/firefox.css";
+  livaraFirefoxCss = "${config.xdg.stateHome}/livara/theme/browser/firefox.css";
   materialFoxUserChrome = pkgs.writeText "livara-firefox-userChrome.css" ''
     @import url("file://${materialFox}/chrome/user-chrome.css");
     @import url("file://${materialFox}/chrome/theme-material-blue.css");
-    @import url("file://${noctaliaFirefoxCss}");
+    @import url("file://${livaraFirefoxCss}");
   '';
   materialFoxUserContent = pkgs.writeText "livara-firefox-userContent.css" ''
     @import url("file://${materialFox}/chrome/user-content.css");
     @import url("file://${materialFox}/chrome/theme-material-blue.css");
-    @import url("file://${noctaliaFirefoxCss}");
+    @import url("file://${livaraFirefoxCss}");
   '';
 
   # One Zen profile owns four Spaces, each with its own container and Essentials.
 
-  # Shared preferences and the Noctalia-generated userChrome import.
+  # Shared preferences and the shell-generated userChrome import.
   zenProfileSettings = {
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
     "zen.workspaces.continue-where-left-off" = true;
@@ -595,7 +595,7 @@ in
 
   # Firefox profiles are created by Firefox, so link managed chrome files after
   # profile creation instead of placing a second theme in the Nix store.
-  home.activation.livaraFirefoxNoctaliaLink = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.livaraFirefoxThemeLink = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ff_dir="${config.home.homeDirectory}/.mozilla/firefox"
     if [ -d "$ff_dir" ]; then
       while IFS= read -r -d "" profile; do

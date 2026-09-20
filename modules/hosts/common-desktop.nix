@@ -38,6 +38,7 @@
         self.nixosModules.appimage
         self.nixosModules.firejail
         self.nixosModules.niri
+        inputs.ambxst-conf.nixosModules.default
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
       ];
@@ -142,7 +143,7 @@
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
-          # Noctalia and plugins retain mutable runtime state under XDG_STATE_HOME.
+          # The selected shell retains mutable runtime state under XDG_STATE_HOME.
           # Keep one rolling Home Manager backup and replace it atomically on
           # later activations instead of aborting when .backup already exists.
           backupFileExtension = "backup";
@@ -154,7 +155,7 @@
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix
-            inputs.shell-conf.homeModules.support
+            inputs.ambxst-conf.homeModules.default
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

@@ -30,6 +30,12 @@
       inputs.noctalia-conf.follows = "noctalia-conf";
     };
 
+    ambxst-conf = {
+      url = "github:Joaoferraz-byte/ambxst-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.shell-conf.follows = "shell-conf";
+    };
+
     xournal-conf = {
       url = "github:Joaoferraz-byte/xournal-conf";
       flake = false;

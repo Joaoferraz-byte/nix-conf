@@ -4,34 +4,6 @@
   gamesDirectory = "${config.home.homeDirectory}/Games";
   musicsDirectory = "${config.home.homeDirectory}/Musics";
   templatesDirectory = "${config.home.homeDirectory}/Templates";
-  normalizeNoctaliaThemeOverride = pkgs.writeShellApplication {
-    name = "noctalia-normalize-theme-override";
-    runtimeInputs = with pkgs; [ bash coreutils gnugrep gnused ];
-    text = ''
-      set -Eeuo pipefail
-      state_file="''${NOCTALIA_STATE_HOME:-''${XDG_STATE_HOME:-$HOME/.local/state}}/noctalia/settings.toml"
-      [[ -f "$state_file" ]] || exit 0
-
-      # GUI settings are mutable app-owned state and load after config.toml.
-      # Remove only the stale value reported by the user; leave all other GUI
-      # preferences and any future deliberate scheme choice untouched.
-      if ! grep -qE '^[[:space:]]*wallpaper_scheme[[:space:]]*=[[:space:]]*"vibrant"[[:space:]]*$' "$state_file"; then
-        exit 0
-      fi
-
-      tmp="$(mktemp "$(dirname "$state_file")/.settings.toml.XXXXXX")"
-      trap 'rm -f "$tmp"' EXIT
-      sed '/^[[:space:]]*wallpaper_scheme[[:space:]]*=[[:space:]]*"vibrant"[[:space:]]*$/d' "$state_file" > "$tmp"
-      if [[ -L "$state_file" ]]; then
-        # Preserve a user-provided symlink, as Noctalia itself does.
-        cat "$tmp" > "$state_file"
-      else
-        chmod --reference="$state_file" "$tmp" 2>/dev/null || true
-        mv -f "$tmp" "$state_file"
-      fi
-      printf '%s\n' 'Removed stale Noctalia wallpaper scheme override: vibrant'
-    '';
-  };
   initBooks = pkgs.writeShellApplication {
     name = "livara-init-books";
     runtimeInputs = with pkgs; [ bash coreutils findutils git ];
@@ -117,11 +89,7 @@ in
       "${config.home.homeDirectory}/Projects"
   '';
 
-  home.activation.normalizeNoctaliaThemeOverride = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    $DRY_RUN_CMD "${normalizeNoctaliaThemeOverride}/bin/noctalia-normalize-theme-override"
-  '';
-
-  home.packages = [ initBooks normalizeNoctaliaThemeOverride ];
+  home.packages = [ initBooks ];
 
   home.sessionVariables = {
     PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
