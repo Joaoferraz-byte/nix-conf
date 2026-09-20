@@ -4,7 +4,7 @@
 
 > **One owner per concern, one explicit closure per service, and a public contract between repositories.**
 
-NixOS owns Niri, system XKB, keyd, portals, drivers, networking, audio and privileged services. Home Manager owns user programs, XDG files and user-level services. `noctalia-conf` owns the complete customized Noctalia shell, including its pinned runtime, settings, wallpaper policy, templates, plugins and lifecycle policy. `shell-conf` is the intermediary that imports Noctalia and owns only shell-independent support and application adapters. `vim-conf` owns NixVim; `xournal-conf` owns Xournal++ editable files; `Wallpapers` remains a local image catalog.
+NixOS owns Niri, system XKB, keyd, portals, drivers, networking, audio and privileged services. Home Manager owns user programs, XDG files and user-level services. `ambxst-conf` owns the active Ambxst runtime, its reviewed upstream patch and its palette bridge. `shell-conf` owns shell-independent support and application adapters; its Noctalia module remains an optional compatibility path and is not part of the active composition. `vim-conf` owns NixVim; `xournal-conf` owns Xournal++ editable files; `Wallpapers` remains a local image catalog.
 
 ## Composition flow
 
@@ -14,10 +14,10 @@ flake inputs
     → host roots
       → common desktop profile
         → Home Manager user profile
-          → Niri config + Noctalia module + application-support module
+          → Niri config + Ambxst module + application-support module
 ```
 
-Composition passes only the necessary integration data through `extraSpecialArgs` (`inputs`, user, and typed profile). The compositor is not passed as a flag to the shell: the profile accepts only `niri`, and UI actions are expressed as native Niri actions or documented Noctalia v5 IPC.
+Composition passes only the necessary integration data through `extraSpecialArgs` (`inputs`, user, and typed profile). The compositor is not passed as a flag to the shell: the profile accepts only `niri`, and UI actions are expressed as native Niri actions or the Ambxst `run` command routed through its IPC.
 
 | Host | Primary layout | Output policy |
 |---|---|---|
@@ -29,48 +29,48 @@ Composition passes only the necessary integration data through `extraSpecialArgs
 | Repository/input | Public contract | Owner |
 |---|---|---|
 | `nix-conf` | Hosts, NixOS modules, Home Manager composition, session policy | System and integration |
-| `noctalia-conf` | `packages.default`, `overlays.default`, `homeModules.default`, settings, templates, plugins and pinned upstream runtime | Complete Noctalia shell |
-| `shell-conf` | `homeModules.default`/`support`, session helpers and application adapters | Intermediary integration |
+| `ambxst-conf` | `packages.default`, `nixosModules.default`, `homeModules.default`, reviewed patch and palette bridge | Complete Ambxst shell |
+| `shell-conf` | `homeModules.support-core`, optional `homeModules.support`, session helpers and application adapters | Intermediary integration |
 | `vim-conf` | NixVim module, plugins and keymaps | Editor |
 | `xournal-conf` | Xournal++ XML, INI, TeX and defaults | Notes application |
 | `Wallpapers` | Images | Asset catalog |
 
-`noctalia-conf` pins the upstream runtime and owns the curated Noctalia integration without writing compositor configuration. `shell-conf` imports that module and connects it to application adapters and session helpers. The `nix-conf` flake does not import a Hyprland module.
+`ambxst-conf` pins the upstream runtime and owns the curated Ambxst integration without writing compositor configuration. `shell-conf` supplies support-core transitively and connects it to application adapters and session helpers. The `nix-conf` flake does not import a Hyprland module.
 
-## Niri and Noctalia session
+## Niri and Ambxst session
 
-`modules/features/niri.nix` enables Niri and the minimal Wayland environment packages. `home/livara/niri.nix` is the sole owner of `~/.config/niri/config.kdl`, navigation, workspaces, fullscreen, hardware keys and Noctalia IPC binds. Screen Toolkit owns region screenshot/annotation, OCR, QR, Lens and recording through the Noctalia service; `home/livara/monitors.nix` materializes only `outputs.kdl` and never declares a fictitious monitor.
+`modules/features/niri.nix` enables Niri and the minimal Wayland environment packages. `home/livara/niri.nix` is the sole owner of `~/.config/niri/config.kdl`, navigation, workspaces, fullscreen, hardware keys and Ambxst IPC binds. Ambxst owns region screenshot/annotation, OCR, QR, Lens and recording; `home/livara/monitors.nix` materializes only `outputs.kdl` and never declares a fictitious monitor.
 
-Niri starts exactly one Noctalia process through `spawn-at-startup`; the Home Manager service is disabled to avoid a duplicate lifecycle. The visual surface does not consult `hyprctl`, does not embed bar QML and does not start a second shell. Niri includes an optional runtime color file generated from the Noctalia wallpaper palette; because included files are watched, a wallpaper change updates the focus-ring colors without editing the declarative compositor file.
+Niri starts exactly one Ambxst process through `spawn-at-startup`; the Home Manager composition does not start a second shell. The visual surface does not consult `hyprctl`, does not embed bar QML and does not start another shell. Niri includes the optional runtime file generated by Ambxst; because included files are watched, a palette change can update generated policy without editing the declarative compositor file.
 
 | Concern | Owner |
 |---|---|
 | Login and compositor | NixOS Niri + display manager |
 | Input/XKB and specific remapping | NixOS XKB + keyd |
-| Idle/lock/monitor power | Noctalia v5 session policy |
-| Bar, panels, launcher and wallpaper picker | Noctalia v5 |
-| Wallpaper catalog | Local `~/Wallpapers` + manual Noctalia picker |
-| Dynamic theme generation | Noctalia v5 palette and user templates |
-| Niri focus-ring and border colors | `noctalia-conf` Niri user template + optional `~/.config/niri/noctalia.kdl` include |
-| Noctalia bar blur/transparency | Noctalia `transparency_mode` + Niri `background-effect`/`blur` |
+| Idle/lock/monitor power | Ambxst session policy |
+| Bar, panels, launcher and wallpaper picker | Ambxst |
+| Wallpaper catalog | Local `~/Wallpapers` + Ambxst picker |
+| Dynamic theme generation | Ambxst palette and `shell-conf` adapters |
+| Niri border and generated shell policy | `nix-conf` overrides + optional `~/.local/share/ambxst/niri.kdl` include |
+| Ambxst bar blur/transparency | Ambxst config + Niri `background-effect`/`blur` |
 | Application theme adapters | `shell-conf` / `sync-livara-themes` |
 
-## Noctalia visual contract
+## Active shell visual contract
 
-The integration installs stable Noctalia intent through `noctalia-conf/config/noctalia/config.toml`. The runtime, template source and plugin source come from the same immutable input; generated outputs live under `$XDG_STATE_HOME/livara/theme` and application profiles. The central flow is:
+The integration installs stable Ambxst intent through the pinned upstream preset and reviewed patch in `ambxst-conf`. Generated outputs live under `$XDG_STATE_HOME/livara/theme` and application profiles. The central flow is:
 
-> Local wallpaper in `~/Wallpapers` → Noctalia v5 palette/templates (`m3-fruit-salad`) → `palette.dark.json` → Niri focus-ring include and application-specific adapters.
+> Local wallpaper in `~/Wallpapers` → Ambxst palette bridge → `palette.dark.json` → Niri runtime include and application-specific adapters.
 
-`noctalia-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE templates, plus the Niri color include and reviewed plugins. `shell-conf` consumes those outputs and materializes Freesm Launcher, Heroic, Foliate, Xournal++ and Vesktop contracts where the applications provide a documented customization path. The Livara Home Manager profile owns Nautilus, the music application package and the Books/Games/Musics directory contract.
+`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and application adapters where the applications provide a documented customization path. The Livara Home Manager profile owns Nautilus, the music application package and the Books/Games/Musics directory contract.
 
 | Application/ecosystem | Generated output |
 |---|---|
-| Noctalia | `config.toml`, plugin source and user templates |
+| Ambxst | pinned runtime, reviewed patch, presets and palette bridge |
 | GTK/Nautilus | Noctalia GTK templates plus stable icon settings; Nautilus owns native GTK/GVFS file browsing |
 | Qt | Noctalia Qt/qtct templates |
-| WezTerm/Kitty | Noctalia native template outputs |
+| WezTerm/Kitty | `shell-conf` adapter outputs for the selected shell |
 | Neovim | `matugen_colors.lua` consumed by NixVim |
-| Firefox/Zen Browser | Noctalia CSS outputs plus profile links |
+| Firefox/Zen Browser | generated `browser/firefox.css` plus profile `userChrome.css` imports |
 | Nixvim Markdown | `vim-conf` Nixvim module, Treesitter grammars, renderer, Mermaid/LaTeX workflow and palette Lua |
 | Freesm Launcher | Native application-specific theme |
 | Vesktop | Local CSS and enabled theme selection |
@@ -112,7 +112,7 @@ nix build .#nixosConfigurations.latitude.config.system.build.toplevel
 nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
 ```
 
-On the real host, run `noctalia msg plugins list`, the generated palette/application checks, `keyd check`, and hardware/audio/portal checks. A constrained sandbox can establish syntax and graph consistency but cannot prove visual behavior, GPU capture, monitor discovery or lock/suspend behavior on physical hardware.
+On the real host, run `niri msg --json layers`, `niri msg outputs`, `pgrep -af 'ambxst|noctalia|waybar|quickshell'`, the generated palette/application checks, `keyd check`, and hardware/audio/portal checks. A constrained sandbox can establish syntax and graph consistency but cannot prove visual behavior, GPU capture, monitor discovery or lock/suspend behavior on physical hardware.
 
 ## References
 

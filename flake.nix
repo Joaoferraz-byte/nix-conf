@@ -113,6 +113,10 @@
             grep -Fq 'match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#' "$config"
             grep -Fq 'spawn-at-startup "''${startAmbxst}/bin/livara-start-ambxst"' "$config"
             grep -Fq 'include optional=true "''${home}/.local/share/ambxst/niri.kdl"' "$config"
+            grep -Fq 'width 3.0' "$config"
+            grep -Fq 'Mod+Shift+O repeat=false { spawn "ambxst" "run" "ocr"; }' "$config"
+            grep -Fq 'Mod+Shift+Q repeat=false { spawn "ambxst" "run" "qr"; }' "$config"
+            grep -Fq 'playerctl' ${./modules/features/niri.nix}
             ! grep -Fq 'noctalia msg' "$config"
             ! grep -Fq 'recordToggle' "$config"
             ! grep -Fq 'screenshot-region' "$config"

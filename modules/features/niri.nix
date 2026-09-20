@@ -27,6 +27,7 @@
           procps
           bc
           pulseaudio
+          playerctl
           zbar
           ffmpeg
           bind

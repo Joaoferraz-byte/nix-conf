@@ -64,7 +64,9 @@ in
       }
       border {
         on
-        width 2.2
+        // This is the visible Niri window border; Ambxst frameThickness only
+        // controls a shell frame and must not be used as a proxy here.
+        width 3.0
       }
       preset-column-widths {
         proportion 0.33333

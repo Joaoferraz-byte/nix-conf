@@ -38,8 +38,6 @@ let
   '';
   materialFoxUserContent = pkgs.writeText "livara-firefox-userContent.css" ''
     @import url("file://${materialFox}/chrome/user-content.css");
-    @import url("file://${materialFox}/chrome/theme-material-blue.css");
-    @import url("file://${livaraFirefoxCss}");
   '';
 
   # One Zen profile owns four Spaces, each with its own container and Essentials.
@@ -63,7 +61,9 @@ let
   };
 
   zenProfileUserChrome = ''
-    @import url("${config.xdg.stateHome}/livara/theme/browser/firefox.css");
+    @import url("file://${materialFox}/chrome/user-chrome.css");
+    @import url("file://${materialFox}/chrome/theme-material-blue.css");
+    @import url("file://${livaraFirefoxCss}");
   '';
 
   # One profile-local container per Space keeps each Essentials strip isolated.
