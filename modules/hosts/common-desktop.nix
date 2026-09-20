@@ -1,8 +1,30 @@
-{ self, inputs, ... }:
+    { self, inputs, ... }:
 {
   flake.nixosModules.commonDesktop = { config, lib, pkgs, ... }:
     let
       cfg = config.desktop.profile;
+      wifiResumeHook = pkgs.writeShellScript "livara-networkmanager-wifi-resume" ''
+        set -eu
+        state=/run/livara-networkmanager-wifi-state
+        case "''${1:-}" in
+          pre)
+            if ${pkgs.networkmanager}/bin/nmcli radio wifi 2>/dev/null | ${pkgs.coreutils}/bin/grep -qx enabled; then
+              ${pkgs.coreutils}/bin/printf '%s\n' enabled > "$state"
+            else
+              ${pkgs.coreutils}/bin/printf '%s\n' disabled > "$state"
+            fi
+            ;;
+          post)
+            if [ -r "$state" ] && [ "$(${pkgs.coreutils}/bin/cat "$state")" = enabled ]; then
+              ${pkgs.networkmanager}/bin/nmcli radio wifi on || true
+              for device in $(${pkgs.networkmanager}/bin/nmcli -t -f DEVICE,TYPE device status | ${pkgs.gawk}/bin/awk -F: '$2 == "wifi" { print $1 }'); do
+                ${pkgs.networkmanager}/bin/nmcli device connect "$device" && break || true
+              done
+            fi
+            ${pkgs.coreutils}/bin/rm -f "$state"
+            ;;
+        esac
+      '';
     in
     {
       imports = [
@@ -66,7 +88,9 @@
         programs.dconf.enable = true;
         services.gvfs.enable = true;
         services.udisks2.enable = true;
+        networking.networkmanager.enable = lib.mkDefault true;
         environment.systemPackages = [ pkgs.networkmanager ];
+        environment.etc."systemd/system-sleep/livara-networkmanager-wifi".source = wifiResumeHook;
 
         # Shared overlays applied to every host importing commonDesktop.
         nixpkgs.overlays = [
