@@ -55,10 +55,14 @@ in
     comment = "Run a selected AppImage with NixOS appimage-run inside Firejail";
     exec = "${firejailAppimage}/bin/livara-firejail-appimage %f";
     terminal = false;
+    icon = "firejail-appimage";
     type = "Application";
     categories = [ "Utility" ];
     mimeType = [ "application/vnd.appimage" ];
   };
+
+  xdg.dataFile."icons/hicolor/scalable/apps/firejail-appimage.svg".source =
+    ./assets/firejail-appimage.svg;
 
   xdg.mimeApps.defaultApplications = {
     "application/vnd.appimage" = [ "firejail-appimage.desktop" ];

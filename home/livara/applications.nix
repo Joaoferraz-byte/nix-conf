@@ -718,7 +718,7 @@ in
     comment = "Plan reusable study blocks and alternating cycles";
     exec = "${studyPlanner}/bin/livara-study-planner gui";
     terminal = false;
-    icon = "x-office-calendar";
+    icon = "livara-study-planner";
     type = "Application";
     categories = [
       "Education"
@@ -766,6 +766,58 @@ in
       "TextEditor"
     ];
   };
+
+  # Keep implementation/configuration helpers out of the application launcher.
+  # NoDisplay preserves their desktop entries for MIME/actions and diagnostics.
+  xdg.desktopEntries = {
+    qt5ct = {
+      name = "Qt5 Settings";
+      noDisplay = true;
+    };
+    qt6ct = {
+      name = "Qt6 Settings";
+      noDisplay = true;
+    };
+    "gtk4-widget-factory" = {
+      name = "GTK Widget Factory";
+      noDisplay = true;
+    };
+    "gtk3-demo" = {
+      name = "GTK Demo";
+      noDisplay = true;
+    };
+    "gtk4-demo" = {
+      name = "GTK Demo";
+      noDisplay = true;
+    };
+    pavucontrol = {
+      name = "Volume Control";
+      noDisplay = true;
+    };
+    swappy = {
+      name = "Print Editor";
+      noDisplay = true;
+    };
+    mpv = {
+      name = "mpv Media Player";
+      noDisplay = true;
+    };
+    "nixos-manual" = {
+      name = "NixOS Manual";
+      noDisplay = true;
+    };
+    "nixos-manual-html" = {
+      name = "NixOS Manual";
+      noDisplay = true;
+    };
+    grandia = {
+      name = "Grandia";
+      noDisplay = true;
+    };
+  };
+
+  xdg.dataFile."icons/hicolor/scalable/apps/livara-study-planner.svg".source =
+    ./assets/livara-launcher-logo.svg;
 
   xdg.mimeApps = {
     enable = true;
