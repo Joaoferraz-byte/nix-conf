@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-  flake.nixosModules.commonDesktop = { config, lib, ... }:
+  flake.nixosModules.commonDesktop = { config, lib, pkgs, ... }:
     let
       cfg = config.desktop.profile;
     in
@@ -66,6 +66,7 @@
         programs.dconf.enable = true;
         services.gvfs.enable = true;
         services.udisks2.enable = true;
+        environment.systemPackages = [ pkgs.networkmanager ];
 
         # Shared overlays applied to every host importing commonDesktop.
         nixpkgs.overlays = [
