@@ -64,7 +64,7 @@ in
       }
       border {
         on
-        width 1.4
+        width 1.6
       }
       preset-column-widths {
         proportion 0.33333
