@@ -5,10 +5,9 @@
       cfg = config.desktop.profile;
       gparted = pkgs.gparted.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
-          substituteInPlace gparted.in \
-            --replace-fail \
-              "\$GKSUPROG '@bindir@/gparted' \"\$@\"" \
-              "\$GKSUPROG env DISPLAY=\"\$DISPLAY\" XAUTHORITY=\"\$XAUTHORITY\" WAYLAND_DISPLAY=\"\$WAYLAND_DISPLAY\" XDG_RUNTIME_DIR=\"\$XDG_RUNTIME_DIR\" GDK_BACKEND=x11 '@bindir@/gparted' \"\$@\""
+          sed -i -E \
+            "s|^([[:space:]]*)\$GKSUPROG .*@bindir@/gparted.*|\1\$GKSUPROG env DISPLAY=\"\$DISPLAY\" XAUTHORITY=\"\$XAUTHORITY\" WAYLAND_DISPLAY=\"\$WAYLAND_DISPLAY\" XDG_RUNTIME_DIR=\"\$XDG_RUNTIME_DIR\" GDK_BACKEND=x11 '@bindir@/gparted' \"\$@\"|" \
+            gparted.in
         '';
       });
       wifiResumeHook = pkgs.writeShellScript "livara-networkmanager-wifi-resume" ''
