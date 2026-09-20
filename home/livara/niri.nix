@@ -85,6 +85,7 @@ in
     environment {
       GTK_ICON_THEME "Livara-Kora"
       QT_ICON_THEME "Livara-Kora"
+      QS_ICON_THEME "Livara-Kora"
       // Make the Home Manager cursor package discoverable to Niri and clients.
       XCURSOR_PATH "${config.home.profileDirectory}/share/icons:${home}/.local/share/icons:${home}/.icons"
       QT_QPA_PLATFORMTHEME "qt6ct"

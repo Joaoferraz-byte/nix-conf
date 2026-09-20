@@ -284,5 +284,8 @@ in
     # variables here.
     GTK_ICON_THEME = "Livara-Kora";
     QT_ICON_THEME = "Livara-Kora";
+    # Quickshell does not consult GTK_ICON_THEME for iconPath(); Ambxst reads
+    # this variable through Quickshell's icon theme resolver.
+    QS_ICON_THEME = "Livara-Kora";
   };
 }
