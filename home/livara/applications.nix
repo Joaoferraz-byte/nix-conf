@@ -814,6 +814,18 @@ in
       name = "Grandia";
       noDisplay = true;
     };
+    satty = {
+      name = "Satty Image Editor";
+      noDisplay = true;
+    };
+    "org.gnome.design.IconLibrary" = {
+      name = "Icon Library";
+      noDisplay = true;
+    };
+    "icon-library" = {
+      name = "Icon Library";
+      noDisplay = true;
+    };
   };
 
   xdg.dataFile."icons/hicolor/scalable/apps/livara-study-planner.svg".source =

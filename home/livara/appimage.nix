@@ -56,6 +56,7 @@ in
     exec = "${firejailAppimage}/bin/livara-firejail-appimage %f";
     terminal = false;
     icon = "firejail-appimage";
+    noDisplay = true;
     type = "Application";
     categories = [ "Utility" ];
     mimeType = [ "application/vnd.appimage" ];
