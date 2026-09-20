@@ -30,6 +30,71 @@
         "type": "github"
       }
     },
+    "ambxst": {
+      "inputs": {
+        "axctl": "axctl",
+        "nixpkgs": [
+          "ambxst-conf",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789886238,
+        "narHash": "sha256-H0VgJYZykfYnMyrXhqwP0hGV5x9qkTPMk+BkB9Bpdxw=",
+        "owner": "Axenide",
+        "repo": "Ambxst",
+        "rev": "7f0ac49b82497c6d273f7cd7e49d302904f440ed",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Axenide",
+        "repo": "Ambxst",
+        "rev": "7f0ac49b82497c6d273f7cd7e49d302904f440ed",
+        "type": "github"
+      }
+    },
+    "ambxst-conf": {
+      "inputs": {
+        "ambxst": "ambxst",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "shell-conf": [
+          "shell-conf"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789917862,
+        "narHash": "sha256-rBiML2oOkEWbuqyYjS04HI+1lwVDELF7u/e5aagzdJQ=",
+        "owner": "Joaoferraz-byte",
+        "repo": "ambxst-conf",
+        "rev": "9723ce4959e0bece5004113f3b2598329d3b5278",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Joaoferraz-byte",
+        "repo": "ambxst-conf",
+        "type": "github"
+      }
+    },
+    "axctl": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1789886065,
+        "narHash": "sha256-zbxZXzELXLs92vbNwSsizeaumci6pTjpqeHcQkaTkn4=",
+        "owner": "Axenide",
+        "repo": "axctl",
+        "rev": "dedcaa6769a577b0a0ea767631f5f4ec317fff59",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Axenide",
+        "repo": "axctl",
+        "type": "github"
+      }
+    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -498,6 +563,22 @@
     },
     "nixpkgs_3": {
       "locked": {
+        "lastModified": 1789785513,
+        "narHash": "sha256-B44WL6h0XoLjJ41bUPJk0X5SDinLCII//6EcBLXKiJ0=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "20b1ddd1aa5ace70c9468305030aa4f9ef79671b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
         "lastModified": 1788881743,
         "narHash": "sha256-2V9GZGvPfrNzxFozhI9dcqV+c3QdA8YZrvAAzqEB+dI=",
         "owner": "nixos",
@@ -639,11 +720,12 @@
     "root": {
       "inputs": {
         "affinity-nix": "affinity-nix",
+        "ambxst-conf": "ambxst-conf",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_4",
         "nixvim": [
           "vim-conf",
           "nixvim"
@@ -654,8 +736,7 @@
         "stylix": "stylix",
         "vim-conf": "vim-conf",
         "xournal-conf": "xournal-conf",
-        "zen-browser": "zen-browser",
-        "ambxst-conf": "ambxst-conf"
+        "zen-browser": "zen-browser"
       }
     },
     "shell-conf": {
@@ -938,65 +1019,6 @@
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
         "type": "github"
-      }
-    },
-    "axctl": {
-      "locked": {
-        "lastModified": 1789886065,
-        "narHash": "sha256-zbxZXzELXLs92vbNwSsizeaumci6pTjpqeHcQkaTkn4=",
-        "owner": "Axenide",
-        "repo": "axctl",
-        "rev": "dedcaa6769a577b0a0ea767631f5f4ec317fff59",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Axenide",
-        "repo": "axctl",
-        "type": "github"
-      }
-    },
-    "ambxst": {
-      "locked": {
-        "lastModified": 1789886238,
-        "narHash": "sha256-H0VgJYZykfYnMyrXhqwP0hGV5x9qkTPMk+BkB9Bpdxw=",
-        "owner": "Axenide",
-        "repo": "Ambxst",
-        "rev": "7f0ac49b82497c6d273f7cd7e49d302904f440ed",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Axenide",
-        "repo": "Ambxst",
-        "type": "github"
-      },
-      "inputs": {
-        "axctl": "axctl",
-        "nixpkgs": [
-          "ambxst-conf",
-          "nixpkgs"
-        ]
-      }
-    },
-    "ambxst-conf": {
-      "locked": {
-        "lastModified": 1789910328,
-        "narHash": "sha256-HcBQK1fPCkavQ/kvQCiZn/m4zHL7BAIY3DrI39wUjss=",
-        "owner": "Joaoferraz-byte",
-        "repo": "ambxst-conf",
-        "rev": "783e76dc0ed0b342c31035191e798a4f7386792d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Joaoferraz-byte",
-        "repo": "ambxst-conf",
-        "type": "github"
-      },
-      "inputs": {
-        "ambxst": "ambxst",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "shell-conf": "shell-conf"
       }
     }
   },
