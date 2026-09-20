@@ -77,7 +77,7 @@ in
   '';
 
   # Profile icon for AccountsService and greeter profile cards.
-  home.file.".face" = {
+  home.file.".face.icon" = {
     source = ./assets/livara-profile-icon.jpg;
     force = true;
   };
