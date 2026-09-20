@@ -3,6 +3,14 @@
   flake.nixosModules.commonDesktop = { config, lib, pkgs, ... }:
     let
       cfg = config.desktop.profile;
+      gparted = pkgs.gparted.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace gparted.in \
+            --replace-fail \
+              "\$GKSUPROG '@bindir@/gparted' \"\$@\"" \
+              "\$GKSUPROG env DISPLAY=\"\$DISPLAY\" XAUTHORITY=\"\$XAUTHORITY\" WAYLAND_DISPLAY=\"\$WAYLAND_DISPLAY\" XDG_RUNTIME_DIR=\"\$XDG_RUNTIME_DIR\" GDK_BACKEND=x11 '@bindir@/gparted' \"\$@\""
+        '';
+      });
       wifiResumeHook = pkgs.writeShellScript "livara-networkmanager-wifi-resume" ''
         set -eu
         state=/run/livara-networkmanager-wifi-state
@@ -89,7 +97,7 @@
         services.gvfs.enable = true;
         services.udisks2.enable = true;
         networking.networkmanager.enable = lib.mkDefault true;
-        environment.systemPackages = [ pkgs.networkmanager ];
+        environment.systemPackages = [ pkgs.networkmanager gparted ];
         environment.etc."systemd/system-sleep/livara-networkmanager-wifi".source = wifiResumeHook;
 
         # Shared overlays applied to every host importing commonDesktop.
