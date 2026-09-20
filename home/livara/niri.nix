@@ -26,6 +26,9 @@ in
   home.file.".config/niri/config.kdl".text = ''
     // Niri owns compositor policy; Ambxst owns shell surfaces and IPC.
     include "outputs.kdl"
+    // Ambxst generates this file through axctl; local policy below is the
+    // documented override layer and must be evaluated after the include.
+    include optional=true "${home}/.local/share/ambxst/niri.kdl"
     prefer-no-csd
     cursor {
       // Stylix owns the cursor package/name/size; Niri applies it to the compositor.
@@ -54,8 +57,10 @@ in
       center-focused-column "never"
       default-column-width { proportion 0.5; }
       focus-ring {
-        on
-        width 1.4
+        // Ambxst/Niri already provide the compositor border. Keeping a
+        // second focus ring creates the apparent double border on focused
+        // windows.
+        off
       }
       border {
         on
@@ -147,6 +152,8 @@ in
     }
 
     binds {
+      // Explicit, stable override for the native Ambxst launcher action.
+      Mod+Space repeat=false { spawn "ambxst" "run" "launcher"; }
       Mod+Return repeat=false { spawn "wezterm" "start" "--always-new-process" "--cwd" "${home}"; }
       Mod+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+Alt+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
@@ -256,7 +263,5 @@ in
     // Exactly one shell instance, inheriting the niri Wayland/D-Bus session.
     spawn-at-startup "${startAmbxst}/bin/livara-start-ambxst"
 
-    // Ambxst generates this file through axctl; user overrides remain here.
-    include optional=true "${home}/.local/share/ambxst/niri.kdl"
   '';
 }
