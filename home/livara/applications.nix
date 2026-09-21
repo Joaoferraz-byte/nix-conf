@@ -10,34 +10,9 @@
 let
   studyPlanner = inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default;
   studyPlannerEnabled = desktopProfile.studyPlanner or false;
-  materialFoxSource = pkgs.fetchFromGitHub {
-    owner = "edelvarden";
-    repo = "material-fox-updated";
-    rev = "523cac082012baaaabc4ddbb62f63769c0cb4e32";
-    hash = "sha256-ZzigMIPHyfNxfJc2bYpvztz1FUbTOdEH+AZv+bivH/M=";
-  };
-  materialFox = pkgs.stdenvNoCC.mkDerivation {
-    pname = "material-fox-updated";
-    version = "2026-09-02";
-    src = materialFoxSource;
-    nativeBuildInputs = [ pkgs.dart-sass ];
-    dontConfigure = true;
-    installPhase = ''
-      mkdir -p "$out/chrome"
-      sass --quiet --no-source-map --style compressed src/user-chrome.scss "$out/chrome/user-chrome.css"
-      sass --quiet --no-source-map --style compressed src/user-content.scss "$out/chrome/user-content.css"
-      cp chrome/theme-material-blue.css "$out/chrome/"
-      cp -r chrome/fonts chrome/icons "$out/chrome/"
-    '';
-  };
   livaraFirefoxCss = "${config.xdg.stateHome}/livara/theme/browser/firefox.css";
-  materialFoxUserChrome = pkgs.writeText "livara-firefox-userChrome.css" ''
-    @import url("file://${materialFox}/chrome/user-chrome.css");
-    @import url("file://${materialFox}/chrome/theme-material-blue.css");
+  livaraUserChrome = pkgs.writeText "livara-firefox-userChrome.css" ''
     @import url("file://${livaraFirefoxCss}");
-  '';
-  materialFoxUserContent = pkgs.writeText "livara-firefox-userContent.css" ''
-    @import url("file://${materialFox}/chrome/user-content.css");
   '';
 
   # One Zen profile owns four Spaces, each with its own container and Essentials.
@@ -61,8 +36,6 @@ let
   };
 
   zenProfileUserChrome = ''
-    @import url("file://${materialFox}/chrome/user-chrome.css");
-    @import url("file://${materialFox}/chrome/theme-material-blue.css");
     @import url("file://${livaraFirefoxCss}");
   '';
 
@@ -579,8 +552,6 @@ in
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "layout.css.prefers-color-scheme.content-override" = 2;
         "svg.context-properties.content.enabled" = true;
-        "userChrome.theme-material" = true;
-
         # Remove shortcuts from the new-tab page.
         "browser.newtabpage.activity-stream.feeds.topsites" = false;
         "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
@@ -602,8 +573,7 @@ in
         [ -d "$profile" ] || continue
         chrome_dir="$profile/chrome"
         $DRY_RUN_CMD mkdir -p "$chrome_dir"
-        $DRY_RUN_CMD ln -sfn "${materialFoxUserChrome}" "$chrome_dir/userChrome.css"
-        $DRY_RUN_CMD ln -sfn "${materialFoxUserContent}" "$chrome_dir/userContent.css"
+        $DRY_RUN_CMD ln -sfn "${livaraUserChrome}" "$chrome_dir/userChrome.css"
       done < <(find "$ff_dir" -mindepth 1 -maxdepth 1 -type d -name '*.default*' -print0)
     fi
   '';
