@@ -30,72 +30,6 @@
         "type": "github"
       }
     },
-    "ambxst": {
-      "inputs": {
-        "axctl": "axctl",
-        "nixpkgs": [
-          "ambxst-conf",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789886238,
-        "narHash": "sha256-H0VgJYZykfYnMyrXhqwP0hGV5x9qkTPMk+BkB9Bpdxw=",
-        "owner": "Axenide",
-        "repo": "Ambxst",
-        "rev": "7f0ac49b82497c6d273f7cd7e49d302904f440ed",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Axenide",
-        "repo": "Ambxst",
-        "rev": "7f0ac49b82497c6d273f7cd7e49d302904f440ed",
-        "type": "github"
-      }
-    },
-    "ambxst-conf": {
-      "inputs": {
-        "ambxst": "ambxst",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "shell-conf": [
-          "shell-conf"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789984060,
-        "narHash": "sha256-FlMIqeqYiPM/FnfxwYe+i7pztKbwmqshZJ2AnQvkL7Q=",
-        "owner": "Joaoferraz-byte",
-        "repo": "ambxst-conf",
-        "rev": "9576227b0f0dfc5eec64c5fb3692840f7ebdd1c7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Joaoferraz-byte",
-        "repo": "ambxst-conf",
-        "type": "github"
-      }
-    },
-    "axctl": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_3"
-      },
-      "locked": {
-        "lastModified": 1789886065,
-        "narHash": "sha256-zbxZXzELXLs92vbNwSsizeaumci6pTjpqeHcQkaTkn4=",
-        "owner": "Axenide",
-        "repo": "axctl",
-        "rev": "dedcaa6769a577b0a0ea767631f5f4ec317fff59",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Axenide",
-        "repo": "axctl",
-        "rev": "dedcaa6769a577b0a0ea767631f5f4ec317fff59",
-        "type": "github"
-      }
-    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -564,22 +498,6 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1789785513,
-        "narHash": "sha256-B44WL6h0XoLjJ41bUPJk0X5SDinLCII//6EcBLXKiJ0=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "20b1ddd1aa5ace70c9468305030aa4f9ef79671b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_4": {
-      "locked": {
         "lastModified": 1788881743,
         "narHash": "sha256-2V9GZGvPfrNzxFozhI9dcqV+c3QdA8YZrvAAzqEB+dI=",
         "owner": "nixos",
@@ -721,12 +639,11 @@
     "root": {
       "inputs": {
         "affinity-nix": "affinity-nix",
-        "ambxst-conf": "ambxst-conf",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "mesa-tomate-driver": "mesa-tomate-driver",
         "nix-flatpak": "nix-flatpak",
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_3",
         "nixvim": [
           "vim-conf",
           "nixvim"
@@ -751,11 +668,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789980022,
-        "narHash": "sha256-MiEp1z4DHXSQoOHckZHB/W3B87iPPk8PgmM+7Yfl2sU=",
+        "lastModified": 1790004701,
+        "narHash": "sha256-Yj9PEu2lycdGlWSWwr5kRPORUfXtVK9F/tCVqlDs/Zw=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "155126e37bbf77bdcf76dbd300f9d7a2f6c41b17",
+        "rev": "524f6f5e84af9cd253f02950bd47bb4f47fb62eb",
         "type": "github"
       },
       "original": {

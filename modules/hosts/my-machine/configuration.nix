@@ -32,9 +32,8 @@
     # provider used by the desktop performance widget.
     services.power-profiles-daemon.enable = true;
 
-    # GameMode is an on-demand client/daemon integration exposed by the
-    # Ambxst session. It is intentionally scoped to myMachine; the Latitude keeps
-    # only the native power-profiles-daemon contract.
+    # GameMode is an on-demand client/daemon integration scoped to myMachine;
+    # the Latitude keeps only the native power-profiles-daemon contract.
     programs.gamemode = {
       enable = true;
       enableRenice = false;

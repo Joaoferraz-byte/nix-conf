@@ -38,7 +38,6 @@
         self.nixosModules.appimage
         self.nixosModules.firejail
         self.nixosModules.niri
-        inputs.ambxst-conf.nixosModules.default
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
       ];
@@ -155,7 +154,7 @@
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix
-            inputs.ambxst-conf.homeModules.default
+            inputs.shell-conf.homeModules.support
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

@@ -27,7 +27,7 @@
       wifi.powersave = false;
     };
 
-    # niri is the sole compositor and Ambxst is the visual shell.
+    # Niri is the sole compositor and the selected shell owns visual surfaces.
     desktop.profile.compositor = "niri";
 
     # Bluetooth is a laptop-only capability in the shared desktop setup.
@@ -82,16 +82,14 @@
     };
     services.thermald.enable = true;
 
-    # Ambxst reads the laptop battery through UPower.
-    # This is intentionally laptop-only; myMachine is a desktop.
+    # UPower provides laptop battery state; this is intentionally laptop-only.
     services.upower.enable = true;
 
     # Keep TLP as the single power-management owner on this laptop.
     services.power-profiles-daemon.enable = lib.mkForce false;
     services.tlp.pd.enable = true;
 
-    # GameMode is an on-demand client/daemon integration exposed by the
-    # Ambxst session. On the Latitude, TLP remains the sole
+    # GameMode is an on-demand client/daemon integration. On the Latitude, TLP remains the sole
     # power-management owner; GameMode switches the CPU governor to
     # `performance` directly via sysfs/cpupower (desiredgov) when a game
     # requests it, and TLP restores `powersave` once the request is
