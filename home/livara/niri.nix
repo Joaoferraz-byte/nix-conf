@@ -6,9 +6,9 @@ let
   studyPlannerEnabled = desktopProfile.studyPlanner or false;
   startAmbxst = pkgs.writeShellApplication {
     name = "livara-start-ambxst";
-    runtimeInputs = with pkgs; [ bash ];
+    runtimeInputs = with pkgs; [ bash coreutils util-linux ];
     text = ''
-      exec ambxst
+      exec flock -n "''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ambxst-livara.lock" ambxst
     '';
   };
 in
