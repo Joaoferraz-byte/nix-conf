@@ -237,6 +237,7 @@ in
       Mod+Shift+M { maximize-window-to-edges; }
       Mod+Ctrl+F { toggle-window-floating; }
       Mod+Shift+C repeat=false { spawn "sh" "-c" "hyprpicker -f hex | wl-copy"; }
+      Mod+Shift+S repeat=false { spawn "noctalia" "msg" "screenshot-region"; }
       Mod+Ctrl+Shift+C { center-visible-columns; }
       Mod+Minus { set-column-width "-10%"; }
       Mod+Equal { set-column-width "+10%"; }

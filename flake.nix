@@ -109,6 +109,7 @@
             grep -Fq 'playerctl' ${./modules/features/niri.nix}
             grep -Fq 'spawn-at-startup' "$config"
             grep -Fq 'include optional=true "noctalia.kdl"' "$config"
+            grep -Fq 'Mod+Shift+S repeat=false { spawn "noctalia" "msg" "screenshot-region"; }' "$config"
             if grep -Fq 'open-maximized true' "$config" || grep -Eiq 'initial_cols|initial_rows' "$config"; then
               exit 1
             fi
