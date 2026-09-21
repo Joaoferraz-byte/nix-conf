@@ -64,11 +64,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789973691,
-        "narHash": "sha256-pB7C93FLneUS64KCauCRjthVAcsJUuANV4ms+kR9IXg=",
+        "lastModified": 1789979545,
+        "narHash": "sha256-mRzIZJZU1mj8D4Bisrl6Dulb0qXnIRDdsJ6xUkgJ06g=",
         "owner": "Joaoferraz-byte",
         "repo": "ambxst-conf",
-        "rev": "fa4e66043a751154a4fe61d1de91fc0c4eee6dcb",
+        "rev": "0630638f0f5a9fa26a30d0920e22a457cadd993d",
         "type": "github"
       },
       "original": {
@@ -751,11 +751,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789907297,
-        "narHash": "sha256-OW8G4hjrSTbvzSRJpLs9PDKYEcYw6PWJhMfPdUiV/Ek=",
+        "lastModified": 1789978403,
+        "narHash": "sha256-ox8GxHwmuevnAD4XjGt6YzdNL/n5PXXvQhQR9HVQg7o=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "807cfb5fe0f3ef9e1db3f16a02cf085021edc1b3",
+        "rev": "31ca7536b894050350c3774a02a7f1d6be798198",
         "type": "github"
       },
       "original": {
