@@ -151,10 +151,12 @@
             inherit inputs self;
             userName = cfg.userName;
             desktopProfile = cfg;
+            shellName = "Ambxst";
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix
-            inputs.shell-conf.homeModules.support
+            inputs.ambxst-conf.homeModules.default
+            inputs.shell-conf.homeModules.default
             inputs.nixvim.homeModules.nixvim
           ];
           users.${cfg.userName} = import ../../home/livara/home.nix;

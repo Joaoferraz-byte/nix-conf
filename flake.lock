@@ -30,6 +30,72 @@
         "type": "github"
       }
     },
+    "ambxst": {
+      "inputs": {
+        "axctl": "axctl",
+        "nixpkgs": [
+          "ambxst-conf",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790020432,
+        "narHash": "sha256-ZgO+kqYYfNefevXV1ixWdSycEny5xyRVJVm3WO/2r1Y=",
+        "owner": "Axenide",
+        "repo": "Ambxst",
+        "rev": "2a704c438ddc0b94a11f4e4cf32a16220b62141f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Axenide",
+        "repo": "Ambxst",
+        "rev": "2a704c438ddc0b94a11f4e4cf32a16220b62141f",
+        "type": "github"
+      }
+    },
+    "ambxst-conf": {
+      "inputs": {
+        "ambxst": "ambxst",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790033086,
+        "narHash": "sha256-YtVrR9ncbpWhrTbvdQPHB1+MIjUz8CFdUkoiIHYlIIg=",
+        "owner": "Joaoferraz-byte",
+        "repo": "ambxst-conf",
+        "rev": "4e8b4d64530bd02f214c00ad18613b6ed7d07ddb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Joaoferraz-byte",
+        "repo": "ambxst-conf",
+        "type": "github"
+      }
+    },
+    "axctl": {
+      "inputs": {
+        "nixpkgs": [
+          "ambxst-conf",
+          "ambxst",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789930318,
+        "narHash": "sha256-pjWbz9E1BS6E1ha3jGgIXKPxzPcliv/69sRlgkbi4Rk=",
+        "owner": "Axenide",
+        "repo": "axctl",
+        "rev": "04bb2c61cda436148b1e982f91f627dc428ad9f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Axenide",
+        "repo": "axctl",
+        "type": "github"
+      }
+    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -95,22 +161,6 @@
         "owner": "tinted-theming",
         "repo": "base16-vim",
         "rev": "577fe8125d74ff456cf942c733a85d769afe58b7",
-        "type": "github"
-      }
-    },
-    "community-templates": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1788391861,
-        "narHash": "sha256-phCZfurjqrOEy+1RssStJlSJM8szykkFteGpTDyad68=",
-        "owner": "noctalia-dev",
-        "repo": "community-templates",
-        "rev": "83808b68b035146d974283042bca4774379bebcc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "noctalia-dev",
-        "repo": "community-templates",
         "type": "github"
       }
     },
@@ -535,49 +585,6 @@
         "type": "github"
       }
     },
-    "noctalia": {
-      "inputs": {
-        "nixpkgs": [
-          "noctalia-conf",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787624990,
-        "narHash": "sha256-GYiCoMAaTD9TiprDbrNcuxeHNeiX5HVFyRf6iESl13A=",
-        "owner": "noctalia-dev",
-        "repo": "noctalia",
-        "rev": "e6846db9ab4e6e4c107c4c5072cde9223d6a58c5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "noctalia-dev",
-        "repo": "noctalia",
-        "type": "github"
-      }
-    },
-    "noctalia-conf": {
-      "inputs": {
-        "community-templates": "community-templates",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "noctalia": "noctalia"
-      },
-      "locked": {
-        "lastModified": 1788528844,
-        "narHash": "sha256-Gmku1kvd9FCOxFxZDG7B5EZmJPgpf2gpRyV1eE/HbYY=",
-        "owner": "Joaoferraz-byte",
-        "repo": "noctalia-conf",
-        "rev": "2848246114e91b36b06998025b2e3a32f3f46f7b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Joaoferraz-byte",
-        "repo": "noctalia-conf",
-        "type": "github"
-      }
-    },
     "nur": {
       "inputs": {
         "flake-parts": [
@@ -639,6 +646,7 @@
     "root": {
       "inputs": {
         "affinity-nix": "affinity-nix",
+        "ambxst-conf": "ambxst-conf",
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "mesa-tomate-driver": "mesa-tomate-driver",
@@ -648,7 +656,6 @@
           "vim-conf",
           "nixvim"
         ],
-        "noctalia-conf": "noctalia-conf",
         "shell-conf": "shell-conf",
         "study-planner": "study-planner",
         "stylix": "stylix",
@@ -662,17 +669,14 @@
         "flake-parts": "flake-parts_3",
         "nixpkgs": [
           "nixpkgs"
-        ],
-        "noctalia-conf": [
-          "noctalia-conf"
         ]
       },
       "locked": {
-        "lastModified": 1790004701,
-        "narHash": "sha256-Yj9PEu2lycdGlWSWwr5kRPORUfXtVK9F/tCVqlDs/Zw=",
+        "lastModified": 1790009537,
+        "narHash": "sha256-2ZlUWkTQfvzI5nfaV0/IQic7pGLByrIxNYSrvXQn61s=",
         "owner": "Joaoferraz-byte",
         "repo": "shell-conf",
-        "rev": "524f6f5e84af9cd253f02950bd47bb4f47fb62eb",
+        "rev": "47df27af2012ac17eeed757dc4f25e247267da16",
         "type": "github"
       },
       "original": {

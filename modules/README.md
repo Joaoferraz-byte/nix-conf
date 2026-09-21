@@ -13,39 +13,39 @@ The root `flake.nix` imports the evaluated module surface explicitly. A reusable
 
 ## Shared desktop profile
 
-`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the Niri system module, the shell-conf integration (which consumes the local Noctalia runtime), Stylix and NixVim. The `home/livara/` profile is split by ownership:
+`hosts/common-desktop.nix` is a composition module. It imports Home Manager, the Niri system module, the Ambxst shell integration, Stylix and NixVim. The `home/livara/` profile is split by ownership:
 
 | File | Owner |
 |---|---|
 | `home.nix` | Thin profile entrypoint, identity, imports and stable user preferences. |
-| `niri.nix` | Niri input, navigation, workspace actions, compositor policy and Noctalia IPC keybinds. |
+| `niri.nix` | Niri input, navigation, workspace actions, compositor policy and Ambxst lifecycle. |
 | `monitors.nix` | Host-specific output rules; `myMachine` intentionally uses runtime monitor discovery. |
-| `session.nix` | Session directories and user-session boundaries; shell idle/lock policy belongs to Noctalia. |
+| `session.nix` | Session directories and user-session boundaries; shell idle/lock policy belongs to Ambxst. |
 | `themes.nix` | Stylix cursor boundary, Kora icon policy and stable desktop appearance. |
 | `applications.nix` | Applications, XDG associations, NixVim and browser profile contracts. |
-| `sync.nix` | Independent Vault synchronization service and timer; wallpapers remain local Noctalia data. |
+| `sync.nix` | Independent Vault synchronization service and timer; wallpapers remain local Ambxst data. |
 
-## Noctalia and visual API
+## Ambxst and visual API
 
-Noctalia v5 is the sole user-facing shell, started exactly once by Niri through `spawn-at-startup`. The `noctalia-conf` flake owns the pinned runtime package and lifecycle contract; `shell-conf` imports that module and supplies the bar, launcher, panels, notifications, wallpaper, widgets, plugin registry and documented IPC policy.
+Ambxst is the sole user-facing shell, started exactly once by Niri through `spawn-at-startup`. The `ambxst-conf` flake owns the pinned runtime package and mutable-runtime directory contract; `shell-conf` supplies shell-independent application adapters through `homeModules.default`. Noctalia is not imported into the active Home Manager composition.
 
 The central theme flow is:
 
-> Local wallpaper in `~/Wallpapers` → Noctalia v5 `m3-fruit-salad` palette/templates → `$XDG_STATE_HOME/livara/theme/palette.dark.json` → shell-conf application adapters.
+> Ambxst `~/.cache/ambxst/colors.json` → `ambxst-conf` semantic palette bridge → `$XDG_STATE_HOME/livara/theme/palette.dark.json` → shell-conf application adapters.
 
-`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts, plus formats not covered by those templates, including Freesm Launcher, Heroic, Foliate, Xournal++, Vesktop, IntelliJ/Android Studio, Telegram Desktop and the Hydra export staging tree. The Livara Home Manager profile provides Nautilus and Spotify through Spicetify-Nix; the Noctalia template additionally writes the runtime Spicetify `color.ini` when a writable installation is available. Generated state is mutable runtime data and is never copied into the source tree.
+`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts, plus formats not covered by those adapters, including Freesm Launcher, Heroic, Foliate, Xournal++, Vesktop and the Hydra export staging tree. Android Studio is installed without a repository-owned theme plugin or editor color scheme. Hydra's Appearance database remains application-owned and is not mutated by the adapter. The Livara Home Manager profile provides Nautilus and Spotify through Spicetify-Nix. Generated state is mutable runtime data and is never copied into the source tree.
 
-The selected plugin set is vendored in and pinned by `shell-conf`: `cat`, `timer`, `screen_recorder`, `screen_toolkit`, `gamer_mode`, the FreeSM-adapted `prismlauncher_instances` provider and `bitwarden`. The screen recorder consumes the system-provided `gpu-screen-recorder` capability, while Screen Toolkit receives its Wayland/OCR/annotation tools from `features/niri.nix`. Plugin source is immutable; plugin settings and runtime state remain user data.
+Ambxst owns its pinned upstream runtime and capture UI; `shell-conf` contributes only shell-independent adapters. The active composition does not import a compatibility shell or a Noctalia plugin set. Plugin source is immutable; plugin settings and runtime state remain user data.
 
 `vim-conf` owns the Nixvim editor, Markdown rendering, Mermaid/LaTeX workflow and keymaps; Nautilus owns native desktop file browsing. The `Vault` repository owns plain Markdown and Xournal++ notes; `nix-conf` owns its generic Git synchronization, while `shell-conf` supplies shared palette and application adapters without writing editor state into the Vault. Tablet presence is reported from the physical USB identity and remains separate from the driver/udev module. Battery, Bluetooth, NVIDIA, audio, portals, keyd and power profiles remain host/system responsibilities.
 
-`stylix` is intentionally narrow: it provides the Bibata-Modern-Classic cursor and stable session variables. It is not treated as a universal application theme engine; color ownership remains centralized in Noctalia and each adapter follows its target application's documented format.
+`stylix` is intentionally narrow: it provides the Bibata-Modern-Classic cursor and stable session variables. It is not treated as a universal application theme engine; color ownership remains centralized in Ambxst and each adapter follows its target application's documented format.
 
 ## Input and rebuild boundaries
 
-The XKB of Niri, system locale, console keymap and keyd are separate layers. `features/keyd.nix` owns external Aitek Delta TM6101 remapping; Niri owns compositor navigation and Noctalia actions. The modules must not redefine the same physical key in unrelated layers without an explicit host condition.
+The XKB of Niri, system locale, console keymap and keyd are separate layers. `features/keyd.nix` owns external Aitek Delta TM6101 remapping; Niri owns compositor navigation and Ambxst lifecycle. The modules must not redefine the same physical key in unrelated layers without an explicit host condition.
 
-`install.sh` owns the normal workflow. It refuses to run as root, checks Git permissions and conflict state, validates or reuses hardware, runs the low-cost flake checks, evaluates the selected system derivation and invokes `nixos-rebuild` only after those gates pass. The hardware generator supports ext4 and Btrfs without formatting, repartitioning, guessing devices or changing ACPI parameters.
+`install.sh` owns the normal workflow. It refuses to run as root, checks Git permissions and conflict state, validates or reuses hardware, and invokes `nixos-rebuild` with the locked flake. The low-cost flake, module-parse and Niri validation gates are documented operator checks and are not silently executed by the installer. The hardware generator supports ext4 and Btrfs without formatting, repartitioning, guessing devices or changing ACPI parameters.
 
 ## Validation
 
@@ -68,4 +68,4 @@ nix build .#nixosConfigurations.latitude.config.system.build.toplevel
 nix build .#nixosConfigurations.myMachine.config.system.build.toplevel
 ```
 
-On the real host, run `niri validate`, `noctalia msg plugins list`, the generated palette/application checks, `keyd check`, and the hardware/audio/portal checks. A constrained sandbox can establish syntax and graph consistency but cannot prove visual behavior, GPU capture, monitor discovery or lock/suspend behavior on physical hardware; use direct read-only commands for those checks rather than a repository-specific collector.
+On the real host, run `niri validate`, verify one Ambxst process and no Noctalia process, check the generated palette/application contracts, run `keyd check`, and execute the hardware/audio/portal checks. A constrained sandbox can establish syntax and graph consistency but cannot prove visual behavior, GPU capture, monitor discovery or lock/suspend behavior on physical hardware; use direct read-only commands for those checks rather than a repository-specific collector.

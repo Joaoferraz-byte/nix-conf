@@ -19,15 +19,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    noctalia-conf = {
-      url = "github:Joaoferraz-byte/noctalia-conf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     shell-conf = {
       url = "github:Joaoferraz-byte/shell-conf";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.noctalia-conf.follows = "noctalia-conf";
+    };
+
+    ambxst-conf = {
+      url = "github:Joaoferraz-byte/ambxst-conf";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     xournal-conf = {
@@ -106,10 +105,13 @@
             grep -Fq 'default-window-height { proportion 1.0; }' "$config"
             grep -Fq 'match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#' "$config"
             grep -Fq 'width 3.0' "$config"
+            grep -Fq 'spawn-at-startup "''${startAmbxst}/bin/livara-start-ambxst"' "$config"
+            grep -Fq 'include optional=true "''${home}/.config/niri/axctl.generated.kdl"' "$config"
+            grep -Fq 'Mod+Shift+S repeat=false { spawn "ambxst" "run" "screenshot"; }' "$config"
+            grep -Fq 'Mod+Shift+L repeat=false { spawn "ambxst" "run" "lens"; }' "$config"
+            grep -Fq 'Mod+Shift+W repeat=false { spawn "ambxst" "run" "wallpapers"; }' "$config"
             grep -Fq 'playerctl' ${./modules/features/niri.nix}
-            grep -Fq 'spawn-at-startup' "$config"
-            grep -Fq 'include optional=true "noctalia.kdl"' "$config"
-            grep -Fq 'Mod+Shift+S repeat=false { spawn "noctalia" "msg" "screenshot-region"; }' "$config"
+            ! grep -Eiq 'noctalia|run" "ocr|run" "qr' "$config"
             if grep -Fq 'open-maximized true' "$config" || grep -Eiq 'initial_cols|initial_rows' "$config"; then
               exit 1
             fi

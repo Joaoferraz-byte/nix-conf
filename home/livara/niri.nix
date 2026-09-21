@@ -4,18 +4,16 @@ let
   keyboardLayout = desktopProfile.keyboardLayout or "br";
   keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
   studyPlannerEnabled = desktopProfile.studyPlanner or false;
-  startNoctalia = pkgs.writeShellApplication {
-    name = "livara-start-noctalia";
-    runtimeInputs = with pkgs; [ bash coreutils ];
+  startAmbxst = pkgs.writeShellApplication {
+    name = "livara-start-ambxst";
+    runtimeInputs = with pkgs; [ bash coreutils util-linux ];
     text = ''
-      set -u
-      noctalia &
-      wait "$!"
+      exec flock -n "''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ambxst-livara.lock" ambxst
     '';
   };
 in
 {
-  home.packages = [ startNoctalia ];
+  home.packages = [ startAmbxst ];
 
   # Home Manager may replace the store-backed config symlink atomically; ask the
   # running compositor to load the new file without requiring a new login.
@@ -26,8 +24,11 @@ in
   '';
 
   home.file.".config/niri/config.kdl".text = ''
-    // Niri owns compositor policy; the selected shell owns shell surfaces and IPC.
+    // Niri owns compositor policy; Ambxst owns shell surfaces and IPC.
     include "outputs.kdl"
+    // Ambxst generates this file through axctl; local policy below is the
+    // documented override layer and must be evaluated after the include.
+    include optional=true "${home}/.config/niri/axctl.generated.kdl"
     prefer-no-csd
     cursor {
       // Stylix owns the cursor package/name/size; Niri applies it to the compositor.
@@ -84,6 +85,7 @@ in
     environment {
       GTK_ICON_THEME "Livara-Kora"
       QT_ICON_THEME "Livara-Kora"
+      QS_ICON_THEME "Livara-Kora"
       // Make the Home Manager cursor package discoverable to Niri and clients.
       XCURSOR_PATH "${config.home.profileDirectory}/share/icons:${home}/.local/share/icons:${home}/.icons"
       QT_QPA_PLATFORMTHEME "qt6ct"
@@ -151,7 +153,7 @@ in
     }
 
     binds {
-      Mod+Space repeat=false { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+      Mod+Space repeat=false { spawn "ambxst" "run" "launcher"; }
       Mod+Return repeat=false { spawn "wezterm" "start" "--always-new-process" "--cwd" "${home}"; }
       Mod+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
       Mod+Alt+W repeat=false { spawn "${home}/.local/share/livara/scripts/open-zen.sh"; }
@@ -237,7 +239,7 @@ in
       Mod+Shift+M { maximize-window-to-edges; }
       Mod+Ctrl+F { toggle-window-floating; }
       Mod+Shift+C repeat=false { spawn "sh" "-c" "hyprpicker -f hex | wl-copy"; }
-      Mod+Shift+S repeat=false { spawn "noctalia" "msg" "screenshot-region"; }
+      Mod+Shift+S repeat=false { spawn "ambxst" "run" "screenshot"; }
       Mod+Ctrl+Shift+C { center-visible-columns; }
       Mod+Minus { set-column-width "-10%"; }
       Mod+Equal { set-column-width "+10%"; }
@@ -245,7 +247,8 @@ in
       Mod+Shift+Equal { set-window-height "+10%"; }
       Mod+Ctrl+W { toggle-column-tabbed-display; }
       Mod+O repeat=false { toggle-overview; }
-      Mod+Shift+W repeat=false { spawn "noctalia" "msg" "panel-toggle" "wallpaper"; }
+      Mod+Shift+W repeat=false { spawn "ambxst" "run" "wallpapers"; }
+      Mod+Shift+L repeat=false { spawn "ambxst" "run" "lens"; }
       Mod+Escape repeat=false { toggle-keyboard-shortcuts-inhibit; }
 
       XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
@@ -261,8 +264,7 @@ in
     }
 
     // Exactly one shell instance, inheriting the Niri Wayland/D-Bus session.
-    spawn-at-startup "${startNoctalia}/bin/livara-start-noctalia"
-    include optional=true "noctalia.kdl"
+    spawn-at-startup "${startAmbxst}/bin/livara-start-ambxst"
 
   '';
 }

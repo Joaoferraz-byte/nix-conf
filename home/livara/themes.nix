@@ -280,9 +280,10 @@ in
   };
 
   home.sessionVariables = {
-    # The active shell owns the wallpaper-derived GTK palette; keep only stable session
-    # variables here.
+    # The active shell owns the wallpaper-derived GTK palette; keep only stable
+    # session variables here.
     GTK_ICON_THEME = "Livara-Kora";
     QT_ICON_THEME = "Livara-Kora";
+    QS_ICON_THEME = "Livara-Kora";
   };
 }
