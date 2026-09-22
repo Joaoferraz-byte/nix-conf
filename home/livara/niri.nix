@@ -24,6 +24,29 @@ in
     fi
   '';
 
+  systemd.user.services.livara-niri-border-reload = {
+    Unit = {
+      Description = "Reload Niri after Ambxst regenerates compositor colors";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.niri}/bin/niri msg action load-config-file --path ${config.xdg.configHome}/niri/config.kdl";
+    };
+  };
+
+  systemd.user.paths.livara-niri-border-reload = {
+    Unit = {
+      Description = "Watch the Ambxst-generated Niri compositor file";
+    };
+    Path = {
+      PathChanged = "${config.xdg.configHome}/niri/axctl.generated.kdl";
+      Unit = "livara-niri-border-reload.service";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   xdg.configFile."niri/config.kdl".text = ''
     // Niri owns compositor policy; Ambxst owns shell surfaces and IPC.
     include "outputs.kdl"
