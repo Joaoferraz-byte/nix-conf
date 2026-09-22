@@ -152,6 +152,7 @@
             userName = cfg.userName;
             desktopProfile = cfg;
             shellName = "Ambxst";
+            ambxstPackage = inputs.ambxst-conf.packages.${pkgs.system}.default;
           };
           sharedModules = [
             inputs.stylix.homeModules.stylix

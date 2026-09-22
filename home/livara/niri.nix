@@ -1,14 +1,15 @@
-{ config, lib, pkgs, desktopProfile ? { }, ... }:
+{ config, lib, pkgs, desktopProfile ? { }, ambxstPackage ? null, ... }:
 let
   home = config.home.homeDirectory;
   keyboardLayout = desktopProfile.keyboardLayout or "br";
   keyboardVariant = desktopProfile.keyboardVariant or "abnt2";
   studyPlannerEnabled = desktopProfile.studyPlanner or false;
+  ambxstBin = if ambxstPackage != null then "${ambxstPackage}/bin/ambxst" else "ambxst";
   startAmbxst = pkgs.writeShellApplication {
     name = "livara-start-ambxst";
     runtimeInputs = with pkgs; [ bash coreutils util-linux ];
     text = ''
-      exec flock -n "''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ambxst-livara.lock" ambxst
+      exec flock -n "''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ambxst-livara.lock" "${ambxstBin}"
     '';
   };
 in
