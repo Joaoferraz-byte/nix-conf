@@ -66,12 +66,12 @@
     security.audit = {
       enable = true;
       rules = [
-        "-a always,exit -F arch=b64 -S open,openat -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access_denied"
-        "-a always,exit -F arch=b64 -S open,openat -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access_denied"
         "-w /etc/sudoers -p wa -k sudoers_changes"
         "-w /etc/ssh/sshd_config -p wa -k sshd_config"
         "-w /etc/passwd -p wa -k identity"
         "-w /etc/shadow -p wa -k identity"
+        "-w /etc/group -p wa -k identity"
+        "-w /etc/gshadow -p wa -k identity"
       ];
       backlogLimit = 8192;
     };

@@ -40,4 +40,6 @@
   # Disable stylix's overlay re-injection in the Home Manager context.
   # The overlays remain active at the NixOS level (single source of truth).
   stylix.overlays.enable = false;
+  stylix.targets.gtk.enable = false;
+  stylix.targets.qt.enable = false;
 }

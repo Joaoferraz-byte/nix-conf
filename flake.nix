@@ -117,12 +117,23 @@
             fi
             xournal_settings=${inputs.xournal-conf}/xournalpp/settings.xml
             hardening=${./modules/features/system-hardening.nix}
+            latitude=${./modules/hosts/latitude/configuration.nix}
+            my_machine=${./modules/hosts/my-machine/configuration.nix}
+            themes=${./home/livara/themes.nix}
+            stylix=${./home/livara/stylix.nix}
             audiorelay=${./modules/features/audiorelay.nix}
             home_module=${./home/livara/home.nix}
             xournal_sync=${./scripts/sync-xournalpp-config.sh}
             applications=${./home/livara/applications.nix}
             grep -Fq 'name="menubarVisible" value="false"' "$xournal_settings"
             grep -Fq 'name="defaultViewModeAttributes" value="showToolbar,showSidebar"' "$xournal_settings"
+            grep -Fq 'system.stateVersion = "26.05"' "$latitude"
+            grep -Fq 'system.stateVersion = "26.05"' "$my_machine"
+            ! grep -Fq 'services.tlp.pd' "$latitude"
+            grep -Fq 'gtk4.enable = false;' "$themes"
+            grep -Fq 'stylix.targets.gtk.enable = false;' "$stylix"
+            grep -Fq 'stylix.targets.qt.enable = false;' "$stylix"
+            ! grep -Fq 'open,openat' "$hardening"
             ! grep -Fq '"livara"' "$hardening" || exit 1
             ! grep -Fq 'NOPASSWD' "$hardening" || exit 1
             grep -Fq 'default = false;' "$audiorelay"

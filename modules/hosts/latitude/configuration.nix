@@ -87,7 +87,6 @@
 
     # Keep TLP as the single power-management owner on this laptop.
     services.power-profiles-daemon.enable = lib.mkForce false;
-    services.tlp.pd.enable = true;
 
     # GameMode is an on-demand client/daemon integration. On the Latitude, TLP remains the sole
     # power-management owner; GameMode switches the CPU governor to
@@ -114,6 +113,6 @@
     programs.zsh.enable = true;
 
 
-    system.stateVersion = "26.11";
+    system.stateVersion = "26.05";
   };
 }

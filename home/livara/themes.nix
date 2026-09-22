@@ -242,10 +242,17 @@ in
     file://${home}/Wallpapers	folder-images-symbolic
   '';
 
-  # GTK3 owns the bookmark URI list; the patched Nautilus owner supplies the
-  # independent symbolic icons from the map above.
-  # Do not set gtk-theme here:
-  # The active shell writes the wallpaper-derived GTK CSS dynamically.
+  xdg.configFile."gtk-3.0/bookmarks".text = ''
+    file://${config.xdg.userDirs.documents} Documents
+    file://${config.xdg.userDirs.download} Downloads
+    file://${home}/Pictures Pictures
+    file://${home}/Wallpapers Wallpapers
+    file://${config.home.homeDirectory}/Games Games
+    file://${config.home.homeDirectory}/Projects Projects
+    file://${config.home.homeDirectory}/Vault Vault
+    file://${config.home.homeDirectory}/Fire Fire
+  '';
+
   gtk = {
     enable = true;
     iconTheme = {
@@ -253,19 +260,9 @@ in
       name = "Livara-Kora";
     };
     gtk3 = {
-      enable = true;
-      bookmarks = [
-        "file://${config.xdg.userDirs.documents} Documents"
-        "file://${config.xdg.userDirs.download} Downloads"
-        "file://${home}/Pictures Pictures"
-        "file://${home}/Wallpapers Wallpapers"
-        "file://${config.home.homeDirectory}/Games Games"
-        "file://${config.home.homeDirectory}/Projects Projects"
-        "file://${config.home.homeDirectory}/Vault Vault"
-        "file://${config.home.homeDirectory}/Fire Fire"
-      ];
+      enable = false;
     };
-    gtk4.enable = true;
+    gtk4.enable = false;
   };
 
   dconf.settings = {
