@@ -106,7 +106,7 @@
             grep -Fq 'match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#' "$config"
             grep -Fq 'width 3.0' "$config"
             grep -Fq 'spawn-at-startup "''${startAmbxst}/bin/livara-start-ambxst"' "$config"
-            grep -Fq 'include optional=true "''${home}/.config/niri/axctl.generated.kdl"' "$config"
+            grep -Fq 'include optional=true "''${config.xdg.configHome}/niri/axctl.generated.kdl"' "$config"
             grep -Fq 'Mod+Shift+S repeat=false { spawn "ambxst" "run" "screenshot"; }' "$config"
             grep -Fq 'Mod+Shift+L repeat=false { spawn "ambxst" "run" "lens"; }' "$config"
             grep -Fq 'Mod+Shift+W repeat=false { spawn "ambxst" "run" "wallpapers"; }' "$config"
@@ -120,6 +120,7 @@
             audiorelay=${./modules/features/audiorelay.nix}
             home_module=${./home/livara/home.nix}
             xournal_sync=${./scripts/sync-xournalpp-config.sh}
+            applications=${./home/livara/applications.nix}
             grep -Fq 'name="menubarVisible" value="false"' "$xournal_settings"
             grep -Fq 'name="defaultViewModeAttributes" value="showToolbar,showSidebar"' "$xournal_settings"
             ! grep -Fq '"livara"' "$hardening" || exit 1
@@ -128,6 +129,13 @@
             grep -Fq '$DRY_RUN_CMD mkdir -p' "$home_module"
             grep -Fq 'required_files=(settings.xml toolbar.ini)' "$xournal_sync"
             grep -Fq 'optional_files=(palettes/livara.gpl default_template.tex)' "$xournal_sync"
+            grep -Fq 'userChrome = firefoxProfileUserChrome;' "$applications"
+            grep -Fq '"org.gtk.WidgetFactory4"' "$applications"
+            grep -Fq '"org.gtk.PrintEditor4"' "$applications"
+            grep -Fq '"org.gtk.Shaper"' "$applications"
+            grep -Fq 'exec = "jupyter-lab %f"' "$applications"
+            ! grep -Fq 'name = "Brandia"' "$applications" || exit 1
+            ! grep -Fq 'include optional=true "''${home}/.config/niri/axctl.generated.kdl"' "$config" || exit 1
             grep -Fq ':(glob)**/*.md' ${./home/livara/sync.nix}
             if grep -Fq 'git} -C "$directory" add -A' ${./home/livara/sync.nix}; then
               exit 1

@@ -20,16 +20,16 @@ in
   # running compositor to load the new file without requiring a new login.
   home.activation.reloadNiriConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     if command -v niri >/dev/null 2>&1; then
-      $DRY_RUN_CMD niri msg action load-config-file --path "${home}/.config/niri/config.kdl" || true
+      $DRY_RUN_CMD niri msg action load-config-file --path "${config.xdg.configHome}/niri/config.kdl" || true
     fi
   '';
 
-  home.file.".config/niri/config.kdl".text = ''
+  xdg.configFile."niri/config.kdl".text = ''
     // Niri owns compositor policy; Ambxst owns shell surfaces and IPC.
     include "outputs.kdl"
     // Ambxst generates this file through axctl; local policy below is the
     // documented override layer and must be evaluated after the include.
-    include optional=true "${home}/.config/niri/axctl.generated.kdl"
+    include optional=true "${config.xdg.configHome}/niri/axctl.generated.kdl"
     prefer-no-csd
     cursor {
       // Stylix owns the cursor package/name/size; Niri applies it to the compositor.

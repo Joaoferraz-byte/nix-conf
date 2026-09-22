@@ -11,7 +11,7 @@ let
   studyPlanner = inputs.study-planner.packages.${pkgs.stdenv.hostPlatform.system}.default;
   studyPlannerEnabled = desktopProfile.studyPlanner or false;
   livaraFirefoxCss = "${config.xdg.stateHome}/livara/theme/browser/firefox.css";
-  livaraUserChrome = pkgs.writeText "livara-firefox-userChrome.css" ''
+  firefoxProfileUserChrome = ''
     @import url("file://${livaraFirefoxCss}");
   '';
 
@@ -561,22 +561,9 @@ in
         "browser.newtabpage.activity-stream.system.showSponsored" = false;
         "browser.newtabpage.activity-stream.showSponsored" = false;
       };
+      userChrome = firefoxProfileUserChrome;
     };
   };
-
-  # Firefox profiles are created by Firefox, so link managed chrome files after
-  # profile creation instead of placing a second theme in the Nix store.
-  home.activation.livaraFirefoxThemeLink = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ff_dir="${config.home.homeDirectory}/.mozilla/firefox"
-    if [ -d "$ff_dir" ]; then
-      while IFS= read -r -d "" profile; do
-        [ -d "$profile" ] || continue
-        chrome_dir="$profile/chrome"
-        $DRY_RUN_CMD mkdir -p "$chrome_dir"
-        $DRY_RUN_CMD ln -sfn "${livaraUserChrome}" "$chrome_dir/userChrome.css"
-      done < <(find "$ff_dir" -mindepth 1 -maxdepth 1 -type d -name '*.default*' -print0)
-    fi
-  '';
 
   programs.zsh = {
     enable = true;
@@ -748,36 +735,39 @@ in
       name = "Qt6 Settings";
       noDisplay = true;
     };
-    "gtk4-widget-factory" = {
-      name = "GTK Widget Factory";
-      noDisplay = true;
-    };
     "gtk3-widget-factory" = {
       name = "GTK Widget Factory";
+      exec = "gtk3-widget-factory";
       noDisplay = true;
     };
-    "org.gtk.gtk3.WidgetFactory" = {
+    "org.gtk.WidgetFactory4" = {
       name = "GTK Widget Factory";
-      noDisplay = true;
-    };
-    "org.gtk.gtk4.WidgetFactory" = {
-      name = "GTK Widget Factory";
+      exec = "gtk4-widget-factory";
       noDisplay = true;
     };
     "gtk3-demo" = {
       name = "GTK Demo";
+      exec = "gtk3-demo";
       noDisplay = true;
     };
-    "gtk4-demo" = {
+    "org.gtk.Demo4" = {
       name = "GTK Demo";
+      exec = "gtk4-demo";
       noDisplay = true;
     };
-    pavucontrol = {
-      name = "Volume Control";
+    "org.gtk.PrintEditor4" = {
+      name = "Print Editor";
+      exec = "gtk4-print-editor %f";
       noDisplay = true;
     };
     swappy = {
-      name = "Print Editor";
+      name = "Swappy";
+      exec = "swappy -f %f";
+      noDisplay = true;
+    };
+    "org.pulseaudio.pavucontrol" = {
+      name = "Volume Control";
+      exec = "pavucontrol";
       noDisplay = true;
     };
     mpv = {
@@ -792,72 +782,23 @@ in
       name = "NixOS Manual";
       noDisplay = true;
     };
-    grandia = {
-      name = "Grandia";
-      noDisplay = true;
-    };
     satty = {
       name = "Satty Image Editor";
       noDisplay = true;
     };
-    "org.gnome.design.IconLibrary" = {
-      name = "Icon Library";
-      noDisplay = true;
-    };
-    "icon-library" = {
-      name = "Icon Library";
-      noDisplay = true;
-    };
-    "org.gnome.design.IconEditor" = {
+    "org.gtk.Shaper" = {
       name = "Icon Editor";
+      exec = "gtk4-icon-editor";
       noDisplay = true;
     };
     jupyterlab = {
       name = "JupyterLab";
-      noDisplay = true;
-    };
-    "jupyter-notebook" = {
-      name = "Jupyter Notebook";
-      noDisplay = true;
-    };
-    gradia = {
-      name = "Gradia";
-      noDisplay = true;
-    };
-    "be.alexandervanhee.gradia" = {
-      name = "Gradia";
-      noDisplay = true;
-    };
-    brandia = {
-      name = "Brandia";
-      noDisplay = true;
-    };
-    "node-editor" = {
-      name = "Node Editor";
-      noDisplay = true;
-    };
-    "org.gnome.design.NodeEditor" = {
-      name = "Node Editor";
+      exec = "jupyter-lab %f";
       noDisplay = true;
     };
     "org.gtk.gtk4.NodeEditor" = {
       name = "Node Editor";
-      noDisplay = true;
-    };
-    "bluetooth-adapters" = {
-      name = "Bluetooth Adapters";
-      noDisplay = true;
-    };
-    "bluetooth-manager" = {
-      name = "Bluetooth Manager";
-      noDisplay = true;
-    };
-    "blueman-adapters" = {
-      name = "Bluetooth Adapters";
-      noDisplay = true;
-    };
-    "blueman-manager" = {
-      name = "Bluetooth Manager";
+      exec = "gtk4-node-editor";
       noDisplay = true;
     };
   };
