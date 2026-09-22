@@ -64,7 +64,9 @@ in
       border {
         on
         // This is the visible Niri window border; shell frame dimensions are
-        // not used as a proxy for compositor geometry.
+        // not used as a proxy for compositor geometry. Deliberately do not set
+        // active-color here: Ambxst's generated include owns the palette-bound
+        // active/inactive border colors and reloads them on theme changes.
         width 3.0
       }
       preset-column-widths {

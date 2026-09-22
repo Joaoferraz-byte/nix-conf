@@ -33,7 +33,7 @@ The central theme flow is:
 
 > Ambxst `~/.cache/ambxst/colors.json` → `ambxst-conf` semantic palette bridge → `$XDG_STATE_HOME/livara/theme/palette.dark.json` → shell-conf application adapters.
 
-`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and KDE contracts, plus formats not covered by those adapters, including Freesm Launcher, Heroic, Foliate, Xournal++, Vesktop and the Hydra export staging tree. Android Studio is installed without a repository-owned theme plugin or editor color scheme. Hydra's Appearance database remains application-owned and is not mutated by the adapter. The Livara Home Manager profile provides Nautilus and Spotify through Spicetify-Nix. Generated state is mutable runtime data and is never copied into the source tree.
+`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Fastfetch, btop and KDE contracts, plus formats not covered by those adapters, including Freesm Launcher, Heroic, Foliate, Xournal++, Vesktop and the Hydra export staging tree. Android Studio is installed without a repository-owned theme plugin or editor color scheme. Hydra's Appearance database remains application-owned and is not mutated by the adapter. The Livara Home Manager profile provides Nautilus and Spotify through Spicetify-Nix. Generated state is mutable runtime data and is never copied into the source tree.
 
 Ambxst owns its pinned upstream runtime and capture UI; `shell-conf` contributes only shell-independent adapters. The active composition does not import a compatibility shell or a Noctalia plugin set. Plugin source is immutable; plugin settings and runtime state remain user data.
 

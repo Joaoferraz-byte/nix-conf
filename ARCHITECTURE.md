@@ -59,16 +59,16 @@ Niri starts exactly one Ambxst process through `spawn-at-startup`; the Home Mana
 
 The integration installs stable Ambxst intent through the pinned upstream preset and reviewed patch in `ambxst-conf`. Generated outputs live under `$XDG_STATE_HOME/livara/theme` and application profiles. The central flow is:
 
-> Local wallpaper in `~/Wallpapers` → Ambxst palette bridge → `palette.dark.json` → Niri runtime include and application-specific adapters.
+> Local wallpaper in `~/Wallpapers` → Ambxst palette bridge → active `palette.dark.json`/`palette.light.json` variant → Niri runtime include and application-specific adapters.
 
-`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm, Kitty, Starship and application adapters where the applications provide a documented customization path. The Livara Home Manager profile owns Nautilus, the music application package and the Books/Games/Musics directory contract.
+`shell-conf` owns native GTK, Qt, Firefox, Zen Browser, WezTerm and application adapters where the applications provide a documented customization path. The Livara Home Manager profile owns Nautilus, the music application package and the Books/Games/Musics directory contract.
 
 | Application/ecosystem | Generated output |
 |---|---|
 | Ambxst | pinned runtime, reviewed patch, presets and palette bridge |
-| GTK/Nautilus | `shell-conf` stable icon/dark-mode settings; Nautilus owns native GTK/GVFS file browsing |
+| GTK/GParted/Nautilus | `shell-conf` generated GTK3/GTK4 CSS and mode settings; Nautilus owns native GTK/GVFS file browsing |
 | Qt | Native Qt toolkit configuration and `shell-conf` adapters |
-| WezTerm/Kitty | `shell-conf` adapter outputs for the Ambxst palette |
+| Fastfetch/btop/WezTerm | `shell-conf` adapter outputs for the active Ambxst palette |
 | Neovim | `matugen_colors.lua` consumed by NixVim |
 | Firefox/Zen Browser | `shell-conf` generated CSS plus profile `userChrome.css` imports |
 | Nixvim Markdown | `vim-conf` Nixvim module, Treesitter grammars, renderer, Mermaid/LaTeX workflow and palette Lua |

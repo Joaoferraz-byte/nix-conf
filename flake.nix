@@ -127,7 +127,7 @@
             grep -Fq 'default = false;' "$audiorelay"
             grep -Fq '$DRY_RUN_CMD mkdir -p' "$home_module"
             grep -Fq 'required_files=(settings.xml toolbar.ini)' "$xournal_sync"
-            grep -Fq 'optional_files=(palettes/tokyonight.gpl default_template.tex)' "$xournal_sync"
+            grep -Fq 'optional_files=(palettes/livara.gpl default_template.tex)' "$xournal_sync"
             grep -Fq ':(glob)**/*.md' ${./home/livara/sync.nix}
             if grep -Fq 'git} -C "$directory" add -A' ${./home/livara/sync.nix}; then
               exit 1

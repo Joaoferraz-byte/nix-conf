@@ -15,7 +15,7 @@ repository="$(cd -- "$repository" && pwd)"
 native_root="${XDG_CONFIG_HOME:-$HOME/.config}/xournalpp"
 repository_root="$repository/xournalpp"
 required_files=(settings.xml toolbar.ini)
-optional_files=(palettes/tokyonight.gpl default_template.tex)
+optional_files=(palettes/livara.gpl default_template.tex)
 
 [[ -d "$repository_root" ]] || {
   printf '%s\n' "Xournal++ repository directory not found: $repository_root" >&2

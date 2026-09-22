@@ -221,7 +221,7 @@ let
   xournalppSettings = pkgs.writeText "xournalpp-settings.xml" (
     builtins.replaceStrings
       [ "@XOURNALPP_CONFIG_HOME@" "tokyo-night.gpl" ]
-      [ "${config.xdg.configHome}/xournalpp" "tokyonight.gpl" ]
+      [ "${config.xdg.configHome}/xournalpp" "livara.gpl" ]
       (builtins.readFile "${inputs.xournal-conf}/xournalpp/settings.xml")
   );
   xournalppToolbar = pkgs.writeText "xournalpp-toolbar.ini" (
@@ -230,7 +230,7 @@ let
       [ "toolbarTop1=HIGHLIGHTER,ERASER,PEN" ]
       (builtins.readFile "${inputs.xournal-conf}/xournalpp/toolbar.ini")
   );
-  xournalppPalette = "${inputs.xournal-conf}/xournalpp/palettes/tokyonight.gpl";
+  xournalppPalette = "${inputs.xournal-conf}/xournalpp/palettes/livara.gpl";
 
   matugenConfig = pkgs.writeText "livara-matugen-config.toml" ''
     [config]
@@ -632,13 +632,13 @@ in
     if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then
       $DRY_RUN_CMD cp "${xournalppToolbar}" "${xournalppLocalConfig}/toolbar.ini"
     fi
-    if [ ! -e "${xournalppLocalConfig}/palettes/tokyonight.gpl" ]; then
+    if [ ! -e "${xournalppLocalConfig}/palettes/livara.gpl" ]; then
       $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}/palettes"
-      $DRY_RUN_CMD cp "${xournalppPalette}" "${xournalppLocalConfig}/palettes/tokyonight.gpl"
+      $DRY_RUN_CMD cp "${xournalppPalette}" "${xournalppLocalConfig}/palettes/livara.gpl"
     fi
     if [ -f "${xournalppLocalConfig}/settings.xml" ]; then
       palette_settings_tmp="${xournalppLocalConfig}/settings.xml.livara.tmp"
-      awk -v palette="${xournalppLocalConfig}/palettes/tokyonight.gpl" '
+      awk -v palette="${xournalppLocalConfig}/palettes/livara.gpl" '
         BEGIN { inserted = 0 }
         /<property[[:space:]]+name="colorPalette"/ { next }
         /<\/settings>/ && !inserted {
@@ -752,6 +752,18 @@ in
       name = "GTK Widget Factory";
       noDisplay = true;
     };
+    "gtk3-widget-factory" = {
+      name = "GTK Widget Factory";
+      noDisplay = true;
+    };
+    "org.gtk.gtk3.WidgetFactory" = {
+      name = "GTK Widget Factory";
+      noDisplay = true;
+    };
+    "org.gtk.gtk4.WidgetFactory" = {
+      name = "GTK Widget Factory";
+      noDisplay = true;
+    };
     "gtk3-demo" = {
       name = "GTK Demo";
       noDisplay = true;
@@ -794,6 +806,58 @@ in
     };
     "icon-library" = {
       name = "Icon Library";
+      noDisplay = true;
+    };
+    "org.gnome.design.IconEditor" = {
+      name = "Icon Editor";
+      noDisplay = true;
+    };
+    jupyterlab = {
+      name = "JupyterLab";
+      noDisplay = true;
+    };
+    "jupyter-notebook" = {
+      name = "Jupyter Notebook";
+      noDisplay = true;
+    };
+    gradia = {
+      name = "Gradia";
+      noDisplay = true;
+    };
+    "be.alexandervanhee.gradia" = {
+      name = "Gradia";
+      noDisplay = true;
+    };
+    brandia = {
+      name = "Brandia";
+      noDisplay = true;
+    };
+    "node-editor" = {
+      name = "Node Editor";
+      noDisplay = true;
+    };
+    "org.gnome.design.NodeEditor" = {
+      name = "Node Editor";
+      noDisplay = true;
+    };
+    "org.gtk.gtk4.NodeEditor" = {
+      name = "Node Editor";
+      noDisplay = true;
+    };
+    "bluetooth-adapters" = {
+      name = "Bluetooth Adapters";
+      noDisplay = true;
+    };
+    "bluetooth-manager" = {
+      name = "Bluetooth Manager";
+      noDisplay = true;
+    };
+    "blueman-adapters" = {
+      name = "Bluetooth Adapters";
+      noDisplay = true;
+    };
+    "blueman-manager" = {
+      name = "Bluetooth Manager";
       noDisplay = true;
     };
   };

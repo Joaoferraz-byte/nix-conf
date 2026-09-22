@@ -23,9 +23,9 @@ Niri starts exactly one Ambxst process through its `spawn-at-startup` wrapper. N
 
 > Ambxst wallpaper/theme → `~/.cache/ambxst/colors.json` → `ambxst-conf` semantic palette bridge → `$XDG_STATE_HOME/livara/theme/palette.dark.json` → `shell-conf` application adapters.
 
-`ambxst-conf` owns the upstream shell runtime and its mutable Niri runtime directories. `shell-conf` consumes `~/.cache/ambxst/colors.json`, validates the semantic palette bridge, and owns the Firefox/Zen CSS writer and application-specific formats for GTK, Qt, Kitty, Starship, KDE, Foliate, Freesm Launcher, Heroic, Xournal++ and Vesktop. The Livara Home Manager profile provides the music player and the Books/Games directories.
+`ambxst-conf` owns the upstream shell runtime and its mutable Niri runtime directories. `shell-conf` consumes `~/.cache/ambxst/colors.json`, validates the semantic palette bridge, and owns the Firefox/Zen CSS writer and application-specific formats for GTK3/GTK4, Fastfetch, btop, WezTerm, Neovim, KDE, Foliate, Freesm Launcher, Heroic, Xournal++ and Vesktop. The Livara Home Manager profile provides the music player and the Books/Games directories.
 
-The visual mode is always dark. Stylix and the system theme modules provide stable cursor and icon contracts, while Ambxst owns wallpaper-derived colors. Generated state is stored under XDG state directories and is never copied into the source repositories.
+Dark is the default visual mode. When the producer publishes `palette.light.json`, the same adapters can be invoked with the light variant; otherwise the synchronizer records an explicit fallback to the active palette. Stylix and the system theme modules provide stable cursor and icon contracts, while Ambxst owns wallpaper-derived colors. Generated state is stored under XDG state directories and is never copied into the source repositories.
 
 ## Plugins and productivity
 
