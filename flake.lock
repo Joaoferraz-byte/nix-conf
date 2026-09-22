@@ -61,11 +61,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790037623,
-        "narHash": "sha256-w5Tnq+mu+8D2kHrJKin3Zbyj3NOE+K/ub1y1guZxOf8=",
+        "lastModified": 1790037965,
+        "narHash": "sha256-d2BxVs24WE4DgBdp4AM7VCaBoW/MzZWNdWmf+xxuAO4=",
         "owner": "Joaoferraz-byte",
         "repo": "ambxst-conf",
-        "rev": "f2fe67f2a010853ce7ddeb6bad2f4098e27dd82f",
+        "rev": "e3047bbe7c5f791b8b403ecfa378830ab690165d",
         "type": "github"
       },
       "original": {
