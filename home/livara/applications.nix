@@ -593,13 +593,20 @@ in
     enableZshIntegration = true;
   };
 
-  home.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    git
-    xournalpp
-    affinity-v3
-    easyeffects
-  ] ++ lib.optionals studyPlannerEnabled [ studyPlanner ];
+  home.packages =
+    with pkgs;
+    [
+      nerd-fonts.jetbrains-mono
+      git
+      xournalpp
+      affinity-v3
+      easyeffects
+    ]
+    ++ lib.optionals studyPlannerEnabled [ studyPlanner ]
+    ++ [
+      inputs.biblio-ai.packages.${pkgs.system}.default
+    ]
+    ++ lib.optionals studyPlannerEnabled [ studyPlanner ];
 
   home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"

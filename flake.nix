@@ -9,6 +9,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    biblio-ai = {
+      url = "github:joaoferraz4986-dot/biblio-ai";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     affinity-nix = {
       url = "github:mrshmllow/affinity-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -57,7 +62,8 @@
     };
   };
 
-  outputs = inputs@{ self, ... }:
+  outputs =
+    inputs@{ self, ... }:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.home-manager.flakeModules.home-manager
@@ -82,13 +88,15 @@
         ./modules/hosts/latitude
       ];
 
-      perSystem = { system, ... }:
+      perSystem =
+        { system, ... }:
         let
           pkgs = import inputs.nixpkgs {
             inherit system;
             config.allowUnfree = true;
           };
-        in {
+        in
+        {
           _module.args.pkgs = pkgs;
           checks.niri-window-contract = pkgs.runCommand "livara-niri-window-contract" { } ''
             config=${./home/livara/niri.nix}
