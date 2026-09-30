@@ -1,4 +1,11 @@
-{ config, lib, pkgs, desktopProfile ? { }, ambxstPackage ? null, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  desktopProfile ? { },
+  ambxstPackage ? null,
+  ...
+}:
 let
   home = config.home.homeDirectory;
   keyboardLayout = desktopProfile.keyboardLayout or "br";
@@ -7,7 +14,11 @@ let
   ambxstBin = if ambxstPackage != null then "${ambxstPackage}/bin/ambxst" else "ambxst";
   startAmbxst = pkgs.writeShellApplication {
     name = "livara-start-ambxst";
-    runtimeInputs = with pkgs; [ bash coreutils util-linux ];
+    runtimeInputs = with pkgs; [
+      bash
+      coreutils
+      util-linux
+    ];
     text = ''
       exec flock -n "''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ambxst-livara.lock" "${ambxstBin}"
     '';
@@ -83,14 +94,6 @@ in
       focus-ring {
         // Niri's border is the single compositor window-border owner.
         off
-      }
-      border {
-        on
-        // This is the visible Niri window border; shell frame dimensions are
-        // not used as a proxy for compositor geometry. Deliberately do not set
-        // active-color here: Ambxst's generated include owns the palette-bound
-        // active/inactive border colors and reloads them on theme changes.
-        width 3.0
       }
       preset-column-widths {
         proportion 0.33333
