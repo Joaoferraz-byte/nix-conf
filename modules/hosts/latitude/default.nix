@@ -25,6 +25,7 @@
       self.nixosModules.developmentEmbedded
       self.nixosModules.containers
       self.nixosModules.latitudeConfiguration
+      inputs.mesa-tomate-driver.nixosModules.default
     ];
   };
 }

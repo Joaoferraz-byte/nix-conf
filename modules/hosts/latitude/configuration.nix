@@ -103,6 +103,16 @@
       };
     };
 
+    # The MTM-1106/T501 tablet driver is a host capability, not a desktop-only
+    # helper. Keep the same customized digimend profile used by myMachine.
+    services."mtm1106-mode" = {
+      enable = true;
+      mode = "daemon";
+      profile = "digimend";
+      autoStart = true;
+      environment.MTM1106_CONTACT_THRESHOLD = "500";
+    };
+
     # User
     users.users."livara" = {
       isNormalUser = true;

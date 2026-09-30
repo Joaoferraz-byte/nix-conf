@@ -43,22 +43,18 @@ let
   zenContainers = {
     Personal = {
       id = 1;
-      color = "purple";
       icon = "fingerprint";
     };
     School = {
       id = 2;
-      color = "blue";
       icon = "briefcase";
     };
     Programming = {
       id = 3;
-      color = "turquoise";
       icon = "circle";
     };
     Hobby = {
       id = 4;
-      color = "green";
       icon = "chill";
     };
   };
