@@ -20,6 +20,9 @@ let
   # Shared preferences and the shell-generated userChrome import.
   zenProfileSettings = {
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+    "layout.css.prefers-color-scheme.content-override" = 1;
+    "browser.theme.content-theme" = 2;
+    "browser.theme.toolbar-theme" = 2;
     "zen.workspaces.continue-where-left-off" = true;
     "zen.view.compact.enable-at-startup" = true;
     "zen.view.compact.hide-tabbar" = true;
@@ -546,7 +549,10 @@ in
       };
       settings = {
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-        "layout.css.prefers-color-scheme.content-override" = 2;
+        # 1 means dark; never inherit a possibly-light desktop preference.
+        "layout.css.prefers-color-scheme.content-override" = 1;
+        "browser.theme.content-theme" = 2;
+        "browser.theme.toolbar-theme" = 2;
         "svg.context-properties.content.enabled" = true;
         # Remove shortcuts from the new-tab page.
         "browser.newtabpage.activity-stream.feeds.topsites" = false;

@@ -267,6 +267,7 @@ in
 
   dconf.settings = {
     "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
       icon-theme = "Livara-Kora";
     };
     "org/gnome/desktop/media-handling" = {
@@ -276,8 +277,9 @@ in
   };
 
   home.sessionVariables = {
-    # The active shell owns the wallpaper-derived GTK palette; keep only stable
-    # session variables here.
+    # The desktop is intentionally dark-only. The palette synchronizer owns
+    # colors; these variables enforce the toolkit color-scheme contract.
+    GTK_THEME = "Adwaita:dark";
     GTK_ICON_THEME = "Livara-Kora";
     QT_ICON_THEME = "Livara-Kora";
     QS_ICON_THEME = "Livara-Kora";
