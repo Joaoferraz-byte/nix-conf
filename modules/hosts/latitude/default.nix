@@ -23,6 +23,7 @@
       self.nixosModules.commonDesktop
       self.nixosModules.development
       self.nixosModules.developmentEmbedded
+      self.nixosModules.developmentLanguages
       self.nixosModules.containers
       self.nixosModules.latitudeConfiguration
       inputs.mesa-tomate-driver.nixosModules.default

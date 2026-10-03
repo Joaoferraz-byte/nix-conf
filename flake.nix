@@ -73,6 +73,7 @@
         ./modules/features/desktop-portals.nix
         ./modules/features/development.nix
         ./modules/features/embedded.nix
+        ./modules/features/languages
         ./modules/features/firejail.nix
         ./modules/features/flatpak.nix
         ./modules/features/greeter.nix
