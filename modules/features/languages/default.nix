@@ -1,5 +1,17 @@
 { self, ... }:
 {
+  imports = [
+    ./c.nix
+    ./cpp.nix
+    ./python.nix
+    ./java.nix
+    ./javascript.nix
+    ./php.nix
+    ./assembly.nix
+    ./kotlin.nix
+    ./rust.nix
+  ];
+
   flake.nixosModules.developmentLanguages = {
     imports = [
       self.nixosModules.developmentC
