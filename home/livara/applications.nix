@@ -231,12 +231,6 @@ let
   );
   xournalppPalette = "${inputs.xournal-conf}/xournalpp/palettes/livara.gpl";
 
-  matugenConfig = pkgs.writeText "livara-matugen-config.toml" ''
-    [config]
-    fallback_color = "#7bb7ff"
-    caching = false
-  '';
-
 in
 {
   programs.nixvim = {
@@ -245,8 +239,6 @@ in
     nixpkgs.config.allowUnfreePredicate = pkg: lib.elem (lib.getName pkg) [ "copilot-language-server" ];
     imports = [ inputs.vim-conf.lib.nixvimModule ];
   };
-
-  xdg.configFile."matugen/config.toml".source = matugenConfig;
 
   programs.zen-browser = {
     enable = true;

@@ -20,7 +20,6 @@
           spring-boot-cli
           lombok
           androidStudioPackages.dev
-          matugen
           manim
           manim-slides
 
