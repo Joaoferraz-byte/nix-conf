@@ -602,7 +602,10 @@ in
     ]
     ++ lib.optionals studyPlannerEnabled [ studyPlanner ];
 
-  home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  # Keep the directory visible even before the first Xournal++ launch. The
+  # activation below then writes mutable native files after HM links exist.
+  xdg.configFile."xournalpp/.livara-managed".text = "Managed by Home Manager; native Xournal++ files are converged during activation.\n";
+  home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"
     for file in settings.xml toolbar.ini; do
       native="${xournalppLocalConfig}/$file"

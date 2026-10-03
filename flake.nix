@@ -147,6 +147,8 @@
             ! grep -Fq 'NOPASSWD' "$hardening" || exit 1
             grep -Fq 'default = false;' "$audiorelay"
             grep -Fq '$DRY_RUN_CMD mkdir -p' "$home_module"
+            grep -Fq 'xdg.configFile."xournalpp/.livara-managed"' "$applications"
+            grep -Fq 'entryAfter [ "linkGeneration" ]' "$applications"
             grep -Fq 'required_files=(settings.xml toolbar.ini)' "$xournal_sync"
             grep -Fq 'optional_files=(palettes/livara.gpl default_template.tex)' "$xournal_sync"
             grep -Fq 'userChrome = firefoxProfileUserChrome;' "$applications"
