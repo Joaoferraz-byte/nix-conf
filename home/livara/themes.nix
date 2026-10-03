@@ -279,8 +279,6 @@ in
   home.sessionVariables = {
     # The desktop is intentionally dark-only. The palette synchronizer owns
     # colors; these variables enforce the toolkit color-scheme contract.
-    GTK_THEME = "Adwaita:dark";
-    GTK_ICON_THEME = "Livara-Kora";
     QT_ICON_THEME = "Livara-Kora";
     QS_ICON_THEME = "Livara-Kora";
   };
