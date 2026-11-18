@@ -78,7 +78,6 @@ On `myMachine`, the hardware configuration retains only the real swap UUID `73f0
 ARCHITECTURE.md
 README.md
 docs
-  └── docs/affinity-on-linux.md
   └── docs/xournalpp-matugen.md
 flake.lock
 flake.nix

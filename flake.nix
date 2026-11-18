@@ -14,11 +14,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    affinity-nix = {
-      url = "github:mrshmllow/affinity-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     vim-conf = {
       url = "github:Joaoferraz-byte/vim-conf";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -112,7 +107,7 @@
             fi
             grep -Fq 'match app-id=r#"^org\.wezfurlong\.wezterm$"#' "$config"
             grep -Fq 'default-window-height { proportion 1.0; }' "$config"
-            grep -Fq 'match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#' "$config"
+            grep -Fq 'match app-id=r#"^org\.vinegarhq\.Sober$"#' "$config"
             grep -Fq 'width 3.0' "$config"
             grep -Fq 'spawn-at-startup "''${startAmbxst}/bin/livara-start-ambxst"' "$config"
             grep -Fq 'include optional=true "''${config.xdg.configHome}/niri/axctl.generated.kdl"' "$config"

@@ -145,7 +145,7 @@ in
     }
 
     window-rule {
-      match app-id=r#"^(affinity-v3|org\.vinegarhq\.Sober)$"#
+      match app-id=r#"^org\.vinegarhq\.Sober$"#
       default-column-width { proportion 1.0; }
       default-window-height { proportion 1.0; }
       open-maximized-to-edges true

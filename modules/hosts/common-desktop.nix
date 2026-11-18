@@ -101,7 +101,6 @@
 
         # Shared overlays applied to every host importing commonDesktop.
         nixpkgs.overlays = [
-          inputs.affinity-nix.overlays.default
           (final: prev: {
             libdisplay-info_0_2 = final.libdisplay-info;
             # gradience was removed from nixpkgs; no-op compatibility command.

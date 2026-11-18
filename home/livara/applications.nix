@@ -593,7 +593,6 @@ in
       nerd-fonts.jetbrains-mono
       git
       xournalpp
-      affinity-v3
       easyeffects
     ]
     ++ lib.optionals studyPlannerEnabled [ studyPlanner ]
