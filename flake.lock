@@ -9,17 +9,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1790020432,
-        "narHash": "sha256-ZgO+kqYYfNefevXV1ixWdSycEny5xyRVJVm3WO/2r1Y=",
+        "lastModified": 1794980060,
+        "narHash": "sha256-+Nc26f1j66BvYO5S1Ovio7WTtQ2RF5L3LljgBnoFt4Q=",
         "owner": "Axenide",
         "repo": "Ambxst",
-        "rev": "2a704c438ddc0b94a11f4e4cf32a16220b62141f",
+        "rev": "5db90ba000713b5cb991a2abce1b766ab47fbd2b",
         "type": "github"
       },
       "original": {
         "owner": "Axenide",
+        "ref": "1.4.1",
         "repo": "Ambxst",
-        "rev": "2a704c438ddc0b94a11f4e4cf32a16220b62141f",
         "type": "github"
       }
     },
@@ -31,11 +31,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790041189,
-        "narHash": "sha256-0k9XdZOVTuH/d9WoyD0YBTm8eUf8aB2AmSLHNhGDObY=",
+        "lastModified": 1795012562,
+        "narHash": "sha256-qKud0nVfu5rSdmVtI490GvzqZuHzW46Hz1T1LJEdN8A=",
         "owner": "Joaoferraz-byte",
         "repo": "ambxst-conf",
-        "rev": "32f8efa6fa8498867a21e9d8054198836606f603",
+        "rev": "c737614d1c281c8fdcdab65d54ab09d96b81d276",
         "type": "github"
       },
       "original": {
@@ -53,11 +53,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789930318,
-        "narHash": "sha256-pjWbz9E1BS6E1ha3jGgIXKPxzPcliv/69sRlgkbi4Rk=",
+        "lastModified": 1794979831,
+        "narHash": "sha256-56mwHefLlxK+j/+JByiXZ4bjX1xiwoRAUv0eJ259j4c=",
         "owner": "Axenide",
         "repo": "axctl",
-        "rev": "04bb2c61cda436148b1e982f91f627dc428ad9f9",
+        "rev": "982538d5f2257adeaf17880b7a7309c057f868e7",
         "type": "github"
       },
       "original": {
