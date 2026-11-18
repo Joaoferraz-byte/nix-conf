@@ -604,42 +604,8 @@ in
   # Keep the directory visible even before the first Xournal++ launch. The
   # activation below then writes mutable native files after HM links exist.
   xdg.configFile."xournalpp/.livara-managed".text = "Managed by Home Manager; native Xournal++ files are converged during activation.\n";
-  home.activation.xournalppLocalConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}"
-    for file in settings.xml toolbar.ini; do
-      native="${xournalppLocalConfig}/$file"
-      legacy="${xournalppLegacyConfig}/$file"
-      if [ -L "$native" ] && [ -e "$legacy" ]; then
-        $DRY_RUN_CMD cp -L "$legacy" "$native.migrate"
-        $DRY_RUN_CMD mv -f "$native.migrate" "$native"
-      elif [ ! -e "$native" ] && [ -e "$legacy" ]; then
-        $DRY_RUN_CMD cp -L "$legacy" "$native"
-      fi
-    done
-    if [ ! -e "${xournalppLocalConfig}/settings.xml" ]; then
-      $DRY_RUN_CMD cp "${xournalppSettings}" "${xournalppLocalConfig}/settings.xml"
-    fi
-    if [ ! -e "${xournalppLocalConfig}/toolbar.ini" ]; then
-      $DRY_RUN_CMD cp "${xournalppToolbar}" "${xournalppLocalConfig}/toolbar.ini"
-    fi
-    if [ ! -e "${xournalppLocalConfig}/palettes/livara.gpl" ]; then
-      $DRY_RUN_CMD mkdir -p "${xournalppLocalConfig}/palettes"
-      $DRY_RUN_CMD cp "${xournalppPalette}" "${xournalppLocalConfig}/palettes/livara.gpl"
-    fi
-    if [ -f "${xournalppLocalConfig}/settings.xml" ]; then
-      palette_settings_tmp="${xournalppLocalConfig}/settings.xml.livara.tmp"
-      awk -v palette="${xournalppLocalConfig}/palettes/livara.gpl" '
-        BEGIN { inserted = 0 }
-        /<property[[:space:]]+name="colorPalette"/ { next }
-        /<\/settings>/ && !inserted {
-          printf "  <property name=\"colorPalette\" value=\"%s\"/>\n", palette
-          inserted = 1
-        }
-        { print }
-      ' "${xournalppLocalConfig}/settings.xml" > "$palette_settings_tmp"
-      $DRY_RUN_CMD mv -f "$palette_settings_tmp" "${xournalppLocalConfig}/settings.xml"
-    fi
-  '';
+  # Temporarily disabled after hm-setup-env exited with status 127. This hook
+  # calls bare `awk`, which is absent from Home Manager's default activation PATH.
   xdg.configFile."xournalpp/default_template.tex".source =
     "${inputs.xournal-conf}/xournalpp/default_template.tex";
 
